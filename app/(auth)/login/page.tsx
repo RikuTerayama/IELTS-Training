@@ -62,9 +62,10 @@ export default function LoginPage() {
         // サインアップ成功でセッションがある場合（メール確認をスキップしている場合）
         if (data.session) {
           console.log('Sign up successful with session, redirecting...');
+          setLoading(false);
           // セッションが確実にCookieに保存されるまで待つ
           await new Promise(resolve => setTimeout(resolve, 300));
-          window.location.replace('/home');
+          window.location.href = '/home';
           return;
         }
       } else {
@@ -94,35 +95,52 @@ export default function LoginPage() {
 
         console.log('Login successful, session:', currentSession.user.email);
         
-        // セッションが確実にCookieに保存されるまで待つ（最大2秒）
-        let sessionSaved = false;
-        for (let i = 0; i < 20; i++) {
+        // リダイレクト前にloadingをfalseに設定
+        setLoading(false);
+        
+        // セッションが確実にCookieに保存されるまで待つ（最大3秒）
+        // SupabaseのセッションCookieが確実に保存されるまで待機
+        let attempts = 0;
+        const maxAttempts = 30;
+        while (attempts < maxAttempts) {
           await new Promise(resolve => setTimeout(resolve, 100));
           const { data: { session: checkSession } } = await supabase.auth.getSession();
           if (checkSession) {
-            sessionSaved = true;
-            console.log(`Session confirmed in cookie (attempt ${i + 1}), redirecting...`);
+            console.log(`Session confirmed in cookie (attempt ${attempts + 1}), redirecting...`);
             break;
           }
+          attempts++;
         }
         
-        if (!sessionSaved) {
-          console.warn('Session may not be saved yet, but redirecting anyway...');
+        if (attempts >= maxAttempts) {
+          console.warn('Session confirmation timeout, but redirecting anyway...');
         }
+        
+        // 追加の待機時間（Cookieが確実に保存されるまで）
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         // フルページリロードでリダイレクト（middlewareが最新の認証状態を確認できるように）
-        // window.location.hrefを使用（replaceよりも確実）
-        console.log('Redirecting to /home using window.location.href...');
+        console.log('Executing redirect to /home...');
         
-        // 確実にリダイレクトするため、少し待ってから実行
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // window.location.hrefを使用（フルページリロード）
-        if (typeof window !== 'undefined') {
+        // 複数の方法を試して確実にリダイレクト
+        try {
+          // 方法1: window.location.href（最も確実）
           window.location.href = '/home';
+          
+          // リダイレクトが実行されない場合のフォールバック（1秒後）
+          setTimeout(() => {
+            console.warn('Primary redirect may have failed, trying alternative method...');
+            window.location.replace('/home');
+          }, 1000);
+        } catch (error) {
+          console.error('Redirect error:', error);
+          // 最後の手段としてrouter.pushを試す
+          router.push('/home');
+          router.refresh();
         }
         
-        return; // リダイレクト後は処理を終了
+        // リダイレクト後は処理を終了（この行には到達しないはず）
+        return;
       }
     } catch (err) {
       console.error('Auth error:', err);
@@ -140,7 +158,6 @@ export default function LoginPage() {
         }
       }
       setError(errorMessage);
-    } finally {
       setLoading(false);
     }
   };
@@ -190,6 +207,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
             />
@@ -203,6 +221,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete={isSignUp ? "new-password" : "current-password"}
               required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
             />
@@ -216,6 +235,7 @@ export default function LoginPage() {
                 id="level"
                 value={initialLevel}
                 onChange={(e) => setInitialLevel(e.target.value as any)}
+                autoComplete="off"
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
               >
                 <option value="beginner">初級</option>
