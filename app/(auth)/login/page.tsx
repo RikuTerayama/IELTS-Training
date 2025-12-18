@@ -22,9 +22,17 @@ export default function LoginPage() {
     try {
       if (isSignUp) {
         // サインアップ
+        // 現在のオリジン（本番環境またはローカル）を使用してリダイレクトURLを設定
+        const redirectUrl = typeof window !== 'undefined' 
+          ? `${window.location.origin}/home`
+          : '/home';
+        
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: redirectUrl,
+          },
         });
 
         if (signUpError) throw signUpError;
