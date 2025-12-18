@@ -15,14 +15,18 @@ export async function middleware(request: NextRequest) {
       cookies: {
         getAll() {
           const cookies = request.cookies.getAll();
-          // デバッグ: Cookieの内容を確認
+          // デバッグ: すべてのCookieの内容を確認
+          console.log('[Middleware] getAll() called, cookies count:', cookies.length);
           const authCookies = cookies.filter(c => c.name.includes('auth-token'));
           if (authCookies.length > 0) {
             console.log('[Middleware] Auth cookie details:', authCookies.map(c => ({
               name: c.name,
               valueLength: c.value?.length || 0,
-              valuePreview: c.value?.substring(0, 50) || 'empty'
+              valuePreview: c.value ? c.value.substring(0, 100) : 'EMPTY',
+              hasValue: !!c.value
             })));
+          } else {
+            console.log('[Middleware] No auth cookies found in getAll()');
           }
           return cookies;
         },
@@ -41,8 +45,23 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // Cookieの詳細を確認（getAll()の前に）
+  const allCookies = request.cookies.getAll();
+  const authCookie = allCookies.find(c => c.name.includes('auth-token'));
+  if (authCookie) {
+    console.log('[Middleware] Found auth cookie:', {
+      name: authCookie.name,
+      valueLength: authCookie.value?.length || 0,
+      hasValue: !!authCookie.value,
+      valuePreview: authCookie.value ? authCookie.value.substring(0, 50) : 'EMPTY'
+    });
+  }
+
   // まずセッションを取得（getSession()はCookieから直接読み取る）
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) {
+    console.log('[Middleware] getSession() error:', sessionError);
+  }
   
   // セッションからユーザーを取得
   let user = session?.user ?? null;
