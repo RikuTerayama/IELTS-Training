@@ -117,27 +117,14 @@ export default function LoginPage() {
         }
         
         // 追加の待機時間（Cookieが確実に保存されるまで）
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // フルページリロードでリダイレクト（middlewareが最新の認証状態を確認できるように）
-        console.log('Executing redirect to /home...');
+        // 方法: 現在のページをリロードして、middlewareにリダイレクトを任せる
+        // middlewareが認証済みユーザーを検出して /home にリダイレクトする
+        console.log('Reloading page to trigger middleware redirect...');
         
-        // 複数の方法を試して確実にリダイレクト
-        try {
-          // 方法1: window.location.href（最も確実）
-          window.location.href = '/home';
-          
-          // リダイレクトが実行されない場合のフォールバック（1秒後）
-          setTimeout(() => {
-            console.warn('Primary redirect may have failed, trying alternative method...');
-            window.location.replace('/home');
-          }, 1000);
-        } catch (error) {
-          console.error('Redirect error:', error);
-          // 最後の手段としてrouter.pushを試す
-          router.push('/home');
-          router.refresh();
-        }
+        // 現在のページをリロード（middlewareが認証状態を確認して /home にリダイレクト）
+        window.location.reload();
         
         // リダイレクト後は処理を終了（この行には到達しないはず）
         return;
