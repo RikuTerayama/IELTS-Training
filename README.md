@@ -1,1 +1,134 @@
-# IELTS-Training
+# IELTS Training - MVP実装
+
+IELTS Writing/Speaking向け学習アプリのMVP実装
+
+## 実装状況
+
+### ✅ 完了（縦スライス1の基本実装）
+
+#### 基盤
+- [x] プロジェクトセットアップ（Next.js 14 + TypeScript + Tailwind）
+- [x] Supabaseクライアント（ブラウザ/サーバー）
+- [x] 共通APIレスポンス形式
+- [x] TypeScript型定義（06に準拠）
+- [x] LLM呼び出し共通関数（JSON抽出/リトライ）
+- [x] LLMプロンプトテンプレート（4種類）
+- [x] データベースマイグレーション（8テーブル + RLS）
+- [x] 認証ミドルウェア
+
+#### API（縦スライス1）
+- [x] `GET /api/tasks/recommended` - 今日の推奨タスク取得
+- [x] `GET /api/tasks/:taskId` - タスク詳細取得
+- [x] `POST /api/tasks/generate` - タスク生成（LLM）
+- [x] `POST /api/tasks/:taskId/submit` - 回答送信
+- [x] `POST /api/llm/feedback` - フィードバック生成（LLM）
+- [x] `GET /api/feedback/:feedbackId` - フィードバック取得
+- [x] `GET /api/feedback/attempt/:attemptId` - Attemptからフィードバック取得
+- [x] `GET /api/attempts/:attemptId` - Attempt取得
+- [x] `GET /api/progress/summary` - 進捗サマリー
+- [x] `GET /api/progress/history` - タスク履歴
+
+#### 画面（縦スライス1）
+- [x] `/login` - ログイン/サインアップ
+- [x] `/home` - ホーム（推奨タスク、弱点タグ）
+- [x] `/task/[taskId]` - タスク画面（レベル別入力）
+- [x] `/feedback/[attemptId]` - フィードバック表示
+- [x] `/progress` - 進捗・履歴
+
+#### 共通コンポーネント
+- [x] `Layout` - 共通レイアウト（Header/Footer）
+- [x] `Header` - ヘッダー（メニュー、ログイン状態）
+- [x] `Footer` - フッター（今日の進捗）
+
+### 🚧 未実装（縦スライス2〜5）
+
+- [ ] `/fillin/[attemptId]` - 穴埋め問題画面
+- [ ] `/rewrite/[attemptId]` - 書き直し画面
+- [ ] `/speak/[attemptId]` - Speaking練習画面（テキストのみ）
+- [ ] `/vocab` - 単語学習画面
+- [ ] 穴埋め問題生成API
+- [ ] 書き直し再評価API
+- [ ] Speakingプロンプト生成API
+- [ ] 単語学習API
+
+## セットアップ手順
+
+### 1. 依存関係インストール
+
+```bash
+npm install
+```
+
+### 2. 環境変数設定
+
+`.env.local` を作成し、以下を設定：
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+LLM_API_KEY=your_openai_api_key
+LLM_MODEL=gpt-4o-mini
+APP_BASE_URL=http://localhost:3000
+```
+
+### 3. データベースセットアップ
+
+Supabaseダッシュボードで `supabase/migrations/001_initial_schema.sql` を実行
+
+または、Supabase CLIを使用：
+
+```bash
+supabase db push
+```
+
+### 4. 開発サーバー起動
+
+```bash
+npm run dev
+```
+
+http://localhost:3000 でアクセス
+
+## 次のステップ
+
+### 縦スライス1の動作確認
+1. ログイン/サインアップ
+2. ホーム画面で推奨タスク表示
+3. タスク画面で回答入力・送信
+4. フィードバック生成・表示
+5. 進捗画面で履歴確認
+
+### 縦スライス2実装（Fill-in）
+- `/fillin/[attemptId]` 画面作成
+- 穴埋め問題生成API
+- フィードバック反映ロジック
+
+### 縦スライス3実装（Rewrite）
+- `/rewrite/[attemptId]` 画面作成
+- 書き直し再評価API
+
+### 縦スライス4実装（Vocab）
+- `/vocab` 画面作成
+- 単語学習API
+- 必須語彙連動
+
+### 縦スライス5実装（Speak）
+- `/speak/[attemptId]` 画面作成
+- Speakingプロンプト生成API
+
+## 注意事項
+
+- LLM API Keyが必要です（OpenAI推奨）
+- Supabaseプロジェクトが必要です
+- 初回ログイン時にプロファイルが自動作成されます
+- タスク生成はLLM呼び出しが必要です（コストがかかります）
+
+## 技術スタック
+
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- Supabase (Auth, Postgres)
+- OpenAI API (LLM)
+
