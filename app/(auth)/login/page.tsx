@@ -87,11 +87,11 @@ export default function LoginPage() {
       }
 
       // セッションが確実に保存されるまで少し待つ
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-      // リダイレクト
-      router.push('/home');
-      router.refresh();
+      // フルページリロードでリダイレクト（middlewareが最新の認証状態を確認できるように）
+      // これにより、セッションがCookieに確実に保存されてからリダイレクトされる
+      window.location.href = '/home';
     } catch (err) {
       console.error('Auth error:', err);
       // エラーメッセージを日本語で表示
