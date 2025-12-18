@@ -61,13 +61,22 @@ export async function generateTask(
 ): Promise<TaskGenerationResponse> {
   const prompt = buildTaskGeneratePrompt(level);
   
-  const parsed = await parseLLMResponseWithRetry(async () => {
-    return await callLLM(prompt, {
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
+  try {
+    console.log('[generateTask] Calling LLM with level:', level);
+    const parsed = await parseLLMResponseWithRetry(async () => {
+      return await callLLM(prompt, {
+        response_format: { type: 'json_object' },
+        temperature: 0.7,
+      });
     });
-  });
 
-  return parsed as TaskGenerationResponse;
+    console.log('[generateTask] LLM response parsed successfully');
+    return parsed as TaskGenerationResponse;
+  } catch (error) {
+    console.error('[generateTask] Error:', error);
+    throw new Error(
+      `Failed to generate task: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
 }
 
