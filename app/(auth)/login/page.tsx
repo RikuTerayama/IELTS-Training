@@ -98,53 +98,51 @@ export default function LoginPage() {
         // リダイレクト前にloadingをfalseに設定
         setLoading(false);
         
-        // セッションが確実にCookieに保存されるまで待つ（最大3秒）
-        // SupabaseのセッションCookieが確実に保存されるまで待機
-        let attempts = 0;
-        const maxAttempts = 30;
-        while (attempts < maxAttempts) {
+        // セッションを明示的に保存（@supabase/ssrが自動的にCookieに保存）
+        // セッションが確実に保存されるまで待つ
+        console.log('Waiting for session to be saved to cookies...');
+        
+        // セッションが確実にCookieに保存されるまで待つ（最大5秒）
+        let sessionSaved = false;
+        const maxAttempts = 50;
+        for (let i = 0; i < maxAttempts; i++) {
           await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // セッションを再確認
           const { data: { session: checkSession } } = await supabase.auth.getSession();
           if (checkSession) {
-            console.log(`Session confirmed in cookie (attempt ${attempts + 1}), redirecting...`);
-            break;
+            // Cookieが保存されているか確認（document.cookieで確認可能な場合）
+            try {
+              const cookieString = document.cookie || '';
+              const hasAuthCookie = cookieString.includes('sb-') && cookieString.includes('auth-token');
+              if (hasAuthCookie || i >= 10) { // 10回試行後は強制的に続行
+                sessionSaved = true;
+                console.log(`Session confirmed (attempt ${i + 1}), redirecting...`);
+                break;
+              }
+            } catch (error) {
+              // Cookie確認でエラーが発生しても、セッションがあれば続行
+              if (i >= 10) {
+                sessionSaved = true;
+                console.log(`Session exists, proceeding with redirect (attempt ${i + 1})...`);
+                break;
+              }
+            }
           }
-          attempts++;
         }
         
-        if (attempts >= maxAttempts) {
+        if (!sessionSaved) {
           console.warn('Session confirmation timeout, but redirecting anyway...');
         }
         
         // 追加の待機時間（Cookieが確実に保存されるまで）
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Cookieが実際に保存されているか確認
-        const cookies = document.cookie.split(';').map(c => c.trim());
-        const hasAuthCookie = cookies.some(c => c.startsWith('sb-') && c.includes('auth-token'));
-        console.log('Auth cookies found:', hasAuthCookie);
-        console.log('All cookies:', cookies.filter(c => c.startsWith('sb-')));
+        // 直接 /home にリダイレクト（middlewareが認証状態を確認）
+        console.log('Redirecting to /home...');
         
-        // 方法1: 直接 /home にリダイレクト（middlewareが認証状態を確認）
-        console.log('Attempting direct redirect to /home...');
-        
-        // 複数の方法を試す
-        try {
-          // まず直接リダイレクトを試す
-          window.location.href = '/home';
-          
-          // 3秒後にまだ /login にいる場合は、リロードを試す
-          setTimeout(() => {
-            if (window.location.pathname === '/login') {
-              console.warn('Still on /login after 3 seconds, trying page reload...');
-              window.location.reload();
-            }
-          }, 3000);
-        } catch (error) {
-          console.error('Redirect error:', error);
-          // フォールバック: ページをリロード
-          window.location.reload();
-        }
+        // window.location.hrefを使用（フルページリロード）
+        window.location.href = '/home';
         
         // リダイレクト後は処理を終了（この行には到達しないはず）
         return;

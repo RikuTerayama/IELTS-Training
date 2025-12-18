@@ -36,13 +36,13 @@ export async function middleware(request: NextRequest) {
     error: authError,
   } = await supabase.auth.getUser();
 
-  // デバッグ用ログ（本番環境では削除または条件付きで出力）
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Middleware] Path:', request.nextUrl.pathname);
-    console.log('[Middleware] User:', user ? user.email : 'null');
-    console.log('[Middleware] Auth Error:', authError);
-    console.log('[Middleware] Cookies:', request.cookies.getAll().map(c => c.name));
-  }
+  // デバッグ用ログ（本番環境でも出力）
+  console.log('[Middleware] Path:', request.nextUrl.pathname);
+  console.log('[Middleware] User:', user ? user.email : 'null');
+  console.log('[Middleware] Auth Error:', authError);
+  const cookieNames = request.cookies.getAll().map(c => c.name);
+  console.log('[Middleware] Cookies:', cookieNames);
+  console.log('[Middleware] Has auth cookies:', cookieNames.some(name => name.includes('auth-token')));
 
   // 認証が必要なパス
   const protectedPaths = ['/home', '/task', '/feedback', '/progress', '/vocab', '/rewrite', '/speak', '/fillin'];
