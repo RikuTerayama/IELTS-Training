@@ -124,8 +124,15 @@ export default function TaskPage() {
         let errorMessage = `送信に失敗しました (HTTP ${response.status})`;
         try {
           const errorData = await response.json();
-          console.error('[TaskPage] Submit API error response:', errorData);
-          errorMessage = errorData.error?.message || errorData.message || errorMessage;
+          console.error('[TaskPage] Submit API error response:', JSON.stringify(errorData, null, 2));
+          if (errorData.error) {
+            errorMessage = errorData.error.message || errorData.error.code || errorMessage;
+            if (errorData.error.details) {
+              console.error('[TaskPage] Error details:', errorData.error.details);
+            }
+          } else {
+            errorMessage = errorData.message || errorMessage;
+          }
         } catch (parseError) {
           const errorText = await response.text().catch(() => '');
           console.error('[TaskPage] Submit API error (non-JSON):', errorText);
