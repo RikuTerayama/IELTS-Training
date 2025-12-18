@@ -64,13 +64,30 @@ npm install
 `.env.local` を作成し、以下を設定：
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-LLM_API_KEY=your_openai_api_key
-LLM_MODEL=gpt-4o-mini
+# ==================== Supabase ====================
+# 提供済みの情報
+NEXT_PUBLIC_SUPABASE_URL=https://zensuohywqtqfzdxwgoi.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplbnN1b2h5d3F0cWZ6ZHh3Z29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzUzMjIsImV4cCI6MjA4MTYxMTMyMn0.by4vAuuqTBSD1nGz8Z4cV2i6LCu3bXtC4olUNV1PMfU
+
+# オプション（現在の実装では不要）
+# SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+
+# ==================== LLM (Groq API - 無料推奨) ====================
+# Groq API キーを取得: https://console.groq.com/
+LLM_PROVIDER=groq
+LLM_API_KEY=your_groq_api_key_here
+LLM_MODEL=llama-3.1-8b-instant
+
+# または、OpenAI API を使用する場合（有料）
+# LLM_PROVIDER=openai
+# LLM_API_KEY=sk-your-openai-api-key-here
+# LLM_MODEL=gpt-4o-mini
+
+# ==================== App ====================
 APP_BASE_URL=http://localhost:3000
 ```
+
+**Render（本番環境）での環境変数設定は `RENDER_ENV_VARIABLES.md` を参照してください。**
 
 ### 3. データベースセットアップ
 
