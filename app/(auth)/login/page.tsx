@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -49,6 +51,13 @@ export default function LoginPage() {
 
           if (profileError) throw profileError;
         }
+
+        // サインアップ成功（メール確認が必要な場合）
+        if (data.user && !data.session) {
+          setSignUpSuccess(true);
+          setLoading(false);
+          return; // メール確認が必要な場合はここで終了
+        }
       } else {
         // ログイン
         const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -65,6 +74,35 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 確認メールを再送信
+  const handleResendConfirmation = async () => {
+    setResendingEmail(true);
+    setError(null);
+    
+    try {
+      const redirectUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/home`
+        : '/home';
+      
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (resendError) throw resendError;
+      
+      setError(null);
+      alert('確認メールを再送信しました。メールボックス（スパムフォルダも含む）を確認してください。');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'メールの再送信に失敗しました');
+    } finally {
+      setResendingEmail(false);
     }
   };
 
@@ -123,9 +161,23 @@ export default function LoginPage() {
               {error}
             </div>
           )}
+          {signUpSuccess && (
+            <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
+              <p className="mb-2">サインアップが完了しました！</p>
+              <p className="mb-2">確認メールを送信しました。メールボックス（スパムフォルダも含む）を確認してください。</p>
+              <button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={resendingEmail}
+                className="text-blue-600 hover:text-blue-700 underline"
+              >
+                {resendingEmail ? '送信中...' : '確認メールを再送信'}
+              </button>
+            </div>
+          )}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || signUpSuccess}
             className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
           >
             {loading ? '処理中...' : isSignUp ? 'Sign Up' : 'Login'}
