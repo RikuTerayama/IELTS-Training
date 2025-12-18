@@ -72,15 +72,26 @@ export default function TaskPage() {
         });
 
         if (!generateResponse.ok) {
-          const errorData = await generateResponse.json().catch(() => ({ error: { message: 'Unknown error' } }));
-          throw new Error(errorData.error?.message || `タスクの生成に失敗しました (${generateResponse.status})`);
+          let errorMessage = `タスクの生成に失敗しました (HTTP ${generateResponse.status})`;
+          try {
+            const errorData = await generateResponse.json();
+            console.error('[TaskPage] Generate API error response:', errorData);
+            errorMessage = errorData.error?.message || errorData.message || errorMessage;
+          } catch (parseError) {
+            const errorText = await generateResponse.text().catch(() => '');
+            console.error('[TaskPage] Generate API error (non-JSON):', errorText);
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         const generateData = await generateResponse.json();
         console.log('[TaskPage] Task generation response:', generateData);
 
         if (!generateData.ok) {
-          throw new Error(generateData.error?.message || 'タスクの生成に失敗しました');
+          const errorMessage = generateData.error?.message || generateData.error?.code || 'タスクの生成に失敗しました';
+          console.error('[TaskPage] Generate API returned error:', generateData.error);
+          throw new Error(errorMessage);
         }
 
         if (!generateData.data?.id) {
@@ -110,8 +121,17 @@ export default function TaskPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-        throw new Error(errorData.error?.message || `送信に失敗しました (${response.status})`);
+        let errorMessage = `送信に失敗しました (HTTP ${response.status})`;
+        try {
+          const errorData = await response.json();
+          console.error('[TaskPage] Submit API error response:', errorData);
+          errorMessage = errorData.error?.message || errorData.message || errorMessage;
+        } catch (parseError) {
+          const errorText = await response.text().catch(() => '');
+          console.error('[TaskPage] Submit API error (non-JSON):', errorText);
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -124,11 +144,18 @@ export default function TaskPage() {
           router.push(`/feedback/${data.data.attempt_id}`);
         }
       } else {
-        alert(data.error?.message || '送信に失敗しました');
+        const errorMessage = data.error?.message || data.error?.code || '送信に失敗しました';
+        console.error('[TaskPage] Submit API returned error:', data.error);
+        alert(errorMessage);
       }
     } catch (error) {
       console.error('[TaskPage] Submit error:', error);
-      alert(error instanceof Error ? error.message : 'エラーが発生しました');
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : typeof error === 'string' 
+        ? error 
+        : 'エラーが発生しました';
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }

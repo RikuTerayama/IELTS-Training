@@ -143,9 +143,12 @@ ALTER TABLE daily_state ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can manage own profile" ON profiles
   FOR ALL USING (auth.uid() = id);
 
--- tasks: 全員閲覧可能（生成済みタスク）
+-- tasks: 全員閲覧可能（生成済みタスク）、認証済みユーザーはINSERT可能
 CREATE POLICY "Anyone can view tasks" ON tasks
   FOR SELECT USING (true);
+
+CREATE POLICY "Authenticated users can insert tasks" ON tasks
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 -- attempts: 自分のみ
 CREATE POLICY "Users can manage own attempts" ON attempts
