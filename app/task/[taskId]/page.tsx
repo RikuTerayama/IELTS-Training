@@ -59,7 +59,26 @@ export default function TaskPage() {
     setSubmitting(true);
 
     try {
-      const response = await fetch(`/api/tasks/${task.id}/submit`, {
+      let actualTaskId = task.id;
+
+      // taskIdが'new'の場合は、まずタスクを生成する
+      if (taskId === 'new') {
+        const generateResponse = await fetch('/api/tasks/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ level }),
+        });
+
+        const generateData = await generateResponse.json();
+
+        if (!generateData.ok) {
+          throw new Error(generateData.error?.message || 'タスクの生成に失敗しました');
+        }
+
+        actualTaskId = generateData.data.id;
+      }
+
+      const response = await fetch(`/api/tasks/${actualTaskId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -84,7 +103,7 @@ export default function TaskPage() {
       }
     } catch (error) {
       console.error(error);
-      alert('エラーが発生しました');
+      alert(error instanceof Error ? error.message : 'エラーが発生しました');
     } finally {
       setSubmitting(false);
     }
