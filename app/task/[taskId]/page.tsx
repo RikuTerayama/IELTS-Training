@@ -62,22 +62,41 @@ export default function TaskPage() {
       let actualTaskId = task.id;
 
       // taskIdが'new'の場合は、まずタスクを生成する
-      if (taskId === 'new') {
+      if (taskId === 'new' || task.id === 'new') {
+        console.log('[TaskPage] Generating new task for level:', level);
+        
         const generateResponse = await fetch('/api/tasks/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ level }),
         });
 
+        if (!generateResponse.ok) {
+          const errorData = await generateResponse.json().catch(() => ({ error: { message: 'Unknown error' } }));
+          throw new Error(errorData.error?.message || `タスクの生成に失敗しました (${generateResponse.status})`);
+        }
+
         const generateData = await generateResponse.json();
+        console.log('[TaskPage] Task generation response:', generateData);
 
         if (!generateData.ok) {
           throw new Error(generateData.error?.message || 'タスクの生成に失敗しました');
         }
 
+        if (!generateData.data?.id) {
+          throw new Error('生成されたタスクにIDがありません');
+        }
+
         actualTaskId = generateData.data.id;
+        console.log('[TaskPage] Generated task ID:', actualTaskId);
       }
 
+      if (!actualTaskId || actualTaskId === 'new') {
+        throw new Error('有効なタスクIDが取得できませんでした');
+      }
+
+      console.log('[TaskPage] Submitting to:', `/api/tasks/${actualTaskId}/submit`);
+      
       const response = await fetch(`/api/tasks/${actualTaskId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -90,7 +109,13 @@ export default function TaskPage() {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+        throw new Error(errorData.error?.message || `送信に失敗しました (${response.status})`);
+      }
+
       const data = await response.json();
+      console.log('[TaskPage] Submit response:', data);
 
       if (data.ok) {
         if (data.data.next_step === 'fill_in') {
@@ -102,7 +127,7 @@ export default function TaskPage() {
         alert(data.error?.message || '送信に失敗しました');
       }
     } catch (error) {
-      console.error(error);
+      console.error('[TaskPage] Submit error:', error);
       alert(error instanceof Error ? error.message : 'エラーが発生しました');
     } finally {
       setSubmitting(false);
