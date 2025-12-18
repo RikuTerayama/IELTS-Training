@@ -47,9 +47,19 @@ export default function LoginPage() {
               id: data.user.id,
               email,
               initial_level: initialLevel,
-            });
+            })
+            .select()
+            .single();
 
-          if (profileError) throw profileError;
+          if (profileError) {
+            // 既に存在する場合は無視（ON CONFLICT相当）
+            if (profileError.code === '23505') {
+              console.log('[LoginPage] Profile already exists, continuing...');
+            } else {
+              console.error('[LoginPage] Profile creation error:', profileError);
+              throw profileError;
+            }
+          }
         }
 
         // サインアップ成功（メール確認が必要な場合）
