@@ -58,6 +58,15 @@ export default function LoginPage() {
           setLoading(false);
           return; // メール確認が必要な場合はここで終了
         }
+
+        // サインアップ成功でセッションがある場合（メール確認をスキップしている場合）
+        if (data.session) {
+          console.log('Sign up successful with session, redirecting...');
+          // セッションが確実にCookieに保存されるまで待つ
+          await new Promise(resolve => setTimeout(resolve, 300));
+          window.location.replace('/home');
+          return;
+        }
       } else {
         // ログイン
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -84,14 +93,37 @@ export default function LoginPage() {
         }
 
         console.log('Login successful, session:', currentSession.user.email);
+        
+        // セッションが確実にCookieに保存されるまで待つ（最大2秒）
+        let sessionSaved = false;
+        for (let i = 0; i < 20; i++) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          const { data: { session: checkSession } } = await supabase.auth.getSession();
+          if (checkSession) {
+            sessionSaved = true;
+            console.log(`Session confirmed in cookie (attempt ${i + 1}), redirecting...`);
+            break;
+          }
+        }
+        
+        if (!sessionSaved) {
+          console.warn('Session may not be saved yet, but redirecting anyway...');
+        }
+        
+        // フルページリロードでリダイレクト（middlewareが最新の認証状態を確認できるように）
+        // window.location.hrefを使用（replaceよりも確実）
+        console.log('Redirecting to /home using window.location.href...');
+        
+        // 確実にリダイレクトするため、少し待ってから実行
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // window.location.hrefを使用（フルページリロード）
+        if (typeof window !== 'undefined') {
+          window.location.href = '/home';
+        }
+        
+        return; // リダイレクト後は処理を終了
       }
-
-      // セッションが確実に保存されるまで少し待つ
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      // フルページリロードでリダイレクト（middlewareが最新の認証状態を確認できるように）
-      // これにより、セッションがCookieに確実に保存されてからリダイレクトされる
-      window.location.href = '/home';
     } catch (err) {
       console.error('Auth error:', err);
       // エラーメッセージを日本語で表示
