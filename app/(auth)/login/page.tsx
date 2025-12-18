@@ -119,12 +119,32 @@ export default function LoginPage() {
         // 追加の待機時間（Cookieが確実に保存されるまで）
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // 方法: 現在のページをリロードして、middlewareにリダイレクトを任せる
-        // middlewareが認証済みユーザーを検出して /home にリダイレクトする
-        console.log('Reloading page to trigger middleware redirect...');
+        // Cookieが実際に保存されているか確認
+        const cookies = document.cookie.split(';').map(c => c.trim());
+        const hasAuthCookie = cookies.some(c => c.startsWith('sb-') && c.includes('auth-token'));
+        console.log('Auth cookies found:', hasAuthCookie);
+        console.log('All cookies:', cookies.filter(c => c.startsWith('sb-')));
         
-        // 現在のページをリロード（middlewareが認証状態を確認して /home にリダイレクト）
-        window.location.reload();
+        // 方法1: 直接 /home にリダイレクト（middlewareが認証状態を確認）
+        console.log('Attempting direct redirect to /home...');
+        
+        // 複数の方法を試す
+        try {
+          // まず直接リダイレクトを試す
+          window.location.href = '/home';
+          
+          // 3秒後にまだ /login にいる場合は、リロードを試す
+          setTimeout(() => {
+            if (window.location.pathname === '/login') {
+              console.warn('Still on /login after 3 seconds, trying page reload...');
+              window.location.reload();
+            }
+          }, 3000);
+        } catch (error) {
+          console.error('Redirect error:', error);
+          // フォールバック: ページをリロード
+          window.location.reload();
+        }
         
         // リダイレクト後は処理を終了（この行には到達しないはず）
         return;

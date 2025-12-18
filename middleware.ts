@@ -33,7 +33,16 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
+
+  // デバッグ用ログ（本番環境では削除または条件付きで出力）
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Middleware] Path:', request.nextUrl.pathname);
+    console.log('[Middleware] User:', user ? user.email : 'null');
+    console.log('[Middleware] Auth Error:', authError);
+    console.log('[Middleware] Cookies:', request.cookies.getAll().map(c => c.name));
+  }
 
   // 認証が必要なパス
   const protectedPaths = ['/home', '/task', '/feedback', '/progress', '/vocab', '/rewrite', '/speak', '/fillin'];
@@ -41,6 +50,9 @@ export async function middleware(request: NextRequest) {
 
   // ログインページは認証済みならリダイレクト
   if (request.nextUrl.pathname === '/login' && user) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Middleware] Redirecting authenticated user from /login to /home');
+    }
     return NextResponse.redirect(new URL('/home', request.url));
   }
 
