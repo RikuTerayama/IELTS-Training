@@ -60,18 +60,54 @@ export default function LoginPage() {
         }
       } else {
         // ログイン
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (signInError) throw signInError;
+        if (signInError) {
+          console.error('Login error:', signInError);
+          throw signInError;
+        }
+
+        // セッションが正しく取得できているか確認
+        if (!signInData.session) {
+          console.error('No session after login');
+          throw new Error('ログインに失敗しました。セッションが作成されませんでした。');
+        }
+
+        // セッションを確認
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (!currentSession) {
+          console.error('Session not found after login');
+          throw new Error('ログインに失敗しました。セッションが保存されませんでした。');
+        }
+
+        console.log('Login successful, session:', currentSession.user.email);
       }
 
+      // セッションが確実に保存されるまで少し待つ
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // リダイレクト
       router.push('/home');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Auth error:', err);
+      // エラーメッセージを日本語で表示
+      let errorMessage = 'An error occurred';
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        // Supabaseのエラーメッセージを日本語に変換
+        if (err.message.includes('Invalid login credentials')) {
+          errorMessage = 'メールアドレスまたはパスワードが正しくありません。';
+        } else if (err.message.includes('Email not confirmed')) {
+          errorMessage = 'メールアドレスが確認されていません。確認メールを確認してください。';
+        } else if (err.message.includes('User not found')) {
+          errorMessage = 'ユーザーが見つかりません。サインアップしてください。';
+        }
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
