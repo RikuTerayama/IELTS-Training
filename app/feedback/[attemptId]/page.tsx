@@ -33,17 +33,26 @@ export default function FeedbackPage() {
 
     try {
       // まず既存のフィードバックを確認
+      console.log('[FeedbackPage] Checking for existing feedback...');
       const existingResponse = await fetch(`/api/feedback/attempt/${attemptId}`);
-      const existingData = await existingResponse.json();
+      
+      if (!existingResponse.ok && existingResponse.status !== 200) {
+        console.log('[FeedbackPage] No existing feedback found (status:', existingResponse.status, '), generating new feedback...');
+      } else {
+        const existingData = await existingResponse.json();
+        console.log('[FeedbackPage] Existing feedback response:', existingData);
 
-      if (existingData.ok && existingData.data) {
-        setFeedback(existingData.data);
-        setLoading(false);
-        setGenerating(false);
-        return;
+        if (existingData.ok && existingData.data) {
+          console.log('[FeedbackPage] Using existing feedback');
+          setFeedback(existingData.data);
+          setLoading(false);
+          setGenerating(false);
+          return;
+        }
       }
 
       // 既存がない場合は生成
+      console.log('[FeedbackPage] Generating new feedback...');
       const response = await fetch('/api/llm/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,12 +64,20 @@ export default function FeedbackPage() {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+        console.error('[FeedbackPage] Feedback generation failed:', errorData);
+        throw new Error(errorData.error?.message || `Failed to generate feedback: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('[FeedbackPage] Feedback generation response:', data);
 
       if (data.ok) {
         setFeedback(data.data.feedback);
       } else {
-        alert(data.error?.message || 'フィードバック生成に失敗しました');
+        console.error('[FeedbackPage] API returned error:', data.error);
+        throw new Error(data.error?.message || 'フィードバック生成に失敗しました');
       }
     } catch (error) {
       console.error(error);

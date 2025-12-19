@@ -9,49 +9,81 @@ import type { Feedback } from '@/lib/domain/types';
 
 export async function GET(
   request: Request,
-  { params }: { params: { attemptId: string } }
+  { params }: { params: Promise<{ attemptId: string }> | { attemptId: string } }
 ): Promise<Response> {
   try {
+    // Next.js 15+ では params が Promise になる可能性がある
+    const resolvedParams = params instanceof Promise ? await params : params;
+    const attemptId = resolvedParams.attemptId;
+
+    console.log('[Feedback Attempt API] Fetching feedback for attempt:', attemptId);
+
+    if (!attemptId || attemptId === 'undefined') {
+      console.error('[Feedback Attempt API] Invalid attemptId:', attemptId);
+      return Response.json(
+        errorResponse('BAD_REQUEST', 'Invalid attempt ID'),
+        { status: 400 }
+      );
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      console.error('[Feedback Attempt API] Authentication error:', authError);
       return Response.json(
         errorResponse('UNAUTHORIZED', 'Not authenticated'),
         { status: 401 }
       );
     }
 
+    console.log('[Feedback Attempt API] User authenticated:', user.email);
+
     // attemptがユーザーのものか確認
-    const { data: attempt } = await supabase
+    const { data: attempt, error: attemptError } = await supabase
       .from('attempts')
       .select('id')
-      .eq('id', params.attemptId)
+      .eq('id', attemptId)
       .eq('user_id', user.id)
       .single();
 
-    if (!attempt) {
+    if (attemptError || !attempt) {
+      console.error('[Feedback Attempt API] Attempt not found:', attemptError);
       return Response.json(
         errorResponse('NOT_FOUND', 'Attempt not found'),
         { status: 404 }
       );
     }
 
+    console.log('[Feedback Attempt API] Attempt found, querying feedbacks...');
+
     // 最新のフィードバック取得
     const { data: feedback, error } = await supabase
       .from('feedbacks')
       .select('*')
-      .eq('attempt_id', params.attemptId)
+      .eq('attempt_id', attemptId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle(); // single() ではなく maybeSingle() を使用（存在しない場合は null を返す）
 
-    if (error || !feedback) {
+    if (error) {
+      console.error('[Feedback Attempt API] Database error:', error);
       return Response.json(
-        errorResponse('NOT_FOUND', 'Feedback not found'),
-        { status: 404 }
+        errorResponse('DATABASE_ERROR', error.message || 'Failed to fetch feedback', error),
+        { status: 500 }
       );
     }
+
+    if (!feedback) {
+      console.log('[Feedback Attempt API] Feedback not found for attempt:', attemptId);
+      // フィードバックが存在しない場合は、空のレスポンスを返す（404ではなく200）
+      return Response.json(
+        successResponse(null),
+        { status: 200 }
+      );
+    }
+
+    console.log('[Feedback Attempt API] Feedback found successfully');
 
     // JSONBフィールドをパース
     const feedbackData: Feedback = {

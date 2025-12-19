@@ -8,16 +8,28 @@ import { generateFeedback } from '@/lib/llm/prompts/writing_feedback';
 import { successResponse, errorResponse } from '@/lib/api/response';
 
 export async function POST(request: Request): Promise<Response> {
+  console.log('[LLM Feedback API] Starting feedback generation...');
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      console.error('[LLM Feedback API] Authentication error:', authError);
       return Response.json(
         errorResponse('UNAUTHORIZED', 'Not authenticated'),
         { status: 401 }
       );
     }
+
+    console.log('[LLM Feedback API] User authenticated:', user.email);
+
+    const requestBody = await request.json();
+    console.log('[LLM Feedback API] Request body received:', {
+      attempt_id: requestBody.attempt_id,
+      task_id: requestBody.task_id,
+      level: requestBody.level,
+      user_response_text_length: requestBody.user_response_text?.length || 0,
+    });
 
     const {
       attempt_id,
@@ -29,7 +41,20 @@ export async function POST(request: Request): Promise<Response> {
       task_id: string;
       user_response_text: string;
       level: 'beginner' | 'intermediate' | 'advanced';
-    } = await request.json();
+    } = requestBody;
+
+    if (!attempt_id || !task_id || !user_response_text || !level) {
+      console.error('[LLM Feedback API] Missing required fields:', {
+        attempt_id: !!attempt_id,
+        task_id: !!task_id,
+        user_response_text: !!user_response_text,
+        level: !!level,
+      });
+      return Response.json(
+        errorResponse('BAD_REQUEST', 'Missing required fields'),
+        { status: 400 }
+      );
+    }
 
     // 既存のフィードバックをチェック（キャッシュ）
     const { data: existingFeedback } = await supabase
@@ -82,15 +107,27 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     // LLMでフィードバック生成
-    const feedbackData = await generateFeedback(
-      task.question,
-      user_response_text,
-      level,
-      task_id,
-      attempt_id
-    );
+    console.log('[LLM Feedback API] Calling LLM to generate feedback...');
+    let feedbackData;
+    try {
+      feedbackData = await generateFeedback(
+        task.question,
+        user_response_text,
+        level,
+        task_id,
+        attempt_id
+      );
+      console.log('[LLM Feedback API] Feedback generated successfully');
+    } catch (llmError) {
+      console.error('[LLM Feedback API] LLM error:', llmError);
+      return Response.json(
+        errorResponse('LLM_ERROR', llmError instanceof Error ? llmError.message : 'Failed to generate feedback'),
+        { status: 500 }
+      );
+    }
 
     // feedbacksテーブルに保存
+    console.log('[LLM Feedback API] Saving feedback to database...');
     const { data: feedback, error: insertError } = await supabase
       .from('feedbacks')
       .insert({
@@ -107,8 +144,14 @@ export async function POST(request: Request): Promise<Response> {
       .single();
 
     if (insertError) {
-      throw insertError;
+      console.error('[LLM Feedback API] Database insert error:', insertError);
+      return Response.json(
+        errorResponse('DATABASE_ERROR', insertError.message || 'Failed to save feedback', insertError),
+        { status: 500 }
+      );
     }
+
+    console.log('[LLM Feedback API] Feedback saved successfully, ID:', feedback.id);
 
     // daily_state更新（弱点タグ、Band推定）
     const weaknessTags = feedbackData.dimensions
@@ -131,8 +174,10 @@ export async function POST(request: Request): Promise<Response> {
       })
     );
   } catch (error) {
+    console.error('[LLM Feedback API] Unexpected error:', error);
+    console.error('[LLM Feedback API] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return Response.json(
-      errorResponse('LLM_ERROR', error instanceof Error ? error.message : 'Unknown error'),
+      errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unknown error', error instanceof Error ? { stack: error.stack } : undefined),
       { status: 500 }
     );
   }
