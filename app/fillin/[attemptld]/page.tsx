@@ -7,7 +7,6 @@ import type { Attempt, FillInQuestion } from '@/lib/domain/types';
 
 export default function FillInPage() {
   const params = useParams();
-  const attemptId = params.attemptId as string;
   const router = useRouter();
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [questions, setQuestions] = useState<FillInQuestion[]>([]);
@@ -15,7 +14,34 @@ export default function FillInPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // attemptIdを取得（複数の方法を試す）
+  const getAttemptId = (): string | null => {
+    // 方法1: useParams()から取得
+    if (params?.attemptId && typeof params.attemptId === 'string') {
+      console.log('[FillInPage] attemptId from useParams:', params.attemptId);
+      return params.attemptId;
+    }
+
+    // 方法2: URLから直接取得（フォールバック）
+    if (typeof window !== 'undefined') {
+      const pathParts = window.location.pathname.split('/');
+      const fillinIndex = pathParts.indexOf('fillin');
+      if (fillinIndex >= 0 && pathParts[fillinIndex + 1]) {
+        const idFromUrl = pathParts[fillinIndex + 1];
+        console.log('[FillInPage] attemptId from URL:', idFromUrl);
+        return idFromUrl;
+      }
+    }
+
+    console.error('[FillInPage] Could not extract attemptId from params or URL');
+    console.error('[FillInPage] params:', params);
+    console.error('[FillInPage] window.location.pathname:', typeof window !== 'undefined' ? window.location.pathname : 'N/A');
+    return null;
+  };
+
   useEffect(() => {
+    const attemptId = getAttemptId();
+    
     // attemptIdが存在する場合のみfetchを実行
     if (!attemptId || attemptId === 'undefined') {
       console.error('[FillInPage] attemptId is missing:', attemptId);
@@ -51,7 +77,7 @@ export default function FillInPage() {
         console.error('[FillInPage] Fetch error:', error);
       })
       .finally(() => setLoading(false));
-  }, [attemptId]);
+  }, [params]);
 
   const handleAnswerChange = (questionId: string, answerId: string) => {
     setAnswers({ ...answers, [questionId]: answerId });
@@ -61,9 +87,17 @@ export default function FillInPage() {
     setSubmitting(true);
 
     try {
-      // TODO: 穴埋め回答を送信するAPIを呼び出す
-      // 現在は簡易版として直接feedbackに遷移
-      router.push(`/feedback/${attemptId}`);
+      const attemptId = getAttemptId();
+      if (!attemptId && attempt?.id) {
+        // TODO: 穴埋め回答を送信するAPIを呼び出す
+        // 現在は簡易版として直接feedbackに遷移
+        router.push(`/feedback/${attempt.id}`);
+      } else if (attemptId) {
+        router.push(`/feedback/${attemptId}`);
+      } else {
+        console.error('[FillInPage] Cannot submit: attemptId not found');
+        alert('エラー: 回答IDが見つかりません');
+      }
     } catch (error) {
       console.error(error);
       alert('エラーが発生しました');
@@ -74,7 +108,15 @@ export default function FillInPage() {
 
   const handleSkip = () => {
     // スキップして直接feedbackに遷移
-    router.push(`/feedback/${attemptId}`);
+    const attemptId = getAttemptId();
+    if (attemptId) {
+      router.push(`/feedback/${attemptId}`);
+    } else if (attempt?.id) {
+      router.push(`/feedback/${attempt.id}`);
+    } else {
+      console.error('[FillInPage] Cannot skip: attemptId not found');
+      alert('エラー: 回答IDが見つかりません');
+    }
   };
 
   if (loading) {
@@ -95,7 +137,7 @@ export default function FillInPage() {
             <div className="rounded-lg border border-red-200 bg-red-50 p-6">
               <h2 className="mb-2 text-lg font-semibold text-red-800">回答が見つかりません</h2>
               <p className="text-sm text-red-600">
-                Attempt ID: {attemptId || 'undefined'}
+                Attempt ID: {getAttemptId() || 'undefined'}
               </p>
               <p className="mt-2 text-sm text-red-600">
                 データベースに回答が保存されていない可能性があります。
