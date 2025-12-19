@@ -16,18 +16,40 @@ export default function FillInPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    // attemptIdが存在する場合のみfetchを実行
+    if (!attemptId || attemptId === 'undefined') {
+      console.error('[FillInPage] attemptId is missing:', attemptId);
+      setLoading(false);
+      return;
+    }
+
+    console.log('[FillInPage] Fetching attempt:', attemptId);
+    
     // Attempt取得
     fetch(`/api/attempts/${attemptId}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          console.error('[FillInPage] API error:', res.status, res.statusText);
+          return res.json().then(data => {
+            throw new Error(data.error?.message || `Failed to fetch attempt: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
+        console.log('[FillInPage] Attempt data received:', data);
         if (data.ok) {
           setAttempt(data.data);
           // TODO: 穴埋め問題生成APIを呼び出す
           // 現在は簡易版として空の配列を設定
           setQuestions([]);
+        } else {
+          console.error('[FillInPage] API returned error:', data.error);
         }
       })
-      .catch(console.error)
+      .catch((error) => {
+        console.error('[FillInPage] Fetch error:', error);
+      })
       .finally(() => setLoading(false));
   }, [attemptId]);
 
@@ -69,7 +91,31 @@ export default function FillInPage() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">回答が見つかりません</div>
+          <div className="space-y-4 text-center">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+              <h2 className="mb-2 text-lg font-semibold text-red-800">回答が見つかりません</h2>
+              <p className="text-sm text-red-600">
+                Attempt ID: {attemptId || 'undefined'}
+              </p>
+              <p className="mt-2 text-sm text-red-600">
+                データベースに回答が保存されていない可能性があります。
+              </p>
+            </div>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => router.push('/home')}
+                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              >
+                ホームに戻る
+              </button>
+              <button
+                onClick={() => router.push('/task/new?level=beginner')}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
+              >
+                新しいタスクを開始
+              </button>
+            </div>
+          </div>
         </div>
       </Layout>
     );
