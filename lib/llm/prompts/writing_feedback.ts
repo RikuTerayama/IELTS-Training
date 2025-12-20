@@ -12,8 +12,32 @@ export function buildWritingFeedbackPrompt(
   userResponseText: string,
   level: 'beginner' | 'intermediate' | 'advanced',
   taskId: string,
-  attemptId: string
+  attemptId: string,
+  fillInResults?: {
+    incorrectQuestionTypes: Array<'CC' | 'LR' | 'GRA'>;
+    totalQuestions: number;
+    correctCount: number;
+  } | null
 ): string {
+  let fillInContext = '';
+  if (fillInResults && fillInResults.totalQuestions > 0) {
+    const incorrectTypes = fillInResults.incorrectQuestionTypes;
+    const accuracy = Math.round((fillInResults.correctCount / fillInResults.totalQuestions) * 100);
+    
+    fillInContext = `\nFill-in Exercise Results:
+- Total questions: ${fillInResults.totalQuestions}
+- Correct answers: ${fillInResults.correctCount} (${accuracy}% accuracy)
+- Incorrect question types: ${incorrectTypes.length > 0 ? incorrectTypes.join(', ') : 'None'}
+- Weak areas identified: ${incorrectTypes.length > 0 ? incorrectTypes.map(t => {
+      if (t === 'CC') return 'Coherence and Cohesion (接続詞/指示語)';
+      if (t === 'LR') return 'Lexical Resource (語彙の言い換え)';
+      if (t === 'GRA') return 'Grammatical Range and Accuracy (文結合)';
+      return t;
+    }).join(', ') : 'None'}
+
+IMPORTANT: Consider these fill-in exercise results when providing band_up_actions. If the user made mistakes in CC, LR, or GRA questions, prioritize those dimensions in your feedback.`;
+  }
+
   return `You are an IELTS Writing examiner. Evaluate the following essay and provide feedback in JSON format.
 
 Task: ${taskQuestion}
@@ -24,7 +48,7 @@ ${userResponseText}
 User's Level: ${level}
 - beginner: Band 5.0-5.5 target
 - intermediate: Band 6.0-6.5 target
-- advanced: Band 6.5-7.0 target
+- advanced: Band 6.5-7.0 target${fillInContext}
 
 CRITICAL REQUIREMENTS:
 1. Provide overall_band_range (e.g., "6.0-6.5")
@@ -126,14 +150,20 @@ export async function generateFeedback(
   userResponseText: string,
   level: 'beginner' | 'intermediate' | 'advanced',
   taskId: string,
-  attemptId: string
+  attemptId: string,
+  fillInResults?: {
+    incorrectQuestionTypes: Array<'CC' | 'LR' | 'GRA'>;
+    totalQuestions: number;
+    correctCount: number;
+  } | null
 ): Promise<FeedbackGenerationResponse> {
   const prompt = buildWritingFeedbackPrompt(
     taskQuestion,
     userResponseText,
     level,
     taskId,
-    attemptId
+    attemptId,
+    fillInResults
   );
 
   const parsed = await parseLLMResponseWithRetry(async () => {

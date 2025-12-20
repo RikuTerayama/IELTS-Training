@@ -56,6 +56,22 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
+    // Attempt取得（穴埋め結果を取得するため）
+    const { data: attempt, error: attemptError } = await supabase
+      .from('attempts')
+      .select('*')
+      .eq('id', attempt_id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (attemptError || !attempt) {
+      console.error('[LLM Feedback API] Attempt not found:', attemptError);
+      return Response.json(
+        errorResponse('NOT_FOUND', 'Attempt not found'),
+        { status: 404 }
+      );
+    }
+
     // 既存のフィードバックをチェック（キャッシュ）
     const { data: existingFeedback } = await supabase
       .from('feedbacks')
@@ -63,7 +79,7 @@ export async function POST(request: Request): Promise<Response> {
       .eq('attempt_id', attempt_id)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (existingFeedback) {
       // 既存のフィードバックを返す
@@ -106,6 +122,68 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
+    // 穴埋め結果を取得（あれば）
+    let fillInResults: {
+      incorrectQuestionTypes: Array<'CC' | 'LR' | 'GRA'>;
+      totalQuestions: number;
+      correctCount: number;
+    } | null = null;
+
+    const fillInAnswers = attempt.draft_content?.fill_in_answers as Array<{
+      question_id: string;
+      user_answer: string;
+    }> | undefined;
+
+    if (fillInAnswers && fillInAnswers.length > 0) {
+      console.log('[LLM Feedback API] Fill-in answers found:', fillInAnswers.length);
+      
+      // 穴埋め問題を生成して正解/不正解を判定
+      // 共通関数を直接呼び出し（内部API呼び出しを避ける）
+      try {
+        const { generateFillInQuestions } = await import('@/lib/domain/fillInQuestions');
+        
+        // ユーザーの回答テキストを取得
+        const userResponseText = attempt.draft_content?.final || attempt.draft_content?.fill_in || user_response_text;
+        
+        if (userResponseText) {
+          // 穴埋め問題を生成
+          const questions = generateFillInQuestions(
+            userResponseText,
+            attempt_id,
+            attempt.level
+          );
+          
+          console.log('[LLM Feedback API] Generated questions for analysis:', questions.length);
+          
+          // 正解/不正解を判定
+          const incorrectTypes = new Set<'CC' | 'LR' | 'GRA'>();
+          let correctCount = 0;
+
+          questions.forEach((q) => {
+            const userAnswer = fillInAnswers.find(a => a.question_id === q.id);
+            if (userAnswer) {
+              if (userAnswer.user_answer === q.correct_answer) {
+                correctCount++;
+              } else {
+                incorrectTypes.add(q.question_type);
+              }
+            }
+          });
+
+          fillInResults = {
+            incorrectQuestionTypes: Array.from(incorrectTypes),
+            totalQuestions: questions.length,
+            correctCount,
+          };
+
+          console.log('[LLM Feedback API] Fill-in results:', fillInResults);
+        }
+      } catch (error) {
+        console.warn('[LLM Feedback API] Failed to generate fill-in questions for analysis:', error);
+        // エラー時は続行（穴埋め結果なしでフィードバック生成）
+      }
+    }
+
     // LLMでフィードバック生成
     console.log('[LLM Feedback API] Calling LLM to generate feedback...');
     let feedbackData;
@@ -115,7 +193,8 @@ export async function POST(request: Request): Promise<Response> {
         user_response_text,
         level,
         task_id,
-        attempt_id
+        attempt_id,
+        fillInResults
       );
       console.log('[LLM Feedback API] Feedback generated successfully');
     } catch (llmError) {
