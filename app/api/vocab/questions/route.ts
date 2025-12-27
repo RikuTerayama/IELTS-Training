@@ -15,12 +15,15 @@ type Level = 'beginner' | 'intermediate' | 'advanced';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest): Promise<Response> {
+  const startTime = Date.now();
   console.log('[Vocab Questions API] Starting question generation...');
+  console.log('[Vocab Questions API] Request URL:', request.url);
 
   try {
     const { searchParams } = request.nextUrl;
     const skill = searchParams.get('skill') as Skill;
     const level = searchParams.get('level') as Level;
+    console.log('[Vocab Questions API] Query params - skill:', skill, 'level:', level);
 
     if (!skill || !level) {
       return Response.json(
@@ -45,15 +48,19 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     console.log('[Vocab Questions API] Skill:', skill, 'Level:', level);
 
+    console.log('[Vocab Questions API] Creating Supabase client...');
     const supabase = await createClient();
+    console.log('[Vocab Questions API] Getting user...');
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      console.error('[Vocab Questions API] Authentication failed:', authError);
       return Response.json(
         errorResponse('UNAUTHORIZED', 'Not authenticated'),
         { status: 401 }
       );
     }
+    console.log('[Vocab Questions API] User authenticated:', user.id);
 
     // 単語を取得（技能タグと難易度でフィルタ）
     // 配列カラムに対しては.contains()を使用（skill_tags配列にskillが含まれているかチェック）
@@ -76,23 +83,36 @@ export async function GET(request: NextRequest): Promise<Response> {
       );
     }
 
+    console.log('[Vocab Questions API] Total items fetched:', allItems?.length || 0);
+    
     // クライアント側でskill_tagsをフィルタリング
     const vocabItems = (allItems || []).filter(item => {
       if (!item.skill_tags || !Array.isArray(item.skill_tags)) {
+        console.log('[Vocab Questions API] Item without skill_tags:', item.id, item.word);
         return false;
       }
-      return item.skill_tags.includes(skill);
+      const includes = item.skill_tags.includes(skill);
+      if (!includes) {
+        console.log('[Vocab Questions API] Item skill_tags mismatch:', item.id, item.word, 'tags:', item.skill_tags, 'looking for:', skill);
+      }
+      return includes;
     });
+
+    console.log('[Vocab Questions API] Filtered vocab items:', vocabItems.length);
 
     if (!vocabItems || vocabItems.length === 0) {
       console.error('[Vocab Questions API] No vocab items found. Total items:', allItems?.length || 0);
+      console.error('[Vocab Questions API] Sample items (first 3):', allItems?.slice(0, 3).map(item => ({
+        id: item.id,
+        word: item.word,
+        skill_tags: item.skill_tags,
+        level: item.level
+      })));
       return Response.json(
         errorResponse('NOT_FOUND', `No vocab items found for skill: ${skill}, level: ${level}. Please ensure SQL migration files have been executed.`),
         { status: 404 }
       );
     }
-
-    console.log('[Vocab Questions API] Found vocab items:', vocabItems.length);
 
     // 10問をランダムに選択
     const selectedItems = vocabItems
@@ -140,10 +160,14 @@ export async function GET(request: NextRequest): Promise<Response> {
     });
 
     console.log('[Vocab Questions API] Generated questions:', questions.length);
+    const duration = Date.now() - startTime;
+    console.log('[Vocab Questions API] Request completed in', duration, 'ms');
 
     return Response.json(successResponse(questions));
   } catch (error) {
-    console.error('[Vocab Questions API] Unexpected error:', error);
+    const duration = Date.now() - startTime;
+    console.error('[Vocab Questions API] Unexpected error after', duration, 'ms:', error);
+    console.error('[Vocab Questions API] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return Response.json(
       errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unknown error'),
       { status: 500 }

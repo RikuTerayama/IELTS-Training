@@ -35,25 +35,58 @@ function VocabPageContent() {
       return;
     }
 
+    console.log('[VocabPage] Starting test with skill:', selectedSkill, 'level:', selectedLevel);
     setLoading(true);
+    
     try {
-      const response = await fetch(
-        `/api/vocab/questions?skill=${selectedSkill}&level=${selectedLevel}`
-      );
+      const url = `/api/vocab/questions?skill=${selectedSkill}&level=${selectedLevel}`;
+      console.log('[VocabPage] Fetching from:', url);
+      
+      const response = await fetch(url);
+      console.log('[VocabPage] Response status:', response.status, response.statusText);
+      console.log('[VocabPage] Response ok:', response.ok);
+
+      // レスポンスのステータスを確認
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error('[VocabPage] API error response:', errorText);
+        let errorMessage = `APIエラー (HTTP ${response.status})`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error?.message || errorData.message || errorMessage;
+          console.error('[VocabPage] Parsed error data:', errorData);
+        } catch (parseError) {
+          console.error('[VocabPage] Failed to parse error response:', parseError);
+        }
+        
+        alert(errorMessage);
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
+      console.log('[VocabPage] Response data:', data);
 
       if (data.ok) {
+        console.log('[VocabPage] Questions received:', data.data?.length || 0);
         setQuestions(data.data);
         setCurrentQuestionIndex(0);
         setAnswers({});
         setShowResults(false);
       } else {
+        console.error('[VocabPage] API returned error:', data.error);
         alert(data.error?.message || '問題の取得に失敗しました');
       }
     } catch (error) {
-      console.error('Error fetching questions:', error);
-      alert('エラーが発生しました');
+      console.error('[VocabPage] Error fetching questions:', error);
+      console.error('[VocabPage] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      alert(`エラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
+      console.log('[VocabPage] Setting loading to false');
       setLoading(false);
     }
   };
@@ -286,11 +319,19 @@ function VocabPageContent() {
   }
 
   // 問題表示画面
-  if (questions.length === 0) {
+  // loading状態またはquestionsが空の場合は読み込み中を表示
+  if (loading || questions.length === 0) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">問題を読み込み中...</div>
+          <div className="text-center">
+            {loading ? '問題を読み込み中...' : '問題を開始してください'}
+            {loading && (
+              <div className="mt-4 text-sm text-gray-500">
+                ブラウザのConsole（F12）でログを確認できます
+              </div>
+            )}
+          </div>
         </div>
       </Layout>
     );
