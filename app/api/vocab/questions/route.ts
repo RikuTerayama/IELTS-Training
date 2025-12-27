@@ -56,12 +56,17 @@ export async function GET(request: NextRequest): Promise<Response> {
     }
 
     // 単語を取得（技能タグと難易度でフィルタ）
-    const { data: vocabItems, error: vocabError } = await supabase
+    // 配列カラムに対しては.contains()を使用（skill_tags配列にskillが含まれているかチェック）
+    // PostgreSQLの@>演算子を使用: skill_tags @> ARRAY[skill]
+    let query = supabase
       .from('vocab_items')
       .select('*')
-      .contains('skill_tags', [skill])
       .eq('level', level)
       .limit(100); // 最大100個から10問をランダム選択
+
+    // 配列カラムのフィルタリング
+    // .contains()が動作しない場合の代替案として、全データ取得後にフィルタリング
+    const { data: allItems, error: vocabError } = await query;
 
     if (vocabError) {
       console.error('[Vocab Questions API] Database error:', vocabError);
@@ -71,9 +76,18 @@ export async function GET(request: NextRequest): Promise<Response> {
       );
     }
 
+    // クライアント側でskill_tagsをフィルタリング
+    const vocabItems = (allItems || []).filter(item => {
+      if (!item.skill_tags || !Array.isArray(item.skill_tags)) {
+        return false;
+      }
+      return item.skill_tags.includes(skill);
+    });
+
     if (!vocabItems || vocabItems.length === 0) {
+      console.error('[Vocab Questions API] No vocab items found. Total items:', allItems?.length || 0);
       return Response.json(
-        errorResponse('NOT_FOUND', 'No vocab items found for the selected skill and level'),
+        errorResponse('NOT_FOUND', `No vocab items found for skill: ${skill}, level: ${level}. Please ensure SQL migration files have been executed.`),
         { status: 404 }
       );
     }
