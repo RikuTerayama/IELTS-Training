@@ -85,6 +85,31 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     console.log('[Vocab Questions API] Total items fetched:', allItems?.length || 0);
     
+    // デバッグ: 取得したデータのサンプルをログ出力
+    if (allItems && allItems.length > 0) {
+      const sampleItems = allItems.slice(0, 5).map(item => ({
+        word: item.word,
+        level: item.level,
+        skill_tags: item.skill_tags,
+      }));
+      console.log('[Vocab Questions API] Sample items:', sampleItems);
+      
+      // レベル別の集計
+      const levelCounts = allItems.reduce((acc, item) => {
+        const itemLevel = item.level || 'unknown';
+        acc[itemLevel] = (acc[itemLevel] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      console.log('[Vocab Questions API] Items by level:', levelCounts);
+      
+      // skill_tags別の集計（最初の5件）
+      const skillTagsSamples = allItems.slice(0, 10).map(item => ({
+        word: item.word,
+        skill_tags: item.skill_tags,
+      }));
+      console.log('[Vocab Questions API] Skill tags samples:', skillTagsSamples);
+    }
+    
     // クライアント側でskill_tagsをフィルタリング
     const vocabItems = (allItems || []).filter(item => {
       if (!item.skill_tags || !Array.isArray(item.skill_tags)) {
@@ -93,12 +118,25 @@ export async function GET(request: NextRequest): Promise<Response> {
       }
       const includes = item.skill_tags.includes(skill);
       if (!includes) {
-        console.log('[Vocab Questions API] Item skill_tags mismatch:', item.id, item.word, 'tags:', item.skill_tags, 'looking for:', skill);
+        // ログが多すぎるので、最初の3件だけログ出力
+        if (Math.random() < 0.1) {
+          console.log('[Vocab Questions API] Item skill_tags mismatch:', item.id, item.word, 'tags:', item.skill_tags, 'looking for:', skill);
+        }
       }
       return includes;
     });
 
     console.log('[Vocab Questions API] Filtered vocab items:', vocabItems.length);
+    
+    // フィルタリング後のレベル別集計
+    if (vocabItems.length > 0) {
+      const filteredLevelCounts = vocabItems.reduce((acc, item) => {
+        const itemLevel = item.level || 'unknown';
+        acc[itemLevel] = (acc[itemLevel] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      console.log('[Vocab Questions API] Filtered items by level:', filteredLevelCounts);
+    }
 
     if (!vocabItems || vocabItems.length === 0) {
       console.error('[Vocab Questions API] No vocab items found. Total items:', allItems?.length || 0);
@@ -136,15 +174,43 @@ export async function GET(request: NextRequest): Promise<Response> {
         .filter(v => v.id !== item.id)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3)
-        .map((v, i) => ({
-          id: String.fromCharCode(66 + i), // B, C, D
+        .map((v) => ({
           text: questionType === 'en_to_ja' ? v.meaning : v.word,
         }));
 
-      // 選択肢をシャッフル
-      const allOptions = [correctOption, ...wrongOptions].sort(
-        () => Math.random() - 0.5
-      );
+      // 正解の位置をランダムに決定（0-3のランダムな位置）
+      const correctPosition = Math.floor(Math.random() * 4);
+      
+      // 選択肢を配列に配置（正解をランダムな位置に配置）
+      const allOptionsTexts: string[] = [];
+      let wrongIndex = 0;
+      for (let i = 0; i < 4; i++) {
+        if (i === correctPosition) {
+          allOptionsTexts.push(correctOption.text);
+        } else {
+          if (wrongIndex < wrongOptions.length) {
+            allOptionsTexts.push(wrongOptions[wrongIndex].text);
+            wrongIndex++;
+          } else {
+            // 誤答が不足している場合は、追加の誤答を取得
+            const additionalWrong = vocabItems
+              .filter(v => v.id !== item.id && !allOptionsTexts.includes(questionType === 'en_to_ja' ? v.meaning : v.word))
+              .sort(() => Math.random() - 0.5)[0];
+            if (additionalWrong) {
+              allOptionsTexts.push(questionType === 'en_to_ja' ? additionalWrong.meaning : additionalWrong.word);
+            }
+          }
+        }
+      }
+      
+      // ABCD順にIDを振り直す（表示順序を固定）
+      const allOptions = allOptionsTexts.map((text, index) => ({
+        id: String.fromCharCode(65 + index), // A, B, C, D
+        text: text,
+      }));
+      
+      // 正解のIDを更新（正解のテキストがどの位置にあるか確認）
+      const correctAnswerId = allOptions.find(opt => opt.text === correctOption.text)?.id || 'A';
 
       return {
         id: `q-${item.id}-${index}`,
@@ -155,7 +221,7 @@ export async function GET(request: NextRequest): Promise<Response> {
             ? `"${item.word}" の意味は？`
             : `"${item.meaning}" を表す英単語は？`,
         options: allOptions,
-        correct_answer: correctOption.id,
+        correct_answer: correctAnswerId, // 正解のID（ABCD順に配置された後のID）
       };
     });
 

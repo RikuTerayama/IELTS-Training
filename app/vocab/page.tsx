@@ -451,7 +451,9 @@ function VocabPageContent() {
 
             {/* 選択肢 */}
             <div className="space-y-3">
-              {currentQuestion.options.map((option) => (
+              {currentQuestion.options
+                .sort((a, b) => a.id.localeCompare(b.id)) // ABCD順にソート
+                .map((option) => (
                 <label
                   key={option.id}
                   className={`flex cursor-pointer items-center gap-3 rounded border p-4 transition-colors ${
