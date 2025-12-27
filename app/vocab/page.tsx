@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import type { VocabQuestion } from '@/lib/domain/types';
@@ -8,7 +8,7 @@ import type { VocabQuestion } from '@/lib/domain/types';
 type Skill = 'reading' | 'listening' | 'writing' | 'speaking';
 type Level = 'beginner' | 'intermediate' | 'advanced';
 
-export default function VocabPage() {
+function VocabPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(
@@ -388,6 +388,20 @@ export default function VocabPage() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+export default function VocabPage() {
+  return (
+    <Suspense fallback={
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">読み込み中...</div>
+        </div>
+      </Layout>
+    }>
+      <VocabPageContent />
+    </Suspense>
   );
 }
 

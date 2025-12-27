@@ -6,15 +6,19 @@
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { VocabQuestion } from '@/lib/domain/types';
+import { NextRequest } from 'next/server';
 
 type Skill = 'reading' | 'listening' | 'writing' | 'speaking';
 type Level = 'beginner' | 'intermediate' | 'advanced';
 
-export async function GET(request: Request): Promise<Response> {
+// 動的レンダリングを強制（認証が必要なため）
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest): Promise<Response> {
   console.log('[Vocab Questions API] Starting question generation...');
 
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const skill = searchParams.get('skill') as Skill;
     const level = searchParams.get('level') as Level;
 
