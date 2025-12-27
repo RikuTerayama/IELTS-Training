@@ -17,6 +17,25 @@ function VocabPageContent() {
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(
     (searchParams.get('level') as Level) || null
   );
+
+  // デバッグ用: 初期状態をログ出力
+  useEffect(() => {
+    console.log('[VocabPage] Component mounted');
+    console.log('[VocabPage] Initial state:', {
+      selectedSkill,
+      selectedLevel,
+      searchParamsSkill: searchParams.get('skill'),
+      searchParamsLevel: searchParams.get('level'),
+    });
+  }, []);
+
+  // デバッグ用: 状態変更をログ出力
+  useEffect(() => {
+    console.log('[VocabPage] State changed:', {
+      selectedSkill,
+      selectedLevel,
+    });
+  }, [selectedSkill, selectedLevel]);
   const [questions, setQuestions] = useState<VocabQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -243,15 +262,28 @@ function VocabPageContent() {
               )}
 
               {/* 開始ボタン */}
-              {selectedSkill && selectedLevel && (
+              {selectedSkill && selectedLevel ? (
                 <div className="flex justify-end">
                   <button
-                    onClick={handleStartTest}
+                    onClick={(e) => {
+                      console.log('[VocabPage] Button clicked!', {
+                        selectedSkill,
+                        selectedLevel,
+                        loading,
+                        event: e,
+                      });
+                      handleStartTest();
+                    }}
                     disabled={loading}
-                    className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+                    className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    type="button"
                   >
                     {loading ? '読み込み中...' : 'テストを開始'}
                   </button>
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 mt-4">
+                  デバッグ: selectedSkill={String(selectedSkill)}, selectedLevel={String(selectedLevel)}
                 </div>
               )}
             </div>
@@ -321,6 +353,12 @@ function VocabPageContent() {
   // 問題表示画面
   // loading状態またはquestionsが空の場合は読み込み中を表示
   if (loading || questions.length === 0) {
+    console.log('[VocabPage] Showing loading/empty state:', {
+      loading,
+      questionsLength: questions.length,
+      selectedSkill,
+      selectedLevel,
+    });
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
@@ -329,6 +367,13 @@ function VocabPageContent() {
             {loading && (
               <div className="mt-4 text-sm text-gray-500">
                 ブラウザのConsole（F12）でログを確認できます
+              </div>
+            )}
+            {!loading && questions.length === 0 && (
+              <div className="mt-4 text-sm text-gray-500">
+                デバッグ情報: selectedSkill={String(selectedSkill)}, selectedLevel={String(selectedLevel)}
+                <br />
+                技能と難易度を選択して「テストを開始」ボタンをクリックしてください
               </div>
             )}
           </div>
