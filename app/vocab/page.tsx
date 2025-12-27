@@ -351,35 +351,65 @@ function VocabPageContent() {
   }
 
   // 問題表示画面
-  // loading状態またはquestionsが空の場合は読み込み中を表示
-  if (loading || questions.length === 0) {
-    console.log('[VocabPage] Showing loading/empty state:', {
-      loading,
-      questionsLength: questions.length,
-      selectedSkill,
-      selectedLevel,
-    });
+  // loading状態の場合は読み込み中を表示
+  if (loading) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            {loading ? '問題を読み込み中...' : '問題を開始してください'}
-            {loading && (
-              <div className="mt-4 text-sm text-gray-500">
-                ブラウザのConsole（F12）でログを確認できます
-              </div>
-            )}
-            {!loading && questions.length === 0 && (
-              <div className="mt-4 text-sm text-gray-500">
-                デバッグ情報: selectedSkill={String(selectedSkill)}, selectedLevel={String(selectedLevel)}
-                <br />
-                技能と難易度を選択して「テストを開始」ボタンをクリックしてください
-              </div>
-            )}
+            問題を読み込み中...
+            <div className="mt-4 text-sm text-gray-500">
+              ブラウザのConsole（F12）でログを確認できます
+            </div>
           </div>
         </div>
       </Layout>
     );
+  }
+
+  // questionsが空で、selectedSkillとselectedLevelが設定されている場合は、選択画面に戻す
+  // または「テストを開始」ボタンを表示
+  if (questions.length === 0 && selectedSkill && selectedLevel) {
+    console.log('[VocabPage] Questions empty but skill/level selected, showing start button');
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold">単語練習</h2>
+              <p className="mb-6 text-gray-600">
+                選択: {selectedSkill} ({selectedLevel})
+              </p>
+              <div className="flex justify-end">
+                <button
+                  onClick={(e) => {
+                    console.log('[VocabPage] Start button clicked from empty state!', {
+                      selectedSkill,
+                      selectedLevel,
+                      loading,
+                      event: e,
+                    });
+                    handleStartTest();
+                  }}
+                  disabled={loading}
+                  className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  type="button"
+                >
+                  {loading ? '読み込み中...' : 'テストを開始'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // questionsが空で、selectedSkillまたはselectedLevelが設定されていない場合
+  if (questions.length === 0) {
+    // この場合は選択画面が表示されるはず（最初の条件分岐で処理される）
+    // 念のため、ここでも選択画面に戻す
+    return null; // 最初の条件分岐で処理される
   }
 
   const currentQuestion = questions[currentQuestionIndex];
