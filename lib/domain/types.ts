@@ -266,6 +266,159 @@ export interface FeedbackGenerationResponse extends LLMResponse, Feedback {
   // Feedback型を継承
 }
 
+// ==================== Speaking関連型 ====================
+
+export interface SpeakingSession {
+  id: string;
+  user_id: string;
+  mode: 'drill' | 'mock';
+  part?: 'part1' | 'part2' | 'part3';
+  topic?: string;
+  level?: 'B1' | 'B2' | 'C1';
+  started_at: string;
+  completed_at?: string;
+  total_questions: number;
+  average_band?: number;
+  created_at: string;
+}
+
+export interface SpeakingPrompt {
+  id: string;
+  session_id?: string;
+  mode: 'drill' | 'mock';
+  part?: 'part1' | 'part2' | 'part3';
+  topic?: string;
+  level?: 'B1' | 'B2' | 'C1';
+  jp_intent: string;
+  expected_style?: string;
+  target_points?: {
+    vocabulary?: string[];
+    grammar?: string[];
+    discourse?: string[];
+  };
+  model_answer: string;
+  paraphrases: string[];
+  cue_card?: {
+    topic: string;
+    points: string[];
+  };
+  followup_question?: string;
+  time_limit: number;
+  created_at: string;
+}
+
+export interface SpeakingAttempt {
+  id: string;
+  user_id: string;
+  session_id: string;
+  prompt_id: string;
+  user_response: string;
+  audio_url?: string;
+  response_time?: number;
+  word_count?: number;
+  wpm?: number;
+  filler_count: number;
+  long_pause_count: number;
+  submitted_at: string;
+  created_at: string;
+}
+
+export interface SpeakingFeedback {
+  id: string;
+  attempt_id: string;
+  fluency_band: number;
+  lexical_band: number;
+  grammar_band: number;
+  pronunciation_band: number;
+  overall_band: number;
+  evidence: {
+    fluency: string;
+    lexical: string;
+    grammar: string;
+    pronunciation: string;
+  };
+  top_fixes: Array<{
+    priority: 1 | 2 | 3;
+    dimension: 'fluency' | 'lexical' | 'grammar' | 'pronunciation';
+    issue: string;
+    suggestion: string;
+  }>;
+  rewrite: string;
+  micro_drills: Array<{
+    jp_intent: string;
+    model_answer: string;
+  }>;
+  weakness_tags: string[];
+  created_at: string;
+}
+
+export interface SpeakingReview {
+  id: string;
+  user_id: string;
+  attempt_id: string;
+  weakness_tags: string[];
+  review_due_date: string; // YYYY-MM-DD
+  review_count: number;
+  is_favorite: boolean;
+  user_notes?: string;
+  status: 'pending' | 'reviewed' | 'mastered' | 'skipped';
+  created_at: string;
+  updated_at: string;
+}
+
+// LLMレスポンス型（瞬間英作文用）
+export interface InstantSpeakingPromptResponse extends LLMResponse {
+  jp_intent: string;
+  expected_style: 'casual' | 'formal' | 'polite';
+  target_points: {
+    vocabulary?: string[];
+    grammar?: string[];
+    discourse?: string[];
+  };
+  model_answer: string;
+  paraphrases: string[];
+  cue_card?: {
+    topic: string;
+    points: string[];
+  };
+  followup_question?: string;
+  time_limit: number;
+}
+
+export interface SpeakingEvaluationResponse extends LLMResponse {
+  band_estimates: {
+    fluency: number;
+    lexical: number;
+    grammar: number;
+    pronunciation: number;
+    overall: number;
+  };
+  evidence: {
+    fluency: string;
+    lexical: string;
+    grammar: string;
+    pronunciation: string;
+  };
+  top_fixes: Array<{
+    priority: 1 | 2 | 3;
+    dimension: 'fluency' | 'lexical' | 'grammar' | 'pronunciation';
+    issue: string;
+    suggestion: string;
+  }>;
+  rewrite: string;
+  micro_drills: Array<{
+    jp_intent: string;
+    model_answer: string;
+  }>;
+  weakness_tags: string[];
+}
+
+// FollowUpQuestion型（既存のWriting→Speaking変換で使用）
+export interface FollowUpQuestion {
+  question: string;
+  context?: string;
+}
+
 export interface SpeakingPromptGenerationResponse extends LLMResponse {
   summary_prompt: string;
   follow_up_questions: FollowUpQuestion[];
