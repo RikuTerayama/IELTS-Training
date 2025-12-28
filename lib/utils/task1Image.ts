@@ -10,17 +10,46 @@ export interface Task1ImageInfo {
 }
 
 /**
+ * 質問文からジャンルを推測
+ */
+export function detectTask1Genre(question: string): string | null {
+  const lowerQuestion = question.toLowerCase();
+  
+  if (lowerQuestion.includes('line graph') || lowerQuestion.includes('line chart')) {
+    return 'line_chart';
+  }
+  if (lowerQuestion.includes('bar chart')) {
+    return 'bar_chart';
+  }
+  if (lowerQuestion.includes('pie chart')) {
+    return 'pie_chart';
+  }
+  if (lowerQuestion.includes('table') && !lowerQuestion.includes('chart')) {
+    return 'table';
+  }
+  if (lowerQuestion.includes('diagram') && !lowerQuestion.includes('pie chart') && !lowerQuestion.includes('bar chart')) {
+    return 'diagram';
+  }
+  if (lowerQuestion.includes('map') || lowerQuestion.includes('maps')) {
+    return 'map';
+  }
+  if (lowerQuestion.includes('chart') && (lowerQuestion.includes('first') || lowerQuestion.includes('second') || lowerQuestion.includes('two'))) {
+    return 'multiple_charts';
+  }
+  
+  return null;
+}
+
+/**
  * タスクIDまたは問題内容から画像パスを取得
  * 
- * @param taskId - タスクID（データベースのIDまたはバッチ番号）
- * @param questionType - 問題タイプ（line_chart, bar_chart, pie_chart, table, multiple_charts, diagram, map）
+ * @param question - 質問文
  * @param level - レベル（beginner, intermediate, advanced）
  * @returns 画像パスまたはnull
  */
 export function getTask1ImagePath(
-  taskId: string,
-  questionType?: string,
-  level?: 'beginner' | 'intermediate' | 'advanced'
+  question: string,
+  level: 'beginner' | 'intermediate' | 'advanced'
 ): string | null {
   // バッチ番号と問題番号のマッピング
   // batch1: line_chart (beginner, intermediate, advanced) = 1, 2, 3
@@ -47,20 +76,15 @@ export function getTask1ImagePath(
     advanced: 3,
   };
 
-  let batch: number | null = null;
-  let questionNumber: number | null = null;
-
-  // questionTypeとlevelから決定
-  if (questionType && level) {
-    batch = typeToBatch[questionType] || null;
-    questionNumber = levelToNumber[level] || null;
-  } else {
-    // taskIdから推測（UUIDの場合は別の方法が必要）
-    // ここでは簡易的な実装
+  const genre = detectTask1Genre(question);
+  if (!genre) {
     return null;
   }
 
-  if (batch === null || questionNumber === null) {
+  const batch = typeToBatch[genre];
+  const questionNumber = levelToNumber[level];
+
+  if (!batch || !questionNumber) {
     return null;
   }
 
