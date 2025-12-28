@@ -92,20 +92,52 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* クイックアクション */}
-          <div className="flex gap-4">
-            <button
-              onClick={handleChooseLevel}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
-            >
-              Choose level
-            </button>
-            <button
-              onClick={() => router.push('/vocab')}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
-            >
-              単語練習
-            </button>
+          {/* Trainingセクション */}
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold">📚 Training</h2>
+            <div className="space-y-4">
+              {/* Writing */}
+              <div>
+                <h3 className="mb-3 text-md font-semibold text-gray-800">Writing</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => router.push('/training/writing/task1')}
+                    className="p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                  >
+                    <div className="font-semibold text-lg mb-1">Task 1</div>
+                    <div className="text-sm text-gray-600">グラフ・図表・地図の説明</div>
+                  </button>
+                  <button
+                    onClick={() => router.push('/training/writing/task2')}
+                    className="p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                  >
+                    <div className="font-semibold text-lg mb-1">Task 2</div>
+                    <div className="text-sm text-gray-600">エッセイライティング</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Vocabulary */}
+              <div>
+                <h3 className="mb-3 text-md font-semibold text-gray-800">Vocabulary</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => router.push('/training/vocabulary')}
+                    className="p-4 rounded-lg border-2 border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all text-left"
+                  >
+                    <div className="font-semibold text-lg mb-1">単語練習</div>
+                    <div className="text-sm text-gray-600">語彙力を向上させましょう</div>
+                  </button>
+                  <button
+                    onClick={() => router.push('/training/vocabulary/review')}
+                    className="p-4 rounded-lg border-2 border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all text-left"
+                  >
+                    <div className="font-semibold text-lg mb-1">復習</div>
+                    <div className="text-sm text-gray-600">間違えた問題を復習</div>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Blogセクション */}
