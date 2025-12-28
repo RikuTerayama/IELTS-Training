@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 
 type TaskType = 'Task 1' | 'Task 2';
@@ -69,11 +69,20 @@ const levels: { value: Level; label: string }[] = [
 
 export default function TaskSelectPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [taskType, setTaskType] = useState<TaskType | null>(null);
   const [level, setLevel] = useState<Level>('beginner');
   const [task1Genre, setTask1Genre] = useState<Task1Genre | 'random' | null>(null);
   const [task2Genre, setTask2Genre] = useState<Task2Genre | 'random' | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // クエリパラメータからtask_typeを読み取る
+  useEffect(() => {
+    const taskTypeParam = searchParams.get('task_type');
+    if (taskTypeParam === 'Task 1' || taskTypeParam === 'Task 2') {
+      setTaskType(taskTypeParam as TaskType);
+    }
+  }, [searchParams]);
 
   const handleStart = async () => {
     if (!taskType) return;
@@ -101,8 +110,12 @@ export default function TaskSelectPage() {
 
       const data = await response.json();
       if (data.ok && data.data?.id) {
-        // PREPモードを使用するかどうかは、タスクページで判断
-        router.push(`/task/${data.data.id}`);
+        // 初級・中級の場合はPREPモードに直接遷移
+        if (level === 'beginner' || level === 'intermediate') {
+          router.push(`/task/${data.data.id}/prep`);
+        } else {
+          router.push(`/task/${data.data.id}`);
+        }
       } else {
         throw new Error(data.error?.message || 'タスクの生成に失敗しました');
       }
