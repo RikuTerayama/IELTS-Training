@@ -89,14 +89,59 @@ export async function middleware(request: NextRequest) {
   
   // ログインページは認証済みならリダイレクト
   if (request.nextUrl.pathname === '/login' && user) {
+    // 目的ヒアリング完了状況を確認
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && !profile.onboarding_completed) {
+      console.log('[Middleware] Redirecting authenticated user from /login to /onboarding');
+      return NextResponse.redirect(new URL('/onboarding', request.url));
+    }
     console.log('[Middleware] Redirecting authenticated user from /login to /home');
     return NextResponse.redirect(new URL('/home', request.url));
+  }
+
+  // 目的ヒアリングページは認証が必要
+  if (request.nextUrl.pathname === '/onboarding' && !user) {
+    console.log('[Middleware] Redirecting unauthenticated user from /onboarding to /login');
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // 目的ヒアリングページで認証済みの場合、完了状況を確認
+  if (request.nextUrl.pathname === '/onboarding' && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.onboarding_completed) {
+      console.log('[Middleware] Redirecting user with completed onboarding to /home');
+      return NextResponse.redirect(new URL('/home', request.url));
+    }
   }
 
   // 保護されたパスで未認証の場合はログインページへ
   if (isProtectedPath && !user) {
     console.log('[Middleware] Redirecting unauthenticated user to /login');
     return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // 保護されたパスで認証済みの場合、目的ヒアリング完了状況を確認
+  if (isProtectedPath && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && !profile.onboarding_completed) {
+      console.log('[Middleware] Redirecting user with incomplete onboarding to /onboarding');
+      return NextResponse.redirect(new URL('/onboarding', request.url));
+    }
   }
 
   return response;

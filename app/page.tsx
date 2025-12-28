@@ -7,7 +7,6 @@ import Link from 'next/link';
 export default function LandingPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [initialLevel, setInitialLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,27 +36,7 @@ export default function LandingPage() {
 
         if (signUpError) throw signUpError;
 
-        // プロファイル作成
-        if (data.user) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              email,
-              initial_level: initialLevel,
-            })
-            .select()
-            .single();
-
-          if (profileError) {
-            if (profileError.code === '23505') {
-              // 既に存在する場合は無視
-            } else {
-              throw profileError;
-            }
-          }
-        }
-
+        // プロファイルは自動トリガーで作成される（onboarding_completed = false）
         // サインアップ成功（メール確認が必要な場合）
         if (data.user && !data.session) {
           setSignUpSuccess(true);
@@ -69,7 +48,8 @@ export default function LandingPage() {
         if (data.session) {
           setLoading(false);
           await new Promise(resolve => setTimeout(resolve, 300));
-          window.location.href = '/home';
+          // 目的ヒアリングページにリダイレクト
+          window.location.href = '/onboarding';
           return;
         }
       } else {
@@ -98,7 +78,18 @@ export default function LandingPage() {
         // セッションが確実に保存されるまで待つ
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        window.location.href = '/home';
+        // 目的ヒアリング完了状況を確認
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', signInData.user.id)
+          .single();
+
+        if (profile && !profile.onboarding_completed) {
+          window.location.href = '/onboarding';
+        } else {
+          window.location.href = '/home';
+        }
         return;
       }
     } catch (err) {
@@ -234,24 +225,6 @@ export default function LandingPage() {
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
                   />
                 </div>
-                {isSignUp && (
-                  <div>
-                    <label htmlFor="landing-level" className="block text-sm font-medium text-gray-700">
-                      初期レベル
-                    </label>
-                    <select
-                      id="landing-level"
-                      value={initialLevel}
-                      onChange={(e) => setInitialLevel(e.target.value as any)}
-                      autoComplete="off"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                    >
-                      <option value="beginner">初級</option>
-                      <option value="intermediate">中級</option>
-                      <option value="advanced">上級</option>
-                    </select>
-                  </div>
-                )}
                 {error && (
                   <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
                     {error}
