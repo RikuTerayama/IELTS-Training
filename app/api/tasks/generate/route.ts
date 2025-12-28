@@ -24,8 +24,8 @@ export async function POST(request: Request): Promise<Response> {
 
     console.log('[Generate API] User authenticated:', user.email);
 
-    const { level } = await request.json();
-    console.log('[Generate API] Requested level:', level);
+    const { level, task_type, genre } = await request.json();
+    console.log('[Generate API] Requested params:', { level, task_type, genre });
 
     if (!level || !['beginner', 'intermediate', 'advanced'].includes(level)) {
       console.log('[Generate API] Invalid level:', level);
@@ -35,11 +35,19 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
+    const taskType: 'Task 1' | 'Task 2' = task_type || 'Task 2';
+    if (!['Task 1', 'Task 2'].includes(taskType)) {
+      return Response.json(
+        errorResponse('BAD_REQUEST', 'Invalid task_type'),
+        { status: 400 }
+      );
+    }
+
     // LLMでタスク生成
     console.log('[Generate API] Calling LLM to generate task...');
     let taskData;
     try {
-      taskData = await generateTask(level);
+      taskData = await generateTask(level, taskType, genre || null);
       console.log('[Generate API] Task generated successfully:', {
         level: taskData.level,
         questionLength: taskData.question?.length || 0,
@@ -64,6 +72,7 @@ export async function POST(request: Request): Promise<Response> {
       .insert({
         level: taskData.level,
         question: taskData.question,
+        question_type: taskData.question_type || taskType,
         required_vocab: taskData.required_vocab,
         prep_guide: taskData.prep_guide || null,
         is_cached: false,
