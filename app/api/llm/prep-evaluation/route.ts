@@ -34,15 +34,17 @@ export async function POST(request: Request): Promise<Response> {
     const requestBody = await request.json();
     const {
       task_question,
+      task_type,
       prep_answers,
       level,
     }: {
       task_question: string;
+      task_type?: 'Task 1' | 'Task 2';
       prep_answers: {
         point: string;
-        reason: string;
+        reason?: string;
         example: string;
-        point_again: string;
+        point_again?: string;
       };
       level: 'beginner' | 'intermediate' | 'advanced';
     } = requestBody;
@@ -54,8 +56,11 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    console.log('[PREP Evaluation API] Calling LLM to evaluate PREP structure...');
-    const prompt = buildPrepEvaluationPrompt(task_question, prep_answers, level);
+    // task_typeが指定されていない場合は、Task 2をデフォルトとする（後方互換性のため）
+    const taskType = task_type || 'Task 2';
+
+    console.log('[PREP Evaluation API] Calling LLM to evaluate structure...', { taskType });
+    const prompt = buildPrepEvaluationPrompt(task_question, taskType, prep_answers, level);
     
     let evaluationData: PrepEvaluationResponse;
     try {
