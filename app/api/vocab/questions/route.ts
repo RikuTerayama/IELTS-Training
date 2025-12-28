@@ -15,15 +15,10 @@ type Level = 'beginner' | 'intermediate' | 'advanced';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest): Promise<Response> {
-  const startTime = Date.now();
-  console.log('[Vocab Questions API] Starting question generation...');
-  console.log('[Vocab Questions API] Request URL:', request.url);
-
   try {
     const { searchParams } = request.nextUrl;
     const skill = searchParams.get('skill') as Skill;
     const level = searchParams.get('level') as Level;
-    console.log('[Vocab Questions API] Query params - skill:', skill, 'level:', level);
 
     if (!skill || !level) {
       return Response.json(
@@ -46,34 +41,24 @@ export async function GET(request: NextRequest): Promise<Response> {
       );
     }
 
-    console.log('[Vocab Questions API] Skill:', skill, 'Level:', level);
-
-    console.log('[Vocab Questions API] Creating Supabase client...');
     const supabase = await createClient();
-    console.log('[Vocab Questions API] Getting user...');
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error('[Vocab Questions API] Authentication failed:', authError);
       return Response.json(
         errorResponse('UNAUTHORIZED', 'Not authenticated'),
         { status: 401 }
       );
     }
-    console.log('[Vocab Questions API] User authenticated:', user.id);
 
     // 単語を取得（技能タグと難易度でフィルタ）
-    // 配列カラムに対しては.contains()を使用（skill_tags配列にskillが含まれているかチェック）
-    // PostgreSQLの@>演算子を使用: skill_tags @> ARRAY[skill]
-    let query = supabase
+    // レベルでフィルタリング後、クライアント側でskill_tagsをフィルタリング
+    // より多くのデータを取得してからフィルタリング（limitを増やす）
+    const { data: allItems, error: vocabError } = await supabase
       .from('vocab_items')
       .select('*')
       .eq('level', level)
-      .limit(100); // 最大100個から10問をランダム選択
-
-    // 配列カラムのフィルタリング
-    // .contains()が動作しない場合の代替案として、全データ取得後にフィルタリング
-    const { data: allItems, error: vocabError } = await query;
+      .limit(500); // より多くのデータを取得してからフィルタリング
 
     if (vocabError) {
       console.error('[Vocab Questions API] Database error:', vocabError);
@@ -82,70 +67,16 @@ export async function GET(request: NextRequest): Promise<Response> {
         { status: 500 }
       );
     }
-
-    console.log('[Vocab Questions API] Total items fetched:', allItems?.length || 0);
-    
-    // デバッグ: 取得したデータのサンプルをログ出力
-    if (allItems && allItems.length > 0) {
-      const sampleItems = allItems.slice(0, 5).map(item => ({
-        word: item.word,
-        level: item.level,
-        skill_tags: item.skill_tags,
-      }));
-      console.log('[Vocab Questions API] Sample items:', sampleItems);
-      
-      // レベル別の集計
-      const levelCounts = allItems.reduce((acc, item) => {
-        const itemLevel = item.level || 'unknown';
-        acc[itemLevel] = (acc[itemLevel] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      console.log('[Vocab Questions API] Items by level:', levelCounts);
-      
-      // skill_tags別の集計（最初の5件）
-      const skillTagsSamples = allItems.slice(0, 10).map(item => ({
-        word: item.word,
-        skill_tags: item.skill_tags,
-      }));
-      console.log('[Vocab Questions API] Skill tags samples:', skillTagsSamples);
-    }
     
     // クライアント側でskill_tagsをフィルタリング
     const vocabItems = (allItems || []).filter(item => {
       if (!item.skill_tags || !Array.isArray(item.skill_tags)) {
-        console.log('[Vocab Questions API] Item without skill_tags:', item.id, item.word);
         return false;
       }
-      const includes = item.skill_tags.includes(skill);
-      if (!includes) {
-        // ログが多すぎるので、最初の3件だけログ出力
-        if (Math.random() < 0.1) {
-          console.log('[Vocab Questions API] Item skill_tags mismatch:', item.id, item.word, 'tags:', item.skill_tags, 'looking for:', skill);
-        }
-      }
-      return includes;
+      return item.skill_tags.includes(skill);
     });
 
-    console.log('[Vocab Questions API] Filtered vocab items:', vocabItems.length);
-    
-    // フィルタリング後のレベル別集計
-    if (vocabItems.length > 0) {
-      const filteredLevelCounts = vocabItems.reduce((acc, item) => {
-        const itemLevel = item.level || 'unknown';
-        acc[itemLevel] = (acc[itemLevel] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      console.log('[Vocab Questions API] Filtered items by level:', filteredLevelCounts);
-    }
-
     if (!vocabItems || vocabItems.length === 0) {
-      console.error('[Vocab Questions API] No vocab items found. Total items:', allItems?.length || 0);
-      console.error('[Vocab Questions API] Sample items (first 3):', allItems?.slice(0, 3).map(item => ({
-        id: item.id,
-        word: item.word,
-        skill_tags: item.skill_tags,
-        level: item.level
-      })));
       return Response.json(
         errorResponse('NOT_FOUND', `No vocab items found for skill: ${skill}, level: ${level}. Please ensure SQL migration files have been executed.`),
         { status: 404 }
@@ -225,15 +156,9 @@ export async function GET(request: NextRequest): Promise<Response> {
       };
     });
 
-    console.log('[Vocab Questions API] Generated questions:', questions.length);
-    const duration = Date.now() - startTime;
-    console.log('[Vocab Questions API] Request completed in', duration, 'ms');
-
     return Response.json(successResponse(questions));
   } catch (error) {
-    const duration = Date.now() - startTime;
-    console.error('[Vocab Questions API] Unexpected error after', duration, 'ms:', error);
-    console.error('[Vocab Questions API] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('[Vocab Questions API] Unexpected error:', error);
     return Response.json(
       errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unknown error'),
       { status: 500 }

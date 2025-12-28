@@ -18,24 +18,6 @@ function VocabPageContent() {
     (searchParams.get('level') as Level) || null
   );
 
-  // デバッグ用: 初期状態をログ出力
-  useEffect(() => {
-    console.log('[VocabPage] Component mounted');
-    console.log('[VocabPage] Initial state:', {
-      selectedSkill,
-      selectedLevel,
-      searchParamsSkill: searchParams.get('skill'),
-      searchParamsLevel: searchParams.get('level'),
-    });
-  }, []);
-
-  // デバッグ用: 状態変更をログ出力
-  useEffect(() => {
-    console.log('[VocabPage] State changed:', {
-      selectedSkill,
-      selectedLevel,
-    });
-  }, [selectedSkill, selectedLevel]);
   const [questions, setQuestions] = useState<VocabQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -54,29 +36,21 @@ function VocabPageContent() {
       return;
     }
 
-    console.log('[VocabPage] Starting test with skill:', selectedSkill, 'level:', selectedLevel);
     setLoading(true);
     
     try {
       const url = `/api/vocab/questions?skill=${selectedSkill}&level=${selectedLevel}`;
-      console.log('[VocabPage] Fetching from:', url);
-      
       const response = await fetch(url);
-      console.log('[VocabPage] Response status:', response.status, response.statusText);
-      console.log('[VocabPage] Response ok:', response.ok);
 
-      // レスポンスのステータスを確認
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
-        console.error('[VocabPage] API error response:', errorText);
         let errorMessage = `APIエラー (HTTP ${response.status})`;
         
         try {
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.error?.message || errorData.message || errorMessage;
-          console.error('[VocabPage] Parsed error data:', errorData);
         } catch (parseError) {
-          console.error('[VocabPage] Failed to parse error response:', parseError);
+          // パースエラーは無視
         }
         
         alert(errorMessage);
@@ -85,27 +59,18 @@ function VocabPageContent() {
       }
 
       const data = await response.json();
-      console.log('[VocabPage] Response data:', data);
 
       if (data.ok) {
-        console.log('[VocabPage] Questions received:', data.data?.length || 0);
         setQuestions(data.data);
         setCurrentQuestionIndex(0);
         setAnswers({});
         setShowResults(false);
       } else {
-        console.error('[VocabPage] API returned error:', data.error);
         alert(data.error?.message || '問題の取得に失敗しました');
       }
     } catch (error) {
-      console.error('[VocabPage] Error fetching questions:', error);
-      console.error('[VocabPage] Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-      });
       alert(`エラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
-      console.log('[VocabPage] Setting loading to false');
       setLoading(false);
     }
   };
@@ -179,7 +144,6 @@ function VocabPageContent() {
         alert(data.error?.message || '回答の送信に失敗しました');
       }
     } catch (error) {
-      console.error('Error submitting answers:', error);
       alert('エラーが発生しました');
     } finally {
       setSubmitting(false);
@@ -262,28 +226,16 @@ function VocabPageContent() {
               )}
 
               {/* 開始ボタン */}
-              {selectedSkill && selectedLevel ? (
+              {selectedSkill && selectedLevel && (
                 <div className="flex justify-end">
                   <button
-                    onClick={(e) => {
-                      console.log('[VocabPage] Button clicked!', {
-                        selectedSkill,
-                        selectedLevel,
-                        loading,
-                        event: e,
-                      });
-                      handleStartTest();
-                    }}
+                    onClick={handleStartTest}
                     disabled={loading}
                     className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     type="button"
                   >
                     {loading ? '読み込み中...' : 'テストを開始'}
                   </button>
-                </div>
-              ) : (
-                <div className="text-sm text-gray-500 mt-4">
-                  デバッグ: selectedSkill={String(selectedSkill)}, selectedLevel={String(selectedLevel)}
                 </div>
               )}
             </div>
@@ -358,9 +310,6 @@ function VocabPageContent() {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             問題を読み込み中...
-            <div className="mt-4 text-sm text-gray-500">
-              ブラウザのConsole（F12）でログを確認できます
-            </div>
           </div>
         </div>
       </Layout>
@@ -370,7 +319,6 @@ function VocabPageContent() {
   // questionsが空で、selectedSkillとselectedLevelが設定されている場合は、選択画面に戻す
   // または「テストを開始」ボタンを表示
   if (questions.length === 0 && selectedSkill && selectedLevel) {
-    console.log('[VocabPage] Questions empty but skill/level selected, showing start button');
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
@@ -382,15 +330,7 @@ function VocabPageContent() {
               </p>
               <div className="flex justify-end">
                 <button
-                  onClick={(e) => {
-                    console.log('[VocabPage] Start button clicked from empty state!', {
-                      selectedSkill,
-                      selectedLevel,
-                      loading,
-                      event: e,
-                    });
-                    handleStartTest();
-                  }}
+                  onClick={handleStartTest}
                   disabled={loading}
                   className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   type="button"
