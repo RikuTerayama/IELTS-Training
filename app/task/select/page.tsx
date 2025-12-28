@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 
@@ -67,7 +67,7 @@ const levels: { value: Level; label: string }[] = [
   { value: 'advanced', label: '上級' },
 ];
 
-export default function TaskSelectPage() {
+function TaskSelectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [taskType, setTaskType] = useState<TaskType | null>(null);
@@ -271,6 +271,20 @@ export default function TaskSelectPage() {
         )}
       </div>
     </Layout>
+  );
+}
+
+export default function TaskSelectPage() {
+  return (
+    <Suspense fallback={
+      <Layout>
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="text-center">読み込み中...</div>
+        </div>
+      </Layout>
+    }>
+      <TaskSelectContent />
+    </Suspense>
   );
 }
 
