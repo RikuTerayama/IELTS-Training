@@ -232,6 +232,26 @@ export default function TaskPage() {
             </div>
           )}
 
+          {/* PREPヒアリングモードへの切り替えボタン（初級/中級のみ） */}
+          {(level === 'beginner' || level === 'intermediate') && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-blue-900 mb-1">PREPヒアリングモード</h3>
+                  <p className="text-sm text-blue-700">
+                    キャラクターが質問しながら、段階的にエッセイを作成できます
+                  </p>
+                </div>
+                <button
+                  onClick={() => router.push(`/task/${taskId}/prep`)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  PREPモードで開始
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* 入力エリア */}
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">回答</h2>
