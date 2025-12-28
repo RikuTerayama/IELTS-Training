@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
@@ -14,17 +13,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(false);
   const [signUpSuccess, setSignUpSuccess] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
-
-  useEffect(() => {
-    // 既にログインしている場合はホームにリダイレクト
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        router.push('/home');
-      }
-    });
-  }, [router, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,16 +172,15 @@ export default function LandingPage() {
 
       {/* メインコンテンツ */}
       <main className="container mx-auto px-4 py-12">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        {/* ヒーローセクション */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           {/* 左側: 紹介セクション */}
           <div className="space-y-6">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">
-              IELTS Writing
-              <br />
-              <span className="text-blue-600">Training Platform</span>
+              IELTS Training Platform
             </h1>
             <p className="text-lg text-gray-600">
-              IELTS Writing Task 2のスキルを向上させるための包括的なトレーニングプラットフォームです。
+              IELTSのスキルを向上させるための包括的なトレーニングプラットフォーム<br />
               実践的なフィードバックと進捗追跡で、目標スコア達成をサポートします。
             </p>
             <div className="space-y-3">
@@ -217,42 +205,42 @@ export default function LandingPage() {
               <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">
                 {isSignUp ? '新規登録' : 'ログイン'}
               </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="landing-email" className="block text-sm font-medium text-gray-700">
                     メール
                   </label>
                   <input
-                    id="email"
+                    id="landing-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
+                    autoComplete="off"
                     required
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="landing-password" className="block text-sm font-medium text-gray-700">
                     パスワード
                   </label>
                   <input
-                    id="password"
+                    id="landing-password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    autoComplete={isSignUp ? "new-password" : "current-password"}
+                    autoComplete="new-password"
                     required
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
                   />
                 </div>
                 {isSignUp && (
                   <div>
-                    <label htmlFor="level" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="landing-level" className="block text-sm font-medium text-gray-700">
                       初期レベル
                     </label>
                     <select
-                      id="level"
+                      id="landing-level"
                       value={initialLevel}
                       onChange={(e) => setInitialLevel(e.target.value as any)}
                       autoComplete="off"
@@ -301,13 +289,177 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+
+        {/* 学習者のよくある悩み */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+            学習者のよくある悩み
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="text-4xl mb-4">😰</div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">フィードバックが得られない</h3>
+              <p className="text-gray-600">
+                自分の書いたエッセイがどの程度のスコアなのか、どこを改善すべきか分からない
+              </p>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="text-4xl mb-4">📊</div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">進捗が見えない</h3>
+              <p className="text-gray-600">
+                練習を続けているが、自分の成長が実感できず、モチベーションが下がる
+              </p>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="text-4xl mb-4">📚</div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">効率的な学習方法が分からない</h3>
+              <p className="text-gray-600">
+                何を練習すれば良いか、どの単語を覚えれば良いか分からず迷っている
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* このサイトで提供したい価値 */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+            このサイトで提供したい価値
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-8 shadow-md">
+              <div className="text-4xl mb-4">🤖</div>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-900">AIによる即座のフィードバック</h3>
+              <p className="text-gray-700 mb-4">
+                提出後すぐに、バンドスコアの評価と詳細なフィードバックを受け取れます。文法、語彙、論理構成など、各観点での改善点を明確に提示します。
+              </p>
+              <ul className="space-y-2 text-gray-600">
+                <li>• バンドスコアの自動評価</li>
+                <li>• 具体的な改善提案</li>
+                <li>• 弱点の特定と対策</li>
+              </ul>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-8 shadow-md">
+              <div className="text-4xl mb-4">📈</div>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-900">進捗の可視化</h3>
+              <p className="text-gray-700 mb-4">
+                過去の回答履歴を一覧で確認でき、自分の成長を実感できます。弱点タグの分析により、重点的に練習すべき分野が明確になります。
+              </p>
+              <ul className="space-y-2 text-gray-600">
+                <li>• スコアの推移グラフ</li>
+                <li>• 弱点タグの分析</li>
+                <li>• 学習履歴の管理</li>
+              </ul>
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-8 shadow-md">
+              <div className="text-4xl mb-4">📝</div>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-900">段階的な学習サポート</h3>
+              <p className="text-gray-700 mb-4">
+                初級・中級・上級のレベル別に最適化されたタスクと、PREPガイドによる学習支援で、無理なくステップアップできます。
+              </p>
+              <ul className="space-y-2 text-gray-600">
+                <li>• レベル別タスクの提供</li>
+                <li>• PREPガイドによる学習支援</li>
+                <li>• 穴埋め練習（初級・中級）</li>
+              </ul>
+            </div>
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg p-8 shadow-md">
+              <div className="text-4xl mb-4">📖</div>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-900">4技能別の単語練習</h3>
+              <p className="text-gray-700 mb-4">
+                Reading、Listening、Writing、Speakingの各技能に特化した単語を、難易度別に練習できます。IELTSに頻出する重要単語を効率的に習得できます。
+              </p>
+              <ul className="space-y-2 text-gray-600">
+                <li>• 技能別・難易度別の単語分類</li>
+                <li>• 選択式クイズ形式</li>
+                <li>• 1200語の充実した語彙データベース</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* 使い方 */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+            使い方
+          </h2>
+          <div className="max-w-4xl mx-auto">
+            <div className="space-y-8">
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  1
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900">アカウント作成</h3>
+                  <p className="text-gray-600">
+                    メールアドレスとパスワードでアカウントを作成します。初期レベル（初級・中級・上級）を選択してください。
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  2
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900">タスクを選択</h3>
+                  <p className="text-gray-600">
+                    ホーム画面から推奨タスクを選択するか、新しいタスクを作成します。自分のレベルに合ったタスクを選びましょう。
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  3
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900">エッセイを書く</h3>
+                  <p className="text-gray-600">
+                    タスクの指示に従ってエッセイを書きます。初級・中級の方は、PREPガイドを参考にしながら日本語で骨組みを作成し、その後英語で完成させます。
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  4
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900">フィードバックを確認</h3>
+                  <p className="text-gray-600">
+                    提出後、AIによる詳細なフィードバックとバンドスコアの評価を受け取ります。改善点を確認し、必要に応じて書き直しを行います。
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  5
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900">進捗を確認</h3>
+                  <p className="text-gray-600">
+                    Progressページで過去の回答履歴を確認し、自分の成長を実感します。弱点タグを確認して、重点的に練習すべき分野を把握します。
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  6
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900">単語練習</h3>
+                  <p className="text-gray-600">
+                    Vocabページで、4技能別・難易度別の単語を練習します。定期的に練習することで、IELTSに必要な語彙力を効率的に向上させます。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* フッター */}
       <footer className="border-t border-gray-200 bg-white/80 backdrop-blur-sm mt-12">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-gray-600">
-            <p>&copy; 2024 IELTS Training. All rights reserved.</p>
+            <p>&copy; 2025 IELTS Training. All rights reserved.</p>
           </div>
         </div>
       </footer>
