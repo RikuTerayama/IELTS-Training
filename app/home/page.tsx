@@ -44,8 +44,7 @@ export default function HomePage() {
   };
 
   const handleChooseLevel = () => {
-    // TODO: レベル選択モーダル（簡易版では初級に固定）
-    router.push('/task/new?level=beginner');
+    router.push('/task/select');
   };
 
   if (loading) {
