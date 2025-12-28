@@ -15,26 +15,47 @@ export interface Task1ImageInfo {
 export function detectTask1Genre(question: string): string | null {
   const lowerQuestion = question.toLowerCase();
   
+  // 複数の図表を先にチェック（first/second/twoなどのキーワードで判定）
+  if (lowerQuestion.includes('first chart') || lowerQuestion.includes('second chart') || 
+      (lowerQuestion.includes('chart') && (lowerQuestion.includes('first') || lowerQuestion.includes('second') || lowerQuestion.includes('two')))) {
+    return 'multiple_charts';
+  }
+  
+  // line graph/chartの検出
   if (lowerQuestion.includes('line graph') || lowerQuestion.includes('line chart')) {
     return 'line_chart';
   }
+  
+  // "The graph" や "graph illustrates" などのパターンもline_chartの可能性が高い
+  // ただし、"bar chart"や"pie chart"を含まない場合のみ
+  if ((lowerQuestion.includes('the graph') || lowerQuestion.includes('graph illustrates') || lowerQuestion.includes('graph shows')) 
+      && !lowerQuestion.includes('bar chart') && !lowerQuestion.includes('pie chart')) {
+    return 'line_chart';
+  }
+  
+  // bar chartの検出
   if (lowerQuestion.includes('bar chart')) {
     return 'bar_chart';
   }
+  
+  // pie chartの検出
   if (lowerQuestion.includes('pie chart')) {
     return 'pie_chart';
   }
-  if (lowerQuestion.includes('table') && !lowerQuestion.includes('chart')) {
-    return 'table';
-  }
-  if (lowerQuestion.includes('diagram') && !lowerQuestion.includes('pie chart') && !lowerQuestion.includes('bar chart')) {
+  
+  // diagramの検出（chartを含まない場合）
+  if (lowerQuestion.includes('diagram') && !lowerQuestion.includes('chart')) {
     return 'diagram';
   }
+  
+  // mapの検出
   if (lowerQuestion.includes('map') || lowerQuestion.includes('maps')) {
     return 'map';
   }
-  if (lowerQuestion.includes('chart') && (lowerQuestion.includes('first') || lowerQuestion.includes('second') || lowerQuestion.includes('two'))) {
-    return 'multiple_charts';
+  
+  // tableの検出（chartを含まない場合）
+  if (lowerQuestion.includes('table') && !lowerQuestion.includes('chart')) {
+    return 'table';
   }
   
   return null;
