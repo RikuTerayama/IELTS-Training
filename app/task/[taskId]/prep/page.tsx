@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
+import { Task1Image } from '@/components/task/Task1Image';
 import type { Task } from '@/lib/domain/types';
 
 type PrepStep = 'point' | 'reason' | 'example' | 'point_again' | 'japanese_evaluation' | 'english_generation' | 'ielts_feedback';
