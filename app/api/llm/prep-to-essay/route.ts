@@ -33,17 +33,19 @@ export async function POST(request: Request): Promise<Response> {
     const requestBody = await request.json();
     const {
       task_question,
+      task_type,
       prep_answers,
       japanese_evaluation,
       level,
       required_vocab,
     }: {
       task_question: string;
+      task_type?: 'Task 1' | 'Task 2';
       prep_answers: {
         point: string;
-        reason: string;
+        reason?: string;
         example: string;
-        point_again: string;
+        point_again?: string;
       };
       japanese_evaluation: {
         is_valid_prep: boolean;
@@ -62,9 +64,13 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    console.log('[PREP to Essay API] Calling LLM to generate essay...');
+    // task_typeが指定されていない場合は、Task 2をデフォルトとする（後方互換性のため）
+    const taskType = task_type || 'Task 2';
+
+    console.log('[PREP to Essay API] Calling LLM to generate essay...', { taskType });
     const prompt = buildPrepToEssayPrompt(
       task_question,
+      taskType,
       prep_answers,
       japanese_evaluation,
       level,
