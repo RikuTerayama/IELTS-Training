@@ -211,7 +211,7 @@ export default function PrepTaskPage() {
             japanese: `${answers.point}\n${answers.reason}\n${answers.example}\n${answers.point_again}`,
             final: englishEssay.essay,
             prep_answers: answers,
-            japanese_evaluation,
+            japanese_evaluation: japaneseEvaluation,
             english_essay: englishEssay,
           },
         }),
