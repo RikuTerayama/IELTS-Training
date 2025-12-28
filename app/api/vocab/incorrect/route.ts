@@ -55,6 +55,7 @@ export async function GET(request: Request): Promise<Response> {
         question_id: string;
         question: any;
         correct_answer: string;
+        options?: Array<{ id: string; text: string }>;
       }>;
 
       answers.forEach((answer) => {
@@ -64,7 +65,11 @@ export async function GET(request: Request): Promise<Response> {
             incorrectQuestions.push({
               vocab_id: question.vocab_id,
               question_id: answer.question_id,
-              question: question.question,
+              question: {
+                ...question.question,
+                options: question.options || [],
+                correct_answer: question.correct_answer,
+              },
               user_answer: answer.user_answer,
               correct_answer: question.correct_answer,
               session_date: log.session_date,
