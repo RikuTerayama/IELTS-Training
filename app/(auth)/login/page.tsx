@@ -7,7 +7,6 @@ import { createClient } from '@/lib/supabase/client';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [initialLevel, setInitialLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,29 +38,7 @@ export default function LoginPage() {
 
         if (signUpError) throw signUpError;
 
-        // プロファイル作成
-        if (data.user) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              email,
-              initial_level: initialLevel,
-            })
-            .select()
-            .single();
-
-          if (profileError) {
-            // 既に存在する場合は無視（ON CONFLICT相当）
-            if (profileError.code === '23505') {
-              console.log('[LoginPage] Profile already exists, continuing...');
-            } else {
-              console.error('[LoginPage] Profile creation error:', profileError);
-              throw profileError;
-            }
-          }
-        }
-
+        // プロファイルは自動トリガーで作成される（onboarding_completed = false）
         // サインアップ成功（メール確認が必要な場合）
         if (data.user && !data.session) {
           setSignUpSuccess(true);
@@ -75,7 +52,7 @@ export default function LoginPage() {
           setLoading(false);
           // セッションが確実にCookieに保存されるまで待つ
           await new Promise(resolve => setTimeout(resolve, 300));
-          window.location.href = '/home';
+          window.location.href = '/onboarding';
           return;
         }
       } else {
@@ -148,11 +125,23 @@ export default function LoginPage() {
         // 追加の待機時間（Cookieが確実に保存されるまで）
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // 直接 /home にリダイレクト（middlewareが認証状態を確認）
-        console.log('Redirecting to /home...');
+        // 目的ヒアリング完了状況を確認
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', signInData.user.id)
+          .single();
+
+        console.log('Profile onboarding status:', profile?.onboarding_completed);
         
-        // window.location.hrefを使用（フルページリロード）
-        window.location.href = '/home';
+        // 目的ヒアリング未完了の場合は目的ヒアリングページへ
+        if (profile && !profile.onboarding_completed) {
+          console.log('Redirecting to /onboarding...');
+          window.location.href = '/onboarding';
+        } else {
+          console.log('Redirecting to /home...');
+          window.location.href = '/home';
+        }
         
         // リダイレクト後は処理を終了（この行には到達しないはず）
         return;
@@ -241,24 +230,6 @@ export default function LoginPage() {
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
             />
           </div>
-          {isSignUp && (
-            <div>
-              <label htmlFor="level" className="block text-sm font-medium text-gray-700">
-                初期レベル
-              </label>
-              <select
-                id="level"
-                value={initialLevel}
-                onChange={(e) => setInitialLevel(e.target.value as any)}
-                autoComplete="off"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-              >
-                <option value="beginner">初級</option>
-                <option value="intermediate">中級</option>
-                <option value="advanced">上級</option>
-              </select>
-            </div>
-          )}
           {error && (
             <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
               {error}
