@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
+import { Task1Image } from '@/components/task/Task1Image';
 import type { Task, DraftContent } from '@/lib/domain/types';
 
 export default function TaskPage() {
@@ -195,6 +196,19 @@ export default function TaskPage() {
           {/* お題 */}
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">お題</h2>
+            
+            {/* Task1の場合は画像を表示 */}
+            {task.question_type === 'Task 1' && (
+              <div className="mb-4">
+                <Task1Image
+                  question={task.question}
+                  level={level}
+                  alt="Task 1 Chart or Diagram"
+                  className="w-full"
+                />
+              </div>
+            )}
+            
             <p className="text-gray-700">{task.question}</p>
             <div className="mt-4 space-y-2">
               <p>
