@@ -31,7 +31,7 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/home" className="text-xl font-bold text-blue-600">
-              IELTS Writing
+              IELTS Training
             </Link>
             <nav className="flex gap-4">
               <Link href="/home" className="text-gray-700 hover:text-blue-600">
@@ -42,6 +42,14 @@ export function Header() {
               </Link>
               <Link href="/vocab" className="text-gray-700 hover:text-blue-600">
                 Vocab
+              </Link>
+              <Link 
+                href="https://ieltsconsult.netlify.app/" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-700 hover:text-blue-600"
+              >
+                Blog
               </Link>
             </nav>
           </div>
