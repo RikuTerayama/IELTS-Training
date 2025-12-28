@@ -6,6 +6,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 
+// このAPIルートは動的に実行される必要がある（認証が必要なため）
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request): Promise<Response> {
   try {
     const supabase = await createClient();
