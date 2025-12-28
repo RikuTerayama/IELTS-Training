@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
+import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
 import type { Task } from '@/lib/domain/types';
 
 type PrepStep = 'point' | 'reason' | 'example' | 'point_again' | 'japanese_evaluation' | 'english_generation' | 'ielts_feedback';
@@ -116,6 +117,7 @@ export default function PrepTaskPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           task_question: task?.question,
+          task_type: task?.question_type,
           prep_answers: answers,
           level,
         }),
@@ -149,6 +151,7 @@ export default function PrepTaskPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           task_question: task?.question,
+          task_type: task?.question_type,
           prep_answers: answers,
           japanese_evaluation: japaneseEvaluation,
           level,
@@ -236,33 +239,58 @@ export default function PrepTaskPage() {
   };
 
   const getCurrentQuestion = () => {
-    switch (currentStep) {
-      case 'point':
-        return {
-          title: 'P (Point) は何？',
-          description: '学校の始める時間について、自分の意見を述べることが大切です。あなたの意見（Point）を日本語で書いてください。',
-          placeholder: '例：私は学校の始業時間を遅くすべきだと思います。',
-        };
-      case 'reason':
-        return {
-          title: 'R (Reason) は何？',
-          description: '2-3の理由を挙げて、自分の意見が裏付けられるようにします。あなたの理由を日本語で書いてください。',
-          placeholder: '例：\n1. 睡眠不足の解消\n2. 学習効率の向上\n3. 健康への配慮',
-        };
-      case 'example':
-        return {
-          title: 'E (Example) は何？',
-          description: 'ある具体的な例を挙げて、自分の意見を具体的に説明します。具体的な例を日本語で書いてください。',
-          placeholder: '例：例えば、アメリカの一部の学校では、始業時間を遅らせた結果、生徒の成績が向上したという研究結果があります。',
-        };
-      case 'point_again':
-        return {
-          title: 'P (Point again) は？',
-          description: '結論で自分の意見を再び述べます。結論を日本語で書いてください。',
-          placeholder: '例：したがって、学校の始業時間を遅くすることは、生徒の健康と学習効果の両面で有益であると考えます。',
-        };
-      default:
-        return { title: '', description: '', placeholder: '' };
+    const isTask1 = task?.question_type === 'Task 1';
+    const genreName = task ? getTask1GenreName(task.question) : '';
+    const genreNameEnglish = task ? getTask1GenreNameEnglish(task.question) : '';
+    
+    if (isTask1) {
+      // Task1用の質問
+      switch (currentStep) {
+        case 'point':
+          return {
+            title: 'P (ポイント) は何？',
+            description: `${genreNameEnglish}における主な特徴を述べることが大切です。グラフや表から読み取れる主な傾向や変化を日本語で書いてください。`,
+            placeholder: `例：訪問者数は2010年から2020年にかけて一直線で増加傾向にある。`,
+          };
+        case 'example':
+          return {
+            title: 'E (具体例) は何？',
+            description: '具体的な数値やデータを挙げて、特徴を具体的に説明します。具体的な数値や年、比較などを日本語で書いてください。',
+            placeholder: '例：2010年は15,000人だったのに、2020年には35,000人に増加している。また、2014年に28,000人でピークを迎えた後、一時的に減少したが、その後再び増加に転じた。',
+          };
+        default:
+          return { title: '', description: '', placeholder: '' };
+      }
+    } else {
+      // Task2用の質問
+      switch (currentStep) {
+        case 'point':
+          return {
+            title: 'P (Point) は何？',
+            description: task?.prep_guide?.point || 'あなたの意見（Point）を日本語で書いてください。',
+            placeholder: '例：私は学校の始業時間を遅くすべきだと思います。',
+          };
+        case 'reason':
+          return {
+            title: 'R (Reason) は何？',
+            description: task?.prep_guide?.reason || '2-3の理由を挙げて、自分の意見が裏付けられるようにします。あなたの理由を日本語で書いてください。',
+            placeholder: '例：\n1. 睡眠不足の解消\n2. 学習効率の向上\n3. 健康への配慮',
+          };
+        case 'example':
+          return {
+            title: 'E (Example) は何？',
+            description: task?.prep_guide?.example || 'ある具体的な例を挙げて、自分の意見を具体的に説明します。具体的な例を日本語で書いてください。',
+            placeholder: '例：例えば、アメリカの一部の学校では、始業時間を遅らせた結果、生徒の成績が向上したという研究結果があります。',
+          };
+        case 'point_again':
+          return {
+            title: 'P (Point again) は？',
+            description: task?.prep_guide?.point_again || '結論で自分の意見を再び述べます。結論を日本語で書いてください。',
+            placeholder: '例：したがって、学校の始業時間を遅くすることは、生徒の健康と学習効果の両面で有益であると考えます。',
+          };
+        default:
+          return { title: '', description: '', placeholder: '' };
+      }
     }
   };
 
@@ -282,10 +310,12 @@ export default function PrepTaskPage() {
   };
 
   const canProceed = () => {
+    const isTask1 = task?.question_type === 'Task 1';
+    
     if (currentStep === 'point') return answers.point.trim().length > 0;
-    if (currentStep === 'reason') return answers.reason.trim().length > 0;
+    if (currentStep === 'reason' && !isTask1) return answers.reason.trim().length > 0;
     if (currentStep === 'example') return answers.example.trim().length > 0;
-    if (currentStep === 'point_again') return answers.point_again.trim().length > 0;
+    if (currentStep === 'point_again' && !isTask1) return answers.point_again.trim().length > 0;
     if (currentStep === 'japanese_evaluation') return !!japaneseEvaluation;
     if (currentStep === 'english_generation') return !!englishEssay;
     return false;
@@ -320,34 +350,44 @@ export default function PrepTaskPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-600">
-              {currentStep === 'point' && 'ステップ 1/7'}
-              {currentStep === 'reason' && 'ステップ 2/7'}
-              {currentStep === 'example' && 'ステップ 3/7'}
-              {currentStep === 'point_again' && 'ステップ 4/7'}
-              {currentStep === 'japanese_evaluation' && 'ステップ 5/7'}
-              {currentStep === 'english_generation' && 'ステップ 6/7'}
-              {currentStep === 'ielts_feedback' && 'ステップ 7/7'}
+              {(() => {
+                const isTask1 = task?.question_type === 'Task 1';
+                const totalSteps = isTask1 ? 5 : 7;
+                const stepNumbers: Record<string, number> = isTask1
+                  ? { point: 1, example: 2, japanese_evaluation: 3, english_generation: 4, ielts_feedback: 5 }
+                  : { point: 1, reason: 2, example: 3, point_again: 4, japanese_evaluation: 5, english_generation: 6, ielts_feedback: 7 };
+                return `ステップ ${stepNumbers[currentStep] || 0}/${totalSteps}`;
+              })()}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
               style={{
-                width: `${
-                  currentStep === 'point'
-                    ? '14%'
-                    : currentStep === 'reason'
-                    ? '28%'
-                    : currentStep === 'example'
-                    ? '42%'
-                    : currentStep === 'point_again'
-                    ? '57%'
-                    : currentStep === 'japanese_evaluation'
-                    ? '71%'
-                    : currentStep === 'english_generation'
-                    ? '85%'
-                    : '100%'
-                }`,
+                width: (() => {
+                  const isTask1 = task?.question_type === 'Task 1';
+                  if (isTask1) {
+                    switch (currentStep) {
+                      case 'point': return '20%';
+                      case 'example': return '40%';
+                      case 'japanese_evaluation': return '60%';
+                      case 'english_generation': return '80%';
+                      case 'ielts_feedback': return '100%';
+                      default: return '0%';
+                    }
+                  } else {
+                    switch (currentStep) {
+                      case 'point': return '14%';
+                      case 'reason': return '28%';
+                      case 'example': return '42%';
+                      case 'point_again': return '57%';
+                      case 'japanese_evaluation': return '71%';
+                      case 'english_generation': return '85%';
+                      case 'ielts_feedback': return '100%';
+                      default: return '0%';
+                    }
+                  }
+                })(),
               }}
             ></div>
           </div>
@@ -457,11 +497,20 @@ export default function PrepTaskPage() {
         <div className="flex justify-between">
           <button
             onClick={() => {
-              if (currentStep === 'reason') setCurrentStep('point');
-              else if (currentStep === 'example') setCurrentStep('reason');
-              else if (currentStep === 'point_again') setCurrentStep('example');
-              else if (currentStep === 'japanese_evaluation') setCurrentStep('point_again');
-              else if (currentStep === 'english_generation') setCurrentStep('japanese_evaluation');
+              const isTask1 = task?.question_type === 'Task 1';
+              if (isTask1) {
+                if (currentStep === 'example') setCurrentStep('point');
+                else if (currentStep === 'japanese_evaluation') setCurrentStep('example');
+                else if (currentStep === 'english_generation') setCurrentStep('japanese_evaluation');
+                else if (currentStep === 'ielts_feedback') setCurrentStep('english_generation');
+              } else {
+                if (currentStep === 'reason') setCurrentStep('point');
+                else if (currentStep === 'example') setCurrentStep('reason');
+                else if (currentStep === 'point_again') setCurrentStep('example');
+                else if (currentStep === 'japanese_evaluation') setCurrentStep('point_again');
+                else if (currentStep === 'english_generation') setCurrentStep('japanese_evaluation');
+                else if (currentStep === 'ielts_feedback') setCurrentStep('english_generation');
+              }
             }}
             disabled={currentStep === 'point' || processing}
             className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
