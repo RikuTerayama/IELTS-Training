@@ -28,29 +28,29 @@ export function Header() {
   };
 
   return (
-    <header className="border-b border-gray-200 bg-white">
+    <header className="border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/home" className="text-xl font-bold text-blue-600">
+            <Link href="/home" className="text-xl font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
               IELTS Training
             </Link>
             {/* デスクトップナビゲーション */}
             <nav className="hidden md:flex gap-4">
-              <Link href="/home" className="text-gray-700 hover:text-blue-600">
+              <Link href="/home" className="text-slate-300 hover:text-indigo-400 transition-colors">
                 Home
               </Link>
-              <Link href="/progress" className="text-gray-700 hover:text-blue-600">
+              <Link href="/progress" className="text-slate-300 hover:text-indigo-400 transition-colors">
                 Progress
               </Link>
-              <Link href="/vocab" className="text-gray-700 hover:text-blue-600">
+              <Link href="/vocab" className="text-slate-300 hover:text-indigo-400 transition-colors">
                 Vocab
               </Link>
               <Link 
                 href="https://ieltsconsult.netlify.app/" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-700 hover:text-blue-600"
+                className="text-slate-300 hover:text-indigo-400 transition-colors"
               >
                 Blog
               </Link>
@@ -61,10 +61,10 @@ export function Header() {
             <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <>
-                  <span className="text-sm text-gray-600">{user.email}</span>
+                  <span className="text-sm text-slate-400">{user.email}</span>
                   <button
                     onClick={handleLogout}
-                    className="rounded bg-gray-200 px-3 py-1 text-sm text-gray-700 hover:bg-gray-300"
+                    className="rounded bg-slate-700/50 px-3 py-1 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
                   >
                     Logout
                   </button>
@@ -72,7 +72,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                  className="rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-500 transition-colors"
                 >
                   Login
                 </Link>
@@ -81,7 +81,7 @@ export function Header() {
             {/* ハンバーガーメニューボタン（モバイル） */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 text-gray-700 hover:text-blue-600 focus:outline-none"
+              className="md:hidden p-2 text-slate-300 hover:text-indigo-400 focus:outline-none transition-colors"
               aria-label="メニューを開く"
             >
               <svg
@@ -104,26 +104,26 @@ export function Header() {
         </div>
         {/* モバイルメニュー */}
         {menuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-gray-200 pt-4">
+          <nav className="md:hidden mt-4 pb-4 border-t border-slate-700/50 pt-4">
             <div className="flex flex-col gap-3">
               <Link
                 href="/home"
                 onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-blue-600 py-2"
+                className="text-slate-300 hover:text-indigo-400 py-2 transition-colors"
               >
                 Home
               </Link>
               <Link
                 href="/progress"
                 onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-blue-600 py-2"
+                className="text-slate-300 hover:text-indigo-400 py-2 transition-colors"
               >
                 Progress
               </Link>
               <Link
                 href="/vocab"
                 onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-blue-600 py-2"
+                className="text-slate-300 hover:text-indigo-400 py-2 transition-colors"
               >
                 Vocab
               </Link>
@@ -132,28 +132,28 @@ export function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-blue-600 py-2"
+                className="text-slate-300 hover:text-indigo-400 py-2 transition-colors"
               >
                 Blog
               </Link>
               {user ? (
                 <>
-                  <div className="pt-2 border-t border-gray-200 mt-2">
-                    <div className="text-sm text-gray-600 py-2">{user.email}</div>
+                  <div className="pt-2 border-t border-slate-700/50 mt-2">
+                    <div className="text-sm text-slate-400 py-2">{user.email}</div>
                     <button
                       onClick={handleLogout}
-                      className="rounded bg-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-300 w-full text-left"
+                      className="rounded bg-slate-700/50 px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 w-full text-left transition-colors"
                     >
                       Logout
                     </button>
                   </div>
                 </>
               ) : (
-                <div className="pt-2 border-t border-gray-200 mt-2">
+                <div className="pt-2 border-t border-slate-700/50 mt-2">
                   <Link
                     href="/login"
                     onClick={() => setMenuOpen(false)}
-                    className="rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 block text-center"
+                    className="rounded bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-500 block text-center transition-colors"
                   >
                     Login
                   </Link>
