@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -14,6 +14,20 @@ export default function LoginPage() {
   const [resendingEmail, setResendingEmail] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  // ローカルストレージからメールアドレスとパスワードを読み込む
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedEmail = localStorage.getItem('ielts_training_email');
+      const savedPassword = localStorage.getItem('ielts_training_password');
+      if (savedEmail) {
+        setEmail(savedEmail);
+      }
+      if (savedPassword) {
+        setPassword(savedPassword);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +95,12 @@ export default function LoginPage() {
         }
 
         console.log('Login successful, session:', currentSession.user.email);
+        
+        // ログイン成功時にメールアドレスとパスワードをローカルストレージに保存
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('ielts_training_email', email);
+          localStorage.setItem('ielts_training_password', password);
+        }
         
         // リダイレクト前にloadingをfalseに設定
         setLoading(false);
