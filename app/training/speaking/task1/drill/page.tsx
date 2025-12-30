@@ -35,6 +35,10 @@ export default function SpeakingTask1DrillPage() {
           setUserResponse(transcript);
           setIsRecording(false);
           checkAnswer(transcript);
+          // 音声認識後に自動的に次の問題に進む（3秒後に）
+          setTimeout(() => {
+            handleNextAuto();
+          }, 3000);
         };
 
         recognitionInstance.onerror = (event: any) => {
@@ -83,6 +87,19 @@ export default function SpeakingTask1DrillPage() {
     }
   };
 
+  // 次の問題へ（自動 - 音声認識後）
+  const handleNextAuto = () => {
+    if (currentIndex < phrases.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setUserResponse('');
+      setIsCorrect(null);
+      setShowAnswer(false);
+    } else {
+      // 全問終了
+      router.push('/home');
+    }
+  };
+
   // 正答判定（音声認識の場合のみ）
   const checkAnswer = (response: string) => {
     if (inputMode !== 'voice') return; // テキスト入力の場合は評価しない
@@ -115,7 +132,7 @@ export default function SpeakingTask1DrillPage() {
     }
   };
 
-  // 次の問題へ
+  // 次の問題へ（手動）
   const handleNext = () => {
     if (currentIndex < phrases.length - 1) {
       setCurrentIndex(currentIndex + 1);
