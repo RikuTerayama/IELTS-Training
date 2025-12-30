@@ -130,6 +130,13 @@ export default function SpeakingTask1DrillPage() {
 
     setIsCorrect(isExactMatch || includesMainParts || false);
     setShowAnswer(true);
+    
+    // 評価表示後、3秒後に次の問題に自動進行
+    if (inputMode === 'voice') {
+      setTimeout(() => {
+        handleNextAuto();
+      }, 3000);
+    }
   };
 
   // テキスト入力時の処理（評価も実施）
