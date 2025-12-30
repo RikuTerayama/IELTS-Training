@@ -96,10 +96,8 @@ export default function SpeakingTask3DrillPage() {
     }
   };
 
-  // 正答判定（音声認識の場合のみ）
+  // 正答判定（音声認識・テキスト入力両方）
   const checkAnswer = (response: string) => {
-    if (inputMode !== 'voice') return;
-
     const currentPhrase = phrases[currentIndex];
     if (!currentPhrase) return;
 
@@ -107,21 +105,28 @@ export default function SpeakingTask3DrillPage() {
     const normalizedAnswer = currentPhrase.english.toLowerCase().trim().replace(/[.,!?]/g, '');
 
     const isExactMatch = normalizedResponse === normalizedAnswer;
+    
     const includesMainParts = currentPhrase.english_variations?.some(variation => {
       const normalizedVariation = variation.toLowerCase().trim().replace(/[.,!?]/g, '');
-      return normalizedResponse.includes(normalizedVariation.split(' ')[0]) || 
-             normalizedVariation.includes(normalizedResponse.split(' ')[0]);
+      const answerWords = normalizedAnswer.split(/\s+/).filter(w => w.length > 3);
+      const responseWords = normalizedResponse.split(/\s+/).filter(w => w.length > 3);
+      const variationWords = normalizedVariation.split(/\s+/).filter(w => w.length > 3);
+      
+      const matchAnswerWords = answerWords.filter(w => responseWords.includes(w)).length;
+      const matchVariationWords = variationWords.filter(w => responseWords.includes(w)).length;
+      
+      return matchAnswerWords >= Math.ceil(answerWords.length * 0.7) || 
+             matchVariationWords >= Math.ceil(variationWords.length * 0.7);
     });
 
     setIsCorrect(isExactMatch || includesMainParts || false);
     setShowAnswer(true);
   };
 
-  // テキスト入力時の処理（評価しない）
+  // テキスト入力時の処理（評価も実施）
   const handleTextSubmit = () => {
     if (inputMode === 'text' && userResponse.trim()) {
-      setShowAnswer(true);
-      setIsCorrect(null);
+      checkAnswer(userResponse);
     }
   };
 
@@ -259,7 +264,7 @@ export default function SpeakingTask3DrillPage() {
                       )}
                     </div>
                     <p className="text-sm text-gray-500 text-center">
-                      音声入力の場合のみ、正答判定が行われます
+                      音声入力完了後、自動的に評価されます
                     </p>
                   </div>
                 ) : (
@@ -279,7 +284,7 @@ export default function SpeakingTask3DrillPage() {
                       解答を確認
                     </button>
                     <p className="text-sm text-gray-500 text-center">
-                      テキスト入力の場合は評価されません。模範解答を確認できます。
+                      テキスト入力完了後、評価されます
                     </p>
                   </div>
                 )}
@@ -290,7 +295,7 @@ export default function SpeakingTask3DrillPage() {
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <h2 className="text-lg font-semibold mb-4">結果:</h2>
 
-                {inputMode === 'voice' && isCorrect !== null && (
+                {isCorrect !== null && (
                   <div className={`mb-4 p-4 rounded ${
                     isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
                   }`}>
@@ -325,14 +330,31 @@ export default function SpeakingTask3DrillPage() {
                   </div>
                 )}
 
-                <div className="mt-6 flex justify-center">
-                  <button
-                    onClick={handleNext}
-                    className="px-8 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-                  >
-                    {currentIndex < phrases.length - 1 ? '次の問題' : '完了'}
-                  </button>
-                </div>
+                {inputMode === 'text' && (
+                  <div className="mt-6 flex justify-center">
+                    <button
+                      onClick={handleNext}
+                      className="px-8 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                    >
+                      {currentIndex < phrases.length - 1 ? '次の問題' : '完了'}
+                    </button>
+                  </div>
+                )}
+                {inputMode === 'voice' && currentIndex < phrases.length - 1 && (
+                  <div className="mt-6 flex justify-center">
+                    <p className="text-sm text-gray-500">3秒後に次の問題に自動で進みます...</p>
+                  </div>
+                )}
+                {inputMode === 'voice' && currentIndex >= phrases.length - 1 && (
+                  <div className="mt-6 flex justify-center">
+                    <button
+                      onClick={() => router.push('/home')}
+                      className="px-8 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                    >
+                      完了
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
