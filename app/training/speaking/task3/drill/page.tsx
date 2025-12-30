@@ -34,10 +34,6 @@ export default function SpeakingTask3DrillPage() {
           setUserResponse(transcript);
           setIsRecording(false);
           checkAnswer(transcript);
-          // 音声認識後に自動的に次の問題に進む（3秒後に）
-          setTimeout(() => {
-            handleNextAuto();
-          }, 3000);
         };
 
         recognitionInstance.onerror = (event: any) => {
@@ -121,6 +117,13 @@ export default function SpeakingTask3DrillPage() {
 
     setIsCorrect(isExactMatch || includesMainParts || false);
     setShowAnswer(true);
+    
+    // 評価表示後、3秒後に次の問題に自動進行
+    if (inputMode === 'voice') {
+      setTimeout(() => {
+        handleNextAuto();
+      }, 3000);
+    }
   };
 
   // テキスト入力時の処理（評価も実施）
