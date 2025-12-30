@@ -87,9 +87,9 @@ export default function SpeakingTask3DrillPage() {
       setUserResponse('');
       setIsCorrect(null);
       setShowAnswer(false);
-    } else {
-      router.push('/home');
     }
+    // 最後の問題の場合は、homeに遷移せずに評価を表示したままにする
+    // ユーザーが「完了」ボタンをクリックするまで待つ
   };
 
   // 正答判定（音声認識・テキスト入力両方）
