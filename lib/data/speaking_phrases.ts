@@ -92,7 +92,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '8',
-    japanese: '私は読書が好きで、なぜならリラックスできるからで、良い小説を読むと日々のストレスを完全に忘れることができるからです。',
+    japanese: 'リラックスできるので、私は読書が好きです。',
     english: "I enjoy reading because it helps me relax. For example, when I read a good novel, I can completely forget about my daily stress.",
     english_variations: [
       "Reading is one of my favorite pastimes because it's so relaxing. Take last week, for instance - I was reading a thriller and time just flew by.",
@@ -114,7 +114,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '10',
-    japanese: '私は日本料理が好きで、特に寿司とラーメンが好きですが、新鮮で風味が豊かなところが気に入っています。',
+    japanese: '私は日本料理が好きで、特に寿司とラーメンが好きです。',
     english: "I'm quite fond of Japanese cuisine, particularly sushi and ramen. I like how fresh and flavorful they are.",
     english_variations: [
       "I really enjoy Japanese food, especially sushi and ramen. They're so fresh and tasty.",
@@ -126,7 +126,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   // Task 2用のフレーズ
   {
     id: '11',
-    japanese: '私は先月京都で小さな美術館を訪れ、週末の旅行中に現代美術の展示を見るのに約2時間を過ごしました。',
+    japanese: '私は先月京都で小さな美術館を訪れました。',
     english: "I visited a small art museum in Kyoto last month. It was during a weekend trip, and I spent about two hours there exploring the contemporary art exhibits.",
     english_variations: [
       "Last month, I went to an art museum in Kyoto. I went there on a weekend and spent two hours looking at contemporary art.",
@@ -137,7 +137,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '12',
-    japanese: '私は子供の頃、祖母の家の近くにある公園でよく遊んでいましたが、特に夏休みにはいとこと一緒に午後中を過ごしたことを覚えています。',
+    japanese: '私は子供の頃、祖母の家の近くにある公園でよく遊んでいました。',
     english: "When I was a child, I used to play in a park near my grandmother's house. I remember spending entire afternoons there with my cousins, especially during summer holidays.",
     english_variations: [
       "As a kid, I often played at a park close to my grandmother's place. I'd spend whole afternoons there with my cousins in the summer.",
@@ -148,7 +148,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '13',
-    japanese: '私は3年前に大学で卒業式に出席しましたが、それは学生生活の終わりとキャリアの始まりを意味する重要な出来事でした。',
+    japanese: '私は3年前に大学で卒業式に出席しました。',
     english: "I attended my graduation ceremony three years ago at my university. It was a significant event that marked the end of my student life and the beginning of my career.",
     english_variations: [
       "My graduation ceremony was really important to me. It happened three years ago at university and represented a major turning point in my life.",
@@ -159,7 +159,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '17',
-    japanese: '私は先週末に友達と一緒に新しいカフェに行き、コーヒーがとても美味しくて雰囲気も良かったです。',
+    japanese: '私は先週末に友達と一緒に新しいカフェに行きました。',
     english: "I went to a new café with my friends last weekend. The coffee was really good, and the atmosphere was nice too.",
     english_variations: [
       "Last weekend, I visited a new café with friends. The coffee tasted great and I enjoyed the atmosphere.",
@@ -170,7 +170,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '18',
-    japanese: '私は高校時代に最も影響を受けた先生がいて、彼は数学の先生で私に問題解決の重要性を教えてくれました。',
+    japanese: '私は高校時代に最も影響を受けた先生がいて、彼は数学の先生でした。',
     english: "There's a teacher who influenced me most during high school. He was my math teacher, and he taught me the importance of problem-solving.",
     english_variations: [
       "During high school, I had a math teacher who had a big impact on me. He showed me how important problem-solving is.",
@@ -182,7 +182,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   // Task 3用のフレーズ
   {
     id: '14',
-    japanese: '教育は重要で、なぜならより良い機会への扉を開き、例えば高等教育を受けた人はより多くのキャリア選択肢がありより良い給料を得ることができるからです。',
+    japanese: 'より良い機会への扉を開くので、教育は重要です。',
     english: "Education is crucial because it opens doors to better opportunities. For instance, people with higher education often have more career options and earn better salaries.",
     english_variations: [
       "Education matters because it provides access to more opportunities. Those with advanced education typically have wider career choices and higher income.",
@@ -193,7 +193,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '15',
-    japanese: 'テクノロジーには良い点と悪い点の両方がありますが、良い点としてはコミュニケーションをより簡単にし効率を向上させ、悪い点としてはプライバシーの懸念を引き起こしたり対面での交流を減らす可能性もあります。',
+    japanese: 'テクノロジーには良い点と悪い点の両方があります。',
     english: "Technology has both advantages and disadvantages. On the positive side, it makes communication easier and improves efficiency. However, it can also lead to privacy concerns and reduce face-to-face interactions.",
     english_variations: [
       "Technology brings benefits like easier communication and better efficiency, but it also raises privacy issues and reduces personal contact.",
@@ -204,7 +204,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '16',
-    japanese: '環境問題に対して、人々が日々できることを続けることが重要で、再生可能エネルギーに焦点を当て、小さな日常行動を通じてカーボンフットプリントを減らすべきです。',
+    japanese: '環境問題に対して、人々が日々できることを続けることが重要です。',
     english: "For environmental issues, it's important for people to continue doing what they can in their daily lives. We should focus on renewable energy and reduce our carbon footprint through small daily actions.",
     english_variations: [
       "When it comes to the environment, people need to keep doing small things every day. This includes using renewable energy and making eco-friendly choices.",
@@ -215,7 +215,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   },
   {
     id: '19',
-    japanese: 'オンライン教育には柔軟性があるという利点があり、学生は自分のペースで学習でき、他のコミットメントがある人にとって特に有益です。',
+    japanese: 'オンライン教育には柔軟性があるという利点があります。',
     english: "Online education has the advantage of flexibility. Students can learn at their own pace, which is particularly beneficial for those with other commitments.",
     english_variations: [
       "One benefit of online education is its flexibility. Learners can study when it suits them, which helps people with busy schedules.",
@@ -261,7 +261,7 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
   // 追加のフレーズ（Task 2用）
   {
     id: '23',
-    japanese: '私は高校時代に参加した文化祭について話したいですが、準備に多くの時間を費やし、とても思い出に残る経験でした。',
+    japanese: '私は高校時代に参加した文化祭について話したいです。',
     english: "I'd like to talk about a school festival I participated in during high school. We spent a lot of time preparing for it, and it was a very memorable experience.",
     english_variations: [
       "I want to describe a cultural festival I took part in while in high school. The preparation took a long time, but it's one of my best memories.",
