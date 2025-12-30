@@ -123,6 +123,74 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
     topic: 'food',
     level: 'B1',
   },
+  // Task 2用のフレーズ
+  {
+    id: '11',
+    japanese: '最近訪れた印象的な場所について、どこ・いつ・何をした・なぜ印象的だったかを順序立てて説明したい。',
+    english: "I'd like to talk about a small art museum I visited in Kyoto last month. It was during a weekend trip, and I spent about two hours there exploring the contemporary art exhibits. What really impressed me was how the traditional architecture blended seamlessly with modern installations.",
+    english_variations: [
+      "I visited an art museum in Kyoto last month. I went there on a weekend and spent two hours looking at contemporary art. The thing that struck me most was the blend of traditional and modern design.",
+      "Last month, I went to Kyoto and visited an art museum. I was there for about two hours on a weekend, exploring modern art. What caught my attention was the way old and new architecture came together.",
+    ],
+    topic: 'place',
+    level: 'B2',
+  },
+  {
+    id: '12',
+    japanese: '子供時代に遊んだ場所について、具体的なエピソードを交えながら説明したい。',
+    english: "When I was a child, I used to play in a park near my grandmother's house. I remember spending entire afternoons there with my cousins, especially during summer holidays. We'd climb trees, play hide and seek, and sometimes just sit under the big oak tree and talk.",
+    english_variations: [
+      "As a kid, I often played at a park close to my grandmother's place. I'd spend whole afternoons there with my cousins in the summer. We climbed trees, played games, and just relaxed under a big tree.",
+      "I used to go to a park near my grandmother's house when I was young. During summer, my cousins and I would spend all afternoon there playing on the trees and having fun.",
+    ],
+    topic: 'place',
+    level: 'B2',
+  },
+  {
+    id: '13',
+    japanese: '重要なイベントについて、いつ・どこで・何が起きた・なぜ重要だったかを説明したい。',
+    english: "I want to talk about my graduation ceremony, which took place three years ago at my university. It was significant because it marked the end of my student life and the beginning of my career. I remember feeling both excited and nervous about what lay ahead.",
+    english_variations: [
+      "My graduation ceremony was really important to me. It happened three years ago at university and represented a major turning point in my life from student to professional.",
+      "Three years ago, I graduated from university. The ceremony was a milestone event that closed one chapter and opened another in my life.",
+    ],
+    topic: 'event',
+    level: 'B2',
+  },
+  // Task 3用のフレーズ
+  {
+    id: '14',
+    japanese: '教育の重要性について、理由を述べ、具体例を挙げ、結論でまとめたい。',
+    english: "Education is crucial because it opens doors to better opportunities. For instance, people with higher education often have more career options and earn better salaries. Therefore, I believe investing in education is essential for personal and social development.",
+    english_variations: [
+      "Education matters because it provides access to more opportunities. Those with advanced education typically have wider career choices and higher income. That's why I think education is vital for both individuals and society.",
+      "The importance of education lies in the opportunities it creates. For example, well-educated individuals usually enjoy better job prospects. This is why education should be a priority for everyone.",
+    ],
+    topic: 'education',
+    level: 'B2',
+  },
+  {
+    id: '15',
+    japanese: 'テクノロジーの影響について、良い点と悪い点をバランス良く述べたい。',
+    english: "Technology has both advantages and disadvantages. On the positive side, it makes communication easier and improves efficiency. However, it can also lead to privacy concerns and reduce face-to-face interactions. So we need to find a balance.",
+    english_variations: [
+      "Technology brings benefits like easier communication and better efficiency, but it also raises privacy issues and reduces personal contact. We should use it wisely.",
+      "While technology improves our lives through better communication and efficiency, it also creates privacy problems and less human interaction. Finding the right balance is key.",
+    ],
+    topic: 'technology',
+    level: 'B2',
+  },
+  {
+    id: '16',
+    japanese: '環境問題について、問題点を説明し、解決策を提案したい。',
+    english: "Environmental issues are a major concern today. Pollution and climate change are serious problems that affect everyone. I think we should focus on renewable energy and reduce our carbon footprint through small daily actions.",
+    english_variations: [
+      "The environment faces serious challenges like pollution and climate change. Solutions include switching to renewable energy and making eco-friendly choices in our daily lives.",
+      "Environmental problems such as pollution and climate change need urgent attention. We can address them by using clean energy and being more environmentally conscious.",
+    ],
+    topic: 'environment',
+    level: 'B2',
+  },
   // 追加のフレーズは必要に応じて追加
 ];
 
@@ -139,6 +207,30 @@ export function getPhrasesByTopicAndLevel(
   );
   
   // ランダムにシャッフルして指定数まで取得
+  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+/**
+ * Task 2用のフレーズを取得（place, event, person など）
+ */
+export function getTask2Phrases(count: number = 10): SpeakingPhrase[] {
+  const task2Topics = ['place', 'event', 'person'];
+  const filtered = SPEAKING_PHRASES.filter(
+    (phrase) => task2Topics.includes(phrase.topic)
+  );
+  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+/**
+ * Task 3用のフレーズを取得（education, technology, environment など）
+ */
+export function getTask3Phrases(count: number = 10): SpeakingPhrase[] {
+  const task3Topics = ['education', 'technology', 'environment'];
+  const filtered = SPEAKING_PHRASES.filter(
+    (phrase) => task3Topics.includes(phrase.topic)
+  );
   const shuffled = [...filtered].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
