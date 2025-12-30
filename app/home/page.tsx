@@ -117,6 +117,34 @@ export default function HomePage() {
                 </div>
               </div>
 
+              {/* Speaking */}
+              <div>
+                <h3 className="mb-3 text-md font-semibold text-gray-800">Speaking（瞬間英作文）</h3>
+                <div className="grid md:grid-cols-3 gap-3">
+                  <button
+                    onClick={() => router.push('/training/speaking/task1')}
+                    className="p-4 rounded-lg border-2 border-gray-200 hover:border-purple-500 hover:bg-purple-50 transition-all text-left"
+                  >
+                    <div className="font-semibold text-lg mb-1">Task 1</div>
+                    <div className="text-sm text-gray-600">基本的な質問・自己紹介</div>
+                  </button>
+                  <button
+                    onClick={() => router.push('/training/speaking/task2')}
+                    className="p-4 rounded-lg border-2 border-gray-200 hover:border-purple-500 hover:bg-purple-50 transition-all text-left"
+                  >
+                    <div className="font-semibold text-lg mb-1">Task 2</div>
+                    <div className="text-sm text-gray-600">スピーチ・説明</div>
+                  </button>
+                  <button
+                    onClick={() => router.push('/training/speaking/task3')}
+                    className="p-4 rounded-lg border-2 border-gray-200 hover:border-purple-500 hover:bg-purple-50 transition-all text-left"
+                  >
+                    <div className="font-semibold text-lg mb-1">Task 3</div>
+                    <div className="text-sm text-gray-600">抽象的議論・意見</div>
+                  </button>
+                </div>
+              </div>
+
               {/* Vocabulary */}
               <div>
                 <h3 className="mb-3 text-md font-semibold text-gray-800">Vocabulary</h3>
