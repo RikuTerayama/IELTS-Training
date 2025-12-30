@@ -35,10 +35,6 @@ export default function SpeakingTask1DrillPage() {
           setUserResponse(transcript);
           setIsRecording(false);
           checkAnswer(transcript);
-          // 音声認識後に自動的に次の問題に進む（3秒後に）
-          setTimeout(() => {
-            handleNextAuto();
-          }, 3000);
         };
 
         recognitionInstance.onerror = (event: any) => {
@@ -94,10 +90,9 @@ export default function SpeakingTask1DrillPage() {
       setUserResponse('');
       setIsCorrect(null);
       setShowAnswer(false);
-    } else {
-      // 全問終了
-      router.push('/home');
     }
+    // 最後の問題の場合は、homeに遷移せずに評価を表示したままにする
+    // ユーザーが「完了」ボタンをクリックするまで待つ
   };
 
   // 正答判定（音声認識・テキスト入力両方）
