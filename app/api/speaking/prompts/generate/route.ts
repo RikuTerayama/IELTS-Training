@@ -23,7 +23,7 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    const { session_id, topic, part, level, mode, target_points } = await request.json();
+    const { session_id, topic, part, level, mode, target_points, use_preset } = await request.json();
 
     if (!session_id || !mode || !topic) {
       return Response.json(
@@ -32,11 +32,66 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    // LLMでプロンプト生成
+    const finalLevel = level || 'B2';
+    const finalPart = part || null;
+
+    // 1. プリセットから取得を試みる（use_presetがtrue、または明示的にfalseでない場合）
+    if (use_preset !== false) {
+      const { data: presetPrompts, error: presetError } = await supabase
+        .from('speaking_prompts')
+        .select('*')
+        .eq('mode', mode)
+        .eq('topic', topic)
+        .eq('level', finalLevel)
+        .is('session_id', null) // プリセット（session_idがNULL）
+        .limit(50);
+
+      if (!presetError && presetPrompts && presetPrompts.length > 0) {
+        // partでフィルタリング（partが指定されている場合）
+        let filteredPresets = presetPrompts;
+        if (finalPart) {
+          filteredPresets = presetPrompts.filter(p => p.part === finalPart);
+        }
+
+        if (filteredPresets.length > 0) {
+          // ランダムに1つ選択
+          const randomPrompt = filteredPresets[Math.floor(Math.random() * filteredPresets.length)];
+          
+          // セッション用にコピー（session_idを設定）
+          const { data: sessionPrompt, error: copyError } = await supabase
+            .from('speaking_prompts')
+            .insert({
+              session_id,
+              mode: randomPrompt.mode,
+              part: randomPrompt.part,
+              topic: randomPrompt.topic,
+              level: randomPrompt.level,
+              jp_intent: randomPrompt.jp_intent,
+              expected_style: randomPrompt.expected_style,
+              target_points: randomPrompt.target_points,
+              model_answer: randomPrompt.model_answer,
+              paraphrases: randomPrompt.paraphrases,
+              cue_card: randomPrompt.cue_card,
+              followup_question: randomPrompt.followup_question,
+              time_limit: randomPrompt.time_limit,
+            })
+            .select()
+            .single();
+
+          if (!copyError && sessionPrompt) {
+            console.log('[Speaking Prompt Generate API] Using preset prompt');
+            return Response.json(successResponse(sessionPrompt));
+          }
+        }
+      }
+    }
+
+    // 2. プリセットがない、またはuse_preset=falseの場合はLLMで生成
+    console.log('[Speaking Prompt Generate API] Generating with LLM');
     const prompt = buildSpeakingPromptGeneratePrompt(
       topic,
-      part || null,
-      level || 'B2',
+      finalPart,
+      finalLevel,
       mode,
       target_points
     );
