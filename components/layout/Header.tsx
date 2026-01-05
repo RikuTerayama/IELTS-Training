@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export function Header() {
   const [user, setUser] = useState<any>(null);
@@ -28,29 +29,29 @@ export function Header() {
   };
 
   return (
-    <header className="border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm">
+    <header className="border-b border-border bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/home" className="text-xl font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
+            <Link href="/home" className="text-xl font-bold text-primary hover:text-primary-hover transition-colors duration-200">
               IELTS Training
             </Link>
             {/* デスクトップナビゲーション */}
             <nav className="hidden md:flex gap-4">
-              <Link href="/home" className="text-slate-300 hover:text-indigo-400 transition-colors">
+              <Link href="/home" className="text-text-muted hover:text-text transition-colors duration-200">
                 Home
               </Link>
-              <Link href="/progress" className="text-slate-300 hover:text-indigo-400 transition-colors">
+              <Link href="/progress" className="text-text-muted hover:text-text transition-colors duration-200">
                 Progress
               </Link>
-              <Link href="/vocab" className="text-slate-300 hover:text-indigo-400 transition-colors">
+              <Link href="/vocab" className="text-text-muted hover:text-text transition-colors duration-200">
                 Vocab
               </Link>
               <Link 
                 href="https://ieltsconsult.netlify.app/" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-300 hover:text-indigo-400 transition-colors"
+                className="text-text-muted hover:text-text transition-colors duration-200"
               >
                 Blog
               </Link>
@@ -79,11 +80,13 @@ export function Header() {
               )}
             </div>
             {/* ハンバーガーメニューボタン（モバイル） */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 text-slate-300 hover:text-indigo-400 focus:outline-none transition-colors"
-              aria-label="メニューを開く"
-            >
+            <div className="md:hidden flex items-center gap-2">
+              <ThemeToggle />
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-2 text-text-muted hover:text-text focus:outline-none transition-colors duration-200"
+                aria-label="メニューを開く"
+              >
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -99,31 +102,32 @@ export function Header() {
                   <path d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
         {/* モバイルメニュー */}
         {menuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-slate-700/50 pt-4">
+          <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4">
             <div className="flex flex-col gap-3">
               <Link
                 href="/home"
                 onClick={() => setMenuOpen(false)}
-                className="text-slate-300 hover:text-indigo-400 py-2 transition-colors"
+                className="text-text-muted hover:text-text py-2 transition-colors duration-200"
               >
                 Home
               </Link>
               <Link
                 href="/progress"
                 onClick={() => setMenuOpen(false)}
-                className="text-slate-300 hover:text-indigo-400 py-2 transition-colors"
+                className="text-text-muted hover:text-text py-2 transition-colors duration-200"
               >
                 Progress
               </Link>
               <Link
                 href="/vocab"
                 onClick={() => setMenuOpen(false)}
-                className="text-slate-300 hover:text-indigo-400 py-2 transition-colors"
+                className="text-text-muted hover:text-text py-2 transition-colors duration-200"
               >
                 Vocab
               </Link>
@@ -132,28 +136,28 @@ export function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMenuOpen(false)}
-                className="text-slate-300 hover:text-indigo-400 py-2 transition-colors"
+                className="text-text-muted hover:text-text py-2 transition-colors duration-200"
               >
                 Blog
               </Link>
               {user ? (
                 <>
-                  <div className="pt-2 border-t border-slate-700/50 mt-2">
-                    <div className="text-sm text-slate-400 py-2">{user.email}</div>
+                  <div className="pt-2 border-t border-border mt-2">
+                    <div className="text-sm text-text-muted py-2">{user.email}</div>
                     <button
                       onClick={handleLogout}
-                      className="rounded bg-slate-700/50 px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 w-full text-left transition-colors"
+                      className="rounded bg-surface-2 border border-border px-3 py-2 text-sm text-text hover:bg-surface w-full text-left transition-all duration-200"
                     >
                       Logout
                     </button>
                   </div>
                 </>
               ) : (
-                <div className="pt-2 border-t border-slate-700/50 mt-2">
+                <div className="pt-2 border-t border-border mt-2">
                   <Link
                     href="/login"
                     onClick={() => setMenuOpen(false)}
-                    className="rounded bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-500 block text-center transition-colors"
+                    className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary-hover block text-center transition-colors duration-200"
                   >
                     Login
                   </Link>
