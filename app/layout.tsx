@@ -13,7 +13,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
+    <html lang="ja" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function() {
+  try {
+    var themeMode = localStorage.getItem('themeMode');
+    var resolvedTheme;
+    
+    if (themeMode === 'light' || themeMode === 'dark') {
+      resolvedTheme = themeMode;
+    } else {
+      // system または 未設定の場合
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      resolvedTheme = prefersDark ? 'dark' : 'light';
+    }
+    
+    document.documentElement.setAttribute('data-theme', resolvedTheme);
+  } catch (e) {
+    // エラー時はデフォルトでdark
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+            `,
+          }}
+        />
+      </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
       </body>

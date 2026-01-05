@@ -6,7 +6,7 @@ type ThemeMode = 'system' | 'light' | 'dark';
 type Theme = 'light' | 'dark';
 
 const ThemeContext = createContext<{
-  theme: Theme;
+  theme: Theme; // resolvedTheme（実際に適用されているテーマ）
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;

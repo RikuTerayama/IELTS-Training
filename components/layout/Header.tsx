@@ -58,6 +58,10 @@ export function Header() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            {/* デスクトップテーマトグル */}
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
             {/* デスクトップユーザー情報 */}
             <div className="hidden md:flex items-center gap-4">
               {user ? (
