@@ -3,7 +3,7 @@
 import { useTheme } from './ThemeProvider';
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, themeMode, toggleTheme } = useTheme();
 
   return (
     <button
@@ -39,7 +39,9 @@ export function ThemeToggle() {
           </>
         )}
       </svg>
+      {themeMode === 'system' && (
+        <span className="absolute -top-1 -right-1 w-2 h-2 bg-text-muted rounded-full" title="システム設定に従う" />
+      )}
     </button>
   );
 }
-
