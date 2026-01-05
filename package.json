@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
-    "lint": "next lint"
+    "lint": "npm run lint:theme && next lint",
+    "lint:theme": "node scripts/lint-theme-colors.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
