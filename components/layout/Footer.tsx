@@ -20,9 +20,9 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
+    <footer className="border-t border-border bg-surface/50 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between text-sm text-slate-400">
+        <div className="flex items-center justify-between text-sm text-text-muted">
           <div>
             {summary && (
               <>
