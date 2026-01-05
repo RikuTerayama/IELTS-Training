@@ -42,13 +42,13 @@ export function Task1Image({
 
   if (!imagePath || imageError) {
     return (
-      <div className={`rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center ${className}`} style={{ minHeight: '300px' }}>
+      <div className={`rounded-lg border border-border bg-surface-2 flex items-center justify-center ${className}`} style={{ minHeight: '300px' }}>
         <div className="text-center p-4">
-          <p className="text-gray-500">
+          <p className="text-text-muted">
             {imagePath ? '画像を読み込めませんでした' : '画像が見つかりません'}
           </p>
           {process.env.NODE_ENV === 'development' && imagePath && (
-            <p className="text-xs text-gray-400 mt-2">パス: {imagePath}</p>
+            <p className="text-xs text-text-subtle mt-2">パス: {imagePath}</p>
           )}
         </div>
       </div>
@@ -56,7 +56,7 @@ export function Task1Image({
   }
 
   return (
-    <div className={`rounded-lg border border-gray-200 bg-white overflow-hidden ${className}`}>
+    <div className={`rounded-lg border border-border bg-surface overflow-hidden ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imagePath}
