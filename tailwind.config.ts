@@ -45,6 +45,29 @@ const config: Config = {
           hover: 'rgb(var(--danger-hover) / <alpha-value>)',
           foreground: 'rgb(var(--danger-foreground) / <alpha-value>)',
         },
+        success: {
+          DEFAULT: 'rgb(var(--success) / <alpha-value>)',
+          hover: 'rgb(var(--success-hover) / <alpha-value>)',
+          foreground: 'rgb(var(--success-foreground) / <alpha-value>)',
+          bg: 'rgb(var(--success-bg) / <alpha-value>)',
+          border: 'rgb(var(--success-border) / <alpha-value>)',
+        },
+        warning: {
+          DEFAULT: 'rgb(var(--warning) / <alpha-value>)',
+          hover: 'rgb(var(--warning-hover) / <alpha-value>)',
+          foreground: 'rgb(var(--warning-foreground) / <alpha-value>)',
+          bg: 'rgb(var(--warning-bg) / <alpha-value>)',
+          border: 'rgb(var(--warning-border) / <alpha-value>)',
+        },
+        link: {
+          DEFAULT: 'rgb(var(--link) / <alpha-value>)',
+          hover: 'rgb(var(--link-hover) / <alpha-value>)',
+        },
+        placeholder: 'rgb(var(--placeholder) / <alpha-value>)',
+        overlay: {
+          DEFAULT: 'rgb(var(--overlay) / <alpha-value>)',
+          opacity: 'var(--overlay-opacity)',
+        },
       },
       boxShadow: {
         'theme': 'var(--shadow)',
