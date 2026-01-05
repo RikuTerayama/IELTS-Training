@@ -152,7 +152,7 @@ export default function SpeakingTask2DrillPage() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="text-center py-8">読み込み中...</div>
+          <div className="text-center py-8 text-text-muted">読み込み中...</div>
         </div>
       </Layout>
     );
@@ -161,16 +161,16 @@ export default function SpeakingTask2DrillPage() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6">瞬間英作文 - Task 2</h1>
+        <h1 className="text-2xl font-bold mb-6 text-text">瞬間英作文 - Task 2</h1>
 
         <div className="mb-6">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
+          <div className="flex justify-between text-sm text-text-muted mb-2">
             <span>問題 {currentIndex + 1} / {phrases.length}</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-surface-2 rounded-full h-2">
             <div
-              className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+              className="bg-accent-violet h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -184,10 +184,10 @@ export default function SpeakingTask2DrillPage() {
               setIsCorrect(null);
               setShowAnswer(false);
             }}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring ${
               inputMode === 'voice'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-accent-violet text-accent-violet-foreground'
+                : 'bg-surface-2 text-text hover:bg-surface'
             }`}
           >
             音声入力
@@ -199,10 +199,10 @@ export default function SpeakingTask2DrillPage() {
               setIsCorrect(null);
               setShowAnswer(false);
             }}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring ${
               inputMode === 'text'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-accent-violet text-accent-violet-foreground'
+                : 'bg-surface-2 text-text hover:bg-surface'
             }`}
           >
             テキスト入力
@@ -211,27 +211,27 @@ export default function SpeakingTask2DrillPage() {
 
         {currentPhrase && (
           <div className="space-y-6">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold mb-4 text-gray-600">日本語:</h2>
-              <p className="text-xl text-gray-800">{currentPhrase.japanese}</p>
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
+              <h2 className="text-lg font-semibold mb-4 text-text-muted">日本語:</h2>
+              <p className="text-xl text-text">{currentPhrase.japanese}</p>
             </div>
 
             {!showAnswer && (
-              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">あなたの回答:</h2>
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
+                <h2 className="text-lg font-semibold mb-4 text-text">あなたの回答:</h2>
 
                 {inputMode === 'voice' ? (
                   <div className="space-y-4">
                     {userResponse && (
-                      <div className="p-4 bg-gray-50 rounded border">
-                        <p className="text-lg">{userResponse}</p>
+                      <div className="p-4 bg-surface-2 rounded border border-border">
+                        <p className="text-lg text-text">{userResponse}</p>
                       </div>
                     )}
                     <div className="flex justify-center">
                       {!isRecording ? (
                         <button
                           onClick={startRecording}
-                          className="px-8 py-4 bg-purple-600 text-white rounded-full hover:bg-purple-700 flex items-center gap-2"
+                          className="px-8 py-4 bg-accent-violet text-accent-violet-foreground rounded-full hover:bg-accent-violet-hover flex items-center gap-2 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                         >
                           <svg
                             className="w-6 h-6"
@@ -249,7 +249,7 @@ export default function SpeakingTask2DrillPage() {
                       ) : (
                         <button
                           onClick={stopRecording}
-                          className="px-8 py-4 bg-red-600 text-white rounded-full hover:bg-red-700 flex items-center gap-2 animate-pulse"
+                          className="px-8 py-4 bg-danger text-danger-foreground rounded-full hover:bg-danger-hover flex items-center gap-2 animate-pulse transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                         >
                           <svg
                             className="w-6 h-6"
@@ -266,7 +266,7 @@ export default function SpeakingTask2DrillPage() {
                         </button>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 text-center">
+                    <p className="text-sm text-text-muted text-center">
                       音声入力完了後、自動的に評価されます
                     </p>
                   </div>
@@ -276,17 +276,17 @@ export default function SpeakingTask2DrillPage() {
                       value={userResponse}
                       onChange={(e) => setUserResponse(e.target.value)}
                       placeholder="英語で入力してください（テキスト入力の場合は評価されません）"
-                      className="w-full p-4 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                      className="w-full p-4 border border-border bg-surface-2 rounded-md text-text placeholder:text-placeholder focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                       rows={4}
                     />
                     <button
                       onClick={handleTextSubmit}
                       disabled={!userResponse.trim()}
-                      className="w-full px-6 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400"
+                      className="w-full px-6 py-3 bg-accent-violet text-accent-violet-foreground rounded-md hover:bg-accent-violet-hover disabled:bg-text-muted/50 disabled:cursor-not-allowed disabled:text-text-subtle transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                     >
                       解答を確認
                     </button>
-                    <p className="text-sm text-gray-500 text-center">
+                    <p className="text-sm text-text-muted text-center">
                       テキスト入力完了後、評価されます
                     </p>
                   </div>
@@ -295,15 +295,15 @@ export default function SpeakingTask2DrillPage() {
             )}
 
             {showAnswer && (
-              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">結果:</h2>
+              <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
+                <h2 className="text-lg font-semibold mb-4 text-text">結果:</h2>
 
                 {isCorrect !== null && (
                   <div className={`mb-4 p-4 rounded ${
-                    isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                    isCorrect ? 'bg-success-bg border border-success-border' : 'bg-danger/10 border border-danger/20'
                   }`}>
                     <p className={`text-lg font-semibold ${
-                      isCorrect ? 'text-green-800' : 'text-red-800'
+                      isCorrect ? 'text-success' : 'text-danger'
                     }`}>
                       {isCorrect ? '✓ 正解です！' : '✗ もう一度練習しましょう'}
                     </p>
@@ -312,22 +312,22 @@ export default function SpeakingTask2DrillPage() {
 
                 {userResponse && (
                   <div className="mb-4">
-                    <h3 className="font-semibold mb-2">あなたの回答:</h3>
-                    <p className="text-gray-700">{userResponse}</p>
+                    <h3 className="font-semibold mb-2 text-text">あなたの回答:</h3>
+                    <p className="text-text-muted">{userResponse}</p>
                   </div>
                 )}
 
                 <div className="mb-4">
-                  <h3 className="font-semibold mb-2">模範解答:</h3>
-                  <p className="text-gray-700 text-lg">{currentPhrase.english}</p>
+                  <h3 className="font-semibold mb-2 text-text">模範解答:</h3>
+                  <p className="text-text text-lg">{currentPhrase.english}</p>
                 </div>
 
                 {currentPhrase.english_variations && currentPhrase.english_variations.length > 0 && (
                   <div className="mb-4">
-                    <h3 className="font-semibold mb-2">別の言い回し:</h3>
+                    <h3 className="font-semibold mb-2 text-text">別の言い回し:</h3>
                     <ul className="list-disc list-inside space-y-1">
                       {currentPhrase.english_variations.map((variation, i) => (
-                        <li key={i} className="text-gray-700">{variation}</li>
+                        <li key={i} className="text-text-muted">{variation}</li>
                       ))}
                     </ul>
                   </div>
@@ -337,7 +337,7 @@ export default function SpeakingTask2DrillPage() {
                   <div className="mt-6 flex justify-center">
                     <button
                       onClick={handleNext}
-                      className="px-8 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                      className="px-8 py-3 bg-accent-violet text-accent-violet-foreground rounded-md hover:bg-accent-violet-hover transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                     >
                       {currentIndex < phrases.length - 1 ? '次の問題' : '完了'}
                     </button>
@@ -345,14 +345,14 @@ export default function SpeakingTask2DrillPage() {
                 )}
                 {inputMode === 'voice' && currentIndex < phrases.length - 1 && (
                   <div className="mt-6 flex justify-center">
-                    <p className="text-sm text-gray-500">3秒後に次の問題に自動で進みます...</p>
+                    <p className="text-sm text-text-muted">3秒後に次の問題に自動で進みます...</p>
                   </div>
                 )}
                 {inputMode === 'voice' && currentIndex >= phrases.length - 1 && (
                   <div className="mt-6 flex justify-center">
                     <button
                       onClick={() => router.push('/home')}
-                      className="px-8 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                      className="px-8 py-3 bg-accent-violet text-accent-violet-foreground rounded-md hover:bg-accent-violet-hover transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                     >
                       完了
                     </button>
