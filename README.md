@@ -40,14 +40,36 @@ IELTS Writing/Speaking向け学習アプリのMVP実装
 - [x] `Header` - ヘッダー（メニュー、ログイン状態）
 - [x] `Footer` - フッター（今日の進捗）
 
-### 🚧 未実装（縦スライス2〜5）
+### ✅ 完了（縦スライス2: Fill-in）
 
-- [ ] `/fillin/[attemptId]` - 穴埋め問題画面
-- [ ] `/rewrite/[attemptId]` - 書き直し画面
+#### API（縦スライス2）
+- [x] `GET /api/tasks/:taskId/fill-in-questions` - 穴埋め問題生成
+- [x] `POST /api/tasks/:taskId/fill-in` - 穴埋め回答送信
+
+#### 画面（縦スライス2）
+- [x] `/fillin/[attemptId]` - 穴埋め問題画面
+
+#### 機能
+- [x] 穴埋め問題生成（簡易ルールベース）
+- [x] フィードバック生成時に穴埋め結果を反映
+
+### ✅ 完了（縦スライス3: Rewrite）
+
+#### API（縦スライス3）
+- [x] `POST /api/tasks/:taskId/rewrite` - 書き直し回答送信・再評価
+
+#### 画面（縦スライス3）
+- [x] `/rewrite/[attemptId]` - 書き直し画面
+
+#### 機能
+- [x] 2カラム表示（原文/編集エリア）
+- [x] 最大2箇所の書き直し対象編集
+- [x] LLMによる再評価
+
+### 🚧 未実装（縦スライス4〜5）
+
 - [ ] `/speak/[attemptId]` - Speaking練習画面（テキストのみ）
 - [ ] `/vocab` - 単語学習画面
-- [ ] 穴埋め問題生成API
-- [ ] 書き直し再評価API
 - [ ] Speakingプロンプト生成API
 - [ ] 単語学習API
 
@@ -115,11 +137,6 @@ http://localhost:3000 でアクセス
 3. タスク画面で回答入力・送信
 4. フィードバック生成・表示
 5. 進捗画面で履歴確認
-
-### 縦スライス2実装（Fill-in）
-- `/fillin/[attemptId]` 画面作成
-- 穴埋め問題生成API
-- フィードバック反映ロジック
 
 ### 縦スライス3実装（Rewrite）
 - `/rewrite/[attemptId]` 画面作成
