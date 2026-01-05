@@ -216,14 +216,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-bg">
+      <div className="w-full max-w-md rounded-lg bg-surface border border-border p-8 shadow-theme-lg">
+        <h1 className="mb-6 text-center text-2xl font-bold text-text">
           IELTS Training
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-text">
               メール
             </label>
             <input
@@ -233,11 +233,12 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+              placeholder="example@email.com"
+              className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-text">
               パスワード
             </label>
             <input
@@ -247,23 +248,24 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete={isSignUp ? "new-password" : "current-password"}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+              placeholder="••••••••"
+              className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
             />
           </div>
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+            <div className="rounded-md bg-danger/10 border border-danger/20 p-3 text-sm text-danger">
               {error}
             </div>
           )}
           {signUpSuccess && (
-            <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
+            <div className="rounded-md bg-success-bg/50 border border-success-border/50 p-3 text-sm text-success">
               <p className="mb-2">サインアップが完了しました！</p>
               <p className="mb-2">確認メールを送信しました。メールボックス（スパムフォルダも含む）を確認してください。</p>
               <button
                 type="button"
                 onClick={handleResendConfirmation}
                 disabled={resendingEmail}
-                className="text-blue-600 hover:text-blue-700 underline"
+                className="text-link hover:text-link-hover underline transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {resendingEmail ? '送信中...' : '確認メールを再送信'}
               </button>
@@ -272,14 +274,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading || signUpSuccess}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+            className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary-hover disabled:bg-text-muted disabled:cursor-not-allowed transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
             {loading ? '処理中...' : isSignUp ? 'Sign Up' : 'Login'}
           </button>
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
-            className="w-full text-sm text-blue-600 hover:text-blue-700"
+            className="w-full text-sm text-link hover:text-link-hover transition-colors duration-200"
           >
             {isSignUp ? '既にアカウントをお持ちですか？' : '新規登録'}
           </button>
