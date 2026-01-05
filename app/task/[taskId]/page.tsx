@@ -228,8 +228,8 @@ export default function TaskPage() {
           {/* PREPガイド（初級/中級のみ） */}
           {task.prep_guide && (level === 'beginner' || level === 'intermediate') && (
             <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
-              <h2 className="mb-4 text-lg font-semibold">PREPガイド</h2>
-              <div className="space-y-2 text-sm">
+              <h2 className="mb-4 text-lg font-semibold text-text">PREPガイド</h2>
+              <div className="space-y-2 text-sm text-text">
                 <p>
                   <strong>P (Point):</strong> {task.prep_guide.point}
                 </p>
@@ -248,17 +248,17 @@ export default function TaskPage() {
 
           {/* PREPヒアリングモードへの切り替えボタン（初級/中級のみ） */}
           {(level === 'beginner' || level === 'intermediate') && (
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 mb-6">
+            <div className="rounded-lg border border-primary/20 bg-primary/10 p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-blue-900 mb-1">PREPヒアリングモード</h3>
-                  <p className="text-sm text-blue-700">
+                  <h3 className="font-semibold text-text mb-1">PREPヒアリングモード</h3>
+                  <p className="text-sm text-text-muted">
                     キャラクターが質問しながら、段階的にエッセイを作成できます
                   </p>
                 </div>
                 <button
                   onClick={() => router.push(`/task/${taskId}/prep`)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                 >
                   PREPモードで開始
                 </button>
@@ -267,12 +267,12 @@ export default function TaskPage() {
           )}
 
           {/* 入力エリア */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">回答</h2>
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
+            <h2 className="mb-4 text-lg font-semibold text-text">回答</h2>
             {level === 'beginner' ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-text">
                     日本語で回答
                   </label>
                   <textarea
@@ -281,12 +281,12 @@ export default function TaskPage() {
                       setDraftContent({ ...draftContent, japanese: e.target.value })
                     }
                     rows={5}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-theme transition-all duration-200"
                     placeholder="日本語で回答を書いてください"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-text">
                     英語で回答（自由記述）
                   </label>
                   <textarea
@@ -295,7 +295,7 @@ export default function TaskPage() {
                       setDraftContent({ ...draftContent, final: e.target.value })
                     }
                     rows={10}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm"
+                    className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-theme transition-all duration-200"
                     placeholder="英語で回答を書いてください"
                   />
                 </div>
@@ -305,7 +305,7 @@ export default function TaskPage() {
                 value={draftContent.final || ''}
                 onChange={(e) => setDraftContent({ ...draftContent, final: e.target.value })}
                 rows={15}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm"
+                className="block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-theme transition-all duration-200"
                 placeholder="英語でPREP形式で回答を書いてください"
               />
             ) : (
@@ -313,7 +313,7 @@ export default function TaskPage() {
                 value={draftContent.final || ''}
                 onChange={(e) => setDraftContent({ ...draftContent, final: e.target.value })}
                 rows={15}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm"
+                className="block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-theme transition-all duration-200"
                 placeholder="英語で自由に回答を書いてください"
               />
             )}
@@ -324,7 +324,7 @@ export default function TaskPage() {
             <button
               onClick={handleSubmit}
               disabled={submitting || !draftContent.final}
-              className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+              className="rounded-md bg-primary px-6 py-2 text-primary-foreground hover:bg-primary-hover disabled:bg-text-muted/50 disabled:cursor-not-allowed disabled:text-text-subtle transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
             >
               {submitting ? '送信中...' : 'Submit'}
             </button>
