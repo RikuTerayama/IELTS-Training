@@ -173,7 +173,7 @@ export default function TaskPage() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">読み込み中...</div>
+          <div className="text-center text-text-muted">読み込み中...</div>
         </div>
       </Layout>
     );
@@ -183,7 +183,7 @@ export default function TaskPage() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">タスクが見つかりません</div>
+          <div className="text-center text-text-muted">タスクが見つかりません</div>
         </div>
       </Layout>
     );
@@ -194,8 +194,8 @@ export default function TaskPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           {/* お題 */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">お題</h2>
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
+            <h2 className="mb-4 text-lg font-semibold text-text">お題</h2>
             
             {/* Task1の場合は画像を表示 */}
             {task.question_type === 'Task 1' && (
@@ -209,15 +209,15 @@ export default function TaskPage() {
               </div>
             )}
             
-            <p className="text-gray-700">{task.question}</p>
+            <p className="text-text-muted">{task.question}</p>
             <div className="mt-4 space-y-2">
-              <p>
+              <p className="text-text">
                 目標: Band <span className="font-medium">6.0-6.5</span>
               </p>
-              <p>
+              <p className="text-text">
                 必須語彙:{' '}
                 {task.required_vocab.map((v) => (
-                  <span key={v.word} className="mr-2 rounded bg-blue-100 px-2 py-1 text-sm">
+                  <span key={v.word} className="mr-2 rounded bg-primary/10 border border-primary/20 px-2 py-1 text-sm text-primary">
                     {v.word}
                   </span>
                 ))}
@@ -227,7 +227,7 @@ export default function TaskPage() {
 
           {/* PREPガイド（初級/中級のみ） */}
           {task.prep_guide && (level === 'beginner' || level === 'intermediate') && (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
               <h2 className="mb-4 text-lg font-semibold">PREPガイド</h2>
               <div className="space-y-2 text-sm">
                 <p>
