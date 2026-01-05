@@ -9,14 +9,14 @@ export default function SpeakingTask3Page() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6">Speaking Task 3 - 抽象的議論・意見</h1>
-        <p className="text-gray-600 mb-8">
+        <h1 className="text-2xl font-bold mb-6 text-text">Speaking Task 3 - 抽象的議論・意見</h1>
+        <p className="text-text-muted mb-8">
           IELTS Speaking Part 3の形式で、抽象的・理論的な質問に対する意見を述べる瞬間英作文を練習します
         </p>
         <div className="flex justify-center">
           <button
             onClick={() => router.push('/training/speaking/task3/drill')}
-            className="px-8 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-semibold"
+            className="px-8 py-3 bg-accent-violet text-accent-violet-foreground rounded-md hover:bg-accent-violet-hover transition-colors font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
             瞬間英作文を開始
           </button>
