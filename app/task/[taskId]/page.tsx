@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { Task1Flow } from '@/components/task1/Task1Flow';
+import { cn, cardBase, cardTitle, cardDesc } from '@/lib/ui/theme';
 import type { Task, DraftContent, Attempt } from '@/lib/domain/types';
 
 function TaskPageContent() {
@@ -227,19 +228,19 @@ function TaskPageContent() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className={cn('mb-6 p-6', cardBase)}>
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="mb-2 text-lg font-semibold">お題</h2>
-                <p className="text-sm text-gray-600">{task.question}</p>
+                <h2 className={cn('mb-2 text-lg font-semibold', cardTitle)}>お題</h2>
+                <p className={cn('text-sm', cardDesc)}>{task.question}</p>
                 <div className="mt-2">
-                  <p className="text-sm text-gray-600">
-                    目標: Band <span className="font-medium">6.0-6.5</span>
+                  <p className={cn('text-sm', cardDesc)}>
+                    目標: Band <span className={cn('font-medium', 'text-text')}>6.0-6.5</span>
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className={cn('text-sm', cardDesc)}>
                     必須語彙:{' '}
                     {task.required_vocab.map((v) => (
-                      <span key={v.word} className="mr-2 rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                      <span key={v.word} className={cn('mr-2 rounded border border-primary/20 bg-accent-indigo/10 px-2 py-1 text-xs', 'text-text')}>
                         {v.word}
                       </span>
                     ))}
@@ -249,11 +250,11 @@ function TaskPageContent() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setMode(mode === 'training' ? 'exam' : 'training')}
-                  className={`rounded px-3 py-1 text-sm ${
+                  className={cn('rounded px-3 py-1 text-sm', 
                     mode === 'training'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700'
-                  }`}
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-surface-2 text-text'
+                  )}
                 >
                   {mode === 'training' ? 'Training' : 'Exam'}
                 </button>

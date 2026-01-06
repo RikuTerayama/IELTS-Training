@@ -58,13 +58,12 @@ export function Task1Image({
 
   return (
     <div className={cn('mx-auto w-full max-w-3xl', className)}>
-      <div className={cn('relative w-full overflow-hidden rounded-xl border border-border bg-surface', 'max-h-[320px] md:max-h-[400px]')}>
+      <div className={cn('relative w-full rounded-xl border border-border bg-surface p-4')}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imagePath}
           alt={alt}
-          className="w-full h-auto object-contain"
-          style={{ maxHeight: '100%' }}
+          className="mx-auto w-full h-auto max-h-[320px] md:max-h-[400px] object-contain"
           onError={() => setImageError(true)}
         />
       </div>

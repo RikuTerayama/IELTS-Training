@@ -6,6 +6,7 @@
 'use client';
 
 import { useState } from 'react';
+import { cn } from '@/lib/ui/theme';
 import type { Task1Observation } from '@/lib/domain/types';
 
 interface Task1ObservationOverlayProps {
@@ -112,7 +113,7 @@ export function Task1ObservationOverlay({
               value={obs.text}
               onChange={(e) => handleTextChange(obs.id, e.target.value)}
               onClick={(e) => e.stopPropagation()}
-              className="w-32 resize-none rounded border border-yellow-300 bg-white p-1 text-xs"
+              className={cn('w-32 resize-none rounded border border-yellow-300 bg-surface p-1 text-xs', 'text-text placeholder:text-placeholder')}
               placeholder="メモ..."
               rows={2}
             />

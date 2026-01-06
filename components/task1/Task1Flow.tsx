@@ -224,21 +224,20 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
                 <div key={step.index} className="flex items-center">
                   <button
                     onClick={() => setCurrentStep(step.index)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
+                    className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors',
                       currentStep === step.index
-                        ? 'border-blue-600 bg-blue-600 text-white'
+                        ? 'border-primary bg-primary text-primary-foreground'
                         : stepContent[step.index]
-                        ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-gray-300 bg-white text-gray-500'
-                    }`}
+                        ? 'border-success bg-success-bg text-success'
+                        : 'border-border bg-surface-2 text-text-subtle'
+                    )}
                   >
                     {step.index}
                   </button>
                   {index < STEPS.length - 1 && (
                     <div
-                      className={`h-1 w-12 ${
-                        stepContent[step.index] ? 'bg-green-500' : 'bg-gray-300'
-                      }`}
+                      className={cn('h-1 w-12', stepContent[step.index] ? 'bg-success' : 'bg-border')}
                     />
                   )}
                 </div>
