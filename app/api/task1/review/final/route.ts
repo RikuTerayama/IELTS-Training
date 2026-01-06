@@ -108,10 +108,11 @@ export async function POST(request: Request): Promise<Response> {
       });
 
       // metadataを補完
+      const parsedObj = parsed as Record<string, unknown>;
       const feedbackWithMetadata = {
-        ...parsed,
+        ...parsedObj,
         metadata: {
-          ...(parsed as any).metadata,
+          ...(parsedObj.metadata as Record<string, unknown> || {}),
           task_id: task.id,
           attempt_id: attempt.id,
           user_level: attempt.level,
