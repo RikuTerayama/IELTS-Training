@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
+import { cn, cardBase, cardTitle, cardDesc, selectableSelected, selectableUnselected, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 import type { VocabQuestion } from '@/lib/domain/types';
 
 type Skill = 'reading' | 'listening' | 'writing' | 'speaking';
@@ -166,25 +167,21 @@ function VocabPageContent() {
       <Layout>
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-6">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold">単語練習</h2>
-              <p className="mb-6 text-gray-600">
+            <div className={cn('p-6', cardBase)}>
+              <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>単語練習</h2>
+              <p className={cn('mb-6', cardDesc)}>
                 4技能別・難易度別のIELTS重要単語をテストできます
               </p>
 
               {/* 技能選択 */}
               <div className="mb-6">
-                <h3 className="mb-3 font-medium text-gray-900">技能を選択</h3>
+                <h3 className={cn('mb-3 font-medium', cardTitle)}>技能を選択</h3>
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   {(['reading', 'listening', 'writing', 'speaking'] as Skill[]).map((skill) => (
                     <button
                       key={skill}
                       onClick={() => setSelectedSkill(skill)}
-                      className={`rounded-md border p-4 text-center transition-colors ${
-                        selectedSkill === skill
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
+                      className={cn('p-4 text-center', selectedSkill === skill ? selectableSelected : selectableUnselected)}
                     >
                       <div className="text-2xl mb-2">
                         {skill === 'reading' && '📖'}
@@ -192,7 +189,7 @@ function VocabPageContent() {
                         {skill === 'writing' && '✍️'}
                         {skill === 'speaking' && '🎤'}
                       </div>
-                      <div className="font-medium capitalize">{skill}</div>
+                      <div className={cn('font-medium capitalize', 'text-text')}>{skill}</div>
                     </button>
                   ))}
                 </div>
@@ -201,24 +198,20 @@ function VocabPageContent() {
               {/* 難易度選択 */}
               {selectedSkill && (
                 <div className="mb-6">
-                  <h3 className="mb-3 font-medium text-gray-900">難易度を選択</h3>
+                  <h3 className={cn('mb-3 font-medium', cardTitle)}>難易度を選択</h3>
                   <div className="grid grid-cols-3 gap-3">
                     {(['beginner', 'intermediate', 'advanced'] as Level[]).map((level) => (
                       <button
                         key={level}
                         onClick={() => setSelectedLevel(level)}
-                        className={`rounded-md border p-4 text-center transition-colors ${
-                          selectedLevel === level
-                            ? 'border-green-500 bg-green-50 text-green-700'
-                            : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className={cn('p-4 text-center', selectedLevel === level ? selectableSelected : selectableUnselected)}
                       >
-                        <div className="font-medium capitalize">
+                        <div className={cn('font-medium capitalize', 'text-text')}>
                           {level === 'beginner' && '初級'}
                           {level === 'intermediate' && '中級'}
                           {level === 'advanced' && '上級'}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">100単語</div>
+                        <div className={cn('text-xs mt-1', cardDesc)}>100単語</div>
                       </button>
                     ))}
                   </div>
@@ -231,7 +224,7 @@ function VocabPageContent() {
                   <button
                     onClick={handleStartTest}
                     disabled={loading}
-                    className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className={cn('px-6 py-2', buttonPrimary)}
                     type="button"
                   >
                     {loading ? '読み込み中...' : 'テストを開始'}
@@ -251,28 +244,28 @@ function VocabPageContent() {
       <Layout>
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-6">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold">テスト結果</h2>
+            <div className={cn('p-6', cardBase)}>
+              <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>テスト結果</h2>
               <div className="mb-6">
-                <div className="text-3xl font-bold text-blue-600 mb-2">
+                <div className={cn('text-3xl font-bold mb-2', 'text-primary')}>
                   {results.score} / {results.total}
                 </div>
-                <div className="text-gray-600">
+                <div className={cardDesc}>
                   正答率: {Math.round((results.score / results.total) * 100)}%
                 </div>
               </div>
 
               {results.incorrectQuestions.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="mb-3 font-medium text-gray-900">間違えた単語</h3>
+                  <h3 className={cn('mb-3 font-medium', cardTitle)}>間違えた単語</h3>
                   <div className="space-y-2">
                     {results.incorrectQuestions.map((q) => (
                       <div
                         key={q.id}
-                        className="rounded-md border border-red-200 bg-red-50 p-3"
+                        className={cn('rounded-md border border-danger bg-danger/10 p-3')}
                       >
-                        <div className="font-medium text-gray-900">{q.question}</div>
-                        <div className="text-sm text-gray-600 mt-1">
+                        <div className={cn('font-medium', 'text-text')}>{q.question}</div>
+                        <div className={cn('text-sm mt-1', cardDesc)}>
                           正解: {q.options.find(o => o.id === q.correct_answer)?.text}
                         </div>
                       </div>
@@ -284,13 +277,13 @@ function VocabPageContent() {
               <div className="flex gap-4">
                 <button
                   onClick={handleRestart}
-                  className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  className={cn('px-4 py-2', buttonPrimary)}
                 >
                   新しいテストを開始
                 </button>
                 <button
                   onClick={() => router.push('/home')}
-                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  className={cn('px-4 py-2', buttonSecondary)}
                 >
                   ホームに戻る
                 </button>
@@ -323,16 +316,16 @@ function VocabPageContent() {
       <Layout>
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-6">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold">単語練習</h2>
-              <p className="mb-6 text-gray-600">
+            <div className={cn('p-6', cardBase)}>
+              <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>単語練習</h2>
+              <p className={cn('mb-6', cardDesc)}>
                 選択: {selectedSkill} ({selectedLevel})
               </p>
               <div className="flex justify-end">
                 <button
                   onClick={handleStartTest}
                   disabled={loading}
-                  className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className={cn('px-6 py-2', buttonPrimary)}
                   type="button"
                 >
                   {loading ? '読み込み中...' : 'テストを開始'}
@@ -360,34 +353,34 @@ function VocabPageContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           {/* ヘッダー */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className={cn('p-6', cardBase)}>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">
+              <h2 className={cn('text-lg font-semibold', cardTitle)}>
                 単語練習 - {selectedSkill} ({selectedLevel})
               </h2>
-              <div className="text-sm text-gray-600">
+              <div className={cn('text-sm', cardDesc)}>
                 問題 {currentQuestionIndex + 1} / {questions.length}
               </div>
             </div>
-            <div className="h-2 w-full rounded-full bg-gray-200">
+            <div className={cn('h-2 w-full rounded-full', 'bg-surface-2')}>
               <div
-                className="h-2 rounded-full bg-blue-600 transition-all"
+                className={cn('h-2 rounded-full transition-all', 'bg-primary')}
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
 
           {/* 問題表示 */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className={cn('p-6', cardBase)}>
             <div className="mb-4">
-              <span className="rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800">
+              <span className={cn('rounded border border-primary/20 bg-accent-indigo/10 px-2 py-1 text-xs font-semibold', 'text-text')}>
                 {currentQuestion.question_type === 'en_to_ja' && '英→日'}
                 {currentQuestion.question_type === 'ja_to_en' && '日→英'}
                 {currentQuestion.question_type === 'context' && '文脈'}
                 {currentQuestion.question_type === 'collocation' && 'コロケーション'}
               </span>
             </div>
-            <div className="mb-6 text-lg text-gray-700">{currentQuestion.question}</div>
+            <div className={cn('mb-6 text-lg', 'text-text')}>{currentQuestion.question}</div>
 
             {/* 選択肢 */}
             <div className="space-y-3">
@@ -396,11 +389,12 @@ function VocabPageContent() {
                 .map((option) => (
                 <label
                   key={option.id}
-                  className={`flex cursor-pointer items-center gap-3 rounded border p-4 transition-colors ${
+                  className={cn(
+                    'flex cursor-pointer items-center gap-3 rounded border p-4 transition-colors',
                     answers[currentQuestion.id] === option.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:bg-gray-50'
-                  }`}
+                      ? 'border-primary bg-accent-indigo/10'
+                      : 'border-border hover:bg-surface-2'
+                  )}
                 >
                   <input
                     type="radio"
@@ -408,10 +402,10 @@ function VocabPageContent() {
                     value={option.id}
                     checked={answers[currentQuestion.id] === option.id}
                     onChange={() => handleAnswerChange(currentQuestion.id, option.id)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 text-primary focus:ring-primary"
                   />
-                  <span className="font-medium text-gray-700">{option.id})</span>
-                  <span className="text-gray-700">{option.text}</span>
+                  <span className={cn('font-medium', 'text-text')}>{option.id})</span>
+                  <span className="text-text">{option.text}</span>
                 </label>
               ))}
             </div>
@@ -422,14 +416,14 @@ function VocabPageContent() {
             <button
               onClick={handlePrevious}
               disabled={currentQuestionIndex === 0}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+              className={cn('px-4 py-2', buttonSecondary)}
             >
               前へ
             </button>
             {currentQuestionIndex < questions.length - 1 ? (
               <button
                 onClick={handleNext}
-                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                className={cn('px-4 py-2', buttonPrimary)}
               >
                 次へ
               </button>
@@ -437,7 +431,7 @@ function VocabPageContent() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:bg-gray-400"
+                className={cn('px-4 py-2', buttonPrimary, 'bg-success hover:bg-success-hover')}
               >
                 {submitting ? '送信中...' : '回答を送信'}
               </button>

@@ -129,6 +129,7 @@
 
   body {
     @apply bg-[rgb(var(--bg))] text-[rgb(var(--text))];
+    font-family: var(--font-inter), var(--font-noto-sans-jp), system-ui, -apple-system, sans-serif;
     transition: background-color 200ms ease, color 200ms ease;
   }
 

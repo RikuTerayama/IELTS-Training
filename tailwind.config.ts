@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'var(--font-noto-sans-jp)', 'system-ui', '-apple-system', 'sans-serif'],
+      },
       colors: {
         bg: 'rgb(var(--bg) / <alpha-value>)',
         'bg-secondary': 'rgb(var(--bg-secondary) / <alpha-value>)',

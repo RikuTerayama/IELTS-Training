@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Task1ObservationOverlay } from './Task1ObservationOverlay';
 import { KeyNumbersPanel } from './KeyNumbersPanel';
@@ -45,6 +45,10 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
   const [showStepReview, setShowStepReview] = useState(false);
   const [showFinalReview, setShowFinalReview] = useState(false);
 
+  // 復元フラグ: attempt.idが変わった時だけリセット
+  const hydratedRef = useRef<string | null>(null);
+  const lastAttemptIdRef = useRef<string | null>(null);
+
   const stepState = attempt?.step_state as Task1StepState | undefined;
   const observations = stepState?.observations || [];
   const keyNumbers = stepState?.key_numbers || [];
@@ -54,30 +58,47 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
     ? getTask1ImagePath(task.question, task.level)
     : null;
 
-  // 初期化: attemptからstepContentを復元
+  // 初期化: attemptからstepContentを復元（初回のみ、またはattempt.idが変わった時のみ）
   useEffect(() => {
-    if (stepState && attempt) {
-      const content: Record<number, string> = {};
-      if (stepState.step1) content[1] = stepState.step1;
-      if (stepState.step2) content[2] = stepState.step2;
-      if (stepState.step3) content[3] = stepState.step3;
-      if (stepState.step4) content[4] = stepState.step4;
-      if (stepState.step5) content[5] = stepState.step5;
-      if (stepState.step6) content[6] = stepState.step6;
-      setStepContent(content);
+    if (!stepState || !attempt) return;
 
-      // レビュー状態を復元
-      if (attempt.review_state) {
-        setReviewState(attempt.review_state as Task1ReviewState);
-        if ((attempt.review_state as Task1ReviewState).step_review?.status === 'completed') {
-          setShowStepReview(true);
-        }
-        if ((attempt.review_state as Task1ReviewState).final_review?.status === 'completed') {
-          setShowFinalReview(true);
-        }
+    // attempt.idが変わった場合は復元フラグをリセット
+    if (lastAttemptIdRef.current !== attempt.id) {
+      hydratedRef.current = null;
+      lastAttemptIdRef.current = attempt.id;
+    }
+
+    // 既に復元済みの場合はスキップ（保存でattemptが更新されても復元しない）
+    if (hydratedRef.current === attempt.id) {
+      return;
+    }
+
+    // 復元: 空のstepContentだけ埋める（既にローカルで編集済みのstepは上書きしない）
+    setStepContent((prev) => {
+      const content: Record<number, string> = { ...prev };
+      if (!content[1] && stepState.step1) content[1] = stepState.step1;
+      if (!content[2] && stepState.step2) content[2] = stepState.step2;
+      if (!content[3] && stepState.step3) content[3] = stepState.step3;
+      if (!content[4] && stepState.step4) content[4] = stepState.step4;
+      if (!content[5] && stepState.step5) content[5] = stepState.step5;
+      if (!content[6] && stepState.step6) content[6] = stepState.step6;
+      return content;
+    });
+
+    // 復元フラグを設定
+    hydratedRef.current = attempt.id;
+
+    // レビュー状態を復元（初回のみ）
+    if (attempt.review_state) {
+      setReviewState(attempt.review_state as Task1ReviewState);
+      if ((attempt.review_state as Task1ReviewState).step_review?.status === 'completed') {
+        setShowStepReview(true);
+      }
+      if ((attempt.review_state as Task1ReviewState).final_review?.status === 'completed') {
+        setShowFinalReview(true);
       }
     }
-  }, [attempt, stepState]);
+  }, [attempt?.id, stepState]); // attempt全体ではなくattempt.idのみを依存配列に
 
   // Step保存（デバウンス付き）
   const saveStepDebounced = useCallback(
