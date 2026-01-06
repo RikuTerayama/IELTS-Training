@@ -143,12 +143,20 @@ function TaskSelectContent() {
               }}
               className={`p-6 rounded-lg border-2 transition-all text-left ${
                 taskType === 'Task 1'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
-              <div className="font-semibold text-lg mb-2">Task 1</div>
-              <div className="text-sm text-gray-600">グラフ・図表・地図の説明</div>
+              <div className={`font-semibold text-lg mb-2 ${
+                taskType === 'Task 1'
+                  ? 'text-slate-900 dark:text-slate-100'
+                  : 'text-slate-900 dark:text-slate-100'
+              }`}>Task 1</div>
+              <div className={`text-sm ${
+                taskType === 'Task 1'
+                  ? 'text-slate-700 dark:text-slate-300'
+                  : 'text-slate-600 dark:text-slate-400'
+              }`}>グラフ・図表・地図の説明</div>
             </button>
             <button
               onClick={() => {
@@ -157,12 +165,20 @@ function TaskSelectContent() {
               }}
               className={`p-6 rounded-lg border-2 transition-all text-left ${
                 taskType === 'Task 2'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
-              <div className="font-semibold text-lg mb-2">Task 2</div>
-              <div className="text-sm text-gray-600">エッセイライティング</div>
+              <div className={`font-semibold text-lg mb-2 ${
+                taskType === 'Task 2'
+                  ? 'text-slate-900 dark:text-slate-100'
+                  : 'text-slate-900 dark:text-slate-100'
+              }`}>Task 2</div>
+              <div className={`text-sm ${
+                taskType === 'Task 2'
+                  ? 'text-slate-700 dark:text-slate-300'
+                  : 'text-slate-600 dark:text-slate-400'
+              }`}>エッセイライティング</div>
             </button>
           </div>
         </div>
@@ -178,8 +194,8 @@ function TaskSelectContent() {
                   onClick={() => setLevel(l.value)}
                   className={`px-6 py-2 rounded-md border-2 transition-all ${
                     level === l.value
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   {l.label}
@@ -200,24 +216,40 @@ function TaskSelectContent() {
                   onClick={() => setTask1Genre(genre.value)}
                   className={`p-4 rounded-lg border-2 transition-all text-left ${
                     task1Genre === genre.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
                   }`}
                 >
-                  <div className="font-semibold mb-1">{genre.label}</div>
-                  <div className="text-sm text-gray-600">{genre.description}</div>
+                  <div className={`font-semibold mb-1 ${
+                    task1Genre === genre.value
+                      ? 'text-slate-900 dark:text-slate-100'
+                      : 'text-slate-900 dark:text-slate-100'
+                  }`}>{genre.label}</div>
+                  <div className={`text-sm ${
+                    task1Genre === genre.value
+                      ? 'text-slate-700 dark:text-slate-300'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}>{genre.description}</div>
                 </button>
               ))}
               <button
                 onClick={() => setTask1Genre('random')}
                 className={`p-4 rounded-lg border-2 transition-all text-left ${
                   task1Genre === 'random'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
                 }`}
               >
-                <div className="font-semibold mb-1">🎲 ランダム</div>
-                <div className="text-sm text-gray-600">ランダムな形式を選択</div>
+                <div className={`font-semibold mb-1 ${
+                  task1Genre === 'random'
+                    ? 'text-slate-900 dark:text-slate-100'
+                    : 'text-slate-900 dark:text-slate-100'
+                }`}>🎲 ランダム</div>
+                <div className={`text-sm ${
+                  task1Genre === 'random'
+                    ? 'text-slate-700 dark:text-slate-300'
+                    : 'text-slate-600 dark:text-slate-400'
+                }`}>ランダムな形式を選択</div>
               </button>
             </div>
           </div>
@@ -234,24 +266,40 @@ function TaskSelectContent() {
                   onClick={() => setTask2Genre(genre.value)}
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                     task2Genre === genre.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
                   }`}
                 >
-                  <div className="font-semibold mb-1">{genre.label}</div>
-                  <div className="text-sm text-gray-600">{genre.description}</div>
+                  <div className={`font-semibold mb-1 ${
+                    task2Genre === genre.value
+                      ? 'text-slate-900 dark:text-slate-100'
+                      : 'text-slate-900 dark:text-slate-100'
+                  }`}>{genre.label}</div>
+                  <div className={`text-sm ${
+                    task2Genre === genre.value
+                      ? 'text-slate-700 dark:text-slate-300'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}>{genre.description}</div>
                 </button>
               ))}
               <button
                 onClick={() => setTask2Genre('random')}
                 className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                   task2Genre === 'random'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
                 }`}
               >
-                <div className="font-semibold mb-1">🎲 ランダム</div>
-                <div className="text-sm text-gray-600">ランダムなエッセータイプを選択</div>
+                <div className={`font-semibold mb-1 ${
+                  task2Genre === 'random'
+                    ? 'text-slate-900 dark:text-slate-100'
+                    : 'text-slate-900 dark:text-slate-100'
+                }`}>🎲 ランダム</div>
+                <div className={`text-sm ${
+                  task2Genre === 'random'
+                    ? 'text-slate-700 dark:text-slate-300'
+                    : 'text-slate-600 dark:text-slate-400'
+                }`}>ランダムなエッセータイプを選択</div>
               </button>
             </div>
           </div>

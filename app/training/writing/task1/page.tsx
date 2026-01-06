@@ -67,22 +67,22 @@ export default function WritingTask1Page() {
         
         {/* 推薦タスク */}
         {!loading && recommendation && (
-          <div className="mb-8 rounded-lg border border-blue-200 bg-blue-50 p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">おすすめタスク</h2>
+          <div className="mb-8 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800/50 p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">おすすめタスク</h2>
             <div className="mb-4 space-y-2 text-sm">
-              <p className="text-gray-700">
+              <p className="text-slate-700 dark:text-slate-200">
                 <strong>レベル:</strong> {recommendation.level}
               </p>
-              <p className="text-gray-700">
+              <p className="text-slate-700 dark:text-slate-200">
                 <strong>ジャンル:</strong> {recommendation.genre || 'ランダム'}
               </p>
-              <p className="text-gray-700">
+              <p className="text-slate-700 dark:text-slate-200">
                 <strong>モード:</strong> {recommendation.mode}
               </p>
               {recommendation.weaknesses.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-sm font-medium text-gray-700">改善すべき点:</p>
-                  <ul className="list-disc pl-5 text-sm text-gray-600">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">改善すべき点:</p>
+                  <ul className="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300">
                     {recommendation.weaknesses.map((w) => (
                       <li key={w}>{w}</li>
                     ))}
@@ -111,7 +111,7 @@ export default function WritingTask1Page() {
           </button>
           <button
             onClick={() => router.push('/training/writing/task1/progress')}
-            className="rounded-md border border-gray-300 bg-white px-8 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-800 px-8 py-3 font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
           >
             進捗を見る
           </button>

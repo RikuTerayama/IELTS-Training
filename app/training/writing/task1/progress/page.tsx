@@ -102,22 +102,22 @@ export default function Task1ProgressPage() {
 
           {/* 推薦タスク */}
           {recommendation && (
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold">おすすめタスク</h2>
+            <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800/50 p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">おすすめタスク</h2>
               <div className="mb-4 space-y-2">
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-slate-700 dark:text-slate-200">
                   <strong>レベル:</strong> {recommendation.level}
                 </p>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-slate-700 dark:text-slate-200">
                   <strong>ジャンル:</strong> {recommendation.genre || 'ランダム'}
                 </p>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-slate-700 dark:text-slate-200">
                   <strong>モード:</strong> {recommendation.mode}
                 </p>
                 {recommendation.weaknesses.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-700">改善すべき点:</p>
-                    <ul className="list-disc pl-5 text-sm text-gray-600">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">改善すべき点:</p>
+                    <ul className="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300">
                       {recommendation.weaknesses.map((w) => (
                         <li key={w}>{weaknessLabels[w] || w}</li>
                       ))}
@@ -136,15 +136,15 @@ export default function Task1ProgressPage() {
 
           {/* 弱点統計 */}
           {skillStats && Object.keys(skillStats.counters).length > 0 && (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold">弱点統計</h2>
+            <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">弱点統計</h2>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                 {Object.entries(skillStats.counters).map(([key, value]) => (
-                  <div key={key} className="rounded border border-gray-200 bg-gray-50 p-3">
-                    <p className="text-sm font-medium text-gray-700">
+                  <div key={key} className="rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700/50 p-3">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
                       {weaknessLabels[key] || key}
                     </p>
-                    <p className="text-2xl font-bold text-gray-900">{value}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
                   </div>
                 ))}
               </div>
@@ -152,22 +152,22 @@ export default function Task1ProgressPage() {
           )}
 
           {/* 直近のattempts */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">最近の練習</h2>
+          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">最近の練習</h2>
             {recentAttempts.length === 0 ? (
-              <p className="text-sm text-gray-600">まだ練習記録がありません</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">まだ練習記録がありません</p>
             ) : (
               <div className="space-y-2">
                 {recentAttempts.map((attempt) => (
                   <div
                     key={attempt.id}
-                    className="flex items-center justify-between rounded border border-gray-200 bg-gray-50 p-3"
+                    className="flex items-center justify-between rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700/50 p-3"
                   >
                     <div>
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                         {attempt.level} - {attempt.mode || 'training'}
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
                         {new Date(attempt.created_at).toLocaleDateString('ja-JP')}
                       </p>
                     </div>
