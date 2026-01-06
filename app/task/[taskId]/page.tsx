@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { Task1Flow } from '@/components/task1/Task1Flow';
 import type { Task, DraftContent, Attempt } from '@/lib/domain/types';
 
-export default function TaskPage() {
+function TaskPageContent() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const taskId = params.taskId as string;
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
@@ -55,13 +56,17 @@ export default function TaskPage() {
           // Task 1の場合はattemptを作成または再開
           if (data.data.question_type === 'Task 1') {
             try {
+              // URLクエリパラメータからmodeを取得
+              const modeParam = searchParams.get('mode');
+              const resolvedMode = modeParam === 'exam' ? 'exam' : 'training';
+              
               const attemptRes = await fetch('/api/task1/attempts/create-or-resume', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   task_id: taskId,
                   level: data.data.level,
-                  mode: 'training', // デフォルトはtraining
+                  mode: resolvedMode,
                 }),
               });
 
@@ -69,7 +74,7 @@ export default function TaskPage() {
                 const attemptData = await attemptRes.json();
                 if (attemptData.ok) {
                   setAttempt(attemptData.data);
-                  setMode(attemptData.data.mode || 'training');
+                  setMode(attemptData.data.mode || resolvedMode);
                 }
               }
             } catch (error) {
@@ -416,6 +421,20 @@ export default function TaskPage() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+export default function TaskPage() {
+  return (
+    <Suspense fallback={
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center text-text-muted">読み込み中...</div>
+        </div>
+      </Layout>
+    }>
+      <TaskPageContent />
+    </Suspense>
   );
 }
 

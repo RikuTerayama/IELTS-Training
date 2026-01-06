@@ -10,10 +10,11 @@ import type { Task1StepReviewFeedback } from '@/lib/domain/types';
 
 interface StepReviewPanelProps {
   feedback: Task1StepReviewFeedback;
+  originalSteps: Record<number, string>; // 元のStep内容（フォールバック用）
   onApply: (fixedSteps: Record<string, string>) => void;
 }
 
-export function StepReviewPanel({ feedback, onApply }: StepReviewPanelProps) {
+export function StepReviewPanel({ feedback, originalSteps, onApply }: StepReviewPanelProps) {
   const [fixedSteps, setFixedSteps] = useState<Record<string, string>>({});
 
   const handleApply = () => {
@@ -22,8 +23,9 @@ export function StepReviewPanel({ feedback, onApply }: StepReviewPanelProps) {
     feedback.step_feedbacks.forEach((stepFeedback) => {
       if (!stepFeedback.is_valid && stepFeedback.issues.length > 0) {
         // 最初のissueのexample_afterがあれば使用、なければ元のテキスト
-        const fixedText = stepFeedback.issues[0]?.example_after || '';
-        if (fixedText) {
+        const fixedText = stepFeedback.issues[0]?.example_after || originalSteps[stepFeedback.step_index] || '';
+        // 空文字列でない場合のみ追加
+        if (fixedText && fixedText.trim().length > 0) {
           appliedSteps[String(stepFeedback.step_index)] = fixedText;
         }
       }

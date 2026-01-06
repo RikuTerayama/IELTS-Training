@@ -238,3 +238,11 @@ export const ReviewFinalRequestSchema = z.object({
   attempt_id: z.string().uuid(),
 });
 
+export const ApplyStepFixesRequestSchema = z.object({
+  attempt_id: z.string().uuid(),
+  fixed_steps: z.record(
+    z.union([z.literal('1'), z.literal('2'), z.literal('3'), z.literal('4'), z.literal('5')]),
+    z.string().min(1) // 空文字列を許可しない
+  ),
+});
+

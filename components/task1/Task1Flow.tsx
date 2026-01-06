@@ -309,15 +309,51 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
           {showStepReview && reviewState?.step_review?.feedback_payload && (
             <StepReviewPanel
               feedback={reviewState.step_review.feedback_payload}
-              onApply={(fixedSteps) => {
-                // 修正を適用
-                const updatedContent = { ...stepContent };
-                Object.entries(fixedSteps).forEach(([step, content]) => {
-                  updatedContent[parseInt(step)] = content as string;
-                });
-                setStepContent(updatedContent);
-                // データベースに保存
-                // TODO: API呼び出し
+              originalSteps={stepContent}
+              onApply={async (fixedSteps) => {
+                if (!attempt) return;
+
+                try {
+                  // API呼び出しで修正を適用
+                  const response = await fetch('/api/task1/attempts/apply-step-fixes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      attempt_id: attempt.id,
+                      fixed_steps: fixedSteps,
+                    }),
+                  });
+
+                  if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: { message: 'Failed to apply fixes' } }));
+                    throw new Error(errorData.error?.message || 'Failed to apply fixes');
+                  }
+
+                  const data = await response.json();
+                  if (data.ok && data.data.attempt) {
+                    // 更新されたattemptを反映
+                    onAttemptChange(data.data.attempt);
+                    
+                    // stepContentを更新（修正内容を反映）
+                    const updatedContent = { ...stepContent };
+                    Object.entries(fixedSteps).forEach(([step, content]) => {
+                      updatedContent[parseInt(step)] = content as string;
+                    });
+                    setStepContent(updatedContent);
+                    
+                    // Step6に自動遷移
+                    setCurrentStep(6);
+                    setShowStepReview(false);
+                    
+                    // 成功メッセージ（簡易版）
+                    console.log('Fixes applied successfully');
+                  } else {
+                    throw new Error(data.error?.message || 'Failed to apply fixes');
+                  }
+                } catch (error) {
+                  console.error('Failed to apply fixes:', error);
+                  alert(error instanceof Error ? error.message : '修正の適用に失敗しました');
+                }
               }}
             />
           )}

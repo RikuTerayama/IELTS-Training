@@ -52,7 +52,9 @@ export default function WritingTask1Page() {
 
       const generateData = await generateRes.json();
       if (generateData.ok) {
-        router.push(`/task/${generateData.data.id}`);
+        // 推薦されたmodeをURLクエリパラメータに含める
+        const modeParam = recommendation.mode === 'exam' ? '?mode=exam' : '';
+        router.push(`/task/${generateData.data.id}${modeParam}`);
       }
     } catch (error) {
       console.error('Failed to start recommended task:', error);
