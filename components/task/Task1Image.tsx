@@ -58,12 +58,12 @@ export function Task1Image({
 
   return (
     <div className={cn('mx-auto w-full max-w-3xl', className)}>
-      <div className={cn('relative w-full rounded-xl border border-border bg-surface p-4')}>
+      <div className={cn('relative w-full rounded-xl border border-border bg-surface p-4', 'max-h-[60vh] overflow-auto')}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imagePath}
           alt={alt}
-          className="mx-auto w-full h-auto max-h-[320px] md:max-h-[400px] object-contain"
+          className="mx-auto w-full h-auto max-h-[60vh] object-contain"
           onError={() => setImageError(true)}
         />
       </div>

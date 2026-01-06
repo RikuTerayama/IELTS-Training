@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
+import { cn, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 export default function WritingTask1Page() {
   const router = useRouter();
@@ -69,22 +70,22 @@ export default function WritingTask1Page() {
         
         {/* 推薦タスク */}
         {!loading && recommendation && (
-          <div className="mb-8 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800/50 p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">おすすめタスク</h2>
+          <div className={cn('mb-8 rounded-lg border border-primary/20 bg-accent-indigo/10 p-6 shadow-sm')}>
+            <h2 className={cn('mb-4 text-lg font-semibold', 'text-text')}>おすすめタスク</h2>
             <div className="mb-4 space-y-2 text-sm">
-              <p className="text-slate-700 dark:text-slate-200">
+              <p className="text-text">
                 <strong>レベル:</strong> {recommendation.level}
               </p>
-              <p className="text-slate-700 dark:text-slate-200">
+              <p className="text-text">
                 <strong>ジャンル:</strong> {recommendation.genre || 'ランダム'}
               </p>
-              <p className="text-slate-700 dark:text-slate-200">
+              <p className="text-text">
                 <strong>モード:</strong> {recommendation.mode}
               </p>
               {recommendation.weaknesses.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">改善すべき点:</p>
-                  <ul className="list-disc pl-5 text-sm text-slate-600 dark:text-slate-300">
+                  <p className={cn('text-sm font-medium', 'text-text')}>改善すべき点:</p>
+                  <ul className={cn('list-disc pl-5 text-sm', 'text-text-muted')}>
                     {recommendation.weaknesses.map((w) => (
                       <li key={w}>{w}</li>
                     ))}
@@ -94,7 +95,7 @@ export default function WritingTask1Page() {
             </div>
             <button
               onClick={handleStartRecommended}
-              className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+              className={cn('px-6 py-2', buttonPrimary)}
             >
               推薦タスクを開始
             </button>

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { cn, buttonSecondary, buttonPrimary } from '@/lib/ui/theme';
 
 export function Header() {
   const [user, setUser] = useState<any>(null);
@@ -66,10 +67,10 @@ export function Header() {
             <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <>
-                  <span className="text-sm text-slate-400">{user.email}</span>
+                  <span className={cn('text-sm', 'text-text-muted')}>{user.email}</span>
                   <button
                     onClick={handleLogout}
-                    className="rounded bg-slate-700/50 px-3 py-1 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+                    className={cn('px-3 py-1 text-sm', buttonSecondary)}
                   >
                     Logout
                   </button>
@@ -77,7 +78,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-500 transition-colors"
+                  className={cn('px-3 py-1 text-sm', buttonPrimary)}
                 >
                   Login
                 </Link>

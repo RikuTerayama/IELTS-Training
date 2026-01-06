@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
+import { cn, cardBase, cardTitle, cardDesc, textareaBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 import type { Task } from '@/lib/domain/types';
 
 type PrepStep = 'point' | 'reason' | 'example' | 'point_again' | 'japanese_evaluation' | 'english_generation' | 'ielts_feedback';
@@ -358,7 +359,7 @@ export default function PrepTaskPage() {
         {/* プログレスバー */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">
+            <span className={cn('text-sm font-medium', cardDesc)}>
               {(() => {
                 const isTask1 = task?.question_type === 'Task 1';
                 const totalSteps = isTask1 ? 5 : 7;
@@ -369,9 +370,9 @@ export default function PrepTaskPage() {
               })()}
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className={cn('w-full rounded-full h-2', 'bg-surface-2')}>
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className={cn('h-2 rounded-full transition-all duration-300', 'bg-primary')}
               style={{
                 width: (() => {
                   const isTask1 = task?.question_type === 'Task 1';
@@ -403,8 +404,8 @@ export default function PrepTaskPage() {
         </div>
 
         {/* お題表示 */}
-        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm mb-6">
-          <h2 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">お題</h2>
+        <div className={cn('p-6 mb-6', cardBase)}>
+          <h2 className={cn('mb-2 text-lg font-semibold', cardTitle)}>お題</h2>
           
           {/* Task1の場合は画像を表示 */}
           {task.question_type === 'Task 1' && (
@@ -418,15 +419,15 @@ export default function PrepTaskPage() {
             </div>
           )}
           
-          <p className="text-slate-700 dark:text-slate-200">{task.question}</p>
+          <p className={cardDesc}>{task.question}</p>
           <div className="mt-4 space-y-2">
-            <p className="text-slate-700 dark:text-slate-200">
-              目標: Band <span className="font-medium text-slate-900 dark:text-slate-100">6.0-6.5</span>
+            <p className={cardDesc}>
+              目標: Band <span className={cn('font-medium', 'text-text')}>6.0-6.5</span>
             </p>
-            <p className="text-slate-700 dark:text-slate-200">
+            <p className={cardDesc}>
               必須語彙:{' '}
               {task.required_vocab.map((v) => (
-                <span key={v.word} className="mr-2 rounded bg-blue-100 dark:bg-blue-900/40 px-2 py-1 text-sm text-blue-800 dark:text-blue-200">
+                <span key={v.word} className={cn('mr-2 rounded border border-primary/20 bg-accent-indigo/10 px-2 py-1 text-sm', 'text-text')}>
                   {v.word}
                 </span>
               ))}
@@ -436,60 +437,60 @@ export default function PrepTaskPage() {
 
         {/* ステップ別コンテンツ */}
         {currentStep === 'japanese_evaluation' && japaneseEvaluation ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm mb-6">
-            <h2 className="mb-4 text-lg font-semibold">日本語PREP評価</h2>
+          <div className={cn('p-6 mb-6', cardBase)}>
+            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>日本語PREP評価</h2>
             <div className="space-y-4">
               <div>
-                <div className="text-sm font-medium text-gray-600 mb-1">PREPとして成り立っているか</div>
-                <div className={`text-lg font-semibold ${japaneseEvaluation.is_valid_prep ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={cn('text-sm font-medium mb-1', cardDesc)}>PREPとして成り立っているか</div>
+                <div className={cn('text-lg font-semibold', japaneseEvaluation.is_valid_prep ? 'text-success' : 'text-danger')}>
                   {japaneseEvaluation.is_valid_prep ? '✓ 成り立っています' : '✗ 改善が必要です'}
                 </div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-600 mb-1">スコア予測</div>
-                <div className="text-lg font-semibold text-blue-600">{japaneseEvaluation.score_estimate}</div>
+                <div className={cn('text-sm font-medium mb-1', cardDesc)}>スコア予測</div>
+                <div className={cn('text-lg font-semibold', 'text-primary')}>{japaneseEvaluation.score_estimate}</div>
               </div>
               {japaneseEvaluation.missing_points.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">足りない点</div>
+                  <div className={cn('text-sm font-medium mb-1', cardDesc)}>足りない点</div>
                   <ul className="list-disc list-inside space-y-1">
                     {japaneseEvaluation.missing_points.map((point, idx) => (
-                      <li key={idx} className="text-gray-700">{point}</li>
+                      <li key={idx} className="text-text">{point}</li>
                     ))}
                   </ul>
                 </div>
               )}
               <div>
-                <div className="text-sm font-medium text-gray-600 mb-1">フィードバック</div>
-                <div className="text-gray-700 whitespace-pre-wrap">{japaneseEvaluation.feedback}</div>
+                <div className={cn('text-sm font-medium mb-1', cardDesc)}>フィードバック</div>
+                <div className={cn('whitespace-pre-wrap', 'text-text')}>{japaneseEvaluation.feedback}</div>
               </div>
             </div>
           </div>
         ) : currentStep === 'english_generation' && englishEssay ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm mb-6">
-            <h2 className="mb-4 text-lg font-semibold">英語エッセイ</h2>
+          <div className={cn('p-6 mb-6', cardBase)}>
+            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>英語エッセイ</h2>
             <div className="space-y-4">
               <div>
-                <div className="text-sm font-medium text-gray-600 mb-1">語数</div>
-                <div className="text-lg font-semibold text-blue-600">{englishEssay.word_count} words</div>
+                <div className={cn('text-sm font-medium mb-1', cardDesc)}>語数</div>
+                <div className={cn('text-lg font-semibold', 'text-primary')}>{englishEssay.word_count} words</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-600 mb-2">エッセイ</div>
-                <div className="rounded border border-gray-300 bg-gray-50 p-4 whitespace-pre-wrap text-gray-700">
+                <div className={cn('text-sm font-medium mb-2', cardDesc)}>エッセイ</div>
+                <div className={cn('rounded border border-border bg-surface-2 p-4 whitespace-pre-wrap', 'text-text')}>
                   {englishEssay.essay}
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm mb-6">
-            <h2 className="mb-2 text-xl font-semibold">{question.title}</h2>
-            <p className="mb-4 text-gray-600">{question.description}</p>
+          <div className={cn('p-6 mb-6', cardBase)}>
+            <h2 className={cn('mb-2 text-xl font-semibold', cardTitle)}>{question.title}</h2>
+            <p className={cn('mb-4', cardDesc)}>{question.description}</p>
             <textarea
               value={getCurrentAnswer()}
               onChange={(e) => handleAnswerChange(currentStep, e.target.value)}
               rows={8}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+              className={cn(textareaBase, 'px-3 py-2')}
               placeholder={question.placeholder}
             />
           </div>
@@ -497,7 +498,7 @@ export default function PrepTaskPage() {
 
         {/* エラー表示 */}
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 mb-6 text-red-800">
+          <div className={cn('rounded-lg border border-danger bg-danger/10 p-4 mb-6', 'text-danger')}>
             {error}
           </div>
         )}
@@ -522,14 +523,14 @@ export default function PrepTaskPage() {
               }
             }}
             disabled={currentStep === 'point' || processing}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+            className={cn('px-6 py-2', buttonSecondary)}
           >
             戻る
           </button>
           <button
             onClick={handleNext}
             disabled={!canProceed() || processing}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+            className={cn('px-6 py-2', buttonPrimary)}
           >
             {processing
               ? '処理中...'
