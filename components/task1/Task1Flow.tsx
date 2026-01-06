@@ -16,6 +16,7 @@ import { ComparisonPhrasesPanel } from './ComparisonPhrasesPanel';
 import { NumberGuard } from './NumberGuard';
 import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1ImagePath } from '@/lib/utils/task1Image';
+import { cn, cardBase, cardTitle, textareaBase, buttonPrimary } from '@/lib/ui/theme';
 import type { Task, Attempt, Task1StepState, Task1ReviewState } from '@/lib/domain/types';
 import { countWords, countParagraphs, evaluateChecklist, extractNumbers } from '@/lib/utils/task1Helpers';
 
