@@ -4,6 +4,8 @@
 
 'use client';
 
+import { cn, cardBase, cardTitle, cardDesc } from '@/lib/ui/theme';
+
 interface ChecklistPanelProps {
   checklist: {
     has_overview?: boolean;
@@ -28,20 +30,20 @@ export function ChecklistPanel({ checklist, wordCount, paragraphCount }: Checkli
   ];
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <h3 className="mb-3 font-semibold">チェックリスト</h3>
+    <div className={cn('p-4', cardBase)}>
+      <h3 className={cn('mb-3 font-semibold', cardTitle)}>チェックリスト</h3>
       <div className="space-y-2">
         {items.map((item) => (
           <div key={item.key} className="flex items-center gap-2">
             <div
-              className={`h-5 w-5 rounded border-2 flex items-center justify-center ${
+              className={cn('h-5 w-5 rounded border-2 flex items-center justify-center', 
                 item.checked
-                  ? 'border-green-500 bg-green-50'
-                  : 'border-gray-300 bg-white'
-              }`}
+                  ? 'border-success bg-success-bg'
+                  : 'border-border bg-surface-2'
+              )}
             >
               {item.checked && (
-                <svg className="h-3 w-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className={cn('h-3 w-3', 'text-success')} fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -50,7 +52,7 @@ export function ChecklistPanel({ checklist, wordCount, paragraphCount }: Checkli
                 </svg>
               )}
             </div>
-            <span className={`text-sm ${item.checked ? 'text-gray-700' : 'text-gray-400'}`}>
+            <span className={cn('text-sm', item.checked ? 'text-text' : 'text-text-subtle')}>
               {item.label}
             </span>
           </div>
@@ -59,15 +61,15 @@ export function ChecklistPanel({ checklist, wordCount, paragraphCount }: Checkli
 
       {/* 語数・段落数表示 */}
       {(wordCount !== undefined || paragraphCount !== undefined) && (
-        <div className="mt-4 border-t border-gray-200 pt-4">
+        <div className={cn('mt-4 border-t border-border pt-4')}>
           {wordCount !== undefined && (
-            <p className="text-sm text-gray-600">
-              語数: <span className="font-semibold">{wordCount}</span>
+            <p className={cardDesc}>
+              語数: <span className="font-semibold text-text">{wordCount}</span>
             </p>
           )}
           {paragraphCount !== undefined && (
-            <p className="text-sm text-gray-600">
-              段落数: <span className="font-semibold">{paragraphCount}</span>
+            <p className={cardDesc}>
+              段落数: <span className="font-semibold text-text">{paragraphCount}</span>
             </p>
           )}
         </div>

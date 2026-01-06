@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getTask1ImagePath, getTask1ImagePathFromMetadata, detectTask1Genre } from '@/lib/utils/task1Image';
+import { cn, cardBase } from '@/lib/ui/theme';
 
 interface Task1ImageProps {
   question?: string;
@@ -56,14 +57,17 @@ export function Task1Image({
   }
 
   return (
-    <div className={`rounded-lg border border-border bg-surface overflow-hidden ${className}`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={imagePath}
-        alt={alt}
-        className="w-full h-auto"
-        onError={() => setImageError(true)}
-      />
+    <div className={cn('mx-auto w-full max-w-3xl', className)}>
+      <div className={cn('relative w-full overflow-hidden rounded-xl border border-border bg-surface', 'max-h-[320px] md:max-h-[400px]')}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imagePath}
+          alt={alt}
+          className="w-full h-auto object-contain"
+          style={{ maxHeight: '100%' }}
+          onError={() => setImageError(true)}
+        />
+      </div>
     </div>
   );
 }

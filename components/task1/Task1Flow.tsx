@@ -186,7 +186,7 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
         <div className="md:col-span-2 space-y-6">
           {/* 画像とObservation Overlay（Trainingモードのみ） */}
           {imagePath && mode === 'training' && (
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            <div className={cn('p-4', cardBase)}>
               <Task1ObservationOverlay
                 imageUrl={imagePath}
                 observations={observations}
@@ -217,7 +217,7 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
           )}
 
           {/* Stepper */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className={cn('p-6', cardBase)}>
             <div className="flex items-center justify-between">
               {STEPS.map((step, index) => (
                 <div key={step.index} className="flex items-center">
@@ -246,11 +246,11 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
           </div>
 
           {/* Step入力エリア */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-2 text-lg font-semibold">
+          <div className={cn('p-6', cardBase)}>
+            <h2 className={cn('mb-2 text-lg font-semibold', cardTitle)}>
               Step {currentStep}: {STEPS[currentStep - 1].title}
             </h2>
-            <p className="mb-4 text-sm text-gray-600">
+            <p className={cn('mb-4 text-sm', 'text-text-muted')}>
               {STEPS[currentStep - 1].description}
             </p>
 
@@ -263,7 +263,7 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
                 saveStepDebounced(currentStep, e.target.value);
               }}
               rows={currentStep === 6 ? 15 : 8}
-              className="w-full rounded-md border border-gray-300 p-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className={cn(textareaBase, 'p-3')}
               placeholder={`Step ${currentStep}の回答を入力してください...`}
               disabled={mode === 'exam' && currentStep <= 5 && !stepContent[currentStep]}
             />
@@ -277,7 +277,7 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
                   }
                 }}
                 disabled={!stepContent[currentStep]?.trim().length}
-                className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className={cn('mt-4 px-4 py-2', buttonPrimary)}
               >
                 次へ
               </button>
@@ -287,7 +287,7 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
             {currentStep === 5 && stepContent[5] && (
               <button
                 onClick={handleStep5Complete}
-                className="mt-4 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                className={cn('mt-4 px-4 py-2', buttonPrimary, 'bg-success hover:bg-success-hover')}
               >
                 レビューを実行
               </button>
@@ -297,7 +297,7 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
             {currentStep === 6 && stepContent[6] && (
               <button
                 onClick={handleStep6Complete}
-                className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                className={cn('mt-4 px-4 py-2', buttonPrimary)}
               >
                 最終レビューを実行
               </button>
@@ -305,7 +305,7 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
 
             {/* 保存状態 */}
             {saving && (
-              <p className="mt-2 text-sm text-gray-500">保存中...</p>
+              <p className={cn('mt-2 text-sm', 'text-text-muted')}>保存中...</p>
             )}
 
             {/* 数字ガード（Step6のみ） */}

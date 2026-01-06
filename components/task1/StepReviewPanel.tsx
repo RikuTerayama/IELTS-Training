@@ -6,6 +6,7 @@
 'use client';
 
 import { useState } from 'react';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
 import type { Task1StepReviewFeedback } from '@/lib/domain/types';
 
 interface StepReviewPanelProps {
@@ -34,38 +35,38 @@ export function StepReviewPanel({ feedback, originalSteps, onApply }: StepReview
   };
 
   return (
-    <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 shadow-sm">
-      <h3 className="mb-4 text-lg font-semibold">Step レビュー結果</h3>
+    <div className={cn('p-6', cardBase, 'border-accent-indigo bg-accent-indigo/10')}>
+      <h3 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Step レビュー結果</h3>
 
       <div className="space-y-4">
         {feedback.step_feedbacks.map((stepFeedback) => (
           <div
             key={stepFeedback.step_index}
-            className="rounded border border-gray-200 bg-white p-4"
+            className={cn('rounded border border-border bg-surface p-4')}
           >
-            <h4 className="mb-2 font-semibold">
+            <h4 className={cn('mb-2 font-semibold', cardTitle)}>
               Step {stepFeedback.step_index}
               {stepFeedback.is_valid ? (
-                <span className="ml-2 text-green-600">✓ 良好</span>
+                <span className={cn('ml-2', 'text-success')}>✓ 良好</span>
               ) : (
-                <span className="ml-2 text-red-600">⚠ 要修正</span>
+                <span className={cn('ml-2', 'text-danger')}>⚠ 要修正</span>
               )}
             </h4>
 
             {stepFeedback.issues.length > 0 && (
               <div className="mb-2">
-                <p className="text-sm font-medium text-gray-700">指摘事項:</p>
-                <ul className="list-disc pl-5 text-sm text-gray-600">
+                <p className={cn('text-sm font-medium', cardTitle)}>指摘事項:</p>
+                <ul className={cn('list-disc pl-5 text-sm', cardDesc)}>
                   {stepFeedback.issues.map((issue, idx) => (
                     <li key={idx}>
                       <span className="font-medium">[{issue.category}]</span> {issue.description}
                       {issue.suggestion && (
-                        <div className="mt-1 text-gray-500">
+                        <div className={cn('mt-1', 'text-text-subtle')}>
                           提案: {issue.suggestion}
                         </div>
                       )}
                       {issue.example_before && issue.example_after && (
-                        <div className="mt-1 text-xs text-gray-500">
+                        <div className={cn('mt-1 text-xs', 'text-text-subtle')}>
                           例: {issue.example_before} → {issue.example_after}
                         </div>
                       )}
@@ -77,8 +78,8 @@ export function StepReviewPanel({ feedback, originalSteps, onApply }: StepReview
 
             {stepFeedback.strengths && stepFeedback.strengths.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-green-700">良い点:</p>
-                <ul className="list-disc pl-5 text-sm text-green-600">
+                <p className={cn('text-sm font-medium', 'text-success')}>良い点:</p>
+                <ul className={cn('list-disc pl-5 text-sm', 'text-success')}>
                   {stepFeedback.strengths.map((strength, idx) => (
                     <li key={idx}>{strength}</li>
                   ))}
@@ -91,12 +92,12 @@ export function StepReviewPanel({ feedback, originalSteps, onApply }: StepReview
 
       {/* 最重要修正点 */}
       {feedback.top_priority_fix && (
-        <div className="mt-4 rounded border-2 border-red-300 bg-red-50 p-4">
-          <h4 className="mb-2 font-semibold text-red-800">最重要修正点</h4>
-          <p className="text-sm text-red-700">
+        <div className={cn('mt-4 rounded border-2 border-danger bg-danger/10 p-4')}>
+          <h4 className={cn('mb-2 font-semibold', 'text-danger')}>最重要修正点</h4>
+          <p className={cn('text-sm', 'text-danger')}>
             Step {feedback.top_priority_fix.step_index}: {feedback.top_priority_fix.issue}
           </p>
-          <p className="mt-2 text-sm text-red-600">
+          <p className={cn('mt-2 text-sm', 'text-danger')}>
             {feedback.top_priority_fix.fix_guidance}
           </p>
         </div>
@@ -104,7 +105,7 @@ export function StepReviewPanel({ feedback, originalSteps, onApply }: StepReview
 
       <button
         onClick={handleApply}
-        className="mt-4 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+        className={cn('mt-4 px-4 py-2', buttonPrimary, 'bg-success hover:bg-success-hover')}
       >
         修正を適用してStep 6へ進む
       </button>

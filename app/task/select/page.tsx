@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
+import { cn, selectableSelected, selectableUnselected, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
 
 type TaskType = 'Task 1' | 'Task 2';
 type Level = 'beginner' | 'intermediate' | 'advanced';
@@ -139,55 +140,31 @@ function TaskSelectContent() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6 text-text dark:text-text">タスクを選択</h1>
+        <h1 className={cn('text-2xl font-bold mb-6', cardTitle)}>タスクを選択</h1>
 
         {/* タスクタイプ選択 */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">タスクタイプ</h2>
+          <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>タスクタイプ</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <button
               onClick={() => {
                 setTaskType('Task 1');
                 setTask1Genre(null);
               }}
-              className={`p-6 rounded-lg border-2 transition-all text-left ${
-                taskType === 'Task 1'
-                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
-              }`}
+              className={cn('p-6', taskType === 'Task 1' ? selectableSelected : selectableUnselected)}
             >
-              <div className={`font-semibold text-lg mb-2 ${
-                taskType === 'Task 1'
-                  ? 'text-slate-900 dark:text-slate-100'
-                  : 'text-slate-900 dark:text-slate-100'
-              }`}>Task 1</div>
-              <div className={`text-sm ${
-                taskType === 'Task 1'
-                  ? 'text-slate-700 dark:text-slate-300'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}>グラフ・図表・地図の説明</div>
+              <div className={cn('font-semibold text-lg mb-2', cardTitle)}>Task 1</div>
+              <div className={cardDesc}>グラフ・図表・地図の説明</div>
             </button>
             <button
               onClick={() => {
                 setTaskType('Task 2');
                 setTask2Genre(null);
               }}
-              className={`p-6 rounded-lg border-2 transition-all text-left ${
-                taskType === 'Task 2'
-                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
-              }`}
+              className={cn('p-6', taskType === 'Task 2' ? selectableSelected : selectableUnselected)}
             >
-              <div className={`font-semibold text-lg mb-2 ${
-                taskType === 'Task 2'
-                  ? 'text-slate-900 dark:text-slate-100'
-                  : 'text-slate-900 dark:text-slate-100'
-              }`}>Task 2</div>
-              <div className={`text-sm ${
-                taskType === 'Task 2'
-                  ? 'text-slate-700 dark:text-slate-300'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}>エッセイライティング</div>
+              <div className={cn('font-semibold text-lg mb-2', cardTitle)}>Task 2</div>
+              <div className={cardDesc}>エッセイライティング</div>
             </button>
           </div>
         </div>
@@ -195,17 +172,13 @@ function TaskSelectContent() {
         {/* レベル選択 */}
         {taskType && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">レベル</h2>
+            <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>レベル</h2>
             <div className="flex gap-4">
               {levels.map((l) => (
                 <button
                   key={l.value}
                   onClick={() => setLevel(l.value)}
-                  className={`px-6 py-2 rounded-md border-2 transition-all ${
-                    level === l.value
-                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-slate-700 dark:text-slate-300'
-                  }`}
+                  className={cn('px-6 py-2', level === l.value ? selectableSelected : selectableUnselected)}
                 >
                   {l.label}
                 </button>
@@ -217,25 +190,17 @@ function TaskSelectContent() {
         {/* Mode選択（Task1のみ） */}
         {taskType === 'Task 1' && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">モード</h2>
+            <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>モード</h2>
             <div className="flex gap-4">
               <button
                 onClick={() => setSelectedMode('training')}
-                className={`px-6 py-2 rounded-md border-2 transition-all ${
-                  selectedMode === 'training'
-                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-slate-700 dark:text-slate-300'
-                }`}
+                className={cn('px-6 py-2', selectedMode === 'training' ? selectableSelected : selectableUnselected)}
               >
                 Training
               </button>
               <button
                 onClick={() => setSelectedMode('exam')}
-                className={`px-6 py-2 rounded-md border-2 transition-all ${
-                  selectedMode === 'exam'
-                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-slate-700 dark:text-slate-300'
-                }`}
+                className={cn('px-6 py-2', selectedMode === 'exam' ? selectableSelected : selectableUnselected)}
               >
                 Exam
               </button>
@@ -246,48 +211,24 @@ function TaskSelectContent() {
         {/* Task1 ジャンル選択 */}
         {taskType === 'Task 1' && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">形式を選択</h2>
+            <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>形式を選択</h2>
             <div className="grid md:grid-cols-2 gap-4">
               {task1Genres.map((genre) => (
                 <button
                   key={genre.value}
                   onClick={() => setTask1Genre(genre.value)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left ${
-                    task1Genre === genre.value
-                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
-                  }`}
+                  className={cn('p-4', task1Genre === genre.value ? selectableSelected : selectableUnselected)}
                 >
-                  <div className={`font-semibold mb-1 ${
-                    task1Genre === genre.value
-                      ? 'text-slate-900 dark:text-slate-100'
-                      : 'text-slate-900 dark:text-slate-100'
-                  }`}>{genre.label}</div>
-                  <div className={`text-sm ${
-                    task1Genre === genre.value
-                      ? 'text-slate-700 dark:text-slate-300'
-                      : 'text-slate-600 dark:text-slate-400'
-                  }`}>{genre.description}</div>
+                  <div className={cn('font-semibold mb-1', cardTitle)}>{genre.label}</div>
+                  <div className={cardDesc}>{genre.description}</div>
                 </button>
               ))}
               <button
                 onClick={() => setTask1Genre('random')}
-                className={`p-4 rounded-lg border-2 transition-all text-left ${
-                  task1Genre === 'random'
-                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
-                }`}
+                className={cn('p-4', task1Genre === 'random' ? selectableSelected : selectableUnselected)}
               >
-                <div className={`font-semibold mb-1 ${
-                  task1Genre === 'random'
-                    ? 'text-slate-900 dark:text-slate-100'
-                    : 'text-slate-900 dark:text-slate-100'
-                }`}>🎲 ランダム</div>
-                <div className={`text-sm ${
-                  task1Genre === 'random'
-                    ? 'text-slate-700 dark:text-slate-300'
-                    : 'text-slate-600 dark:text-slate-400'
-                }`}>ランダムな形式を選択</div>
+                <div className={cn('font-semibold mb-1', cardTitle)}>🎲 ランダム</div>
+                <div className={cardDesc}>ランダムな形式を選択</div>
               </button>
             </div>
           </div>
@@ -296,48 +237,24 @@ function TaskSelectContent() {
         {/* Task2 ジャンル選択 */}
         {taskType === 'Task 2' && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">エッセータイプを選択</h2>
+            <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>エッセータイプを選択</h2>
             <div className="space-y-3">
               {task2Genres.map((genre) => (
                 <button
                   key={genre.value}
                   onClick={() => setTask2Genre(genre.value)}
-                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                    task2Genre === genre.value
-                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
-                  }`}
+                  className={cn('w-full p-4', task2Genre === genre.value ? selectableSelected : selectableUnselected)}
                 >
-                  <div className={`font-semibold mb-1 ${
-                    task2Genre === genre.value
-                      ? 'text-slate-900 dark:text-slate-100'
-                      : 'text-slate-900 dark:text-slate-100'
-                  }`}>{genre.label}</div>
-                  <div className={`text-sm ${
-                    task2Genre === genre.value
-                      ? 'text-slate-700 dark:text-slate-300'
-                      : 'text-slate-600 dark:text-slate-400'
-                  }`}>{genre.description}</div>
+                  <div className={cn('font-semibold mb-1', cardTitle)}>{genre.label}</div>
+                  <div className={cardDesc}>{genre.description}</div>
                 </button>
               ))}
               <button
                 onClick={() => setTask2Genre('random')}
-                className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                  task2Genre === 'random'
-                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800'
-                }`}
+                className={cn('w-full p-4', task2Genre === 'random' ? selectableSelected : selectableUnselected)}
               >
-                <div className={`font-semibold mb-1 ${
-                  task2Genre === 'random'
-                    ? 'text-slate-900 dark:text-slate-100'
-                    : 'text-slate-900 dark:text-slate-100'
-                }`}>🎲 ランダム</div>
-                <div className={`text-sm ${
-                  task2Genre === 'random'
-                    ? 'text-slate-700 dark:text-slate-300'
-                    : 'text-slate-600 dark:text-slate-400'
-                }`}>ランダムなエッセータイプを選択</div>
+                <div className={cn('font-semibold mb-1', cardTitle)}>🎲 ランダム</div>
+                <div className={cardDesc}>ランダムなエッセータイプを選択</div>
               </button>
             </div>
           </div>
@@ -349,7 +266,7 @@ function TaskSelectContent() {
             <button
               onClick={handleStart}
               disabled={loading}
-              className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-semibold"
+              className={cn('px-8 py-3', buttonPrimary)}
             >
               {loading ? '生成中...' : 'タスクを開始'}
             </button>

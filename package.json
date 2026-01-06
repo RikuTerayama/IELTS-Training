@@ -12,9 +12,11 @@
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.39.0",
+    "clsx": "^2.1.1",
     "next": "14.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "tailwind-merge": "^3.4.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -29,4 +31,3 @@
     "typescript": "^5.3.3"
   }
 }
-

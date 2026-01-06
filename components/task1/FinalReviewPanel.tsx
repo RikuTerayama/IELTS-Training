@@ -5,6 +5,7 @@
 
 'use client';
 
+import { cn, cardBase, cardTitle, cardDesc, badgeBase } from '@/lib/ui/theme';
 import type { Task1FinalReviewFeedback } from '@/lib/domain/types';
 
 interface FinalReviewPanelProps {
@@ -17,46 +18,43 @@ export function FinalReviewPanel({ feedback, finalResponse }: FinalReviewPanelPr
   const sentences = finalResponse.split(/[.!?]+/).filter(s => s.trim().length > 0);
 
   return (
-    <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 shadow-sm">
-      <h3 className="mb-4 text-lg font-semibold">最終レビュー結果</h3>
+    <div className={cn('p-6', cardBase, 'border-accent-indigo bg-accent-indigo/10')}>
+      <h3 className={cn('mb-4 text-lg font-semibold', cardTitle)}>最終レビュー結果</h3>
 
       {/* Overall Band */}
-      <div className="mb-4 rounded border border-gray-200 bg-white p-4">
-        <h4 className="font-semibold">Overall Band: {feedback.overall_band_range}</h4>
+      <div className={cn('mb-4 rounded border border-border bg-surface p-4')}>
+        <h4 className={cn('font-semibold', cardTitle)}>Overall Band: {feedback.overall_band_range}</h4>
       </div>
 
       {/* 文単位ハイライト */}
       <div className="mb-4 space-y-2">
-        <h4 className="font-semibold">文単位フィードバック</h4>
+        <h4 className={cn('font-semibold', cardTitle)}>文単位フィードバック</h4>
         {feedback.sentence_highlights.map((highlight, index) => (
           <div
             key={index}
-            className="rounded border border-gray-200 bg-white p-3"
+            className={cn('rounded border border-border bg-surface p-3')}
           >
             <div className="mb-1 flex items-center gap-2">
               {highlight.tags.map((tag) => (
                 <span
                   key={tag}
-                  className={`rounded px-2 py-1 text-xs font-semibold ${
-                    tag === 'TR'
-                      ? 'bg-blue-100 text-blue-800'
-                      : tag === 'CC'
-                      ? 'bg-green-100 text-green-800'
-                      : tag === 'LR'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}
+                  className={cn(badgeBase, 
+                    tag === 'TR' ? 'bg-accent-indigo/20 text-accent-indigo-foreground' :
+                    tag === 'CC' ? 'bg-success-bg text-success' :
+                    tag === 'LR' ? 'bg-warning-bg text-warning' :
+                    'bg-accent-violet/20 text-accent-violet-foreground'
+                  )}
                 >
                   {tag}
                 </span>
               ))}
             </div>
-            <p className="text-sm text-gray-700">{highlight.sentence_text}</p>
-            <p className="mt-1 text-xs text-gray-600">{highlight.comment}</p>
+            <p className={cn('text-sm', 'text-text')}>{highlight.sentence_text}</p>
+            <p className={cn('mt-1 text-xs', cardDesc)}>{highlight.comment}</p>
             {highlight.suggested_rewrite && (
-              <div className="mt-2 rounded bg-gray-50 p-2">
-                <p className="text-xs text-gray-500">提案:</p>
-                <p className="text-sm text-gray-700">{highlight.suggested_rewrite}</p>
+              <div className={cn('mt-2 rounded bg-surface-2 p-2')}>
+                <p className={cn('text-xs', 'text-text-subtle')}>提案:</p>
+                <p className={cn('text-sm', 'text-text')}>{highlight.suggested_rewrite}</p>
               </div>
             )}
           </div>
@@ -65,11 +63,11 @@ export function FinalReviewPanel({ feedback, finalResponse }: FinalReviewPanelPr
 
       {/* 4次元評価 */}
       <div className="mb-4">
-        <h4 className="mb-2 font-semibold">4次元評価</h4>
+        <h4 className={cn('mb-2 font-semibold', cardTitle)}>4次元評価</h4>
         <div className="space-y-2">
           {feedback.dimensions.map((dim) => (
-            <div key={dim.dimension} className="rounded border border-gray-200 bg-white p-2">
-              <p className="text-sm">
+            <div key={dim.dimension} className={cn('rounded border border-border bg-surface p-2')}>
+              <p className={cn('text-sm', 'text-text')}>
                 <span className="font-semibold">{dim.dimension}</span>: {dim.short_comment} (Band: {dim.band_estimate})
               </p>
             </div>
@@ -79,16 +77,16 @@ export function FinalReviewPanel({ feedback, finalResponse }: FinalReviewPanelPr
 
       {/* Band-up Actions */}
       <div className="mb-4">
-        <h4 className="mb-2 font-semibold">Band向上のためのアクション</h4>
+        <h4 className={cn('mb-2 font-semibold', cardTitle)}>Band向上のためのアクション</h4>
         <div className="space-y-2">
           {feedback.band_up_actions.map((action) => (
-            <div key={action.priority} className="rounded border border-gray-200 bg-white p-3">
-              <h5 className="font-semibold">
+            <div key={action.priority} className={cn('rounded border border-border bg-surface p-3')}>
+              <h5 className={cn('font-semibold', cardTitle)}>
                 {action.priority}. {action.title}
               </h5>
-              <p className="mt-1 text-sm text-gray-600">{action.why}</p>
-              <p className="mt-1 text-sm text-gray-600">{action.how}</p>
-              <p className="mt-2 text-sm text-gray-700">{action.example}</p>
+              <p className={cn('mt-1 text-sm', cardDesc)}>{action.why}</p>
+              <p className={cn('mt-1 text-sm', cardDesc)}>{action.how}</p>
+              <p className={cn('mt-2 text-sm', 'text-text')}>{action.example}</p>
             </div>
           ))}
         </div>
@@ -96,9 +94,9 @@ export function FinalReviewPanel({ feedback, finalResponse }: FinalReviewPanelPr
 
       {/* 数字検証結果 */}
       {feedback.number_validation && feedback.number_validation.has_mismatch && (
-        <div className="mb-4 rounded border-2 border-red-300 bg-red-50 p-4">
-          <h4 className="mb-2 font-semibold text-red-800">数字の不一致</h4>
-          <p className="text-sm text-red-700">
+        <div className={cn('mb-4 rounded border-2 border-danger bg-danger/10 p-4')}>
+          <h4 className={cn('mb-2 font-semibold', 'text-danger')}>数字の不一致</h4>
+          <p className={cn('text-sm', 'text-danger')}>
             本文中の数字と登録した数字に不一致があります。確認してください。
           </p>
         </div>
