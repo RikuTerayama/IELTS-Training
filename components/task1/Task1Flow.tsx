@@ -268,6 +268,21 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
               disabled={mode === 'exam' && currentStep <= 5 && !stepContent[currentStep]}
             />
 
+            {/* 次へボタン（Step1-4） */}
+            {currentStep < 5 && (
+              <button
+                onClick={() => {
+                  if (stepContent[currentStep]?.trim().length > 0) {
+                    setCurrentStep((s) => Math.min(6, s + 1));
+                  }
+                }}
+                disabled={!stepContent[currentStep]?.trim().length}
+                className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                次へ
+              </button>
+            )}
+
             {/* Step5完了ボタン */}
             {currentStep === 5 && stepContent[5] && (
               <button

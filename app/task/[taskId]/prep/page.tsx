@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
@@ -28,8 +28,9 @@ interface EnglishEssay {
   word_count: number;
 }
 
-export default function PrepTaskPage() {
+function PrepTaskPageContent() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const taskId = params.taskId as string;
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
@@ -76,13 +77,20 @@ export default function PrepTaskPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.ok) {
+          // Task1の場合は /task/[taskId] にリダイレクト（Task1Flowを使用）
+          if (data.data.question_type === 'Task 1') {
+            const modeParam = searchParams.get('mode');
+            const modeQuery = modeParam === 'exam' ? '?mode=exam' : '';
+            router.replace(`/task/${taskId}${modeQuery}`);
+            return;
+          }
           setTask(data.data);
           setLevel(data.data.level);
         }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [taskId]);
+  }, [taskId, router, searchParams]);
 
   const handleAnswerChange = (step: PrepStep, value: string) => {
     if (step === 'point') setAnswers({ ...answers, point: value });
@@ -394,8 +402,8 @@ export default function PrepTaskPage() {
         </div>
 
         {/* お題表示 */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm mb-6">
-          <h2 className="mb-2 text-lg font-semibold">お題</h2>
+        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm mb-6">
+          <h2 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">お題</h2>
           
           {/* Task1の場合は画像を表示 */}
           {task.question_type === 'Task 1' && (
@@ -409,15 +417,15 @@ export default function PrepTaskPage() {
             </div>
           )}
           
-          <p className="text-gray-700">{task.question}</p>
+          <p className="text-slate-700 dark:text-slate-200">{task.question}</p>
           <div className="mt-4 space-y-2">
-            <p>
-              目標: Band <span className="font-medium">6.0-6.5</span>
+            <p className="text-slate-700 dark:text-slate-200">
+              目標: Band <span className="font-medium text-slate-900 dark:text-slate-100">6.0-6.5</span>
             </p>
-            <p>
+            <p className="text-slate-700 dark:text-slate-200">
               必須語彙:{' '}
               {task.required_vocab.map((v) => (
-                <span key={v.word} className="mr-2 rounded bg-blue-100 px-2 py-1 text-sm">
+                <span key={v.word} className="mr-2 rounded bg-blue-100 dark:bg-blue-900/40 px-2 py-1 text-sm text-blue-800 dark:text-blue-200">
                   {v.word}
                 </span>
               ))}

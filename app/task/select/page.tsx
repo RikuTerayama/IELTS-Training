@@ -74,6 +74,7 @@ function TaskSelectContent() {
   const [level, setLevel] = useState<Level>('beginner');
   const [task1Genre, setTask1Genre] = useState<Task1Genre | 'random' | null>(null);
   const [task2Genre, setTask2Genre] = useState<Task2Genre | 'random' | null>(null);
+  const [selectedMode, setSelectedMode] = useState<'training' | 'exam'>('training');
   const [loading, setLoading] = useState(false);
 
   // クエリパラメータからtask_typeを読み取る
@@ -110,11 +111,19 @@ function TaskSelectContent() {
 
       const data = await response.json();
       if (data.ok && data.data?.id) {
-        // 初級・中級の場合はPREPモードに直接遷移
-        if (level === 'beginner' || level === 'intermediate') {
-          router.push(`/task/${data.data.id}/prep`);
+        // Task1の場合は常に /task/[taskId] に遷移（Task1Flowを使用）
+        // Task2の場合は初級・中級はPREPモード、上級は通常モード
+        if (taskType === 'Task 1') {
+          // modeクエリパラメータを追加（selectedModeがあれば）
+          const modeQuery = selectedMode === 'exam' ? '?mode=exam' : '';
+          router.push(`/task/${data.data.id}${modeQuery}`);
         } else {
-          router.push(`/task/${data.data.id}`);
+          // Task2の場合
+          if (level === 'beginner' || level === 'intermediate') {
+            router.push(`/task/${data.data.id}/prep`);
+          } else {
+            router.push(`/task/${data.data.id}`);
+          }
         }
       } else {
         throw new Error(data.error?.message || 'タスクの生成に失敗しました');
@@ -130,11 +139,11 @@ function TaskSelectContent() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6">タスクを選択</h1>
+        <h1 className="text-2xl font-bold mb-6 text-text dark:text-text">タスクを選択</h1>
 
         {/* タスクタイプ選択 */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-4">タスクタイプ</h2>
+          <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">タスクタイプ</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <button
               onClick={() => {
@@ -186,7 +195,7 @@ function TaskSelectContent() {
         {/* レベル選択 */}
         {taskType && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">レベル</h2>
+            <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">レベル</h2>
             <div className="flex gap-4">
               {levels.map((l) => (
                 <button
@@ -205,10 +214,39 @@ function TaskSelectContent() {
           </div>
         )}
 
+        {/* Mode選択（Task1のみ） */}
+        {taskType === 'Task 1' && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">モード</h2>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setSelectedMode('training')}
+                className={`px-6 py-2 rounded-md border-2 transition-all ${
+                  selectedMode === 'training'
+                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                Training
+              </button>
+              <button
+                onClick={() => setSelectedMode('exam')}
+                className={`px-6 py-2 rounded-md border-2 transition-all ${
+                  selectedMode === 'exam'
+                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                Exam
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Task1 ジャンル選択 */}
         {taskType === 'Task 1' && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">形式を選択</h2>
+            <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">形式を選択</h2>
             <div className="grid md:grid-cols-2 gap-4">
               {task1Genres.map((genre) => (
                 <button
@@ -258,7 +296,7 @@ function TaskSelectContent() {
         {/* Task2 ジャンル選択 */}
         {taskType === 'Task 2' && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">エッセータイプを選択</h2>
+            <h2 className="text-lg font-semibold mb-4 text-text dark:text-text">エッセータイプを選択</h2>
             <div className="space-y-3">
               {task2Genres.map((genre) => (
                 <button
