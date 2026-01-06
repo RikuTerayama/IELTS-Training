@@ -55,7 +55,7 @@ export function Task1Flow({ task, attempt, mode, onAttemptChange }: Task1FlowPro
 
   // 初期化: attemptからstepContentを復元
   useEffect(() => {
-    if (stepState) {
+    if (stepState && attempt) {
       const content: Record<number, string> = {};
       if (stepState.step1) content[1] = stepState.step1;
       if (stepState.step2) content[2] = stepState.step2;
