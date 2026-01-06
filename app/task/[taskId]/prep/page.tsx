@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
@@ -28,9 +28,8 @@ interface EnglishEssay {
   word_count: number;
 }
 
-function PrepTaskPageContent() {
+export default function PrepTaskPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const taskId = params.taskId as string;
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
@@ -79,7 +78,9 @@ function PrepTaskPageContent() {
         if (data.ok) {
           // Task1の場合は /task/[taskId] にリダイレクト（Task1Flowを使用）
           if (data.data.question_type === 'Task 1') {
-            const modeParam = searchParams.get('mode');
+            // URLからmodeパラメータを取得（window.location.searchを使用）
+            const urlParams = new URLSearchParams(window.location.search);
+            const modeParam = urlParams.get('mode');
             const modeQuery = modeParam === 'exam' ? '?mode=exam' : '';
             router.replace(`/task/${taskId}${modeQuery}`);
             return;
@@ -90,7 +91,7 @@ function PrepTaskPageContent() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [taskId, router, searchParams]);
+  }, [taskId, router]);
 
   const handleAnswerChange = (step: PrepStep, value: string) => {
     if (step === 'point') setAnswers({ ...answers, point: value });
