@@ -118,8 +118,12 @@ export interface Attempt {
   id: string;
   user_id: string;
   task_id: string;
+  task_type?: 'Task 1' | 'Task 2'; // Task 1 Step Learning用
+  mode?: 'training' | 'exam'; // Task 1 Step Learning用
   level: 'beginner' | 'intermediate' | 'advanced';
   draft_content: DraftContent;
+  step_state?: Task1StepState; // Task 1 Step Learning用
+  review_state?: Task1ReviewState; // Task 1 Step Learning用
   submitted_at?: string;
   status: 'draft' | 'submitted' | 'rewritten';
   rewrite_count: number;
@@ -132,6 +136,136 @@ export interface DraftContent {
   skeleton?: string; // 初級: 英語骨格
   fill_in?: string; // 初級/中級: 穴埋め回答
   final?: string; // 最終回答（全レベル共通）
+}
+
+// ==================== Task 1 Step Learning型 ====================
+export interface Task1StepState {
+  step1?: string; // グラフは何を示しているか
+  step2?: string; // 大まかな特徴（Overview）
+  step3?: string; // 特徴1
+  step4?: string; // 特徴2
+  step5?: string; // 特徴3
+  step6?: string; // 統合回答
+  step1_fixed?: string; // レビュー反映後
+  step2_fixed?: string;
+  step3_fixed?: string;
+  step4_fixed?: string;
+  step5_fixed?: string;
+  observations?: Task1Observation[]; // 図表上の観察メモ（付箋）
+  key_numbers?: Task1KeyNumber[]; // 登録した数字
+  checklist?: Task1Checklist; // チェックリスト状態
+  timers?: Task1Timers; // Exam用タイマー
+}
+
+export interface Task1Observation {
+  id: string;
+  x: number; // 画像上のX座標（0-100%）
+  y: number; // 画像上のY座標（0-100%）
+  text: string;
+  tags?: string[]; // 任意のタグ
+}
+
+export interface Task1KeyNumber {
+  value: number | string; // 数値または文字列（例: "50%"）
+  unit?: string; // 単位（例: "million", "%", "years"）
+  context: string; // 文脈（例: "Population in 2020"）
+}
+
+export interface Task1Checklist {
+  has_overview?: boolean; // Overviewがあるか
+  has_comparison?: boolean; // 比較表現があるか
+  has_numbers?: boolean; // 数字の根拠があるか
+  has_paragraphs?: boolean; // 段落があるか
+  word_count_ok?: boolean; // 語数が適切か（150-200語）
+  tense_consistent?: boolean; // 時制が一貫しているか
+  [key: string]: boolean | undefined; // その他のチェック項目
+}
+
+export interface Task1Timers {
+  step1_start?: string; // ISO 8601
+  step2_start?: string;
+  step3_start?: string;
+  step4_start?: string;
+  step5_start?: string;
+  step6_start?: string;
+  total_elapsed?: number; // 秒
+}
+
+export interface Task1ReviewState {
+  step_review?: {
+    status: 'pending' | 'completed' | 'error';
+    feedback_payload?: Task1StepReviewFeedback;
+    updated_at?: string;
+  };
+  final_review?: {
+    status: 'pending' | 'completed' | 'error';
+    feedback_payload?: Task1FinalReviewFeedback;
+    updated_at?: string;
+  };
+}
+
+export interface Task1StepReviewFeedback {
+  schema_version: string;
+  step_feedbacks: Array<{
+    step_index: 1 | 2 | 3 | 4 | 5;
+    is_valid: boolean;
+    issues: Array<{
+      category: 'TR' | 'CC' | 'LR' | 'GRA' | 'structure' | 'content';
+      description: string;
+      suggestion: string;
+      example_before?: string;
+      example_after?: string;
+    }>;
+    strengths?: string[];
+  }>;
+  top_priority_fix: {
+    step_index: 1 | 2 | 3 | 4 | 5;
+    issue: string;
+    fix_guidance: string;
+  };
+  number_validation?: {
+    extracted_numbers: Array<{ value: string; context: string }>;
+    registered_numbers: Array<{ value: string; context: string }>;
+    mismatches: Array<{ extracted: string; registered?: string }>;
+  };
+}
+
+export interface Task1FinalReviewFeedback {
+  schema_version: string;
+  overall_band_range: string;
+  dimensions: DimensionFeedback[];
+  strengths: Strength[];
+  band_up_actions: BandUpAction[];
+  rewrite_targets: RewriteTarget[];
+  vocab_suggestions: VocabSuggestion[];
+  sentence_highlights: Array<{
+    sentence_index: number;
+    sentence_text: string;
+    tags: Array<'TR' | 'CC' | 'LR' | 'GRA'>;
+    comment: string;
+    suggested_rewrite?: string;
+  }>;
+  number_validation?: {
+    extracted_numbers: Array<{ value: string; context: string }>;
+    registered_numbers: Array<{ value: string; context: string }>;
+    mismatches: Array<{ extracted: string; registered?: string }>;
+    has_mismatch: boolean;
+  };
+  metadata: FeedbackMetadata;
+}
+
+// ==================== User Skill Stats型 ====================
+export interface UserSkillStats {
+  user_id: string;
+  counters: {
+    overview_missing?: number;
+    comparison_missing?: number;
+    tense_inconsistent?: number;
+    article_errors?: number;
+    number_mismatch?: number;
+    [key: string]: number | undefined;
+  };
+  updated_at: string;
 }
 
 // ==================== 穴埋め問題型 ====================

@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
-import type { Task, DraftContent } from '@/lib/domain/types';
+import { Task1Flow } from '@/components/task1/Task1Flow';
+import type { Task, DraftContent, Attempt } from '@/lib/domain/types';
 
 export default function TaskPage() {
   const params = useParams();
@@ -15,6 +16,8 @@ export default function TaskPage() {
   const [draftContent, setDraftContent] = useState<DraftContent>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [attempt, setAttempt] = useState<Attempt | null>(null);
+  const [mode, setMode] = useState<'training' | 'exam'>('training');
 
   useEffect(() => {
     if (taskId === 'new') {
@@ -44,10 +47,35 @@ export default function TaskPage() {
 
     fetch(`/api/tasks/${taskId}`)
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         if (data.ok) {
           setTask(data.data);
           setLevel(data.data.level);
+
+          // Task 1の場合はattemptを作成または再開
+          if (data.data.question_type === 'Task 1') {
+            try {
+              const attemptRes = await fetch('/api/task1/attempts/create-or-resume', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  task_id: taskId,
+                  level: data.data.level,
+                  mode: 'training', // デフォルトはtraining
+                }),
+              });
+
+              if (attemptRes.ok) {
+                const attemptData = await attemptRes.json();
+                if (attemptData.ok) {
+                  setAttempt(attemptData.data);
+                  setMode(attemptData.data.mode || 'training');
+                }
+              }
+            } catch (error) {
+              console.error('Failed to create/resume attempt:', error);
+            }
+          }
         }
       })
       .catch(console.error)
@@ -189,6 +217,62 @@ export default function TaskPage() {
     );
   }
 
+  // Task 1の場合はStep Learning Flowを表示
+  if (task.question_type === 'Task 1' && attempt) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="mb-2 text-lg font-semibold">お題</h2>
+                <p className="text-sm text-gray-600">{task.question}</p>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600">
+                    目標: Band <span className="font-medium">6.0-6.5</span>
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    必須語彙:{' '}
+                    {task.required_vocab.map((v) => (
+                      <span key={v.word} className="mr-2 rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                        {v.word}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMode(mode === 'training' ? 'exam' : 'training')}
+                  className={`rounded px-3 py-1 text-sm ${
+                    mode === 'training'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  {mode === 'training' ? 'Training' : 'Exam'}
+                </button>
+              </div>
+            </div>
+            <Task1Image
+              question={task.question}
+              level={level}
+              alt="Task 1 Chart or Diagram"
+              className="w-full"
+            />
+          </div>
+          <Task1Flow
+            task={task}
+            attempt={attempt}
+            mode={mode}
+            onAttemptChange={(updatedAttempt) => setAttempt(updatedAttempt)}
+          />
+        </div>
+      </Layout>
+    );
+  }
+
+  // Task 2の場合は既存のUI
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
