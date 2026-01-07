@@ -95,6 +95,8 @@ export interface Task {
   question_type: 'Task 1' | 'Task 2';
   required_vocab: RequiredVocab[]; // 3〜5語
   prep_guide?: PrepGuide; // 初級/中級のみ
+  asset_id?: string; // Task1の場合のアセットID
+  image_path?: string; // Task1の場合の画像パス
   created_at: string;
 }
 

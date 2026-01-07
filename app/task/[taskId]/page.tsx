@@ -263,6 +263,7 @@ function TaskPageContent() {
             <Task1Image
               question={task.question}
               level={level}
+              imagePath={task.image_path}
               alt="Task 1 Chart or Diagram"
               className="w-full"
             />
@@ -293,6 +294,7 @@ function TaskPageContent() {
                 <Task1Image
                   question={task.question}
                   level={level}
+                  imagePath={task.image_path}
                   alt="Task 1 Chart or Diagram"
                   className="w-full"
                 />

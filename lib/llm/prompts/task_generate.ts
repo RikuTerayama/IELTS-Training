@@ -1,9 +1,13 @@
 /**
  * タスク生成プロンプト
  * 07_LLMプロンプトテンプレート.md の task_generate に準拠
+ * 
+ * Task1: アセット先行方式（質問文はアセットから決定、LLMは語彙とprep_guideのみ生成）
+ * Task2: 従来通り（LLMが質問文も生成）
  */
 
 import type { TaskGenerationResponse } from '@/lib/domain/types';
+import type { Task1Asset } from '@/lib/task1/assets';
 import { callLLM } from '../client';
 import { parseLLMResponseWithRetry } from '../parse';
 
@@ -148,11 +152,146 @@ Output JSON format:
 Note: For advanced level, prep_guide can be null or minimal.`;
 }
 
+/**
+ * Task1の質問文をアセットから決定生成
+ * LLMを使わず、アセットメタデータからIELTS定型文を組み立てる
+ */
+export function buildTask1QuestionFromAsset(asset: Task1Asset): string {
+  // グラフ種別に応じた表現を選択
+  const chartTypeMap: Record<Task1Asset['genre'], string> = {
+    line_chart: 'graph',
+    bar_chart: 'bar chart',
+    pie_chart: 'pie chart',
+    table: 'table',
+    multiple_charts: 'charts',
+    diagram: 'diagram',
+    map: 'map',
+  };
+  
+  const chartType = chartTypeMap[asset.genre] || 'chart';
+  
+  // IELTS定型文を組み立て
+  const question = `The ${chartType} below shows ${asset.title.toLowerCase()}${
+    asset.time_period ? ` from ${asset.time_period}` : ''
+  }.
+
+Summarise the information by selecting and reporting the main features, and make comparisons where relevant.
+
+Write at least 150 words.`;
+
+  return question;
+}
+
+/**
+ * Task1の語彙とprep_guideのみをLLMで生成
+ * 質問文はアセットから決定的に生成されるため、LLMには語彙生成のみを依頼
+ */
+function buildTask1VocabPrompt(
+  level: 'beginner' | 'intermediate' | 'advanced',
+  asset: Task1Asset
+): string {
+  return `You are an IELTS Writing Task 1 vocabulary and guide generator for Japanese learners.
+
+Generate vocabulary words and a preparation guide for an IELTS Task 1 task.
+
+Task Information:
+- Level: ${level}
+- Genre: ${asset.genre}
+- Title: ${asset.title}
+- Time Period: ${asset.time_period}
+- Unit: ${asset.unit}
+- Categories: ${asset.categories.join(', ')}
+- Description: ${asset.description}
+
+User Level: ${level}
+- beginner: Band 5.0-5.5 target
+- intermediate: Band 6.0-6.5 target
+- advanced: Band 6.5-7.0 target
+
+IMPORTANT CONSTRAINTS:
+1. DO NOT generate the question text. The question is already determined from the asset metadata.
+2. DO NOT modify or suggest changes to the asset data (title, time period, unit, categories).
+3. ONLY generate required_vocab and prep_guide.
+
+Requirements:
+1. Provide 3-5 required vocabulary words that are appropriate for describing this ${asset.genre}:
+   - word (English)
+   - meaning (Japanese)
+   - skill_tags (array of 'writing', 'speaking', 'reading', 'listening')
+2. For beginner/intermediate levels, provide a simple guide structure (prep_guide)
+3. For advanced level, prep_guide can be null or minimal
+
+Output JSON format:
+{
+  "schema_version": "1.0",
+  "required_vocab": [
+    {
+      "word": "example",
+      "meaning": "例",
+      "skill_tags": ["writing", "speaking"]
+    }
+  ],
+  "prep_guide": {
+    "point": "Describe the main features",
+    "reason": "Provide specific data points",
+    "example": "Include comparisons",
+    "point_again": "Summarize the key trends",
+    "structure": ["Introduction", "Overview", "Details"]
+  }
+}
+
+Note: For advanced level, prep_guide can be null or minimal.`;
+}
+
+/**
+ * Task1の語彙とprep_guideのみをLLMで生成
+ */
+export async function generateTask1VocabOnly(
+  level: 'beginner' | 'intermediate' | 'advanced',
+  asset: Task1Asset
+): Promise<{ required_vocab: TaskGenerationResponse['required_vocab']; prep_guide?: TaskGenerationResponse['prep_guide'] }> {
+  const prompt = buildTask1VocabPrompt(level, asset);
+  
+  try {
+    console.log('[generateTask1VocabOnly] Calling LLM with level:', level, 'asset:', asset.id);
+    const parsed = await parseLLMResponseWithRetry(async () => {
+      return await callLLM(prompt, {
+        response_format: { type: 'json_object' },
+        temperature: 0.2, // 低温度で一貫性を保つ
+      });
+    });
+
+    console.log('[generateTask1VocabOnly] LLM response parsed successfully');
+    
+    // バリデーション: required_vocabが3-5語であることを確認
+    const vocab = (parsed as any).required_vocab;
+    if (!Array.isArray(vocab) || vocab.length < 3 || vocab.length > 5) {
+      console.warn('[generateTask1VocabOnly] Invalid vocab count:', vocab?.length, 'expected 3-5');
+    }
+    
+    return {
+      required_vocab: vocab || [],
+      prep_guide: (parsed as any).prep_guide,
+    };
+  } catch (error) {
+    console.error('[generateTask1VocabOnly] Error:', error);
+    throw new Error(
+      `Failed to generate Task1 vocab: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+}
+
 export async function generateTask(
   level: 'beginner' | 'intermediate' | 'advanced',
   taskType: 'Task 1' | 'Task 2' = 'Task 2',
   genre: string | null = null
 ): Promise<TaskGenerationResponse> {
+  // Task1の場合はアセット先行方式を使うため、この関数は呼ばれない想定
+  // しかし後方互換性のために残しておく（将来削除予定）
+  if (taskType === 'Task 1') {
+    throw new Error('Task1 generation should use generateTask1WithAsset() instead');
+  }
+  
   const prompt = buildTaskGeneratePrompt(level, taskType, genre);
   
   try {

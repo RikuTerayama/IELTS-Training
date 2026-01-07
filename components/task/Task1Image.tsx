@@ -9,6 +9,7 @@ interface Task1ImageProps {
   level?: 'beginner' | 'intermediate' | 'advanced';
   batch?: number;
   questionNumber?: number;
+  imagePath?: string; // 新規生成タスクの場合に直接指定
   alt?: string;
   className?: string;
 }
@@ -18,6 +19,7 @@ export function Task1Image({
   level,
   batch,
   questionNumber,
+  imagePath: imagePathProp,
   alt = 'Task 1 Chart',
   className = '',
 }: Task1ImageProps) {
@@ -25,14 +27,19 @@ export function Task1Image({
   
   let imagePath: string | null = null;
 
-  if (batch !== undefined && questionNumber !== undefined) {
+  // 優先順位1: 直接指定されたimagePath（新規生成タスク）
+  if (imagePathProp) {
+    imagePath = imagePathProp;
+  } else if (batch !== undefined && questionNumber !== undefined) {
+    // 優先順位2: メタデータから（既存方式）
     imagePath = getTask1ImagePathFromMetadata(batch, questionNumber);
   } else if (question && level) {
+    // 優先順位3: 質問文から検出（旧方式、後方互換用）
     imagePath = getTask1ImagePath(question, level);
     // デバッグ用（開発環境のみ）
     if (!imagePath && typeof window !== 'undefined') {
       const detectedGenre = detectTask1Genre(question);
-      console.log('[Task1Image] 画像パスが見つかりません:', {
+      console.log('[Task1Image] 画像パスが見つかりません（旧方式）:', {
         questionPreview: question.substring(0, 150),
         level,
         detectedGenre,
