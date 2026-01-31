@@ -42,9 +42,10 @@ export function Header() {
               <Link href="/home" className="text-text-muted hover:text-text transition-colors duration-200">
                 Home
               </Link>
-              <Link href="/progress" className="text-text-muted hover:text-text transition-colors duration-200">
+              {/* Progressへのリンクは非表示（Step0: 依存を断つ） */}
+              {/* <Link href="/progress" className="text-text-muted hover:text-text transition-colors duration-200">
                 Progress
-              </Link>
+              </Link> */}
               <Link href="/vocab" className="text-text-muted hover:text-text transition-colors duration-200">
                 Vocab
               </Link>
@@ -122,13 +123,14 @@ export function Header() {
               >
                 Home
               </Link>
-              <Link
+              {/* Progressへのリンクは非表示（Step0: 依存を断つ） */}
+              {/* <Link
                 href="/progress"
                 onClick={() => setMenuOpen(false)}
                 className="text-text-muted hover:text-text py-2 transition-colors duration-200"
               >
                 Progress
-              </Link>
+              </Link> */}
               <Link
                 href="/vocab"
                 onClick={() => setMenuOpen(false)}
