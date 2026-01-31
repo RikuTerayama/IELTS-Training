@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
-// --- アイコンコンポーネント（絵文字の代わりにこれらを使用します） ---
+// --- アイコンコンポーネント ---
 const Icons = {
   Check: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>,
   Chart: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
@@ -27,7 +27,14 @@ export default function LandingPage() {
   const [resendingEmail, setResendingEmail] = useState(false);
   const supabase = createClient();
 
-  // --- ロジック部分は変更なし ---
+  // --- スムーズスクロール機能 ---
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -136,16 +143,14 @@ export default function LandingPage() {
       setResendingEmail(false);
     }
   };
-  // --- ロジック終了 ---
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       
-      {/* 背景の洗練された装飾 */}
+      {/* 背景装飾 */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-50/60 rounded-[100%] blur-3xl opacity-70" />
         <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-blue-50/40 rounded-[100%] blur-3xl opacity-60" />
-        {/* グリッドパターン */}
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
       </div>
 
@@ -174,7 +179,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="relative z-10 pt-32 pb-24">
+      <main className="relative z-10 pt-32 pb-0">
         
         {/* ヒーローセクション */}
         <div className="container mx-auto px-6 mb-32">
@@ -282,227 +287,466 @@ export default function LandingPage() {
                     <button
                       type="submit"
                       disabled={loading || signUpSuccess}
-                      className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-lg shadow-slate-900/10 active:transform active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg shadow-indigo-500/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 group-hover:scale-[1.02] active:scale-[0.98]"
                     >
                       {loading ? (
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       ) : (
                         <>
                           {isSignUp ? 'Create Account' : 'Sign In'}
-                          <Icons.ArrowRight className="w-4 h-4" />
+                          <Icons.ArrowRight className="w-4 h-4 opacity-80" />
                         </>
                       )}
                     </button>
-
-                    <div className="pt-2 text-center">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsSignUp(!isSignUp);
-                          setError(null);
-                          setSignUpSuccess(false);
-                        }}
-                        className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
-                      >
-                        {isSignUp ? 'すでにアカウントをお持ちの方' : '新規登録はこちら'}
-                      </button>
-                    </div>
                   </form>
+
+                  <div className="mt-6 text-center">
+                    <button
+                      onClick={() => {
+                        setIsSignUp(!isSignUp);
+                        setError(null);
+                        setSignUpSuccess(false);
+                      }}
+                      className="text-sm text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+                    >
+                      {isSignUp ? 'すでにアカウントをお持ちですか？ ログイン' : 'アカウントをお持ちでないですか？ 新規登録'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 課題解決セクション (Modern Cards) */}
+        {/* 課題解決セクション */}
         <section className="py-24 bg-white border-y border-slate-100">
           <div className="container mx-auto px-6">
             <div className="max-w-3xl mx-auto text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">なぜ、独学でのスコアアップは難しいのか</h2>
-              <p className="text-slate-500 text-lg">多くの学習者が直面する「見えない壁」を、テクノロジーで可視化します。</p>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                なぜ、独学でのスコアアップは難しいのか
+              </h2>
+              <p className="text-slate-500 text-lg">
+                多くのIELTS学習者が直面する共通の課題があります。
+              </p>
             </div>
             
             <div className="grid md:grid-cols-3 gap-8">
-              {[
-                { 
-                  icon: <Icons.Alert className="w-6 h-6 text-red-500" />, 
-                  title: "フィードバックの欠如", 
-                  desc: "ライティングの自己採点は不可能です。改善点が見えないまま、間違ったフォームで練習を続けていませんか？" 
-                },
-                { 
-                  icon: <Icons.Chart className="w-6 h-6 text-orange-500" />, 
-                  title: "成長の停滞", 
-                  desc: "「書けるようになった気」がしていても、スコアが変わらない。客観的な指標がないため、スランプに陥りやすくなります。" 
-                },
-                { 
-                  icon: <Icons.Layers className="w-6 h-6 text-blue-500" />, 
-                  title: "非効率な学習戦略", 
-                  desc: "自分に必要なのが単語力なのか、構成力なのか。優先順位を誤ると、膨大な時間を浪費することになります。" 
-                },
-              ].map((item, i) => (
-                <div key={i} className="group p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300">
-                  <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    {item.icon}
+               <div className="p-8 rounded-2xl bg-[#FAFAFA] border border-slate-100">
+                  <div className="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center mb-6">
+                    <Icons.Alert className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">{item.title}</h3>
-                  <p className="text-slate-600 leading-relaxed text-sm">{item.desc}</p>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">フィードバックの欠如</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    自分のライティングやスピーキングのどこが間違っているのか、どう改善すべきかが客観的に分からない。
+                  </p>
+               </div>
+               <div className="p-8 rounded-2xl bg-[#FAFAFA] border border-slate-100">
+                  <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center mb-6">
+                    <Icons.Chart className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">成長の停滞</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    同じような表現ばかり使ってしまい、バンドスコア5.5〜6.0の壁をなかなか超えられない。
+                  </p>
+               </div>
+               <div className="p-8 rounded-2xl bg-[#FAFAFA] border border-slate-100">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                    <Icons.Layers className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">非効率な学習戦略</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    闇雲に問題を解くだけで、体系的な語彙強化や論理構成のトレーニングができていない。
+                  </p>
+               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features セクション (Bento Grid) */}
+        <section id="features" className="py-24 bg-[#FAFAFA]">
+          <div className="container mx-auto px-6">
+            <div className="max-w-3xl mx-auto text-center mb-16">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                Everything you need to succeed
+              </h2>
+              <p className="text-slate-500 text-lg">
+                AI技術と学習科学を組み合わせた、オールインワンの学習プラットフォーム
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {/* Feature 1: Main (Large) */}
+              <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm overflow-hidden relative group hover:shadow-md transition-all">
+                <div className="relative z-10">
+                  <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-6">
+                    <Icons.Brain className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-3">AI Instant Feedback</h3>
+                  <p className="text-slate-600 max-w-md mb-6">
+                    提出から数秒で、試験官レベルの詳細なフィードバックを受け取れます。文法ミスだけでなく、語彙の多様性や論理構成まで分析します。
+                  </p>
+                </div>
+                <div className="absolute right-0 bottom-0 w-1/2 h-full bg-gradient-to-l from-indigo-50 to-transparent opacity-50" />
+              </div>
+
+              {/* Feature 2: Vocabulary */}
+              <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="w-12 h-12 bg-pink-100 text-pink-600 rounded-xl flex items-center justify-center mb-6">
+                  <Icons.Book className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">Smart Vocabulary</h3>
+                <p className="text-slate-600 text-sm">
+                  文脈に基づいた語彙学習。忘却曲線に基づくSRSシステムで、効率的に定着させます。
+                </p>
+              </div>
+
+              {/* Feature 3: Progress */}
+              <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-6">
+                  <Icons.Chart className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">Visual Progress</h3>
+                <p className="text-slate-600 text-sm">
+                  日々の学習進捗と弱点を可視化。自分の成長を実感しながら学習を継続できます。
+                </p>
+              </div>
+
+              {/* Feature 4: Curriculum */}
+              <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-all flex items-center">
+                <div className="flex-1">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                    <Icons.Target className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">レベル別カリキュラム</h3>
+                  <p className="text-slate-600">
+                    現在のレベル（Beginner / Intermediate / Advanced）に合わせて、最適な学習コンテンツを自動で提供します。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing セクション */}
+        <section id="pricing" className="py-24 bg-white border-y border-slate-100">
+          <div className="container mx-auto px-6">
+            <div className="max-w-3xl mx-auto text-center mb-16">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                今は完全無料で始められます
+              </h2>
+              <p className="text-slate-500 text-lg">
+                MVP期間中は、すべての機能を無料でお試しいただけます。
+              </p>
+            </div>
+            
+            <div className="max-w-md mx-auto">
+              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl p-8 border-2 border-indigo-200 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  LIMITED TIME
+                </div>
+                <div className="text-center mb-6">
+                  <div className="inline-block px-3 py-1 mb-4 rounded-full bg-indigo-600/10 text-indigo-700 text-xs font-bold">
+                    FREE PLAN
+                  </div>
+                  <div className="text-5xl font-bold text-slate-900 mb-2">
+                    ¥0
+                  </div>
+                  <div className="text-slate-500 text-sm">/ 月</div>
+                </div>
+                
+                <ul className="space-y-4 mb-8">
+                  {[
+                    'AIによる即時フィードバック（無制限）',
+                    'Writing Task 1/2 練習',
+                    'Speaking練習',
+                    '語彙・熟語・表現バンク学習',
+                    '進捗可視化・弱点分析',
+                    '忘却曲線ベースの復習システム',
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <div className="mt-0.5 text-indigo-600">
+                        <Icons.Check className="w-5 h-5" />
+                      </div>
+                      <span className="text-slate-700 font-medium">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30"
+                >
+                  無料で始める
+                </button>
+              </div>
+            </div>
+            
+            <div className="mt-8 text-center text-sm text-slate-500">
+              <p>※ 将来的に有料プランを導入する可能性がありますが、現在のユーザーには移行期間を設けます。</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials セクション */}
+        <section id="testimonials" className="py-24 bg-[#FAFAFA]">
+          <div className="container mx-auto px-6">
+            <div className="max-w-3xl mx-auto text-center mb-16">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                ユーザーの声
+              </h2>
+              <p className="text-slate-500 text-lg">
+                実際にIELTS Trainingを利用している学習者からのフィードバック
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {[
+                {
+                  name: 'T.K.さん',
+                  level: 'Intermediate',
+                  band: '6.5達成',
+                  text: 'AIのフィードバックが非常に具体的で、どこを改善すべきかが明確になりました。特に論理構成のアドバイスが役立ちました。',
+                  avatar: '👨‍💼'
+                },
+                {
+                  name: 'M.S.さん',
+                  level: 'Beginner',
+                  band: '5.5達成',
+                  text: 'レベル別のカリキュラムが自分に合っていて、無理なく学習を続けられています。語彙学習も効率的です。',
+                  avatar: '👩‍🎓'
+                },
+                {
+                  name: 'R.Y.さん',
+                  level: 'Advanced',
+                  band: '7.0達成',
+                  text: '進捗が可視化されることで、モチベーションが維持できています。弱点分析機能も優秀です。',
+                  avatar: '👨‍🎓'
+                },
+              ].map((testimonial, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="text-3xl bg-slate-50 w-10 h-10 flex items-center justify-center rounded-full">{testimonial.avatar}</div>
+                    <div>
+                      <div className="font-bold text-slate-900">{testimonial.name}</div>
+                      <div className="text-xs text-slate-500">{testimonial.level} • <span className="text-indigo-600 font-medium">{testimonial.band}</span></div>
+                    </div>
+                  </div>
+                  <p className="text-slate-600 text-sm leading-relaxed">"{testimonial.text}"</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Features: Bento Grid Layout */}
-        <section className="py-24 bg-[#FAFAFA]">
+        {/* About セクション */}
+        <section id="about" className="py-24 bg-white border-y border-slate-100">
           <div className="container mx-auto px-6">
-            <div className="mb-16">
-              <span className="text-indigo-600 font-bold tracking-wider uppercase text-xs mb-2 block">Our Solution</span>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
-                All-in-One Platform<br />for IELTS Success
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(200px,auto)]">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                  IELTS Trainingについて
+                </h2>
+                <p className="text-slate-500 text-lg">
+                  データ駆動型アプローチで、IELTSスコアアップをサポートします
+                </p>
+              </div>
               
-              {/* Feature 1: Main AI - Large Box */}
-              <div className="md:col-span-2 row-span-2 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-100 transition-colors"></div>
-                <div className="relative z-10 h-full flex flex-col justify-between">
-                  <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-500/30">
-                    <Icons.Brain className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-2">AI Instant Feedback</h3>
-                    <p className="text-slate-600 mb-6 leading-relaxed">
-                      提出からわずか数秒で、IELTS認定試験官レベルの詳細な分析を提供します。
-                      文法ミスだけでなく、「論理的一貫性」「語彙の多様性」など、評価基準に基づいた具体的な改善案を提示。
-                    </p>
-                    <div className="space-y-3">
-                      {['予想バンドスコア算出', 'パラフレーズ提案', '論理構成の弱点指摘'].map((tag, i) => (
-                        <div key={i} className="flex items-center gap-3 text-sm font-medium text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
-                          <Icons.Check className="w-4 h-4 text-indigo-600" />
-                          {tag}
-                        </div>
-                      ))}
+              <div className="space-y-12">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span className="w-1 h-6 bg-indigo-600 rounded-full"></span>
+                    ミッション
+                  </h3>
+                  <p className="text-slate-600 leading-relaxed bg-[#FAFAFA] p-6 rounded-xl border border-slate-100">
+                    IELTS Trainingは、AI技術を活用して、すべての学習者が効率的にIELTSスコアを向上させられるプラットフォームを目指しています。
+                    独学では難しい「客観的なフィードバック」と「データに基づく学習戦略」を提供することで、目標スコア達成をサポートします。
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span className="w-1 h-6 bg-indigo-600 rounded-full"></span>
+                    技術スタック
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                      <div className="font-semibold text-slate-900 mb-2">フロントエンド</div>
+                      <div className="text-sm text-slate-600">Next.js 14, React, TypeScript, Tailwind CSS</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                      <div className="font-semibold text-slate-900 mb-2">バックエンド</div>
+                      <div className="text-sm text-slate-600">Supabase (PostgreSQL), Next.js API Routes</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                      <div className="font-semibold text-slate-900 mb-2">AI/LLM</div>
+                      <div className="text-sm text-slate-600">Groq, OpenAI (GPT-4o-mini)</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                      <div className="font-semibold text-slate-900 mb-2">その他</div>
+                      <div className="text-sm text-slate-600">Zod (バリデーション), SRSアルゴリズム</div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Feature 2: Vocabulary - Small Box */}
-              <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mb-4">
-                  <Icons.Book className="w-5 h-5" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Smart Vocabulary</h3>
-                <p className="text-slate-600 text-sm">
-                  4技能別・頻出1200語を収録。文脈の中で使える「生きた語彙」を習得します。
-                </p>
-              </div>
-
-              {/* Feature 3: Analytics - Small Box */}
-              <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center mb-4">
-                  <Icons.Chart className="w-5 h-5" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Visual Progress</h3>
-                <p className="text-slate-600 text-sm">
-                  日々の学習データを可視化。苦手なトピックや文法項目を自動で特定します。
-                </p>
-              </div>
-
-              {/* Feature 4: Level Based - Wide Box */}
-              <div className="md:col-span-3 bg-slate-900 rounded-3xl p-8 shadow-xl text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-                <div className="relative z-10 max-w-xl">
-                  <div className="inline-block px-3 py-1 mb-4 rounded-full bg-indigo-500/20 border border-indigo-500/50 text-indigo-300 text-xs font-bold">
-                    PERSONALIZED
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">レベル別カリキュラム</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    現在の実力（初級・中級・上級）に合わせて、最適なタスクを提供。PREP法を用いたガイド付きライティングで、無理なく論理構成力を養います。
-                  </p>
-                </div>
-                <div className="relative z-10 flex gap-4 shrink-0">
-                  <div className="px-6 py-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm text-center">
-                    <div className="text-2xl font-bold text-indigo-400">120+</div>
-                    <div className="text-xs text-slate-400 mt-1">Practice Topics</div>
-                  </div>
-                  <div className="px-6 py-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm text-center">
-                    <div className="text-2xl font-bold text-indigo-400">24/7</div>
-                    <div className="text-xs text-slate-400 mt-1">AI Support</div>
-                  </div>
-                </div>
-                
-                {/* 装飾用背景 */}
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-              </div>
-
             </div>
           </div>
         </section>
 
-        {/* CTA セクション */}
-        <section className="py-20 border-t border-slate-200">
-          <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl font-bold text-slate-900 mb-6">
-              Start your journey today.
-            </h2>
-            <p className="text-slate-600 mb-10 max-w-2xl mx-auto">
-              必要なのは、目標に向かう意志だけ。<br/>
-              効率的なツールで、あなたの可能性を最大限に引き出しましょう。
-            </p>
-            <button 
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20 hover:scale-105"
-            >
-              無料でアカウント作成
-              <Icons.ArrowRight className="w-4 h-4" />
-            </button>
+        {/* Contact セクション */}
+        <section id="contact" className="py-24 bg-[#FAFAFA]">
+          <div className="container mx-auto px-6">
+            <div className="max-w-2xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                  お問い合わせ
+                </h2>
+                <p className="text-slate-500 text-lg">
+                  ご質問やフィードバックをお待ちしています
+                </p>
+              </div>
+              
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+                <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('お問い合わせ機能は準備中です。メールにてご連絡ください。'); }}>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        お名前
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900"
+                        placeholder="山田 太郎"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        メールアドレス
+                      </label>
+                      <input
+                        type="email"
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900"
+                        placeholder="example@email.com"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      お問い合わせ内容
+                    </label>
+                    <select className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900">
+                      <option>機能について</option>
+                      <option>バグ報告</option>
+                      <option>改善提案</option>
+                      <option>その他</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      メッセージ
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900 resize-none"
+                      placeholder="お問い合わせ内容をご記入ください"
+                    />
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    className="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all"
+                  >
+                    送信する
+                  </button>
+                </form>
+                
+                <div className="mt-8 pt-8 border-t border-slate-200">
+                  <p className="text-sm text-slate-500 text-center">
+                    または、メールで直接お問い合わせください:<br/>
+                    <a href="mailto:support@ielts-training.com" className="text-indigo-600 hover:underline font-medium">
+                      support@ielts-training.com
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
       </main>
 
       {/* フッター */}
-      <footer className="bg-white border-t border-slate-200 pt-16 pb-12">
+      <footer className="bg-white border-t border-slate-200 py-12">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-slate-900 rounded flex items-center justify-center text-white">
-                  <span className="font-bold text-xs">I</span>
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div className="col-span-1 md:col-span-1">
+               <Link href="/" className="flex items-center gap-2 mb-4">
+                <div className="w-6 h-6 bg-indigo-600 rounded text-white flex items-center justify-center">
+                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </div>
                 <span className="font-bold text-slate-900">IELTS Training</span>
-              </div>
-              <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
-                AIを活用した次世代のIELTS学習プラットフォーム。<br/>
-                科学的なアプローチで、確実なスコアアップをサポートします。
-              </p>
+               </Link>
+               <p className="text-sm text-slate-500 leading-relaxed">
+                 AI-powered IELTS preparation platform designed to help you achieve your target score efficiently.
+               </p>
             </div>
-            <div>
+            
+            <div className="md:col-start-3">
               <h4 className="font-bold text-slate-900 mb-4 text-sm">Product</h4>
               <ul className="space-y-2 text-sm text-slate-500">
-                <li className="hover:text-indigo-600 cursor-pointer">Features</li>
-                <li className="hover:text-indigo-600 cursor-pointer">Pricing</li>
-                <li className="hover:text-indigo-600 cursor-pointer">Testimonials</li>
+                <li>
+                  <button onClick={() => scrollToSection('features')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
+                    Features
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => scrollToSection('pricing')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
+                    Pricing
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => scrollToSection('testimonials')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
+                    Testimonials
+                  </button>
+                </li>
               </ul>
             </div>
+            
             <div>
               <h4 className="font-bold text-slate-900 mb-4 text-sm">Company</h4>
               <ul className="space-y-2 text-sm text-slate-500">
-                <li className="hover:text-indigo-600 cursor-pointer">About</li>
-                <li className="hover:text-indigo-600 cursor-pointer">Blog</li>
-                <li className="hover:text-indigo-600 cursor-pointer">Contact</li>
+                <li>
+                  <button onClick={() => scrollToSection('about')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
+                    About
+                  </button>
+                </li>
+                <li>
+                  <Link 
+                    href="https://ieltsconsult.netlify.app/" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-indigo-600 cursor-pointer transition-colors"
+                  >
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <button onClick={() => scrollToSection('contact')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
+                    Contact
+                  </button>
+                </li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
-            <div>
-              &copy; {new Date().getFullYear()} IELTS Training. All rights reserved.
-            </div>
-            <div className="flex gap-6">
-              <span className="hover:text-slate-600 cursor-pointer">Privacy Policy</span>
-              <span className="hover:text-slate-600 cursor-pointer">Terms of Service</span>
+          
+          <div className="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-slate-400">
+              © {new Date().getFullYear()} IELTS Training. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-xs text-slate-400">
+              <a href="#" className="hover:text-slate-600">Privacy Policy</a>
+              <a href="#" className="hover:text-slate-600">Terms of Service</a>
             </div>
           </div>
         </div>
