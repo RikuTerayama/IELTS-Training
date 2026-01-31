@@ -2,21 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
-import type { ProgressSummary } from '@/lib/domain/types';
+import type { TodayMenu } from '@/lib/api/schemas/menuToday';
+import type { ApiResponse } from '@/lib/api/response';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
 
 export default function HomePage() {
-  const [summary, setSummary] = useState<ProgressSummary | null>(null);
+  const [menu, setMenu] = useState<TodayMenu | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // 進捗サマリー取得
-    fetch('/api/progress/summary')
+    // 今日のメニュー取得
+    fetch('/api/menu/today')
       .then((res) => res.json())
-      .then((data) => {
-        if (data.ok) {
-          setSummary(data.data);
+      .then((data: ApiResponse<TodayMenu>) => {
+        if (data.ok && data.data) {
+          setMenu(data.data);
         }
       })
       .catch(console.error)
@@ -37,96 +40,112 @@ export default function HomePage() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          {/* カード2: 弱点タグ */}
-          {summary && summary.weakness_tags.length > 0 && (
-            <div className="rounded-lg border border-border bg-surface p-6 shadow-theme-lg backdrop-blur-sm">
-              <h2 className="mb-4 text-lg font-semibold text-text">弱点タグ</h2>
-              <p className="text-text-muted">
-                最近は{summary.weakness_tags.join(', ')}が弱め
-              </p>
+          {/* Lv/Exp表示（Step0はダミー、小さめに表示） */}
+          {menu && (
+            <div className={cn('p-4', cardBase)}>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs text-text-muted mb-1">Input Level</div>
+                  <div className="text-sm text-text">
+                    Lv.{menu.xp.input.level} ({menu.xp.input.exp} / {menu.xp.input.nextLevelExp} exp)
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-text-muted mb-1">Output Level</div>
+                  <div className="text-sm text-text">
+                    Lv.{menu.xp.output.level} ({menu.xp.output.exp} / {menu.xp.output.nextLevelExp} exp)
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Trainingセクション */}
-          <div className="rounded-lg border border-border bg-surface p-6 shadow-theme-lg backdrop-blur-sm">
-            <h2 className="mb-4 text-lg font-semibold text-text">📚 Training</h2>
-            <div className="space-y-4">
-              {/* Writing */}
-              <div>
-                <h3 className="mb-3 text-md font-semibold text-text">Writing</h3>
-                <div className="grid md:grid-cols-2 gap-3">
-                  <button
-                    onClick={() => router.push('/training/writing/task1')}
-                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-indigo hover:bg-accent-indigo/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+          {/* Inputセクション */}
+          {menu && menu.input.length > 0 && (
+            <div className={cn('p-6', cardBase)}>
+              <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>📚 Input（定着: 認知と想起）</h2>
+              <p className={cn('mb-4 text-sm', cardDesc)}>
+                語彙・熟語・表現を覚えましょう
+              </p>
+              <div className="grid md:grid-cols-3 gap-4">
+                {menu.input.map((item) => (
+                  <Link
+                    key={item.module}
+                    href={item.cta.href}
+                    className={cn(
+                      'p-4 rounded-lg border-2 border-border bg-surface-2',
+                      'hover:border-accent-emerald hover:bg-accent-emerald/10',
+                      'transition-all duration-200 text-left',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring'
+                    )}
                   >
-                    <div className="font-semibold text-lg mb-1 text-text">Task 1</div>
-                    <div className="text-sm text-text-muted">グラフ・図表・地図の説明</div>
-                  </button>
-                  <button
-                    onClick={() => router.push('/training/writing/task2')}
-                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-indigo hover:bg-accent-indigo/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    <div className="font-semibold text-lg mb-1 text-text">Task 2</div>
-                    <div className="text-sm text-text-muted">エッセイライティング</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Speaking */}
-              <div>
-                <h3 className="mb-3 text-md font-semibold text-text">Speaking（瞬間英作文）</h3>
-                <div className="grid md:grid-cols-3 gap-3">
-                  <button
-                    onClick={() => router.push('/training/speaking/task1')}
-                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    <div className="font-semibold text-lg mb-1 text-text">Task 1</div>
-                    <div className="text-sm text-text-muted">基本的な質問・自己紹介</div>
-                  </button>
-                  <button
-                    onClick={() => router.push('/training/speaking/task2')}
-                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    <div className="font-semibold text-lg mb-1 text-text">Task 2</div>
-                    <div className="text-sm text-text-muted">スピーチ・説明</div>
-                  </button>
-                  <button
-                    onClick={() => router.push('/training/speaking/task3')}
-                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    <div className="font-semibold text-lg mb-1 text-text">Task 3</div>
-                    <div className="text-sm text-text-muted">抽象的議論・意見</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Vocabulary */}
-              <div>
-                <h3 className="mb-3 text-md font-semibold text-text">Vocabulary</h3>
-                <div className="grid md:grid-cols-2 gap-3">
-                  <button
-                    onClick={() => router.push('/training/vocabulary')}
-                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-emerald hover:bg-accent-emerald/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    <div className="font-semibold text-lg mb-1 text-text">単語練習</div>
-                    <div className="text-sm text-text-muted">語彙力を向上させましょう</div>
-                  </button>
-                  <button
-                    onClick={() => router.push('/training/vocabulary/review')}
-                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-emerald hover:bg-accent-emerald/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    <div className="font-semibold text-lg mb-1 text-text">復習</div>
-                    <div className="text-sm text-text-muted">間違えた問題を復習</div>
-                  </button>
-                </div>
+                    <div className={cn('font-semibold text-lg mb-1', cardTitle)}>{item.title}</div>
+                    <div className={cn('text-sm mb-3', cardDesc)}>{item.description}</div>
+                    <span className={cn('text-sm', buttonPrimary, 'inline-block')}>
+                      {item.cta.label} →
+                    </span>
+                  </Link>
+                ))}
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Blogセクション */}
-          <div className="rounded-lg border border-border bg-surface p-6 shadow-theme-lg backdrop-blur-sm">
-            <h2 className="mb-4 text-lg font-semibold text-text">📝 Blog</h2>
-            <p className="mb-4 text-text-muted">
+          {/* Outputセクション */}
+          {menu && menu.output.length > 0 && (
+            <div className={cn('p-6', cardBase)}>
+              <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>✍️ Output（運用: 使わせる制約）</h2>
+              <p className={cn('mb-4 text-sm', cardDesc)}>
+                覚えた語彙・表現を実際に使いましょう
+              </p>
+              <div className="grid md:grid-cols-3 gap-4">
+                {menu.output.map((item) => (
+                  <Link
+                    key={item.module}
+                    href={item.cta.href}
+                    className={cn(
+                      'p-4 rounded-lg border-2 border-border bg-surface-2',
+                      'hover:border-accent-indigo hover:bg-accent-indigo/10',
+                      'transition-all duration-200 text-left',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring'
+                    )}
+                  >
+                    <div className={cn('font-semibold text-lg mb-1', cardTitle)}>{item.title}</div>
+                    <div className={cn('text-sm mb-3', cardDesc)}>{item.description}</div>
+                    <span className={cn('text-sm', buttonPrimary, 'inline-block')}>
+                      {item.cta.label} →
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 通知（あれば表示） */}
+          {menu && menu.notices && menu.notices.length > 0 && (
+            <div className={cn('p-4', cardBase)}>
+              <h3 className={cn('mb-2 text-sm font-semibold', cardTitle)}>お知らせ</h3>
+              <div className="space-y-2">
+                {menu.notices.map((notice, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      'p-3 rounded-md text-sm',
+                      notice.type === 'warning'
+                        ? 'bg-warning-bg border border-warning-border text-warning'
+                        : 'bg-surface-2 text-text-muted'
+                    )}
+                  >
+                    {notice.message}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Blogセクション（既存） */}
+          <div className={cn('p-6', cardBase)}>
+            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>📝 Blog</h2>
+            <p className={cn('mb-4', cardDesc)}>
               IELTS学習に役立つ記事や最新情報をお届けします
             </p>
             <a
