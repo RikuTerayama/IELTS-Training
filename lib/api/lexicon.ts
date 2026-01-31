@@ -44,7 +44,7 @@ export interface LexiconSubmitResponse {
  */
 export async function fetchLexiconSets(
   skill: 'writing' | 'speaking',
-  module: 'lexicon' | 'idiom' = 'lexicon'
+  module: 'lexicon' | 'idiom' | 'vocab' = 'lexicon'
 ): Promise<ApiResponse<LexiconSetsResponse>> {
   const response = await fetch(`/api/lexicon/sets?skill=${skill}&module=${module}`);
   return response.json();
@@ -58,7 +58,7 @@ export async function fetchLexiconQuestions(
   category: string,
   mode: 'click' | 'typing',
   limit: number = 10,
-  module: 'lexicon' | 'idiom' = 'lexicon'
+  module: 'lexicon' | 'idiom' | 'vocab' = 'lexicon'
 ): Promise<ApiResponse<LexiconQuestionsResponse>> {
   const response = await fetch(
     `/api/lexicon/questions?skill=${skill}&category=${category}&mode=${mode}&limit=${limit}&module=${module}`
