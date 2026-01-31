@@ -235,7 +235,7 @@ export function selectAssetByWeight(
     return null;
   }
   
-  const selectedGenre = weightedGenres[Math.floor(Math.random() * weightedGenres.length)];
+  const selectedGenre = weightedGenres[Math.floor(Math.random() * weightedGenres.length)] as Task1Genre;
   const genreCandidates = genreGroups[selectedGenre];
   
   if (genreCandidates.length === 0) {
