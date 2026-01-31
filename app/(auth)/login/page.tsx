@@ -234,7 +234,7 @@ export default function LoginPage() {
               autoComplete="email"
               required
               placeholder="example@email.com"
-              className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+              className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-gray-900 placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
             />
           </div>
           <div>
@@ -249,7 +249,7 @@ export default function LoginPage() {
               autoComplete={isSignUp ? "new-password" : "current-password"}
               required
               placeholder="••••••••"
-              className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+              className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-gray-900 placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
             />
           </div>
           {error && (
