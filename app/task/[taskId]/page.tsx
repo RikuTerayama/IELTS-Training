@@ -20,6 +20,19 @@ function TaskPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [mode, setMode] = useState<'training' | 'exam'>('training');
+  const [requiredItems, setRequiredItems] = useState<Array<{
+    module: 'lexicon' | 'idiom' | 'vocab';
+    item_id: string;
+    skill: 'writing' | 'speaking';
+    category: string;
+    expression: string;
+    ja_hint?: string;
+  }>>([]);
+  const [outputCheckResult, setOutputCheckResult] = useState<{
+    used: Array<{ module: string; item_id: string; expression: string }>;
+    missing: Array<{ module: string; item_id: string; expression: string }>;
+    usage_rate: number;
+  } | null>(null);
 
   useEffect(() => {
     if (taskId === 'new') {
@@ -80,6 +93,23 @@ function TaskPageContent() {
               }
             } catch (error) {
               console.error('Failed to create/resume attempt:', error);
+            }
+          }
+
+          // Required Itemsを取得（Writingの場合）
+          if (data.data.question_type === 'Task 1' || data.data.question_type === 'Task 2') {
+            try {
+              const itemsRes = await fetch(
+                `/api/input/items?skill=writing&modules=vocab,idiom,lexicon&limit=5`
+              );
+              if (itemsRes.ok) {
+                const itemsData = await itemsRes.json();
+                if (itemsData.ok && itemsData.data) {
+                  setRequiredItems(itemsData.data.items);
+                }
+              }
+            } catch (error) {
+              console.error('Failed to fetch required items:', error);
             }
           }
         }
@@ -180,6 +210,49 @@ function TaskPageContent() {
       console.log('[TaskPage] Submit response:', data);
 
       if (data.ok) {
+        // Required Itemsの使用チェック（submit成功後）
+        if (requiredItems.length > 0) {
+          try {
+            const finalContent = draftContent.final || draftContent.fill_in || draftContent.skeleton || '';
+            const outputType = task.question_type === 'Task 1' ? 'writing_task1' : 'writing_task2';
+            
+            const checkRes = await fetch('/api/output/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                output_type: outputType,
+                content: finalContent,
+                required_items: requiredItems.map(item => ({
+                  module: item.module,
+                  item_id: item.item_id,
+                  expression: item.expression,
+                })),
+                meta: {
+                  task_id: actualTaskId,
+                },
+              }),
+            });
+
+            if (checkRes.ok) {
+              const checkData = await checkRes.json();
+              if (checkData.ok && checkData.data) {
+                setOutputCheckResult(checkData.data);
+                // 使用チェック結果がある場合は表示してから遷移
+                if (checkData.data.missing.length > 0) {
+                  const missingList = checkData.data.missing.map((m: { expression: string }) => m.expression).join(', ');
+                  const confirmMessage = `以下の表現が使用されていません: ${missingList}\n\nフィードバック画面に進みますか？`;
+                  if (!confirm(confirmMessage)) {
+                    setSubmitting(false);
+                    return;
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Failed to check required items usage:', error);
+          }
+        }
+        
         if (data.data.next_step === 'fill_in') {
           router.push(`/fillin/${data.data.attempt_id}`);
         } else {
@@ -228,6 +301,22 @@ function TaskPageContent() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
+          {/* Required Items表示 */}
+          {requiredItems.length > 0 && (
+            <div className={cn('mb-4 p-4 rounded-lg', cardBase, 'bg-primary/5 border-primary/20')}>
+              <h3 className={cn('font-semibold mb-2', cardTitle)}>必須使用表現（{requiredItems.length}個）</h3>
+              <div className="flex flex-wrap gap-2">
+                {requiredItems.map((item, idx) => (
+                  <div key={idx} className={cn('text-sm px-2 py-1 rounded', 'bg-surface-2 border border-border')}>
+                    <span className="font-semibold">{item.expression}</span>
+                    {item.ja_hint && <span className="ml-1 text-xs text-text-muted">（{item.ja_hint}）</span>}
+                    <span className="ml-1 text-xs text-text-muted">[{item.module}]</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className={cn('mb-6 p-6', cardBase)}>
             <div className="mb-4 flex items-center justify-between">
               <div>
@@ -284,6 +373,43 @@ function TaskPageContent() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
+          {/* Required Items表示 */}
+          {requiredItems.length > 0 && (
+            <div className={cn('p-4 rounded-lg', cardBase, 'bg-primary/5 border-primary/20')}>
+              <h3 className={cn('font-semibold mb-2', cardTitle)}>必須使用表現（{requiredItems.length}個）</h3>
+              <div className="flex flex-wrap gap-2">
+                {requiredItems.map((item, idx) => (
+                  <div key={idx} className={cn('text-sm px-2 py-1 rounded', 'bg-surface-2 border border-border')}>
+                    <span className="font-semibold">{item.expression}</span>
+                    {item.ja_hint && <span className="ml-1 text-xs text-text-muted">（{item.ja_hint}）</span>}
+                    <span className="ml-1 text-xs text-text-muted">[{item.module}]</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 使用チェック結果表示 */}
+          {outputCheckResult && outputCheckResult.missing.length > 0 && (
+            <div className={cn('p-4 rounded-lg', cardBase, 'bg-danger/10 border-danger')}>
+              <h3 className={cn('font-semibold mb-2 text-danger', cardTitle)}>
+                使用できなかった表現（{outputCheckResult.missing.length}個）
+              </h3>
+              <div className="space-y-1">
+                {outputCheckResult.missing.map((item, idx) => {
+                  const requiredItem = requiredItems.find(ri => ri.item_id === item.item_id);
+                  return (
+                    <div key={idx} className={cn('text-sm', cardDesc)}>
+                      <span className="font-semibold">{item.expression}</span>
+                      {requiredItem?.ja_hint && <span className="ml-2">（{requiredItem.ja_hint}）</span>}
+                      <span className="ml-2 text-xs">[{item.module}]</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* お題 */}
           <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
             <h2 className="mb-4 text-lg font-semibold text-text">お題</h2>
