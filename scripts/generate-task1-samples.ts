@@ -6,14 +6,14 @@
  * npx tsx scripts/generate-task1-samples.ts
  */
 
-import { selectAssetByWeight, type Task1Asset } from '../lib/task1/assets';
+import { selectAssetByWeight, type Task1Asset, type Task1Genre } from '../lib/task1/assets';
 import { buildTask1QuestionFromAsset, generateTask1VocabOnly } from '../lib/llm/prompts/task_generate';
 
 async function generateSample(level: 'beginner' | 'intermediate' | 'advanced', genre?: string) {
   console.log(`\n=== Sample: ${level}${genre ? ` (${genre})` : ''} ===\n`);
   
   // アセット選択
-  const asset = selectAssetByWeight(level, genre || undefined);
+  const asset = selectAssetByWeight(level, (genre as Task1Genre) || undefined);
   if (!asset) {
     console.error('No asset found');
     return;
