@@ -25,49 +25,25 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 });
 
 /**
- * 誤答を生成（同skill同categoryから優先、足りなければ同skill全体から）
+ * 誤答を生成（既存のitemsリストから選択）
  */
-async function generateWrongAnswers(
-  skill: string,
-  category: string,
+function generateWrongAnswers(
   correctExpression: string,
+  candidateItems: Array<{ expression: string }>,
   count: number
-): Promise<string[]> {
-  // 同skill同categoryから取得
-  const { data: sameCategoryItems } = await supabase
-    .from('lexicon_items')
-    .select('expression')
-    .eq('skill', skill)
-    .eq('category', category)
-    .neq('expression', correctExpression)
-    .limit(count);
-
-  const wrongAnswers: string[] = (sameCategoryItems || [])
-    .map(item => item.expression)
-    .filter(expr => expr !== correctExpression);
-
-  // 足りなければ同skill全体から取得
-  if (wrongAnswers.length < count) {
-    const { data: sameSkillItems } = await supabase
-      .from('lexicon_items')
-      .select('expression')
-      .eq('skill', skill)
-      .neq('category', category)
-      .neq('expression', correctExpression)
-      .limit(count - wrongAnswers.length);
-
-    if (sameSkillItems) {
-      wrongAnswers.push(...sameSkillItems.map(item => item.expression));
-    }
-  }
-
-  // シャッフル
-  for (let i = wrongAnswers.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [wrongAnswers[i], wrongAnswers[j]] = [wrongAnswers[j], wrongAnswers[i]];
-  }
-
-  return wrongAnswers.slice(0, count);
+): string[] {
+  // 正答を除外
+  const wrongCandidates = candidateItems
+    .filter(i => i.expression !== correctExpression)
+    .map(i => i.expression);
+  
+  // 重複を除去
+  const uniqueWrongs = Array.from(new Set(wrongCandidates));
+  
+  // ランダムに選択
+  const shuffled = uniqueWrongs.sort(() => Math.random() - 0.5);
+  
+  return shuffled.slice(0, count);
 }
 
 /**
@@ -85,9 +61,7 @@ async function generateQuestions(
   const clickPrompt = `${item.ja_hint}（${getCategoryUsage(item.category)}）`;
   
   // 誤答を生成（既に登録済みのitemsから）
-  const wrongAnswers = await generateWrongAnswers(
-    item.skill,
-    item.category,
+  const wrongAnswers = generateWrongAnswers(
     item.expression,
     allItems.filter(i => i.category === item.category || i.category.startsWith(item.category.split('_')[0])),
     3
@@ -137,9 +111,7 @@ async function generateQuestions(
       
       // Click問題
       const variantClickPrompt = `${item.ja_hint}（${getCategoryUsage(item.category)}）`;
-      const variantWrongAnswers = await generateWrongAnswers(
-        item.skill,
-        item.category,
+      const variantWrongAnswers = generateWrongAnswers(
         variant,
         allItems,
         3
@@ -311,33 +283,33 @@ async function seedLexiconV2() {
     }));
 
     for (const item of LEXICON_MASTER) {
-      const registeredItem = registeredItems.find(
-        ri => ri.expression === item.expression && ri.category === item.category
-      );
-      
-      if (registeredItem) {
-        await generateQuestions(registeredItem.id, item, allItemsForWrongAnswers);
-        questionsCount++;
-      }
+      try {
+        const registeredItem = registeredItems.find(
+          ri => ri.expression === item.expression && ri.category === item.category
+        );
+        
+        if (registeredItem) {
+          await generateQuestions(registeredItem.id, item, allItemsForWrongAnswers);
+          questionsCount++;
+        }
 
-      // バリエーションも問題生成
-      if (item.variants && item.variants.length > 0) {
-        for (const variant of item.variants) {
-          const variantRegisteredItem = registeredItems.find(
-            ri => ri.expression === variant && ri.category === item.category
-          );
-          
-          if (variantRegisteredItem) {
-            await generateQuestions(
-              variantRegisteredItem.id,
-              { ...item, expression: variant },
-              allItemsForWrongAnswers
+        // バリエーションも問題生成
+        if (item.variants && item.variants.length > 0) {
+          for (const variant of item.variants) {
+            const variantRegisteredItem = registeredItems.find(
+              ri => ri.expression === variant && ri.category === item.category
             );
-            questionsCount++;
+            
+            if (variantRegisteredItem) {
+              await generateQuestions(
+                variantRegisteredItem.id,
+                { ...item, expression: variant },
+                allItemsForWrongAnswers
+              );
+              questionsCount++;
+            }
           }
         }
-      }
-    }
       } catch (err) {
         console.error(`Error processing item "${item.expression}":`, err);
         itemsErrorCount++;
