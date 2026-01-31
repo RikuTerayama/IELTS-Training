@@ -20,7 +20,7 @@ export interface Task1Asset {
 
 /**
  * Task1アセット一覧
- * 既存の画像ファイル（public/images/task1/batch*/）に対応
+ * 既存の画像ファイル (public/images/task1/batch*/) に対応
  */
 export const TASK1_ASSETS: Task1Asset[] = [
   // batch1: line_chart
