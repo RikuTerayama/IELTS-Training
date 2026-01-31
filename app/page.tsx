@@ -25,6 +25,8 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(false);
   const [signUpSuccess, setSignUpSuccess] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showTermsOfService, setShowTermsOfService] = useState(false);
   const supabase = createClient();
 
   // --- スムーズスクロール機能 ---
@@ -661,14 +663,6 @@ export default function LandingPage() {
                   </button>
                 </form>
                 
-                <div className="mt-8 pt-8 border-t border-slate-200">
-                  <p className="text-sm text-slate-500 text-center">
-                    または、メールで直接お問い合わせください:<br/>
-                    <a href="mailto:support@ielts-training.com" className="text-indigo-600 hover:underline font-medium">
-                      support@ielts-training.com
-                    </a>
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -745,12 +739,206 @@ export default function LandingPage() {
               © {new Date().getFullYear()} IELTS Training. All rights reserved.
             </p>
             <div className="flex gap-6 text-xs text-slate-400">
-              <a href="#" className="hover:text-slate-600">Privacy Policy</a>
-              <a href="#" className="hover:text-slate-600">Terms of Service</a>
+              <button onClick={() => setShowPrivacyPolicy(true)} className="hover:text-slate-600 transition-colors">
+                Privacy Policy
+              </button>
+              <button onClick={() => setShowTermsOfService(true)} className="hover:text-slate-600 transition-colors">
+                Terms of Service
+              </button>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Privacy Policy モーダル */}
+      {showPrivacyPolicy && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowPrivacyPolicy(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-slate-900">Privacy Policy</h2>
+              <button
+                onClick={() => setShowPrivacyPolicy(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-6 py-8 space-y-6 text-slate-700">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">1. 個人情報の収集</h3>
+                <p className="leading-relaxed">
+                  IELTS Training（以下「当サービス」）は、サービス提供のために以下の個人情報を収集します：
+                </p>
+                <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
+                  <li>メールアドレス（アカウント作成時）</li>
+                  <li>パスワード（暗号化して保存）</li>
+                  <li>学習レベル（初級・中級・上級）</li>
+                  <li>学習履歴（回答内容、フィードバック、進捗データ）</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">2. 個人情報の利用目的</h3>
+                <p className="leading-relaxed">
+                  収集した個人情報は、以下の目的でのみ利用します：
+                </p>
+                <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
+                  <li>サービスの提供・運営</li>
+                  <li>学習進捗の可視化と分析</li>
+                  <li>AIによるフィードバック生成</li>
+                  <li>サービス改善のための統計データ作成</li>
+                  <li>重要なお知らせの配信</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">3. 個人情報の管理</h3>
+                <p className="leading-relaxed">
+                  当サービスは、Supabase（PostgreSQL）を使用して個人情報を安全に管理しています。
+                  パスワードは暗号化され、学習データは認証済みユーザーのみがアクセス可能です。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">4. 第三者への提供</h3>
+                <p className="leading-relaxed">
+                  当サービスは、法令に基づく場合を除き、個人情報を第三者に提供することはありません。
+                  AIフィードバック生成のため、OpenAIやGroqなどのLLMサービスに回答内容を送信しますが、
+                  これらはサービス提供に必要な最小限の情報のみです。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">5. 個人情報の削除</h3>
+                <p className="leading-relaxed">
+                  アカウント削除により、すべての個人情報と学習データが削除されます。
+                  アカウント削除は、設定画面から行うことができます。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">6. お問い合わせ</h3>
+                <p className="leading-relaxed">
+                  個人情報に関するお問い合わせは、Contactセクションからご連絡ください。
+                </p>
+              </div>
+              
+              <div className="pt-4 border-t border-slate-200">
+                <p className="text-sm text-slate-500">
+                  最終更新日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Terms of Service モーダル */}
+      {showTermsOfService && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowTermsOfService(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-slate-900">Terms of Service</h2>
+              <button
+                onClick={() => setShowTermsOfService(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-6 py-8 space-y-6 text-slate-700">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">1. サービスの利用</h3>
+                <p className="leading-relaxed">
+                  IELTS Training（以下「当サービス」）は、IELTS学習をサポートするためのプラットフォームです。
+                  当サービスを利用することにより、本利用規約に同意したものとみなされます。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">2. アカウント</h3>
+                <p className="leading-relaxed mb-2">
+                  アカウント作成には、有効なメールアドレスとパスワードが必要です。
+                </p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>アカウント情報は正確に登録してください</li>
+                  <li>アカウントの管理責任はユーザーにあります</li>
+                  <li>不正アクセスが疑われる場合は、すぐにパスワードを変更してください</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">3. 利用規約の遵守</h3>
+                <p className="leading-relaxed mb-2">
+                  ユーザーは、以下の行為を禁止します：
+                </p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>法令または公序良俗に違反する行為</li>
+                  <li>他のユーザーに迷惑をかける行為</li>
+                  <li>当サービスの運営を妨害する行為</li>
+                  <li>AIフィードバックを不正に利用する行為</li>
+                  <li>その他、当サービスが不適切と判断する行為</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">4. サービスの内容</h3>
+                <p className="leading-relaxed">
+                  当サービスは、AI技術を活用したIELTS学習サポートを提供します。
+                  AIによるフィードバックは参考情報であり、実際のIELTS試験の結果を保証するものではありません。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">5. サービスの変更・終了</h3>
+                <p className="leading-relaxed">
+                  当サービスは、事前の通知なく、サービスの内容を変更または終了する場合があります。
+                  現在は無料で提供していますが、将来的に有料プランを導入する可能性があります。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">6. 免責事項</h3>
+                <p className="leading-relaxed">
+                  当サービスは、以下の事項について責任を負いません：
+                </p>
+                <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
+                  <li>AIフィードバックの正確性</li>
+                  <li>IELTS試験の結果</li>
+                  <li>サービス利用による損害</li>
+                  <li>システムの不具合やメンテナンスによる利用不可</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">7. 知的財産権</h3>
+                <p className="leading-relaxed">
+                  当サービスのコンテンツ（テキスト、デザイン、ロゴ等）の知的財産権は、
+                  当サービスまたはその提供者に帰属します。
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">8. 規約の変更</h3>
+                <p className="leading-relaxed">
+                  当サービスは、本利用規約を変更する場合があります。
+                  変更後の規約は、当サービス上に掲載した時点から効力を生じます。
+                </p>
+              </div>
+              
+              <div className="pt-4 border-t border-slate-200">
+                <p className="text-sm text-slate-500">
+                  最終更新日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
