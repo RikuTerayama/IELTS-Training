@@ -14,6 +14,7 @@ export default function LandingPage() {
   const [resendingEmail, setResendingEmail] = useState(false);
   const supabase = createClient();
 
+  // --- ロジック部分は変更なし ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -21,7 +22,6 @@ export default function LandingPage() {
 
     try {
       if (isSignUp) {
-        // サインアップ
         const redirectUrl = typeof window !== 'undefined' 
           ? `${window.location.origin}/home`
           : '/home';
@@ -36,49 +36,38 @@ export default function LandingPage() {
 
         if (signUpError) throw signUpError;
 
-        // プロファイルは自動トリガーで作成される（onboarding_completed = false）
-        // サインアップ成功（メール確認が必要な場合）
         if (data.user && !data.session) {
           setSignUpSuccess(true);
           setLoading(false);
           return;
         }
 
-        // サインアップ成功でセッションがある場合
         if (data.session) {
           setLoading(false);
           await new Promise(resolve => setTimeout(resolve, 300));
-          // 目的ヒアリングページにリダイレクト
           window.location.href = '/onboarding';
           return;
         }
       } else {
-        // ログイン
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (signInError) {
-          throw signInError;
-        }
+        if (signInError) throw signInError;
 
         if (!signInData.session) {
           throw new Error('ログインに失敗しました。セッションが作成されませんでした。');
         }
 
-        // セッションを確認
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         if (!currentSession) {
           throw new Error('ログインに失敗しました。セッションが保存されませんでした。');
         }
         
         setLoading(false);
-        
-        // セッションが確実に保存されるまで待つ
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // 目的ヒアリング完了状況を確認
         const { data: profile } = await supabase
           .from('profiles')
           .select('onboarding_completed')
@@ -109,11 +98,9 @@ export default function LandingPage() {
     }
   };
 
-  // 確認メールを再送信
   const handleResendConfirmation = async () => {
     setResendingEmail(true);
     setError(null);
-    
     try {
       const redirectUrl = typeof window !== 'undefined' 
         ? `${window.location.origin}/home`
@@ -128,7 +115,6 @@ export default function LandingPage() {
       });
 
       if (resendError) throw resendError;
-      
       setError(null);
       alert('確認メールを再送信しました。メールボックス（スパムフォルダも含む）を確認してください。');
     } catch (err) {
@@ -137,302 +123,345 @@ export default function LandingPage() {
       setResendingEmail(false);
     }
   };
+  // --- ロジック終了 ---
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
+      {/* 装飾背景（Blob） */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-200/40 rounded-full blur-3xl opacity-50 animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-indigo-200/40 rounded-full blur-3xl opacity-50" />
+      </div>
+
       {/* ヘッダー */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
+      <header className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-200/60 transition-all duration-300">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
               IELTS Training
+            </span>
+          </Link>
+          <nav className="flex items-center gap-6">
+            <Link 
+              href="https://ieltsconsult.netlify.app/" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+            >
+              Official Blog
             </Link>
-            <nav className="flex items-center gap-6">
-              <Link 
-                href="https://ieltsconsult.netlify.app/" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-700 hover:text-blue-600 transition-colors"
-              >
-                Blog
-              </Link>
-            </nav>
-          </div>
+          </nav>
         </div>
       </header>
 
       {/* メインコンテンツ */}
-      <main className="container mx-auto px-4 py-12">
+      <main className="relative z-10 pt-28 pb-20">
+        
         {/* ヒーローセクション */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-          {/* 左側: 紹介セクション */}
-          <div className="space-y-6">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">
-              IELTS Training Platform
-            </h1>
-            <p className="text-lg text-gray-600">
-              IELTSのスキルを向上させるための包括的なトレーニングプラットフォーム<br />
-              実践的なフィードバックと進捗追跡で、目標スコア達成をサポートします。
-            </p>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                <span className="text-gray-700">AIによる詳細なフィードバック</span>
+        <div className="container mx-auto px-6 mb-24">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+            {/* 左側: コピー */}
+            <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
+              <div className="inline-block px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold tracking-wide uppercase">
+                New Generation Platform
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                <span className="text-gray-700">進捗の可視化と弱点分析</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                <span className="text-gray-700">4技能別の単語練習</span>
+              <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight leading-tight text-slate-900">
+                AIと共に、<br className="hidden lg:block" />
+                <span className="text-blue-600">IELTSスコア</span>を<br className="lg:hidden" />
+                確実なものに。
+              </h1>
+              <p className="text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                最新のAIフィードバックとデータ分析で、あなたの英語学習を効率化。<br />
+                ライティングの添削から語彙力強化まで、目標スコア達成への最短ルートを提供します。
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+                {['即時フィードバック', '進捗の可視化', 'レベル別カリキュラム'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 text-slate-700 font-medium bg-white/60 px-4 py-2 rounded-lg border border-slate-200 shadow-sm">
+                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                    {item}
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          {/* 右側: ログインフォーム */}
-          <div className="w-full max-w-md mx-auto">
-            <div className="rounded-lg bg-white p-8 shadow-lg">
-              <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">
-                {isSignUp ? '新規登録' : 'ログイン'}
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-                <div>
-                  <label htmlFor="landing-email" className="block text-sm font-medium text-gray-700">
-                    メール
-                  </label>
-                  <input
-                    id="landing-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="off"
-                    required
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                  />
+            {/* 右側: フォーム */}
+            <div className="lg:col-span-5 w-full max-w-md mx-auto">
+              <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-900/10 border border-white/50 p-8 transform transition hover:scale-[1.01] duration-300">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    {isSignUp ? 'アカウント作成' : 'ログイン'}
+                  </h2>
+                  <p className="text-sm text-slate-500 mt-2">
+                    {isSignUp ? '無料で学習を始めましょう' : '学習を再開しましょう'}
+                  </p>
                 </div>
-                <div>
-                  <label htmlFor="landing-password" className="block text-sm font-medium text-gray-700">
-                    パスワード
-                  </label>
-                  <input
-                    id="landing-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="new-password"
-                    required
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                  />
-                </div>
-                {error && (
-                  <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                    {error}
+
+                <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">メールアドレス</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="off"
+                      required
+                      placeholder="name@example.com"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                    />
                   </div>
-                )}
-                {signUpSuccess && (
-                  <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
-                    <p className="mb-2">サインアップが完了しました！</p>
-                    <p className="mb-2">確認メールを送信しました。メールボックス（スパムフォルダも含む）を確認してください。</p>
-                    <button
-                      type="button"
-                      onClick={handleResendConfirmation}
-                      disabled={resendingEmail}
-                      className="text-blue-600 hover:text-blue-700 underline"
-                    >
-                      {resendingEmail ? '送信中...' : '確認メールを再送信'}
-                    </button>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">パスワード</label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="new-password"
+                      required
+                      placeholder="••••••••"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                    />
                   </div>
-                )}
-                <button
-                  type="submit"
-                  disabled={loading || signUpSuccess}
-                  className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-                >
-                  {loading ? '処理中...' : isSignUp ? 'Sign Up' : 'Login'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="w-full text-sm text-blue-600 hover:text-blue-700"
-                >
-                  {isSignUp ? '既にアカウントをお持ちですか？' : '新規登録'}
-                </button>
-              </form>
+
+                  {error && (
+                    <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600 flex items-start gap-2">
+                      <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      {error}
+                    </div>
+                  )}
+
+                  {signUpSuccess && (
+                    <div className="p-4 rounded-xl bg-blue-50 border border-blue-100 text-sm text-blue-800">
+                      <p className="font-bold mb-1">確認メールを送信しました</p>
+                      <p className="opacity-90">メールボックスをご確認ください。</p>
+                      <button
+                        type="button"
+                        onClick={handleResendConfirmation}
+                        disabled={resendingEmail}
+                        className="mt-2 text-xs font-semibold underline hover:text-blue-900"
+                      >
+                        {resendingEmail ? '送信中...' : 'メールが届かない場合はこちら'}
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || signUpSuccess}
+                    className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transform active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:shadow-none"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        処理中...
+                      </span>
+                    ) : (isSignUp ? 'アカウントを作成する' : 'ログインする')}
+                  </button>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                    <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-slate-500">or</span></div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setError(null);
+                      setSignUpSuccess(false);
+                    }}
+                    className="w-full text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+                  >
+                    {isSignUp ? 'すでにアカウントをお持ちの方はこちら' : '初めての方はこちら（新規登録）'}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 学習者のよくある悩み */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-            学習者のよくある悩み
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="text-4xl mb-4">😰</div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">フィードバックが得られない</h3>
-              <p className="text-gray-600">
-                自分の書いたエッセイがどの程度のスコアなのか、どこを改善すべきか分からない
-              </p>
+        {/* 悩み解決セクション */}
+        <section className="py-20 bg-white border-y border-slate-100">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">こんな悩みはありませんか？</h2>
+              <p className="text-slate-500">独学でのIELTS対策につきものの課題を解決します</p>
             </div>
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="text-4xl mb-4">📊</div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">進捗が見えない</h3>
-              <p className="text-gray-600">
-                練習を続けているが、自分の成長が実感できず、モチベーションが下がる
-              </p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="text-4xl mb-4">📚</div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">効率的な学習方法が分からない</h3>
-              <p className="text-gray-600">
-                何を練習すれば良いか、どの単語を覚えれば良いか分からず迷っている
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* このサイトで提供したい価値 */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-            このサイトで提供したい価値
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-8 shadow-md">
-              <div className="text-4xl mb-4">🤖</div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">AIによる即座のフィードバック</h3>
-              <p className="text-gray-700 mb-4">
-                提出後すぐに、バンドスコアの評価と詳細なフィードバックを受け取れます。文法、語彙、論理構成など、各観点での改善点を明確に提示します。
-              </p>
-              <ul className="space-y-2 text-gray-600">
-                <li>• バンドスコアの自動評価</li>
-                <li>• 具体的な改善提案</li>
-                <li>• 弱点の特定と対策</li>
-              </ul>
-            </div>
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-8 shadow-md">
-              <div className="text-4xl mb-4">📈</div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">進捗の可視化</h3>
-              <p className="text-gray-700 mb-4">
-                過去の回答履歴を一覧で確認でき、自分の成長を実感できます。弱点タグの分析により、重点的に練習すべき分野が明確になります。
-              </p>
-              <ul className="space-y-2 text-gray-600">
-                <li>• スコアの推移グラフ</li>
-                <li>• 弱点タグの分析</li>
-                <li>• 学習履歴の管理</li>
-              </ul>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-8 shadow-md">
-              <div className="text-4xl mb-4">📝</div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">段階的な学習サポート</h3>
-              <p className="text-gray-700 mb-4">
-                初級・中級・上級のレベル別に最適化されたタスクと、PREPガイドによる学習支援で、無理なくステップアップできます。
-              </p>
-              <ul className="space-y-2 text-gray-600">
-                <li>• レベル別タスクの提供</li>
-                <li>• PREPガイドによる学習支援</li>
-                <li>• 穴埋め練習（初級・中級）</li>
-              </ul>
-            </div>
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg p-8 shadow-md">
-              <div className="text-4xl mb-4">📖</div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">4技能別の単語練習</h3>
-              <p className="text-gray-700 mb-4">
-                Reading、Listening、Writing、Speakingの各技能に特化した単語を、難易度別に練習できます。IELTSに頻出する重要単語を効率的に習得できます。
-              </p>
-              <ul className="space-y-2 text-gray-600">
-                <li>• 技能別・難易度別の単語分類</li>
-                <li>• 選択式クイズ形式</li>
-                <li>• 1200語の充実した語彙データベース</li>
-              </ul>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                { 
+                  icon: "😰", 
+                  title: "フィードバックがない", 
+                  desc: "書いても正解がわからず、改善ポイントが見えないまま時間だけが過ぎていく..." 
+                },
+                { 
+                  icon: "📉", 
+                  title: "成長が実感できない", 
+                  desc: "毎日勉強しているのにスコアが伸びず、モチベーション維持が難しい..." 
+                },
+                { 
+                  icon: "🌀", 
+                  title: "何からやるべきか迷う", 
+                  desc: "単語、文法、構成... 自分の弱点に合った効率的な学習法がわからない..." 
+                },
+              ].map((item, i) => (
+                <div key={i} className="group p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300">
+                  <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-4xl mb-6 group-hover:scale-110 transition-transform">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
+                  <p className="text-slate-600 leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* 使い方 */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-            使い方
-          </h2>
-          <div className="max-w-4xl mx-auto">
-            <div className="space-y-8">
-              <div className="flex gap-6 items-start">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                  1
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900">アカウント作成</h3>
-                  <p className="text-gray-600">
-                    メールアドレスとパスワードでアカウントを作成します。初期レベル（初級・中級・上級）を選択してください。
+        {/* バリュープロポジション */}
+        <section className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-slate-50/50 -skew-y-3 origin-top-left transform scale-110 z-0" />
+          
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="text-center max-w-3xl mx-auto mb-20">
+              <span className="text-blue-600 font-bold tracking-wider uppercase text-sm">Features</span>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3 mb-6">
+                スコアアップに必要な<br/>すべてをここに。
+              </h2>
+              <p className="text-slate-600 text-lg">
+                テクノロジーと学習科学に基づいた機能で、あなたの学習を強力にバックアップします。
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Feature 1 */}
+              <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-lg border border-slate-100 flex flex-col md:flex-row gap-6 items-start hover:shadow-xl transition-shadow">
+                <div className="w-16 h-16 shrink-0 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-3xl">🤖</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-3">AIによる即座のフィードバック</h3>
+                  <p className="text-slate-600 mb-4 leading-relaxed">
+                    提出後数秒で、予想バンドスコアと詳細な改善提案を受け取れます。文法ミスだけでなく、論理構成や語彙の適切さまで分析します。
                   </p>
+                  <ul className="space-y-2">
+                    {['バンドスコア自動評価', '文法・語彙の添削', '論理構成のアドバイス'].map(item => (
+                      <li key={item} className="flex items-center text-sm text-slate-700 font-medium">
+                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>{item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-              <div className="flex gap-6 items-start">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                  2
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900">タスクを選択</h3>
-                  <p className="text-gray-600">
-                    ホーム画面から推奨タスクを選択するか、新しいタスクを作成します。自分のレベルに合ったタスクを選びましょう。
+
+              {/* Feature 2 */}
+              <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-lg border border-slate-100 flex flex-col md:flex-row gap-6 items-start hover:shadow-xl transition-shadow">
+                <div className="w-16 h-16 shrink-0 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl">📈</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-3">進捗の可視化と分析</h3>
+                  <p className="text-slate-600 mb-4 leading-relaxed">
+                    学習履歴をグラフ化し、成長を一目で確認。苦手なトピックや弱点タグ（冠詞、時制など）を自動抽出し、効率的な復習を促します。
                   </p>
+                  <ul className="space-y-2">
+                    {['スコア推移グラフ', '弱点タグ分析', '学習履歴管理'].map(item => (
+                      <li key={item} className="flex items-center text-sm text-slate-700 font-medium">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></span>{item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-              <div className="flex gap-6 items-start">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                  3
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900">エッセイを書く</h3>
-                  <p className="text-gray-600">
-                    タスクの指示に従ってエッセイを書きます。初級・中級の方は、PREPガイドを参考にしながら日本語で骨組みを作成し、その後英語で完成させます。
+
+              {/* Feature 3 */}
+              <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-lg border border-slate-100 flex flex-col md:flex-row gap-6 items-start hover:shadow-xl transition-shadow">
+                <div className="w-16 h-16 shrink-0 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-3xl">📝</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-3">段階的な学習サポート</h3>
+                  <p className="text-slate-600 mb-4 leading-relaxed">
+                    あなたのレベル（初級・中級・上級）に合わせたタスクを提供。PREP法を用いたガイド付きライティングで、論理的な文章力を養います。
                   </p>
+                  <ul className="space-y-2">
+                    {['レベル別タスク', 'PREPガイド機能', '穴埋めトレーニング'].map(item => (
+                      <li key={item} className="flex items-center text-sm text-slate-700 font-medium">
+                        <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2"></span>{item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-              <div className="flex gap-6 items-start">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                  4
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900">フィードバックを確認</h3>
-                  <p className="text-gray-600">
-                    提出後、AIによる詳細なフィードバックとバンドスコアの評価を受け取ります。改善点を確認し、必要に応じて書き直しを行います。
+
+              {/* Feature 4 */}
+              <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-lg border border-slate-100 flex flex-col md:flex-row gap-6 items-start hover:shadow-xl transition-shadow">
+                <div className="w-16 h-16 shrink-0 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl">📖</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-3">4技能別 単語トレーニング</h3>
+                  <p className="text-slate-600 mb-4 leading-relaxed">
+                    IELTS頻出の1200語を収録。Reading/Listening/Writing/Speakingの技能別に最適化された単語セットで、実践的な語彙力を強化します。
                   </p>
+                  <ul className="space-y-2">
+                    {['技能・難易度別リスト', 'クイズ形式の練習', '1200語データベース'].map(item => (
+                      <li key={item} className="flex items-center text-sm text-slate-700 font-medium">
+                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mr-2"></span>{item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-              <div className="flex gap-6 items-start">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                  5
+            </div>
+          </div>
+        </section>
+
+        {/* 使い方ステップ */}
+        <section className="py-20 bg-slate-50 border-t border-slate-200">
+          <div className="container mx-auto px-6">
+            <h2 className="text-3xl font-bold text-center text-slate-900 mb-16">学習の進め方</h2>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {[
+                { step: 1, title: 'アカウント登録', text: 'レベルを選択し、学習を開始します。' },
+                { step: 2, title: 'タスク選択', text: '今の自分に最適な問題を選びます。' },
+                { step: 3, title: 'ライティング', text: 'ガイドに従ってエッセイを作成します。' },
+                { step: 4, title: 'AI分析', text: '即座にスコアと修正案を確認します。' },
+                { step: 5, title: '進捗確認', text: 'グラフで成長と弱点を把握します。' },
+                { step: 6, title: '単語学習', text: 'スキマ時間で語彙力を強化します。' },
+              ].map((item) => (
+                <div key={item.step} className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 relative overflow-hidden group hover:border-blue-300 transition-colors">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl group-hover:opacity-20 transition-opacity text-blue-900">
+                    {item.step}
+                  </div>
+                  <div className="relative z-10">
+                    <div className="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold mb-4 shadow-md shadow-blue-200">
+                      {item.step}
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
+                    <p className="text-slate-600 text-sm">{item.text}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900">進捗を確認</h3>
-                  <p className="text-gray-600">
-                    Progressページで過去の回答履歴を確認し、自分の成長を実感します。弱点タグを確認して、重点的に練習すべき分野を把握します。
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-6 items-start">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-                  6
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900">単語練習</h3>
-                  <p className="text-gray-600">
-                    Vocabページで、4技能別・難易度別の単語を練習します。定期的に練習することで、IELTSに必要な語彙力を効率的に向上させます。
-                  </p>
-                </div>
-              </div>
+              ))}
+            </div>
+            
+            <div className="mt-16 text-center">
+              <button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white font-bold rounded-full hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
+              >
+                今すぐ無料で始める
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </button>
             </div>
           </div>
         </section>
       </main>
 
       {/* フッター */}
-      <footer className="border-t border-gray-200 bg-white/80 backdrop-blur-sm mt-12">
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center text-sm text-gray-600">
-            <p>&copy; 2025 IELTS Training. All rights reserved.</p>
+      <footer className="bg-white border-t border-slate-200 pt-12 pb-8">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+            <div className="text-xl font-bold text-slate-800">IELTS Training</div>
+            <div className="text-sm text-slate-500">
+              Empowering learners to achieve their target scores.
+            </div>
+          </div>
+          <div className="border-t border-slate-100 pt-8 text-center text-sm text-slate-400">
+            &copy; {new Date().getFullYear()} IELTS Training. All rights reserved.
           </div>
         </div>
       </footer>
