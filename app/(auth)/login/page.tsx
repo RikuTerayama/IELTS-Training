@@ -216,76 +216,108 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg">
-      <div className="w-full max-w-md rounded-lg bg-surface border border-border p-8 shadow-theme-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold text-text">
-          IELTS Training
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-text">
-              メール
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              required
-              placeholder="example@email.com"
-              className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-gray-900 placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-text">
-              パスワード
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={isSignUp ? "new-password" : "current-password"}
-              required
-              placeholder="••••••••"
-              className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-gray-900 placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-            />
-          </div>
-          {error && (
-            <div className="rounded-md bg-danger/10 border border-danger/20 p-3 text-sm text-danger">
-              {error}
+    <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA] text-slate-900 font-sans relative overflow-hidden">
+      {/* 背景装飾（LandingPageスタイル） */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-50/60 rounded-[100%] blur-3xl opacity-70" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[500px] bg-blue-50/40 rounded-[100%] blur-3xl opacity-60" />
+      </div>
+
+      {/* ログインフォームカード */}
+      <div className="relative z-10 w-full max-w-md px-6">
+        <div className="rounded-2xl bg-white border border-slate-200 p-8 shadow-lg">
+          {/* ロゴとタイトル */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-xl mb-4 shadow-lg shadow-indigo-500/20">
+              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
             </div>
-          )}
-          {signUpSuccess && (
-            <div className="rounded-md bg-success-bg/50 border border-success-border/50 p-3 text-sm text-success">
-              <p className="mb-2">サインアップが完了しました！</p>
-              <p className="mb-2">確認メールを送信しました。メールボックス（スパムフォルダも含む）を確認してください。</p>
-              <button
-                type="button"
-                onClick={handleResendConfirmation}
-                disabled={resendingEmail}
-                className="text-link hover:text-link-hover underline transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {resendingEmail ? '送信中...' : '確認メールを再送信'}
-              </button>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
+              IELTS Training
+            </h1>
+            <p className="text-sm text-slate-500">
+              {isSignUp ? '新規アカウントを作成' : 'アカウントにログイン'}
+            </p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-slate-900 mb-2">
+                メールアドレス
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+                placeholder="example@email.com"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+              />
             </div>
-          )}
-          <button
-            type="submit"
-            disabled={loading || signUpSuccess}
-            className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary-hover disabled:bg-text-muted disabled:cursor-not-allowed transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-          >
-            {loading ? '処理中...' : isSignUp ? 'Sign Up' : 'Login'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="w-full text-sm text-link hover:text-link-hover transition-colors duration-200"
-          >
-            {isSignUp ? '既にアカウントをお持ちですか？' : '新規登録'}
-          </button>
-        </form>
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold text-slate-900 mb-2">
+                パスワード
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={isSignUp ? "new-password" : "current-password"}
+                required
+                placeholder="••••••••"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+              />
+            </div>
+            {error && (
+              <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-900">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="flex-1">{error}</div>
+                </div>
+              </div>
+            )}
+            {signUpSuccess && (
+              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-900">
+                <div className="flex items-start gap-2 mb-3">
+                  <svg className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="font-semibold mb-1">サインアップが完了しました！</p>
+                    <p className="mb-2">確認メールを送信しました。メールボックス（スパムフォルダも含む）を確認してください。</p>
+                    <button
+                      type="button"
+                      onClick={handleResendConfirmation}
+                      disabled={resendingEmail}
+                      className="text-emerald-700 hover:text-emerald-900 underline font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {resendingEmail ? '送信中...' : '確認メールを再送信'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={loading || signUpSuccess}
+              className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-white font-semibold hover:bg-indigo-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            >
+              {loading ? '処理中...' : isSignUp ? 'Sign Up' : 'Login'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="w-full text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200"
+            >
+              {isSignUp ? '既にアカウントをお持ちですか？' : '新規登録'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
