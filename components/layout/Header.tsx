@@ -44,62 +44,62 @@ export function Header() {
               IELTS Training
             </span>
           </Link>
-            {/* デスクトップナビゲーション */}
-            <nav className="hidden md:flex gap-6">
-              <Link href="/home" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
-                Home
-              </Link>
-              {/* Progressへのリンクは非表示（Step0: 依存を断つ） */}
-              {/* <Link href="/progress" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
-                Progress
-              </Link> */}
-              <Link href="/vocab" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
-                Vocab
-              </Link>
-              <Link 
-                href="https://ieltsconsult.netlify.app/" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200"
-              >
-                Blog
-              </Link>
-            </nav>
+          {/* デスクトップナビゲーション */}
+          <nav className="hidden md:flex gap-6">
+            <Link href="/home" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
+              Home
+            </Link>
+            {/* Progressへのリンクは非表示（Step0: 依存を断つ） */}
+            {/* <Link href="/progress" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
+              Progress
+            </Link> */}
+            <Link href="/vocab" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
+              Vocab
+            </Link>
+            <Link 
+              href="https://ieltsconsult.netlify.app/" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200"
+            >
+              Blog
+            </Link>
+          </nav>
+        </div>
+        <div className="flex items-center gap-4">
+          {/* デスクトップテーマトグル */}
+          <div className="hidden md:block">
+            <ThemeToggle />
           </div>
-          <div className="flex items-center gap-4">
-            {/* デスクトップテーマトグル */}
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
-            {/* デスクトップユーザー情報 */}
-            <div className="hidden md:flex items-center gap-4">
-              {user ? (
-                <>
-                  <span className="text-sm text-slate-500">{user.email}</span>
-                  <button
-                    onClick={handleLogout}
-                    className={cn('px-4 py-2 text-sm', buttonSecondary)}
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  className={cn('px-4 py-2 text-sm', buttonPrimary)}
+          {/* デスクトップユーザー情報 */}
+          <div className="hidden md:flex items-center gap-4">
+            {user ? (
+              <>
+                <span className="text-sm text-slate-500">{user.email}</span>
+                <button
+                  onClick={handleLogout}
+                  className={cn('px-4 py-2 text-sm', buttonSecondary)}
                 >
-                  Login
-                </Link>
-              )}
-            </div>
-            {/* ハンバーガーメニューボタン（モバイル） */}
-            <div className="md:hidden flex items-center gap-2">
-              <ThemeToggle />
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2 text-slate-500 hover:text-slate-900 focus:outline-none transition-colors duration-200"
-                aria-label="メニューを開く"
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className={cn('px-4 py-2 text-sm', buttonPrimary)}
               >
+                Login
+              </Link>
+            )}
+          </div>
+          {/* ハンバーガーメニューボタン（モバイル） */}
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 text-slate-500 hover:text-slate-900 focus:outline-none transition-colors duration-200"
+              aria-label="メニューを開く"
+            >
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -115,73 +115,71 @@ export function Header() {
                   <path d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
-              </button>
-            </div>
+            </button>
           </div>
         </div>
-        {/* モバイルメニュー */}
-        {menuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-slate-200 pt-4">
-            <div className="flex flex-col gap-3">
-              <Link
-                href="/home"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
-              >
-                Home
-              </Link>
-              {/* Progressへのリンクは非表示（Step0: 依存を断つ） */}
-              {/* <Link
-                href="/progress"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
-              >
-                Progress
-              </Link> */}
-              <Link
-                href="/vocab"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
-              >
-                Vocab
-              </Link>
-              <Link
-                href="https://ieltsconsult.netlify.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
-              >
-                Blog
-              </Link>
-              {user ? (
-                <>
-                  <div className="pt-2 border-t border-slate-200 mt-2">
-                    <div className="text-sm text-slate-500 py-2">{user.email}</div>
-                    <button
-                      onClick={handleLogout}
-                      className={cn('w-full text-left', buttonSecondary)}
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="pt-2 border-t border-slate-200 mt-2">
-                  <Link
-                    href="/login"
-                    onClick={() => setMenuOpen(false)}
-                    className={cn('block text-center', buttonPrimary)}
-                  >
-                    Login
-                  </Link>
-                </div>
-              )}
-            </div>
-          </nav>
-        )}
       </div>
+      {/* モバイルメニュー */}
+      {menuOpen && (
+        <nav className="md:hidden mt-4 pb-4 border-t border-slate-200 pt-4">
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/home"
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
+            >
+              Home
+            </Link>
+            {/* Progressへのリンクは非表示（Step0: 依存を断つ） */}
+            {/* <Link
+              href="/progress"
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
+            >
+              Progress
+            </Link> */}
+            <Link
+              href="/vocab"
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
+            >
+              Vocab
+            </Link>
+            <Link
+              href="https://ieltsconsult.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
+            >
+              Blog
+            </Link>
+            {user ? (
+              <>
+                <div className="pt-2 border-t border-slate-200 mt-2">
+                  <div className="text-sm text-slate-500 py-2">{user.email}</div>
+                  <button
+                    onClick={handleLogout}
+                    className={cn('w-full text-left', buttonSecondary)}
+                  >
+                    Logout
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="pt-2 border-t border-slate-200 mt-2">
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className={cn('block text-center', buttonPrimary)}
+                >
+                  Login
+                </Link>
+              </div>
+            )}
+          </div>
+        </nav>
+      )}
     </header>
   );
 }
-
