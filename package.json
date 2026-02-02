@@ -7,12 +7,17 @@
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
     "lint": "npm run lint:theme && next lint",
-    "lint:theme": "node scripts/lint-theme-colors.mjs"
+    "lint:theme": "node scripts/lint-theme-colors.mjs",
+    "seed:lexicon": "tsx scripts/seed-lexicon.ts",
+    "seed:lexicon:v2": "tsx scripts/seed-lexicon-v2.ts",
+    "seed:idiom": "tsx scripts/seed-idiom.ts",
+    "seed:vocab": "tsx scripts/seed-vocab.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.39.0",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.29.2",
     "next": "14.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -28,6 +33,7 @@
     "eslint-config-next": "14.1.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
 }
