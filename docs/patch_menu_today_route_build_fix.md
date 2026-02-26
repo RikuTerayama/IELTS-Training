@@ -2,27 +2,16 @@
 
 ## (a) 原因の一文説明
 
-**`outputModules` 配列の第1要素（Speaking）の `cta` オブジェクトおよび配列要素を閉じる `},` と `},` が、`href: "/training/speaking",` の直後に存在せず、パーサがオブジェクトリテラル内にあると解釈したまま `const outputModules` に到達したため、「Unexpected token outputModules」の構文エラーになっている。**
+**1つ目の `const outputModules` の配列で、先頭要素（Speaking）の `cta` オブジェクトが `href: "/training/speaking",` の直後で閉じられておらず、さらに同じファイル内に重複したコメントと2つ目の `const outputModules` 宣言があった。パーサは「まだオブジェクトリテラル内」と解釈したまま2つ目の `const` に到達し、プロパティ名や `}` を期待して「Unexpected token outputModules」となった。**
 
-つまり、**括弧の閉じ忘れ**（`cta` を閉じる `},` と、配列要素を閉じる `},` の2行が欠けている）が原因。
+つまり、**括弧の閉じ忘れ**（`cta` と配列要素を閉じる `},` と `},` の欠如）**と重複宣言**（2つ目の `const outputModules` とその配列ブロック）の両方が原因。
 
 ---
 
-## (b) 修正パッチ（閉じが欠けている版向け）
+## (b) 適用した修正パッチ（route.ts）
 
-**欠けている場合**は、`href: "/training/speaking",` の**直後**に次の2行を挿入する。
-
-```diff
-         cta: {
-           label: "選ぶ",
-           href: "/training/speaking",
-+        },
-+      },
-         // スタブデータ: Outputセクション（最小3件）
-         const outputModules: TodayMenu['output'] = [
-```
-
-※ 現在のリポジトリの `app/api/menu/today/route.ts` は**既に正しく閉じられている**ため、上記2行は既に存在する。Render に古い版がデプロイされている場合は、この修正が入ったコミットをデプロイすればコンパイルは通る。
+- 1つ目の speaking 要素を `},` `},` で閉じた。
+- 重複していた「スタブデータ」コメントと2つ目の `const outputModules` およびその配列（writing_task1, writing_task2, speaking の3件）を削除し、代わりに writing_task2 の1件だけを同じ配列内の2要素目として追加して配列を `];` で閉じた。
 
 ---
 
