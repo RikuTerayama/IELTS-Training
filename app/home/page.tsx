@@ -8,72 +8,6 @@ import type { TodayMenu } from '@/lib/api/schemas/menuToday';
 import type { ApiResponse } from '@/lib/api/response';
 import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
 
-// 4技能の表示順（FR-6）
-const SKILL_ORDER = ['reading', 'listening', 'speaking', 'writing'] as const;
-type SkillId = (typeof SKILL_ORDER)[number];
-
-const SKILL_LABELS: Record<SkillId, string> = {
-  reading: 'Reading',
-  listening: 'Listening',
-  speaking: 'Speaking',
-  writing: 'Writing',
-};
-
-// Inputカテゴリ定義（FR-1, FR-2, FR-3, FR-4, FR-5）: Vocab / Idiom / Bank を常に表示
-const INPUT_CATEGORIES: Array<{
-  module: 'vocab' | 'idiom' | 'lexicon';
-  title: string;
-  description: string;
-  skills: Record<SkillId, boolean>;
-  getHref: (skill: SkillId) => string;
-}> = [
-  {
-    module: 'vocab',
-    title: 'Vocab',
-    description: 'Speaking/Writingで使える語彙を増やす',
-    skills: { reading: false, listening: false, speaking: true, writing: true },
-    getHref: (skill) => `/training/vocab?skill=${skill}`,
-  },
-  {
-    module: 'idiom',
-    title: 'Idiom',
-    description: 'イディオムを覚えて表現力を高める',
-    skills: { reading: false, listening: false, speaking: false, writing: false },
-    getHref: (skill) => `/training/idiom?skill=${skill}`,
-  },
-  {
-    module: 'lexicon',
-    title: 'Bank',
-    description: '言い換え・コロケーション・ディスコースマーカーなど表現バンク',
-    skills: { reading: false, listening: false, speaking: false, writing: false },
-    getHref: (skill) => `/training/lexicon?skill=${skill}`,
-  },
-];
-
-// Outputカテゴリ定義: Speaking と Writing Task2 のみ（学習導線の整理）
-const OUTPUT_CATEGORIES: Array<{
-  module: 'speaking' | 'writing_task2';
-  title: string;
-  description: string;
-  ctaLabel: string;
-  href: string;
-}> = [
-  {
-    module: 'speaking',
-    title: 'Speaking',
-    description: 'Task1〜3をカテゴリごとに練習。使う表現を見ながら話す練習',
-    ctaLabel: '選ぶ',
-    href: '/training/speaking',
-  },
-  {
-    module: 'writing_task2',
-    title: 'Writing Task 2',
-    description: 'エッセイライティング。レベル別（穴埋め→Reasoning→自由作成）',
-    ctaLabel: '開始',
-    href: '/task/select?task_type=Task%202',
-  },
-];
-
 // アイコン（SVG）
 const Icons = {
   Book: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>,
@@ -147,8 +81,8 @@ export default function HomePage() {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 max-w-full px-4 sm:px-6 py-8 sm:py-12">
-        <div className="space-y-8 min-w-0">
+      <div className="container mx-auto px-6 py-12">
+        <div className="space-y-8">
           {/* ヒーローセクション */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold tracking-tight text-slate-900 mb-3">
@@ -197,125 +131,94 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Inputセクション - 3カテゴリ常時表示・各カテゴリに4技能（FR-1〜FR-6） */}
-          <div>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">Input</h2>
-              <p className="text-slate-600">語彙・熟語・表現を覚えましょう（定着: 認知と想起）</p>
+          {/* Inputセクション - Bento Grid Layout */}
+          {menu && menu.input.length > 0 && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">Input</h2>
+                <p className="text-slate-600">語彙・熟語・表現を覚えましょう（定着: 認知と想起）</p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-6">
+                {menu.input.map((item) => {
+                  const color = getModuleColor(item.module, true);
+                  const colorClasses: Record<string, string> = {
+                    amber: 'bg-amber-50 border-amber-200 text-amber-600',
+                    purple: 'bg-purple-50 border-purple-200 text-purple-600',
+                    blue: 'bg-blue-50 border-blue-200 text-blue-600',
+                    indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
+                  };
+                  const iconBg = colorClasses[color] || colorClasses.indigo;
+                  
+                  return (
+                    <Link
+                      key={item.module}
+                      href={item.cta.href}
+                      className={cn(
+                        'group p-6 rounded-2xl border border-slate-200 bg-white',
+                        'hover:shadow-md hover:-translate-y-1 hover:border-slate-300',
+                        'transition-all duration-200 text-left',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
+                      )}
+                    >
+                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
+                        {getModuleIcon(item.module)}
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
+                      <p className="text-sm text-slate-600 mb-4 leading-relaxed">{item.description}</p>
+                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
+                        {item.cta.label}
+                        <Icons.ArrowRight className="w-4 h-4" />
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {INPUT_CATEGORIES.map((cat) => {
-                const menuItem = menu?.input?.find((m) => m.module === cat.module);
-                const description = menuItem?.description ?? cat.description;
-                const color = getModuleColor(cat.module, true);
-                const colorClasses: Record<string, string> = {
-                  amber: 'bg-amber-50 border-amber-200 text-amber-600',
-                  purple: 'bg-purple-50 border-purple-200 text-purple-600',
-                  blue: 'bg-blue-50 border-blue-200 text-blue-600',
-                  indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
-                };
-                const iconBg = colorClasses[color] || colorClasses.indigo;
+          )}
 
-                return (
-                  <div
-                    key={cat.module}
-                    className={cn(
-                      'p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white min-w-0 overflow-hidden',
-                      'transition-all duration-200 text-left'
-                    )}
-                  >
-                    <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4 shrink-0', iconBg)}>
-                      {getModuleIcon(cat.module)}
-                    </div>
-                    <h3 className="text-heading-3 font-bold text-slate-900 mb-2 break-words">{cat.title}</h3>
-                    <p className="text-small text-slate-600 mb-4 leading-relaxed break-words">{description}</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {SKILL_ORDER.map((skillId) => {
-                        const enabled = cat.skills[skillId];
-                        const label = SKILL_LABELS[skillId];
-                        if (enabled) {
-                          return (
-                            <Link
-                              key={skillId}
-                              href={cat.getHref(skillId)}
-                              className={cn(
-                                'flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-sm font-medium',
-                                'bg-indigo-50 text-indigo-700 border border-indigo-200',
-                                'hover:bg-indigo-100 hover:border-indigo-300 transition-colors',
-                                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
-                              )}
-                            >
-                              {label}
-                              <Icons.ArrowRight className="w-3.5 h-3.5" />
-                            </Link>
-                          );
-                        }
-                        return (
-                          <span
-                            key={skillId}
-                            className={cn(
-                              'flex items-center justify-center py-2.5 px-3 rounded-lg text-sm font-medium',
-                              'bg-slate-50 text-slate-400 border border-slate-200 cursor-not-allowed'
-                            )}
-                            title="Coming soon"
-                          >
-                            {label}
-                            <span className="ml-1 text-xs text-slate-400">(Coming soon)</span>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+          {/* Outputセクション - Bento Grid Layout */}
+          {menu && menu.output.length > 0 && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">Output</h2>
+                <p className="text-slate-600">覚えた語彙・表現を実際に使いましょう（運用: 使わせる制約）</p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-6">
+                {menu.output.map((item) => {
+                  const color = getModuleColor(item.module, false);
+                  const colorClasses: Record<string, string> = {
+                    emerald: 'bg-emerald-50 border-emerald-200 text-emerald-600',
+                    indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
+                    pink: 'bg-pink-50 border-pink-200 text-pink-600',
+                  };
+                  const iconBg = colorClasses[color] || colorClasses.indigo;
+                  
+                  return (
+                    <Link
+                      key={item.module}
+                      href={item.cta.href}
+                      className={cn(
+                        'group p-6 rounded-2xl border border-slate-200 bg-white',
+                        'hover:shadow-md hover:-translate-y-1 hover:border-slate-300',
+                        'transition-all duration-200 text-left',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
+                      )}
+                    >
+                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
+                        {getModuleIcon(item.module)}
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
+                      <p className="text-sm text-slate-600 mb-4 leading-relaxed">{item.description}</p>
+                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
+                        {item.cta.label}
+                        <Icons.ArrowRight className="w-4 h-4" />
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-
-          {/* Outputセクション - Speaking と Writing Task2 の2カード常時表示 */}
-          <div>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">Output</h2>
-              <p className="text-slate-600">覚えた語彙・表現を実際に使いましょう（運用: 使わせる制約）</p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              {OUTPUT_CATEGORIES.map((cat) => {
-                const menuItem = menu?.output?.find((m) => m.module === cat.module);
-                const description = menuItem?.description ?? cat.description;
-                const ctaLabel = menuItem?.cta?.label ?? cat.ctaLabel;
-                const href = menuItem?.cta?.href ?? cat.href;
-                const color = getModuleColor(cat.module, false);
-                const colorClasses: Record<string, string> = {
-                  emerald: 'bg-emerald-50 border-emerald-200 text-emerald-600',
-                  indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
-                  pink: 'bg-pink-50 border-pink-200 text-pink-600',
-                };
-                const iconBg = colorClasses[color] || colorClasses.indigo;
-
-                return (
-                  <Link
-                    key={cat.module}
-                    href={href}
-                    className={cn(
-                      'group p-6 rounded-2xl border border-slate-200 bg-white',
-                      'hover:shadow-md hover:-translate-y-1 hover:border-slate-300',
-                      'transition-all duration-200 text-left',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
-                    )}
-                  >
-                    <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
-                      {getModuleIcon(cat.module)}
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">{cat.title}</h3>
-                    <p className="text-sm text-slate-600 mb-4 leading-relaxed">{description}</p>
-                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-                      {ctaLabel}
-                      <Icons.ArrowRight className="w-4 h-4" />
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
+          )}
 
           {/* 通知（あれば表示） */}
           {menu && menu.notices && menu.notices.length > 0 && (

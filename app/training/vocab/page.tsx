@@ -1,12 +1,6 @@
 'use client';
 
-/**
- * 語彙トレーニング（正規導線）
- * FR-9: /training/vocab を「正」とし、語彙の表示・学習はここに集約。
- * FR-10/11: データは lexicon API（lexicon_items, module=vocab）単一ソース。Speaking/Writing 特化。
- */
-import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import {
   fetchLexiconSets,
@@ -37,7 +31,6 @@ interface QuizState {
 }
 
 export default function VocabPage() {
-  const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>('skill');
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -49,26 +42,6 @@ export default function VocabPage() {
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const appliedInitialSkill = useRef(false);
-
-  // URL ?skill= で来た場合はその技能を選択してカテゴリステップへ（FR-8 遷移先デフォルト）
-  useEffect(() => {
-    if (appliedInitialSkill.current) return;
-    const skill = searchParams.get('skill');
-    if (skill !== 'speaking' && skill !== 'writing') return;
-    appliedInitialSkill.current = true;
-    setLoading(true);
-    setError(null);
-    fetchLexiconSets(skill as Skill, 'vocab').then((response) => {
-      if (response.ok && response.data) {
-        setSelectedSkill(skill as Skill);
-        setSets(response.data.sets);
-        setStep('category');
-      } else {
-        setError(response.error?.message || 'Failed to fetch sets');
-      }
-    }).finally(() => setLoading(false));
-  }, [searchParams]);
 
   // Step A: skill選択
   const handleSkillSelect = async (skill: Skill) => {

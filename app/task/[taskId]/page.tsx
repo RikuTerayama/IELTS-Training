@@ -5,7 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { Task1Flow } from '@/components/task1/Task1Flow';
-import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
 import type { Task, DraftContent, Attempt } from '@/lib/domain/types';
 
 /** W2-FR-3: 40分タイマー（Start/Pause/Reset） */
@@ -413,9 +413,6 @@ function TaskPageContent() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          {/* W2-FR-3: 時間計測（40分目安・Start/Pause/Reset） */}
-          <Task2Timer />
-
           {/* Required Items表示 - Paper Interface Style */}
           {requiredItems.length > 0 && (
             <div className={cn('p-6 rounded-2xl', cardBase, 'bg-indigo-50/50 border-indigo-200')}>

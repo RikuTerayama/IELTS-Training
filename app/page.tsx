@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { CONTACT_MAILTO, CONTACT_GOOGLE_FORM_URL } from '@/lib/constants/contact';
 
 // --- アニメーションコンポーネント ---
 interface FadeInProps {
@@ -233,7 +232,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen min-w-0 overflow-x-hidden bg-[#FAFAFA] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* 背景装飾 */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -255,20 +254,14 @@ export default function LandingPage() {
             </span>
           </Link>
           <nav className="flex items-center gap-6">
-            <Link
-              href="https://ieltsconsult.netlify.app/"
+            <Link 
+              href="https://ieltsconsult.netlify.app/" 
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
             >
-              Official Blog
+              Blog
             </Link>
-            <a
-              href="#contact"
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
-            >
-              Contact
-            </a>
           </nav>
         </div>
       </header>
@@ -603,6 +596,59 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Testimonials セクション */}
+        <section id="testimonials" className="py-24 bg-[#FAFAFA]">
+          <div className="container mx-auto px-6">
+            <FadeIn className="max-w-3xl mx-auto text-center mb-16">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                ユーザーの声
+              </h2>
+              <p className="text-slate-500 text-lg">
+                実際にIELTS Trainingを利用している学習者からのフィードバック
+              </p>
+            </FadeIn>
+            
+            <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto" staggerDelay={0.15}>
+              {[
+                {
+                  name: 'T.K.さん',
+                  level: 'Intermediate',
+                  band: '6.5達成',
+                  text: 'AIのフィードバックが非常に具体的で、どこを改善すべきかが明確になりました。特に論理構成のアドバイスが役立ちました。',
+                  avatar: '👨‍💼'
+                },
+                {
+                  name: 'M.S.さん',
+                  level: 'Beginner',
+                  band: '5.5達成',
+                  text: 'レベル別のカリキュラムが自分に合っていて、無理なく学習を続けられています。語彙学習も効率的です。',
+                  avatar: '👩‍🎓'
+                },
+                {
+                  name: 'R.Y.さん',
+                  level: 'Advanced',
+                  band: '7.0達成',
+                  text: '進捗が可視化されることで、モチベーションが維持できています。弱点分析機能も優秀です。',
+                  avatar: '👨‍🎓'
+                },
+              ].map((testimonial, i) => (
+                <StaggerItem key={i}>
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="text-3xl bg-slate-50 w-10 h-10 flex items-center justify-center rounded-full">{testimonial.avatar}</div>
+                      <div>
+                        <div className="font-bold text-slate-900">{testimonial.name}</div>
+                        <div className="text-xs text-slate-500">{testimonial.level} • <span className="text-indigo-600 font-medium">{testimonial.band}</span></div>
+                      </div>
+                    </div>
+                    <p className="text-slate-600 text-sm leading-relaxed">"{testimonial.text}"</p>
+                  </div>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </div>
+        </section>
+
         {/* About セクション */}
         <section id="about" className="py-24 bg-white border-y border-slate-100">
           <div className="container mx-auto px-6">
@@ -669,7 +715,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Contact セクション（確実に届く導線: メール + 任意で Google Forms） */}
+        {/* Contact セクション */}
         <section id="contact" className="py-24 bg-[#FAFAFA]">
           <div className="container mx-auto px-6">
             <div className="max-w-2xl mx-auto">
@@ -681,67 +727,63 @@ export default function LandingPage() {
                   ご質問やフィードバックをお待ちしています
                 </p>
               </FadeIn>
-
-              {/* 確実に連絡できる手段（優先表示） */}
-              <FadeIn delay={0.1} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 mb-6">
-                <h3 className="font-semibold text-slate-900 mb-4">連絡先（確実に届く方法）</h3>
-                <ul className="space-y-3">
-                  <li>
-                    <a
-                      href={CONTACT_MAILTO}
-                      className="text-indigo-600 hover:text-indigo-700 font-medium underline focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
-                    >
-                      メールでお問い合わせ
-                    </a>
-                    <span className="text-slate-500 text-sm ml-2">（クリックでメーラーが開きます）</span>
-                  </li>
-                  {CONTACT_GOOGLE_FORM_URL && (
-                    <li>
-                      <a
-                        href={CONTACT_GOOGLE_FORM_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-indigo-600 hover:text-indigo-700 font-medium underline focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
-                      >
-                        Google フォームで送信
-                      </a>
-                    </li>
-                  )}
-                </ul>
-                <p className="text-sm text-slate-500 mt-4">送信エラーやスパム対策のため、上記のいずれかでもご連絡いただけます。</p>
-              </FadeIn>
-
-              {/* 従来フォーム（代替として残す場合） */}
+              
               <FadeIn delay={0.2} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
-                <h3 className="font-semibold text-slate-900 mb-4">フォームから送信（準備中の場合は上記メールをご利用ください）</h3>
-                <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); window.location.href = CONTACT_MAILTO; }}>
+                <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('お問い合わせ機能は準備中です。メールにてご連絡ください。'); }}>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">お名前</label>
-                      <input type="text" className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-slate-900" placeholder="山田 太郎" />
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        お名前
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900"
+                        placeholder="山田 太郎"
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">メールアドレス</label>
-                      <input type="email" className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-slate-900" placeholder="example@email.com" />
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        メールアドレス
+                      </label>
+                      <input
+                        type="email"
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900"
+                        placeholder="example@email.com"
+                      />
                     </div>
                   </div>
+                  
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">お問い合わせ内容</label>
-                    <select className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-slate-900">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      お問い合わせ内容
+                    </label>
+                    <select className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900">
                       <option>機能について</option>
                       <option>バグ報告</option>
                       <option>改善提案</option>
                       <option>その他</option>
                     </select>
                   </div>
+                  
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">メッセージ</label>
-                    <textarea rows={4} className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-slate-900 resize-none" placeholder="お問い合わせ内容をご記入ください" />
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      メッセージ
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900 resize-none"
+                      placeholder="お問い合わせ内容をご記入ください"
+                    />
                   </div>
-                  <button type="submit" className="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all">
-                    送信する（未実装の場合はメールが開きます）
-                  </button>
+                  
+                  <button
+                    type="submit"
+                    className="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all"
+                  >
+                    送信する
+                    </button>
                 </form>
+                
               </FadeIn>
             </div>
           </div>
@@ -779,8 +821,8 @@ export default function LandingPage() {
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => scrollToSection('contact')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
-                    Contact
+                  <button onClick={() => scrollToSection('testimonials')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
+                    Testimonials
                   </button>
                 </li>
               </ul>

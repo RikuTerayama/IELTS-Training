@@ -58,13 +58,12 @@ const NoticeSchema = z.object({
 
 /**
  * 今日のメニュースキーマ
- * output は Speaking / Writing Task2 の2件（min(1) で互換性を保持）
  */
 export const TodayMenuSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD形式である必要があります"),
   xp: XPStateSchema,
   input: z.array(InputModuleCardSchema).min(1),
-  output: z.array(OutputModuleCardSchema).min(1).max(10),
+  output: z.array(OutputModuleCardSchema).min(1),
   notices: z.array(NoticeSchema).optional().default([]),
 });
 

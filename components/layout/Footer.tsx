@@ -22,9 +22,9 @@ export function Footer() {
   // }, []);
 
   return (
-    <footer className="border-t border-border bg-bg-secondary min-w-0">
-      <div className="container mx-auto min-w-0 max-w-full px-4 sm:px-6 py-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-small text-text-muted">
+    <footer className="border-t border-slate-200 bg-slate-50">
+      <div className="container mx-auto px-6 py-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <div>
             {/* Step0: Progress依存を断つため、進捗表示をコメントアウト */}
             {/* {summary && (
@@ -38,7 +38,7 @@ export function Footer() {
               </>
             )} */}
           </div>
-          <div className="text-text-subtle">次のおすすめ: タスクを続ける</div>
+          <div className="text-slate-400">次のおすすめ: タスクを続ける</div>
         </div>
       </div>
     </footer>

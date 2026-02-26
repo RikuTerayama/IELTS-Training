@@ -147,15 +147,33 @@ export async function GET(): Promise<Response> {
         cta: {
           label: "選ぶ",
           href: "/training/speaking",
+    // スタブデータ: Outputセクション（最小3件）
+    const outputModules: TodayMenu['output'] = [
+      {
+        module: "writing_task1",
+        title: "Writing Task 1",
+        description: "グラフ・図表・地図の説明",
+        cta: {
+          label: "開始",
+          href: "/training/writing/task1",
         },
       },
       {
         module: "writing_task2",
         title: "Writing Task 2",
-        description: "エッセイライティング。レベル別（穴埋め→Reasoning→自由作成）",
+        description: "エッセイライティング",
         cta: {
           label: "開始",
-          href: "/task/select?task_type=Task%202",
+          href: "/training/writing/task2",
+        },
+      },
+      {
+        module: "speaking",
+        title: "Speaking練習",
+        description: "瞬間英作文・スピーキング",
+        cta: {
+          label: "開始",
+          href: "/training/speaking/task1",
         },
       },
     ];
