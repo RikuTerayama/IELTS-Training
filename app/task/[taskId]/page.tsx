@@ -1,12 +1,47 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { Task1Flow } from '@/components/task1/Task1Flow';
-import { cn, cardBase, cardTitle, cardDesc } from '@/lib/ui/theme';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 import type { Task, DraftContent, Attempt } from '@/lib/domain/types';
+
+/** W2-FR-3: 40分タイマー（Start/Pause/Reset） */
+const TASK2_TIMER_DEFAULT_SEC = 40 * 60;
+
+function Task2Timer({ onElapsedChange }: { onElapsedChange?: (sec: number) => void }) {
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const [running, setRunning] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!running) return;
+    intervalRef.current = setInterval(() => {
+      setElapsedSec((s) => {
+        const next = s + 1;
+        onElapsedChange?.(next);
+        return next;
+      });
+    }, 1000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [running, onElapsedChange]);
+
+  const display = `${String(Math.floor(elapsedSec / 60)).padStart(2, '0')}:${String(elapsedSec % 60).padStart(2, '0')}`;
+  return (
+    <div className={cn('p-4 rounded-xl', cardBase, 'flex flex-wrap items-center gap-4')}>
+      <span className="text-2xl font-mono font-bold text-slate-900">{display}</span>
+      <span className="text-sm text-slate-500">（目安 40分）</span>
+      <div className="flex gap-2">
+        <button onClick={() => setRunning((r) => !r)} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>
+          {running ? 'Pause' : 'Start'}
+        </button>
+        <button onClick={() => { setRunning(false); setElapsedSec(0); }} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>Reset</button>
+      </div>
+    </div>
+  );
+}
 
 function TaskPageContent() {
   const params = useParams();
@@ -20,6 +55,19 @@ function TaskPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [mode, setMode] = useState<'training' | 'exam'>('training');
+  const [requiredItems, setRequiredItems] = useState<Array<{
+    module: 'lexicon' | 'idiom' | 'vocab';
+    item_id: string;
+    skill: 'writing' | 'speaking';
+    category: string;
+    expression: string;
+    ja_hint?: string;
+  }>>([]);
+  const [outputCheckResult, setOutputCheckResult] = useState<{
+    used: Array<{ module: string; item_id: string; expression: string }>;
+    missing: Array<{ module: string; item_id: string; expression: string }>;
+    usage_rate: number;
+  } | null>(null);
 
   useEffect(() => {
     if (taskId === 'new') {
@@ -80,6 +128,23 @@ function TaskPageContent() {
               }
             } catch (error) {
               console.error('Failed to create/resume attempt:', error);
+            }
+          }
+
+          // Required Itemsを取得（Writingの場合）
+          if (data.data.question_type === 'Task 1' || data.data.question_type === 'Task 2') {
+            try {
+              const itemsRes = await fetch(
+                `/api/input/items?skill=writing&modules=vocab,idiom,lexicon&limit=5`
+              );
+              if (itemsRes.ok) {
+                const itemsData = await itemsRes.json();
+                if (itemsData.ok && itemsData.data) {
+                  setRequiredItems(itemsData.data.items);
+                }
+              }
+            } catch (error) {
+              console.error('Failed to fetch required items:', error);
             }
           }
         }
@@ -180,6 +245,49 @@ function TaskPageContent() {
       console.log('[TaskPage] Submit response:', data);
 
       if (data.ok) {
+        // Required Itemsの使用チェック（submit成功後）
+        if (requiredItems.length > 0) {
+          try {
+            const finalContent = draftContent.final || draftContent.fill_in || draftContent.skeleton || '';
+            const outputType = task.question_type === 'Task 1' ? 'writing_task1' : 'writing_task2';
+            
+            const checkRes = await fetch('/api/output/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                output_type: outputType,
+                content: finalContent,
+                required_items: requiredItems.map(item => ({
+                  module: item.module,
+                  item_id: item.item_id,
+                  expression: item.expression,
+                })),
+                meta: {
+                  task_id: actualTaskId,
+                },
+              }),
+            });
+
+            if (checkRes.ok) {
+              const checkData = await checkRes.json();
+              if (checkData.ok && checkData.data) {
+                setOutputCheckResult(checkData.data);
+                // 使用チェック結果がある場合は表示してから遷移
+                if (checkData.data.missing.length > 0) {
+                  const missingList = checkData.data.missing.map((m: { expression: string }) => m.expression).join(', ');
+                  const confirmMessage = `以下の表現が使用されていません: ${missingList}\n\nフィードバック画面に進みますか？`;
+                  if (!confirm(confirmMessage)) {
+                    setSubmitting(false);
+                    return;
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Failed to check required items usage:', error);
+          }
+        }
+        
         if (data.data.next_step === 'fill_in') {
           router.push(`/fillin/${data.data.attempt_id}`);
         } else {
@@ -206,8 +314,8 @@ function TaskPageContent() {
   if (loading) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-text-muted">読み込み中...</div>
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center text-slate-500">読み込み中...</div>
         </div>
       </Layout>
     );
@@ -216,8 +324,8 @@ function TaskPageContent() {
   if (!task) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-text-muted">タスクが見つかりません</div>
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center text-slate-500">タスクが見つかりません</div>
         </div>
       </Layout>
     );
@@ -227,24 +335,45 @@ function TaskPageContent() {
   if (task.question_type === 'Task 1' && attempt) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className={cn('mb-6 p-6', cardBase)}>
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h2 className={cn('mb-2 text-lg font-semibold', cardTitle)}>お題</h2>
-                <p className={cn('text-sm', cardDesc)}>{task.question}</p>
-                <div className="mt-2">
-                  <p className={cn('text-sm', cardDesc)}>
-                    目標: Band <span className={cn('font-medium', 'text-text')}>6.0-6.5</span>
-                  </p>
-                  <p className={cn('text-sm', cardDesc)}>
-                    必須語彙:{' '}
-                    {task.required_vocab.map((v) => (
-                      <span key={v.word} className={cn('mr-2 rounded border border-primary/20 bg-accent-indigo/10 px-2 py-1 text-xs', 'text-text')}>
-                        {v.word}
-                      </span>
-                    ))}
-                  </p>
+        <div className="container mx-auto px-6 py-12 max-w-5xl">
+          {/* Required Items表示 - Paper Interface Style */}
+          {requiredItems.length > 0 && (
+            <div className={cn('mb-6 p-6 rounded-2xl', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
+              <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">必須使用表現（{requiredItems.length}個）</h3>
+              <div className="flex flex-wrap gap-2">
+                {requiredItems.map((item, idx) => (
+                  <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-sm shadow-sm">
+                    <span className="font-semibold text-indigo-900">{item.expression}</span>
+                    {item.ja_hint && <span className="text-xs text-slate-500">（{item.ja_hint}）</span>}
+                    <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={cn('mb-6 p-8 rounded-2xl', cardBase)}>
+            <div className="mb-6 flex items-start justify-between">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-4">お題</h2>
+                <p className="text-base text-slate-700 leading-relaxed mb-4">{task.question}</p>
+                <div className="flex flex-wrap items-center gap-4 mt-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-500">目標:</span>
+                    <span className="px-3 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-semibold text-sm">Band 6.0-6.5</span>
+                  </div>
+                  {task.required_vocab.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-slate-500">必須語彙:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {task.required_vocab.map((v) => (
+                          <span key={v.word} className="px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">
+                            {v.word}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2">
@@ -279,78 +408,127 @@ function TaskPageContent() {
     );
   }
 
-  // Task 2の場合は既存のUI
+  // Task 2の場合は既存のUI（W2-FR-3: 40分タイマー付き）
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          {/* お題 */}
-          <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
-            <h2 className="mb-4 text-lg font-semibold text-text">お題</h2>
+          {/* W2-FR-3: 時間計測（40分目安・Start/Pause/Reset） */}
+          <Task2Timer />
+
+          {/* Required Items表示 - Paper Interface Style */}
+          {requiredItems.length > 0 && (
+            <div className={cn('p-6 rounded-2xl', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
+              <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">必須使用表現（{requiredItems.length}個）</h3>
+              <div className="flex flex-wrap gap-2">
+                {requiredItems.map((item, idx) => (
+                  <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-sm shadow-sm">
+                    <span className="font-semibold text-indigo-900">{item.expression}</span>
+                    {item.ja_hint && <span className="text-xs text-slate-500">（{item.ja_hint}）</span>}
+                    <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 使用チェック結果表示 - Paper Interface Style */}
+          {outputCheckResult && outputCheckResult.missing.length > 0 && (
+            <div className={cn('p-6 rounded-2xl', cardBase, 'bg-amber-50 border-amber-200')}>
+              <h3 className="text-sm font-semibold text-amber-900 mb-3 uppercase tracking-wider">
+                使用できなかった表現（{outputCheckResult.missing.length}個）
+              </h3>
+              <div className="space-y-2">
+                {outputCheckResult.missing.map((item, idx) => {
+                  const requiredItem = requiredItems.find(ri => ri.item_id === item.item_id);
+                  return (
+                    <div key={idx} className="text-sm text-amber-900">
+                      <span className="font-semibold">{item.expression}</span>
+                      {requiredItem?.ja_hint && <span className="ml-2 text-slate-600">（{requiredItem.ja_hint}）</span>}
+                      <span className="ml-2 text-xs text-amber-700">[{item.module}]</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* お題 - Paper Interface Style */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm mb-6">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-4">お題</h2>
             
             {/* Task1の場合は画像を表示 */}
             {task.question_type === 'Task 1' && (
-              <div className="mb-4">
+              <div className="mb-6">
                 <Task1Image
                   question={task.question}
                   level={level}
                   imagePath={task.image_path}
                   alt="Task 1 Chart or Diagram"
-                  className="w-full"
+                  className="w-full rounded-xl"
                 />
               </div>
             )}
             
-            <p className="text-text-muted">{task.question}</p>
-            <div className="mt-4 space-y-2">
-              <p className="text-text">
-                目標: Band <span className="font-medium">6.0-6.5</span>
-              </p>
-              <p className="text-text">
-                必須語彙:{' '}
-                {task.required_vocab.map((v) => (
-                  <span key={v.word} className="mr-2 rounded bg-primary/10 border border-primary/20 px-2 py-1 text-sm text-primary">
-                    {v.word}
-                  </span>
-                ))}
-              </p>
+            <p className="text-base text-slate-700 leading-relaxed mb-6">{task.question}</p>
+            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-slate-500">目標:</span>
+                <span className="px-3 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-semibold text-sm">Band 6.0-6.5</span>
+              </div>
+              {task.required_vocab.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-500">必須語彙:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {task.required_vocab.map((v) => (
+                      <span key={v.word} className="px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">
+                        {v.word}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* PREPガイド（初級/中級のみ） */}
+          {/* PREPガイド（初級/中級のみ） - Paper Interface Style */}
           {task.prep_guide && (level === 'beginner' || level === 'intermediate') && (
-            <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
-              <h2 className="mb-4 text-lg font-semibold text-text">PREPガイド</h2>
-              <div className="space-y-2 text-sm text-text">
-                <p>
-                  <strong>P (Point):</strong> {task.prep_guide.point}
-                </p>
-                <p>
-                  <strong>R (Reason):</strong> {task.prep_guide.reason}
-                </p>
-                <p>
-                  <strong>E (Example):</strong> {task.prep_guide.example}
-                </p>
-                <p>
-                  <strong>P (Point again):</strong> {task.prep_guide.point_again}
-                </p>
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm mb-6">
+              <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-6">PREPガイド</h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                  <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">P (Point)</div>
+                  <p className="text-sm text-slate-700">{task.prep_guide.point}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
+                  <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">R (Reason)</div>
+                  <p className="text-sm text-slate-700">{task.prep_guide.reason}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                  <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">E (Example)</div>
+                  <p className="text-sm text-slate-700">{task.prep_guide.example}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-purple-50 border border-purple-100">
+                  <div className="text-xs font-semibold text-purple-600 uppercase tracking-wider mb-1">P (Point again)</div>
+                  <p className="text-sm text-slate-700">{task.prep_guide.point_again}</p>
+                </div>
               </div>
             </div>
           )}
 
-          {/* PREPヒアリングモードへの切り替えボタン（初級/中級のみ） */}
+          {/* PREPヒアリングモードへの切り替えボタン（初級/中級のみ） - Paper Interface Style */}
           {(level === 'beginner' || level === 'intermediate') && (
-            <div className="rounded-lg border border-primary/20 bg-primary/10 p-4 mb-6">
-              <div className="flex items-center justify-between">
+            <div className="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-6 mb-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-semibold text-text mb-1">PREPヒアリングモード</h3>
-                  <p className="text-sm text-text-muted">
+                  <h3 className="font-bold text-slate-900 mb-1">PREPヒアリングモード</h3>
+                  <p className="text-sm text-slate-600">
                     キャラクターが質問しながら、段階的にエッセイを作成できます
                   </p>
                 </div>
                 <button
                   onClick={() => router.push(`/task/${taskId}/prep`)}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                  className={cn('px-6 py-3', buttonPrimary, 'whitespace-nowrap')}
                 >
                   PREPモードで開始
                 </button>
@@ -358,13 +536,13 @@ function TaskPageContent() {
             </div>
           )}
 
-          {/* 入力エリア */}
-          <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
-            <h2 className="mb-4 text-lg font-semibold text-text">回答</h2>
+          {/* 入力エリア - Paper Interface Style */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm mb-6">
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-6">回答</h2>
             {level === 'beginner' ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-text">
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
                     日本語で回答
                   </label>
                   <textarea
@@ -373,12 +551,12 @@ function TaskPageContent() {
                       setDraftContent({ ...draftContent, japanese: e.target.value })
                     }
                     rows={5}
-                    className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-theme transition-all duration-200"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
                     placeholder="日本語で回答を書いてください"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-text">
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
                     英語で回答（自由記述）
                   </label>
                   <textarea
@@ -386,8 +564,8 @@ function TaskPageContent() {
                     onChange={(e) =>
                       setDraftContent({ ...draftContent, final: e.target.value })
                     }
-                    rows={10}
-                    className="mt-1 block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-theme transition-all duration-200"
+                    rows={12}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
                     placeholder="英語で回答を書いてください"
                   />
                 </div>
@@ -396,27 +574,27 @@ function TaskPageContent() {
               <textarea
                 value={draftContent.final || ''}
                 onChange={(e) => setDraftContent({ ...draftContent, final: e.target.value })}
-                rows={15}
-                className="block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-theme transition-all duration-200"
+                rows={18}
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
                 placeholder="英語でPREP形式で回答を書いてください"
               />
             ) : (
               <textarea
                 value={draftContent.final || ''}
                 onChange={(e) => setDraftContent({ ...draftContent, final: e.target.value })}
-                rows={15}
-                className="block w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-text placeholder:text-placeholder focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-theme transition-all duration-200"
+                rows={18}
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
                 placeholder="英語で自由に回答を書いてください"
               />
             )}
           </div>
 
-          {/* 送信ボタン */}
+          {/* 送信ボタン - Paper Interface Style */}
           <div className="flex justify-end">
             <button
               onClick={handleSubmit}
               disabled={submitting || !draftContent.final}
-              className="rounded-md bg-primary px-6 py-2 text-primary-foreground hover:bg-primary-hover disabled:bg-text-muted/50 disabled:cursor-not-allowed disabled:text-text-subtle transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+              className={cn('px-8 py-3', buttonPrimary, 'disabled:opacity-50 disabled:cursor-not-allowed')}
             >
               {submitting ? '送信中...' : 'Submit'}
             </button>

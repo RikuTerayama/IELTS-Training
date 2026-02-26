@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import type { Feedback, Attempt } from '@/lib/domain/types';
+import { cn, cardBase, cardTitle, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 export default function FeedbackPage() {
   const params = useParams();
@@ -91,8 +92,8 @@ export default function FeedbackPage() {
   if (loading || generating) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center text-slate-500">
             {generating ? 'フィードバックを生成中...' : '読み込み中...'}
           </div>
         </div>
@@ -103,87 +104,164 @@ export default function FeedbackPage() {
   if (!feedback) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">フィードバックが見つかりません</div>
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center text-slate-500">フィードバックが見つかりません</div>
         </div>
       </Layout>
     );
   }
 
+  // Band Rangeをパース（例: "6.0-6.5" → { min: 6.0, max: 6.5 }）
+  const parseBandRange = (range: string) => {
+    const match = range.match(/(\d+\.\d+)-(\d+\.\d+)/);
+    if (match) {
+      return { min: parseFloat(match[1]), max: parseFloat(match[2]) };
+    }
+    const singleMatch = range.match(/(\d+\.\d+)/);
+    if (singleMatch) {
+      const val = parseFloat(singleMatch[1]);
+      return { min: val, max: val };
+    }
+    return { min: 0, max: 0 };
+  };
+
+  const bandRange = parseBandRange(feedback.overall_band_range);
+  const averageBand = (bandRange.min + bandRange.max) / 2;
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          {/* Overall Band */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">
-              Overall Band: {feedback.overall_band_range}
-            </h2>
+      <div className="container mx-auto px-6 py-12 max-w-5xl">
+        <div className="space-y-8">
+          {/* Overall Band - Data Visualization Style */}
+          <div className={cn('p-8 rounded-2xl', cardBase, 'bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200')}>
+            <div className="text-center mb-6">
+              <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2">Overall Band Score</h2>
+              <div className="flex items-baseline justify-center gap-2">
+                <span className="text-6xl font-bold text-indigo-600">{averageBand.toFixed(1)}</span>
+                <span className="text-2xl font-semibold text-slate-500">/ 9.0</span>
+              </div>
+              <p className="text-sm text-slate-600 mt-2">Range: {feedback.overall_band_range}</p>
+            </div>
+            {/* Band Progress Bar */}
+            <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-1000"
+                style={{ width: `${(averageBand / 9.0) * 100}%` }}
+              />
+            </div>
           </div>
 
-          {/* Band-up actions */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">次にBandを上げる3つの行動</h2>
+          {/* Band-up actions - Actionable Cards Style */}
+          <div className={cn('p-8 rounded-2xl', cardBase)}>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-6">次にBandを上げる3つの行動</h2>
             <div className="space-y-4">
-              {feedback.band_up_actions.map((action) => (
-                <div key={action.priority} className="border-l-4 border-blue-500 pl-4">
-                  <h3 className="font-semibold">
-                    {action.priority}. {action.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-600">
-                    <strong>理由:</strong> {action.why}
-                  </p>
-                  <p className="mt-1 text-sm text-gray-600">
-                    <strong>方法:</strong> {action.how}
-                  </p>
-                  <p className="mt-2 text-sm text-gray-700">
-                    <strong>例:</strong> {action.example}
-                  </p>
-                </div>
-              ))}
+              {feedback.band_up_actions.map((action) => {
+                const priorityColors: Record<number, string> = {
+                  1: 'indigo',
+                  2: 'blue',
+                  3: 'emerald',
+                };
+                const color = priorityColors[action.priority] || 'indigo';
+                
+                return (
+                  <div 
+                    key={action.priority} 
+                    className={cn(
+                      'p-6 rounded-xl border-2 border-slate-200 bg-white',
+                      'hover:shadow-md hover:border-indigo-300 transition-all duration-200',
+                      'cursor-pointer'
+                    )}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 rounded-xl bg-${color}-100 border border-${color}-200 flex items-center justify-center shrink-0`}>
+                        <span className={`text-xl font-bold text-${color}-600`}>{action.priority}</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-slate-900 mb-3">{action.title}</h3>
+                        <div className="space-y-2 text-sm">
+                          <div>
+                            <span className="font-semibold text-slate-700">理由:</span>
+                            <span className="ml-2 text-slate-600">{action.why}</span>
+                          </div>
+                          <div>
+                            <span className="font-semibold text-slate-700">方法:</span>
+                            <span className="ml-2 text-slate-600">{action.how}</span>
+                          </div>
+                          <div className="mt-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <span className="font-semibold text-slate-700">例:</span>
+                            <span className="ml-2 text-slate-700">{action.example}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* 4次元評価 */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">4次元評価</h2>
-            <div className="space-y-2">
-              {feedback.dimensions.map((dim) => (
-                <div key={dim.dimension} className="border-b border-gray-100 pb-2">
-                  <p className="text-sm">
-                    <strong>
-                      {dim.dimension}
-                      {dim.dimension === 'TR' && '（問いに答える）'}
-                      {dim.dimension === 'CC' && '（論理の流れ）'}
-                      {dim.dimension === 'LR' && '（語彙の幅）'}
-                      {dim.dimension === 'GRA' && '（文法の正確さ）'}
-                    </strong>
-                    : {dim.short_comment} (Band: {dim.band_estimate})
-                  </p>
-                </div>
-              ))}
+          {/* 4次元評価 - Data Visualization Style */}
+          <div className={cn('p-8 rounded-2xl', cardBase)}>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-6">4次元評価</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              {feedback.dimensions.map((dim) => {
+                const dimensionLabels: Record<string, string> = {
+                  'TR': '問いに答える',
+                  'CC': '論理の流れ',
+                  'LR': '語彙の幅',
+                  'GRA': '文法の正確さ',
+                };
+                const dimensionColors: Record<string, string> = {
+                  'TR': 'indigo',
+                  'CC': 'blue',
+                  'LR': 'emerald',
+                  'GRA': 'purple',
+                };
+                const color = dimensionColors[dim.dimension] || 'indigo';
+                const bandValue = parseFloat(dim.band_estimate) || 0;
+                
+                return (
+                  <div key={dim.dimension} className="p-6 rounded-xl bg-slate-50 border border-slate-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <div className="text-lg font-bold text-slate-900">{dim.dimension}</div>
+                        <div className="text-xs text-slate-500">{dimensionLabels[dim.dimension]}</div>
+                      </div>
+                      <div className="text-2xl font-bold text-indigo-600">{bandValue.toFixed(1)}</div>
+                    </div>
+                    {/* Band Progress Bar */}
+                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden mb-3">
+                      <div 
+                        className={`h-full bg-gradient-to-r from-${color}-500 to-${color}-600 rounded-full transition-all duration-1000`}
+                        style={{ width: `${(bandValue / 9.0) * 100}%` }}
+                      />
+                    </div>
+                    <p className="text-sm text-slate-700 leading-relaxed">{dim.short_comment}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* アクションボタン */}
-          <div className="flex gap-4">
+          {/* アクションボタン - Paper Interface Style */}
+          <div className="flex flex-wrap gap-4">
             {feedback.rewrite_targets.length > 0 && (
               <button
                 onClick={() => router.push(`/rewrite/${attemptId}`)}
-                className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                className={cn('px-6 py-3', buttonPrimary, 'bg-emerald-600 hover:bg-emerald-700')}
               >
                 Rewrite
               </button>
             )}
             <button
               onClick={() => router.push(`/speak/${attemptId}`)}
-              className="rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
+              className={cn('px-6 py-3', buttonPrimary, 'bg-purple-600 hover:bg-purple-700')}
             >
               Speak
             </button>
             <button
               onClick={() => router.push('/home')}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
+              className={cn('px-6 py-3', buttonSecondary)}
             >
               次のタスク
             </button>

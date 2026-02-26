@@ -15,7 +15,7 @@ export default function VocabularyPage() {
         </p>
         <div className="flex justify-center">
           <button
-            onClick={() => router.push('/vocab')}
+            onClick={() => router.push('/training/vocab?skill=speaking')}
             className="px-8 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-semibold"
           >
             単語練習を開始

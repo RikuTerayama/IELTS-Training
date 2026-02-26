@@ -64,18 +64,18 @@
   }
 
   [data-theme="dark"] {
-    /* Dark Theme Colors */
-    --bg: 15 23 42;
-    --bg-secondary: 30 41 59;
-    --surface: 30 41 59;
-    --surface-2: 51 65 85;
+    /* DARK-FR-1/2: 十分にダークな背景・カード・境界線 */
+    --bg: 7 12 24;
+    --bg-secondary: 15 23 42;
+    --surface: 15 23 42;
+    --surface-2: 30 41 59;
     
     --text: 248 250 252;
     --text-muted: 203 213 225;
     --text-subtle: 148 163 184;
     
-    --border: 51 65 85;
-    --border-strong: 71 85 105;
+    --border: 30 41 59;
+    --border-strong: 51 65 85;
     
     --primary: 99 102 241;
     --primary-hover: 129 140 248;
@@ -119,18 +119,39 @@
     
     --focus-ring: 129 140 248;
     
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+    /* DARK-FR-4: 影・境界線を暗背景で見えるように */
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
   }
 
   * {
     @apply border-[color:rgb(var(--border))];
   }
 
+  /* WRAP-FR-1: 横スクロール防止 */
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-[rgb(var(--bg))] text-[rgb(var(--text))];
     font-family: var(--font-inter), var(--font-noto-sans-jp), system-ui, -apple-system, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
     transition: background-color 200ms ease, color 200ms ease;
+    min-width: 0;
+  }
+
+  /* WRAP-FR-2/4: 長語・URL折り返し、見出しの行長 */
+  h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    max-inline-size: 65ch;
+  }
+
+  p, li, td, th {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   /* Focus ring styling */

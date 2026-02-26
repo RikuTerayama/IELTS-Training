@@ -20,7 +20,7 @@ export interface Task1Asset {
 
 /**
  * Task1アセット一覧
- * 既存の画像ファイル（public/images/task1/batch*/）に対応
+ * 既存の画像ファイル (public/images/task1/batch* 配下) に対応
  */
 export const TASK1_ASSETS: Task1Asset[] = [
   // batch1: line_chart
@@ -235,7 +235,7 @@ export function selectAssetByWeight(
     return null;
   }
   
-  const selectedGenre = weightedGenres[Math.floor(Math.random() * weightedGenres.length)];
+  const selectedGenre = weightedGenres[Math.floor(Math.random() * weightedGenres.length)] as Task1Genre;
   const genreCandidates = genreGroups[selectedGenre];
   
   if (genreCandidates.length === 0) {
