@@ -5,7 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { Task1Flow } from '@/components/task1/Task1Flow';
-import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 import type { Task, DraftContent, Attempt } from '@/lib/domain/types';
 
 /** W2-FR-3: 40分タイマー（Start/Pause/Reset） */
