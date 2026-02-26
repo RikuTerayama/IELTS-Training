@@ -1,156 +1,71 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
-import { getPhrasesByTopicAndLevel, getRandomPhrases, type SpeakingPhrase } from '@/lib/data/speaking_phrases';
+import { getPhrasesByTopicAndLevel, type SpeakingPhrase } from '@/lib/data/speaking_phrases';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
-const TOTAL_QUESTIONS = 10;
+/** SPK-FR-4: 音声入力・テキスト入力なし。タイマー・次へ・お題を変える・推奨表現表示のみ */
+interface RecommendedItem {
+  module: string;
+  expression: string;
+  ja_hint?: string;
+}
 
-export default function SpeakingTask1DrillPage() {
+const TASK1_QUESTION_COUNT = 8;
+const TIMER_PRESET_SEC = 30; // 1問あたりの目安時間（任意表示用）
+
+function Task1DrillContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const category = searchParams.get('category') || 'work_study';
+
   const [phrases, setPhrases] = useState<SpeakingPhrase[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [userResponse, setUserResponse] = useState<string>('');
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
-  const [isRecording, setIsRecording] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
-  const recognitionRef = useRef<any>(null);
+  const [recommended, setRecommended] = useState<RecommendedItem[]>([]);
+  const [showExpressions, setShowExpressions] = useState(true);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 音声認識の初期化
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Web Speech APIの確認
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognitionInstance = new SpeechRecognition();
-        recognitionInstance.lang = 'en-US';
-        recognitionInstance.continuous = false;
-        recognitionInstance.interimResults = false;
+    const list = getPhrasesByTopicAndLevel(category, 'B2', TASK1_QUESTION_COUNT);
+    setPhrases(list);
+  }, [category]);
 
-        recognitionInstance.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          setUserResponse(transcript);
-          setIsRecording(false);
-          checkAnswer(transcript);
-        };
-
-        recognitionInstance.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error);
-          setIsRecording(false);
-          alert('音声認識でエラーが発生しました。もう一度お試しください。');
-        };
-
-        recognitionInstance.onend = () => {
-          setIsRecording(false);
-        };
-
-        setRecognition(recognitionInstance);
-        recognitionRef.current = recognitionInstance;
-      } else {
-        // Web Speech APIが利用できない場合、テキスト入力モードに切り替え
-        console.warn('Web Speech API is not available. Falling back to text input.');
-        setInputMode('text');
-      }
-    }
+  useEffect(() => {
+    fetch('/api/input/items?skill=speaking&modules=vocab,idiom&limit=8')
+      .then((r) => r.json())
+      .then((data: { ok?: boolean; data?: { items?: RecommendedItem[] } }) => {
+        if (data.ok && data.data?.items?.length) {
+          setRecommended(
+            data.data.items.map((i: { expression: string; ja_hint?: string; module?: string }) => ({
+              module: i.module || 'vocab',
+              expression: i.expression,
+              ja_hint: i.ja_hint,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  // フレーズの読み込み
   useEffect(() => {
-    // Task 1用のフレーズを取得（work_study, introduction, hometown などから）
-    const task1Phrases = getRandomPhrases(TOTAL_QUESTIONS);
-    setPhrases(task1Phrases);
-  }, []);
-
-  // 音声認識開始
-  const startRecording = () => {
-    if (recognitionRef.current && !isRecording) {
-      setIsRecording(true);
-      setUserResponse('');
-      setIsCorrect(null);
-      setShowAnswer(false);
-      recognitionRef.current.start();
+    if (timerRunning) {
+      intervalRef.current = setInterval(() => setElapsedSec((s) => s + 1), 1000);
     }
-  };
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [timerRunning]);
 
-  // 音声認識停止
-  const stopRecording = () => {
-    if (recognitionRef.current && isRecording) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
-    }
-  };
-
-  // 次の問題へ（自動 - 音声認識後）
-  const handleNextAuto = () => {
-    if (currentIndex < phrases.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setUserResponse('');
-      setIsCorrect(null);
-      setShowAnswer(false);
-    }
-    // 最後の問題の場合は、homeに遷移せずに評価を表示したままにする
-    // ユーザーが「完了」ボタンをクリックするまで待つ
-  };
-
-  // 正答判定（音声認識・テキスト入力両方）
-  const checkAnswer = (response: string) => {
-    const currentPhrase = phrases[currentIndex];
-    if (!currentPhrase) return;
-
-    // シンプルな正答判定（大文字小文字、句読点を無視）
-    const normalizedResponse = response.toLowerCase().trim().replace(/[.,!?]/g, '');
-    const normalizedAnswer = currentPhrase.english.toLowerCase().trim().replace(/[.,!?]/g, '');
-
-    // 完全一致をチェック
-    const isExactMatch = normalizedResponse === normalizedAnswer;
-    
-    // バリエーションとの一致をチェック（主要な単語が含まれているか）
-    const includesMainParts = currentPhrase.english_variations?.some(variation => {
-      const normalizedVariation = variation.toLowerCase().trim().replace(/[.,!?]/g, '');
-      // 主要な単語のいくつかが含まれているかチェック
-      const answerWords = normalizedAnswer.split(/\s+/).filter(w => w.length > 3); // 3文字以上の単語
-      const responseWords = normalizedResponse.split(/\s+/).filter(w => w.length > 3);
-      const variationWords = normalizedVariation.split(/\s+/).filter(w => w.length > 3);
-      
-      // 回答の主要単語の70%以上が含まれているか、またはバリエーションの主要単語の70%以上が含まれているか
-      const matchAnswerWords = answerWords.filter(w => responseWords.includes(w)).length;
-      const matchVariationWords = variationWords.filter(w => responseWords.includes(w)).length;
-      
-      return matchAnswerWords >= Math.ceil(answerWords.length * 0.7) || 
-             matchVariationWords >= Math.ceil(variationWords.length * 0.7);
-    });
-
-    setIsCorrect(isExactMatch || includesMainParts || false);
-    setShowAnswer(true);
-    
-    // 評価表示後、3秒後に次の問題に自動進行
-    if (inputMode === 'voice') {
-      setTimeout(() => {
-        handleNextAuto();
-      }, 3000);
-    }
-  };
-
-  // テキスト入力時の処理（評価も実施）
-  const handleTextSubmit = () => {
-    if (inputMode === 'text' && userResponse.trim()) {
-      checkAnswer(userResponse);
-    }
-  };
-
-  // 次の問題へ（手動）
   const handleNext = () => {
     if (currentIndex < phrases.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setUserResponse('');
-      setIsCorrect(null);
-      setShowAnswer(false);
+      setCurrentIndex((i) => i + 1);
     } else {
-      // 全問終了
-      router.push('/home');
+      router.push('/training/speaking');
     }
   };
 
@@ -161,7 +76,7 @@ export default function SpeakingTask1DrillPage() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="text-center py-8 text-text-muted">読み込み中...</div>
+          <div className="text-center py-8 text-slate-500">読み込み中...</div>
         </div>
       </Layout>
     );
@@ -170,218 +85,106 @@ export default function SpeakingTask1DrillPage() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6 text-text">瞬間英作文 - Task 1</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-xl font-bold text-slate-900">Speaking Task 1</h1>
+          <Link href="/training/speaking" className={cn('text-sm', buttonSecondary)}>
+            お題を変える
+          </Link>
+        </div>
 
-        {/* 進捗バー */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm text-text-muted mb-2">
-            <span>問題 {currentIndex + 1} / {phrases.length}</span>
+        {/* タイマー（Start/Pause/Reset） */}
+        <div className={cn('mb-6 p-4 rounded-xl', cardBase)}>
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-2xl font-mono font-bold text-slate-900">
+              {String(Math.floor(elapsedSec / 60)).padStart(2, '0')}:{String(elapsedSec % 60).padStart(2, '0')}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setTimerRunning((r) => !r)}
+                className={cn('px-3 py-1.5 rounded-lg text-sm font-medium', buttonSecondary)}
+              >
+                {timerRunning ? 'Pause' : 'Start'}
+              </button>
+              <button
+                onClick={() => {
+                  setTimerRunning(false);
+                  setElapsedSec(0);
+                }}
+                className={cn('px-3 py-1.5 rounded-lg text-sm font-medium', buttonSecondary)}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 推奨表現（SPK-FR-3, SPK-AC-4: 空にしない） */}
+        <div className={cn('mb-6', cardBase, 'p-4')}>
+          <button
+            type="button"
+            onClick={() => setShowExpressions((s) => !s)}
+            className="flex items-center justify-between w-full text-left"
+          >
+            <h2 className="font-semibold text-slate-900">使う表現（vocab/idiom）</h2>
+            <span className="text-sm text-slate-500">{showExpressions ? '閉じる' : '開く'}</span>
+          </button>
+          {showExpressions && (
+            <ul className="mt-3 space-y-1.5 text-sm">
+              {recommended.length > 0 ? (
+                recommended.map((item, i) => (
+                  <li key={i} className="text-slate-700">
+                    <span className="font-medium">{item.expression}</span>
+                    {item.ja_hint && <span className="text-slate-500 ml-2">（{item.ja_hint}）</span>}
+                  </li>
+                ))
+              ) : (
+                <li className="text-slate-500">表現を読み込み中…</li>
+              )}
+            </ul>
+          )}
+        </div>
+
+        {/* 進捗 */}
+        <div className="mb-4">
+          <div className="flex justify-between text-sm text-slate-500 mb-1">
+            <span>質問 {currentIndex + 1} / {phrases.length}</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div className="w-full bg-surface-2 rounded-full h-2">
+          <div className="w-full bg-slate-100 rounded-full h-2">
             <div
-              className="bg-accent-violet h-2 rounded-full transition-all duration-300"
+              className="bg-indigo-500 h-2 rounded-full transition-all"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
-        {/* 入力モード切り替え */}
-        <div className="mb-4 flex gap-4 justify-center">
-          <button
-            onClick={() => {
-              setInputMode('voice');
-              setUserResponse('');
-              setIsCorrect(null);
-              setShowAnswer(false);
-            }}
-            className={`px-4 py-2 rounded transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring ${
-              inputMode === 'voice'
-                ? 'bg-accent-violet text-accent-violet-foreground'
-                : 'bg-surface-2 text-text hover:bg-surface'
-            }`}
-          >
-            音声入力
-          </button>
-          <button
-            onClick={() => {
-              setInputMode('text');
-              setUserResponse('');
-              setIsCorrect(null);
-              setShowAnswer(false);
-            }}
-            className={`px-4 py-2 rounded transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring ${
-              inputMode === 'text'
-                ? 'bg-accent-violet text-accent-violet-foreground'
-                : 'bg-surface-2 text-text hover:bg-surface'
-            }`}
-          >
-            テキスト入力
-          </button>
-        </div>
-
+        {/* お題（質問） */}
         {currentPhrase && (
           <div className="space-y-6">
-            {/* 日本語フレーズ表示 */}
-            <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
-              <h2 className="text-lg font-semibold mb-4 text-text-muted">日本語:</h2>
-              <p className="text-xl text-text">{currentPhrase.japanese}</p>
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-slate-500 text-sm mb-2">日本語</p>
+              <p className="text-lg text-slate-900">{currentPhrase.japanese}</p>
             </div>
+            <p className="text-sm text-slate-500">声に出して答えてみましょう（録音・入力はありません）</p>
 
-            {/* 回答エリア */}
-            {!showAnswer && (
-              <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
-                <h2 className="text-lg font-semibold mb-4 text-text">あなたの回答:</h2>
-
-                {inputMode === 'voice' ? (
-                  <div className="space-y-4">
-                    {userResponse && (
-                      <div className="p-4 bg-surface-2 rounded border border-border">
-                        <p className="text-lg text-text">{userResponse}</p>
-                      </div>
-                    )}
-                    <div className="flex justify-center">
-                      {!isRecording ? (
-                        <button
-                          onClick={startRecording}
-                          className="px-8 py-4 bg-accent-violet text-accent-violet-foreground rounded-full hover:bg-accent-violet-hover flex items-center gap-2 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                        >
-                          <svg
-                            className="w-6 h-6"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          音声入力開始
-                        </button>
-                      ) : (
-                        <button
-                          onClick={stopRecording}
-                          className="px-8 py-4 bg-danger text-danger-foreground rounded-full hover:bg-danger-hover flex items-center gap-2 animate-pulse transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                        >
-                          <svg
-                            className="w-6 h-6"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm4 0a1 1 0 112 0v4a1 1 0 11-2 0V7z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          録音中... (タップして停止)
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-sm text-text-muted text-center">
-                      音声入力完了後、自動的に評価されます
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <textarea
-                      value={userResponse}
-                      onChange={(e) => setUserResponse(e.target.value)}
-                      placeholder="英語で入力してください（テキスト入力の場合は評価されません）"
-                      className="w-full p-4 border border-border bg-surface-2 rounded-md text-text placeholder:text-placeholder focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-                      rows={4}
-                    />
-                    <button
-                      onClick={handleTextSubmit}
-                      disabled={!userResponse.trim()}
-                      className="w-full px-6 py-3 bg-accent-violet text-accent-violet-foreground rounded-md hover:bg-accent-violet-hover disabled:bg-text-muted/50 disabled:cursor-not-allowed disabled:text-text-subtle transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                    >
-                      解答を確認
-                    </button>
-                    <p className="text-sm text-text-muted text-center">
-                      テキスト入力完了後、評価されます
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* 結果表示 */}
-            {showAnswer && (
-              <div className="rounded-lg border border-border bg-surface p-6 shadow-theme">
-                <h2 className="text-lg font-semibold mb-4 text-text">結果:</h2>
-
-                {/* 正答判定を表示 */}
-                {isCorrect !== null && (
-                  <div className={`mb-4 p-4 rounded ${
-                    isCorrect ? 'bg-success-bg border border-success-border' : 'bg-danger/10 border border-danger/20'
-                  }`}>
-                    <p className={`text-lg font-semibold ${
-                      isCorrect ? 'text-success' : 'text-danger'
-                    }`}>
-                      {isCorrect ? '✓ 正解です！' : '✗ もう一度練習しましょう'}
-                    </p>
-                  </div>
-                )}
-
-                {/* あなたの回答 */}
-                {userResponse && (
-                  <div className="mb-4">
-                    <h3 className="font-semibold mb-2 text-text">あなたの回答:</h3>
-                    <p className="text-text-muted">{userResponse}</p>
-                  </div>
-                )}
-
-                {/* 模範解答 */}
-                <div className="mb-4">
-                  <h3 className="font-semibold mb-2 text-text">模範解答:</h3>
-                  <p className="text-text text-lg">{currentPhrase.english}</p>
-                </div>
-
-                {/* 別の言い回し */}
-                {currentPhrase.english_variations && currentPhrase.english_variations.length > 0 && (
-                  <div className="mb-4">
-                    <h3 className="font-semibold mb-2 text-text">別の言い回し:</h3>
-                    <ul className="list-disc list-inside space-y-1">
-                      {currentPhrase.english_variations.map((variation, i) => (
-                        <li key={i} className="text-text-muted">{variation}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* 次の問題ボタン */}
-                {inputMode === 'text' && (
-                  <div className="mt-6 flex justify-center">
-                    <button
-                      onClick={handleNext}
-                      className="px-8 py-3 bg-accent-violet text-accent-violet-foreground rounded-md hover:bg-accent-violet-hover transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                    >
-                      {currentIndex < phrases.length - 1 ? '次の問題' : '完了'}
-                    </button>
-                  </div>
-                )}
-                {inputMode === 'voice' && currentIndex < phrases.length - 1 && (
-                  <div className="mt-6 flex justify-center">
-                    <p className="text-sm text-text-muted">3秒後に次の問題に自動で進みます...</p>
-                  </div>
-                )}
-                {inputMode === 'voice' && currentIndex >= phrases.length - 1 && (
-                  <div className="mt-6 flex justify-center">
-                    <button
-                      onClick={() => router.push('/home')}
-                      className="px-8 py-3 bg-accent-violet text-accent-violet-foreground rounded-md hover:bg-accent-violet-hover transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                    >
-                      完了
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="flex gap-4">
+              <button onClick={handleNext} className={cn('px-6 py-3', buttonPrimary)}>
+                {currentIndex < phrases.length - 1 ? '次へ' : '完了'}
+              </button>
+            </div>
           </div>
         )}
       </div>
     </Layout>
+  );
+}
+
+export default function SpeakingTask1DrillPage() {
+  return (
+    <Suspense fallback={
+      <Layout><div className="container mx-auto px-4 py-8 text-center text-slate-500">読み込み中...</div></Layout>
+    }>
+      <Task1DrillContent />
+    </Suspense>
   );
 }

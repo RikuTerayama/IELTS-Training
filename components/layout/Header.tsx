@@ -6,18 +6,35 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { cn, buttonSecondary, buttonPrimary } from '@/lib/ui/theme';
+import { BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
+
+/** ナビ項目（正規導線。未実装は disabled + Coming soon） */
+const NAV_INPUT = [
+  { label: 'Vocab', href: '/training/vocab?skill=speaking', enabled: true },
+  { label: 'Idiom', href: '/training/idiom', enabled: true },
+  { label: 'Bank', href: '/training/lexicon', enabled: true },
+] as const;
+
+const NAV_OUTPUT = [
+  { label: 'Speaking', href: '/training/speaking', enabled: true },
+  { label: 'Writing', href: '/task/select?task_type=Task%202', enabled: true },
+] as const;
+
+const NAV_BLOG: { label: string; href: string; enabled: boolean }[] = [
+  { label: 'Official Blog', href: BLOG_OFFICIAL_URL, enabled: true },
+  ...(BLOG_NOTE_URL ? [{ label: 'Note', href: BLOG_NOTE_URL, enabled: true }] : []),
+];
 
 export function Header() {
   const [user, setUser] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState<'input' | 'output' | 'blog' | null>(null);
+  const [desktopOpenGroup, setDesktopOpenGroup] = useState<'input' | 'output' | 'blog' | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
-
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
     supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -27,6 +44,10 @@ export function Header() {
     await supabase.auth.signOut();
     router.push('/login');
     setMenuOpen(false);
+  };
+
+  const toggleMobileGroup = (g: 'input' | 'output' | 'blog') => {
+    setOpenGroup((prev) => (prev === g ? null : g));
   };
 
   return (

@@ -11,6 +11,19 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-inter)', 'var(--font-noto-sans-jp)', 'system-ui', '-apple-system', 'sans-serif'],
       },
+      /* TYPO-FR-1/2: 用途別トークン（Display / Heading / Body / Small / UI） */
+      fontSize: {
+        'display': ['clamp(2rem, 5vw, 3.5rem)', { lineHeight: '1.15', letterSpacing: '-0.02em' }],
+        'display-sm': ['clamp(1.5rem, 4vw, 2.5rem)', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
+        'heading-1': ['clamp(1.5rem, 3vw, 2rem)', { lineHeight: '1.25', letterSpacing: '-0.01em' }],
+        'heading-2': ['clamp(1.25rem, 2.5vw, 1.5rem)', { lineHeight: '1.3', letterSpacing: '0' }],
+        'heading-3': ['clamp(1.125rem, 2vw, 1.25rem)', { lineHeight: '1.35', letterSpacing: '0' }],
+        'body': ['1rem', { lineHeight: '1.6', letterSpacing: '0' }],
+        'body-lg': ['1.125rem', { lineHeight: '1.6', letterSpacing: '0' }],
+        'small': ['0.875rem', { lineHeight: '1.5', letterSpacing: '0' }],
+        'ui': ['0.875rem', { lineHeight: '1.4', letterSpacing: '0' }],
+        'ui-sm': ['0.8125rem', { lineHeight: '1.4', letterSpacing: '0' }],
+      },
       colors: {
         bg: 'rgb(var(--bg) / <alpha-value>)',
         'bg-secondary': 'rgb(var(--bg-secondary) / <alpha-value>)',

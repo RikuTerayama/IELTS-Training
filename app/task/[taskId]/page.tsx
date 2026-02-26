@@ -1,12 +1,47 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { Task1Flow } from '@/components/task1/Task1Flow';
 import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
 import type { Task, DraftContent, Attempt } from '@/lib/domain/types';
+
+/** W2-FR-3: 40分タイマー（Start/Pause/Reset） */
+const TASK2_TIMER_DEFAULT_SEC = 40 * 60;
+
+function Task2Timer({ onElapsedChange }: { onElapsedChange?: (sec: number) => void }) {
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const [running, setRunning] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!running) return;
+    intervalRef.current = setInterval(() => {
+      setElapsedSec((s) => {
+        const next = s + 1;
+        onElapsedChange?.(next);
+        return next;
+      });
+    }, 1000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [running, onElapsedChange]);
+
+  const display = `${String(Math.floor(elapsedSec / 60)).padStart(2, '0')}:${String(elapsedSec % 60).padStart(2, '0')}`;
+  return (
+    <div className={cn('p-4 rounded-xl', cardBase, 'flex flex-wrap items-center gap-4')}>
+      <span className="text-2xl font-mono font-bold text-slate-900">{display}</span>
+      <span className="text-sm text-slate-500">（目安 40分）</span>
+      <div className="flex gap-2">
+        <button onClick={() => setRunning((r) => !r)} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>
+          {running ? 'Pause' : 'Start'}
+        </button>
+        <button onClick={() => { setRunning(false); setElapsedSec(0); }} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>Reset</button>
+      </div>
+    </div>
+  );
+}
 
 function TaskPageContent() {
   const params = useParams();
@@ -373,7 +408,7 @@ function TaskPageContent() {
     );
   }
 
-  // Task 2の場合は既存のUI
+  // Task 2の場合は既存のUI（W2-FR-3: 40分タイマー付き）
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">

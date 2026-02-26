@@ -138,6 +138,15 @@ export async function GET(): Promise<Response> {
       },
     ];
 
+    // Outputセクション: Speaking と Writing Task2 のみ（学習導線の整理）
+    const outputModules: TodayMenu['output'] = [
+      {
+        module: "speaking",
+        title: "Speaking",
+        description: "Task1〜3をカテゴリごとに練習。使う表現を見ながら話す練習",
+        cta: {
+          label: "選ぶ",
+          href: "/training/speaking",
     // スタブデータ: Outputセクション（最小3件）
     const outputModules: TodayMenu['output'] = [
       {

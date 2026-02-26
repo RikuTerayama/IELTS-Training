@@ -1,12 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
 import { cn, cardBase, cardTitle, cardDesc, textareaBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 import type { Task } from '@/lib/domain/types';
+
+/** W2-FR-3: Task2 実施時の40分タイマー（Start/Pause/Reset） */
+function Task2TimerBlock() {
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const [running, setRunning] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (!running) return;
+    intervalRef.current = setInterval(() => setElapsedSec((s) => s + 1), 1000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [running]);
+  const display = `${String(Math.floor(elapsedSec / 60)).padStart(2, '0')}:${String(elapsedSec % 60).padStart(2, '0')}`;
+  return (
+    <div className={cn('mb-6 p-4 rounded-xl', cardBase, 'flex flex-wrap items-center gap-4')}>
+      <span className="text-2xl font-mono font-bold text-slate-900">{display}</span>
+      <span className="text-sm text-slate-500">（目安 40分）</span>
+      <div className="flex gap-2">
+        <button type="button" onClick={() => setRunning((r) => !r)} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>{running ? 'Pause' : 'Start'}</button>
+        <button type="button" onClick={() => { setRunning(false); setElapsedSec(0); }} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>Reset</button>
+      </div>
+    </div>
+  );
+}
 
 type PrepStep = 'point' | 'reason' | 'example' | 'point_again' | 'japanese_evaluation' | 'english_generation' | 'ielts_feedback';
 
@@ -356,6 +379,9 @@ export default function PrepTaskPage() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* W2-FR-3: Task2 の40分タイマー */}
+        {task.question_type === 'Task 2' && <Task2TimerBlock />}
+
         {/* プログレスバー */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">

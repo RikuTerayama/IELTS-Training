@@ -83,8 +83,18 @@ export async function middleware(request: NextRequest) {
   console.log('[Middleware] Cookies:', cookieNames);
   console.log('[Middleware] Has auth cookies:', cookieNames.some(name => name.includes('auth-token')));
 
-  // 認証が必要なパス
-  const protectedPaths = ['/home', '/task', '/feedback', '/progress', '/vocab', '/rewrite', '/speak', '/fillin'];
+  // FR-8: /vocab は恒久リダイレクトで /training/vocab?skill=speaking へ（308）
+  if (request.nextUrl.pathname === '/vocab') {
+    return NextResponse.redirect(new URL('/training/vocab?skill=speaking', request.url), 308);
+  }
+
+  // W2-FR-2: /training/writing/task2 は廃止。308 で /task/select?task_type=Task%202 へ
+  if (request.nextUrl.pathname === '/training/writing/task2') {
+    return NextResponse.redirect(new URL('/task/select?task_type=Task%202', request.url), 308);
+  }
+
+  // 認証が必要なパス（/vocab は廃止のためリストから削除）
+  const protectedPaths = ['/home', '/task', '/feedback', '/progress', '/rewrite', '/speak', '/fillin'];
   const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
   
   // ログインページは認証済みならリダイレクト
