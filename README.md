@@ -83,7 +83,7 @@ npm install
 
 ### 2. 環境変数設定
 
-`.env.local` を作成し、以下を設定：
+`.env.local` をプロジェクトルートに作成し、以下を設定。**必須・推奨の一覧と本番用チェックリストは [docs/setup_manual.md](docs/setup_manual.md) を参照。**
 
 ```env
 # ==================== Supabase ====================
@@ -109,7 +109,7 @@ LLM_MODEL=llama-3.1-8b-instant
 APP_BASE_URL=http://localhost:3000
 ```
 
-**Render（本番環境）での環境変数設定は `RENDER_ENV_VARIABLES.md` を参照してください。**
+**本番環境（Vercel / Render 等）での環境変数・マイグレーション・チェックリストは [docs/setup_manual.md](docs/setup_manual.md) を参照してください。**
 
 ### 3. データベースセットアップ
 
