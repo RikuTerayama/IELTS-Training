@@ -101,7 +101,7 @@ function Task3DrillContent() {
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-slate-900">Speaking Task 3（Discussion）</h1>
+          <h1 className="text-xl font-bold text-text">Speaking Task 3（Discussion）</h1>
           <Link href="/training/speaking" className={cn('text-sm', buttonSecondary)}>
             お題を変える
           </Link>
@@ -110,7 +110,7 @@ function Task3DrillContent() {
         {/* タイマー */}
         <div className={cn('mb-6 p-4 rounded-xl', cardBase)}>
           <div className="flex items-center gap-4 flex-wrap">
-            <span className="text-2xl font-mono font-bold text-slate-900">
+            <span className="text-2xl font-mono font-bold text-text">
               {String(Math.floor(elapsedSec / 60)).padStart(2, '0')}:{String(elapsedSec % 60).padStart(2, '0')}
             </span>
             <button onClick={() => setTimerRunning((r) => !r)} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>
@@ -123,15 +123,15 @@ function Task3DrillContent() {
         {/* 推奨表現 */}
         <div className={cn('mb-6', cardBase, 'p-4')}>
           <button type="button" onClick={() => setShowExpressions((s) => !s)} className="flex items-center justify-between w-full text-left">
-            <h2 className="font-semibold text-slate-900">使う表現（vocab/idiom）</h2>
-            <span className="text-sm text-slate-500">{showExpressions ? '閉じる' : '開く'}</span>
+            <h2 className="font-semibold text-text">使う表現（vocab/idiom）</h2>
+            <span className="text-sm text-text-muted">{showExpressions ? '閉じる' : '開く'}</span>
           </button>
           {showExpressions && (
             <ul className="mt-3 space-y-1.5 text-sm">
               {(recommended.length > 0 ? recommended : RECOMMENDED_EXPRESSIONS_FALLBACK).map((item, i) => (
-                <li key={i} className="text-slate-700">
+                <li key={i} className="text-text-muted">
                   <span className="font-medium">{item.expression}</span>
-                  {item.ja_hint && <span className="text-slate-500 ml-2">（{item.ja_hint}）</span>}
+                  {item.ja_hint && <span className="text-text-muted ml-2">（{item.ja_hint}）</span>}
                 </li>
               ))}
             </ul>
@@ -139,13 +139,13 @@ function Task3DrillContent() {
         </div>
 
         {/* 深掘り質問 */}
-        <div className="mb-4 text-sm text-slate-500">
+        <div className="mb-4 text-sm text-text-muted">
           質問 {currentIndex + 1} / {questions.length}
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mb-6">
-          <p className="text-lg text-slate-900">{currentQuestion}</p>
+        <div className="rounded-xl border border-border bg-surface p-6 shadow-sm mb-6">
+          <p className="text-lg text-text">{currentQuestion}</p>
         </div>
-        <p className="text-sm text-slate-500 mb-4">声に出して答えてみましょう（録音・入力はありません）</p>
+        <p className="text-sm text-text-muted mb-4">声に出して答えてみましょう（録音・入力はありません）</p>
         <button onClick={handleNext} className={cn('px-6 py-3', buttonPrimary)}>
           {currentIndex < questions.length - 1 ? '次へ' : '完了'}
         </button>
@@ -156,7 +156,7 @@ function Task3DrillContent() {
 
 export default function SpeakingTask3DrillPage() {
   return (
-    <Suspense fallback={<Layout><div className="container mx-auto px-4 py-8 text-center text-slate-500">読み込み中...</div></Layout>}>
+    <Suspense fallback={<Layout><div className="container mx-auto px-4 py-8 text-center text-text-muted">読み込み中...</div></Layout>}>
       <Task3DrillContent />
     </Suspense>
   );

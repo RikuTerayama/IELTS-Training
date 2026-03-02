@@ -154,19 +154,19 @@ export default function OnboardingPage() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-surface rounded-lg shadow-lg p-8">
           {/* プログレスバー */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-600">ステップ {step} / 4</span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm font-medium text-text-muted">ステップ {step} / 4</span>
+              <span className="text-sm text-text-muted">
                 {step === 1 && '目的を選択'}
                 {step === 2 && '現状レベルを選択'}
                 {step === 3 && '推奨レベルを確認'}
                 {step === 4 && 'レベルを登録'}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-surface-2 rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(step / 4) * 100}%` }}
@@ -178,10 +178,10 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-text mb-2">
                   IELTSを受験する目的を教えてください
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-text-muted">
                   あなたの目的に合わせて、最適な学習プランを提案します。
                 </p>
               </div>
@@ -190,10 +190,10 @@ export default function OnboardingPage() {
                   <button
                     key={option.value}
                     onClick={() => handlePurposeSelect(option.value)}
-                    className="text-left p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all"
+                    className="text-left p-4 rounded-lg border-2 border-border hover:border-blue-500 hover:bg-surface-2 transition-all"
                   >
-                    <div className="font-semibold text-gray-900 mb-1">{option.label}</div>
-                    <div className="text-sm text-gray-600">{option.description}</div>
+                    <div className="font-semibold text-text mb-1">{option.label}</div>
+                    <div className="text-sm text-text-muted">{option.description}</div>
                   </button>
                 ))}
               </div>
@@ -210,10 +210,10 @@ export default function OnboardingPage() {
                 >
                   ← 戻る
                 </button>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-text mb-2">
                   現在のIELTS Writingレベルを教えてください
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-text-muted">
                   あなたの現在のレベルを選択してください。正確な評価ができなくても、おおよそのレベルで問題ありません。
                 </p>
               </div>
@@ -225,13 +225,13 @@ export default function OnboardingPage() {
                     className={`w-full text-left p-6 rounded-lg border-2 transition-all ${
                       currentLevel === level
                         ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                        : 'border-border hover:border-blue-300 hover:bg-surface-2'
                     }`}
                   >
-                    <div className="font-semibold text-lg text-gray-900 mb-2">
+                    <div className="font-semibold text-lg text-text mb-2">
                       {levelLabels[level]}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-text-muted">
                       {levelDescriptions[level]}
                     </div>
                   </button>
@@ -250,10 +250,10 @@ export default function OnboardingPage() {
                 >
                   ← 戻る
                 </button>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-text mb-2">
                   推奨レベル
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-text-muted">
                   あなたの目的と現状レベルに基づいて、以下のレベルを推奨します。
                 </p>
               </div>
@@ -267,7 +267,7 @@ export default function OnboardingPage() {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="text-sm font-medium text-gray-700 mb-2">
+                <div className="text-sm font-medium text-text mb-2">
                   推奨レベルを変更する場合は、以下から選択してください：
                 </div>
                 {(Object.keys(levelLabels) as Level[]).map((level) => (
@@ -277,10 +277,10 @@ export default function OnboardingPage() {
                     className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                       recommendedLevel === level
                         ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-border hover:border-border-strong'
                     }`}
                   >
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-text">
                       {levelLabels[level]}
                     </div>
                   </button>
@@ -307,29 +307,29 @@ export default function OnboardingPage() {
                 >
                   ← 戻る
                 </button>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-text mb-2">
                   レベル登録
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-text-muted">
                   選択したレベルで学習を開始します。後から変更することもできます。
                 </p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-6 mb-6">
+              <div className="bg-surface-2 rounded-lg p-6 mb-6">
                 <div className="space-y-3">
                   <div>
-                    <div className="text-sm text-gray-600">目的</div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="text-sm text-text-muted">目的</div>
+                    <div className="font-semibold text-text">
                       {purpose && purposeOptions.find(o => o.value === purpose)?.label}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600">現状レベル</div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="text-sm text-text-muted">現状レベル</div>
+                    <div className="font-semibold text-text">
                       {currentLevel && levelLabels[currentLevel]}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600">学習レベル</div>
+                    <div className="text-sm text-text-muted">学習レベル</div>
                     <div className="font-semibold text-blue-600 text-lg">
                       {recommendedLevel && levelLabels[recommendedLevel]}
                     </div>
@@ -344,14 +344,14 @@ export default function OnboardingPage() {
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setStep(3)}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                  className="px-6 py-2 border border-border text-text rounded-md hover:bg-surface-2 transition-colors"
                 >
                   戻る
                 </button>
                 <button
                   onClick={handleComplete}
                   disabled={loading}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading ? '登録中...' : '学習を開始する'}
                 </button>

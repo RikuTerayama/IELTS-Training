@@ -93,7 +93,7 @@ export default function FeedbackPage() {
     return (
       <Layout>
         <div className="container mx-auto px-6 py-12">
-          <div className="text-center text-slate-500">
+          <div className="text-center text-text-muted">
             {generating ? 'フィードバックを生成中...' : '読み込み中...'}
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function FeedbackPage() {
     return (
       <Layout>
         <div className="container mx-auto px-6 py-12">
-          <div className="text-center text-slate-500">フィードバックが見つかりません</div>
+          <div className="text-center text-text-muted">フィードバックが見つかりません</div>
         </div>
       </Layout>
     );
@@ -135,15 +135,15 @@ export default function FeedbackPage() {
           {/* Overall Band - Data Visualization Style */}
           <div className={cn('p-8 rounded-2xl', cardBase, 'bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200')}>
             <div className="text-center mb-6">
-              <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2">Overall Band Score</h2>
+              <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-2">Overall Band Score</h2>
               <div className="flex items-baseline justify-center gap-2">
                 <span className="text-6xl font-bold text-indigo-600">{averageBand.toFixed(1)}</span>
-                <span className="text-2xl font-semibold text-slate-500">/ 9.0</span>
+                <span className="text-2xl font-semibold text-text-muted">/ 9.0</span>
               </div>
-              <p className="text-sm text-slate-600 mt-2">Range: {feedback.overall_band_range}</p>
+              <p className="text-sm text-text-muted mt-2">Range: {feedback.overall_band_range}</p>
             </div>
             {/* Band Progress Bar */}
-            <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden">
+            <div className="w-full h-4 bg-surface-2 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-1000"
                 style={{ width: `${(averageBand / 9.0) * 100}%` }}
@@ -153,7 +153,7 @@ export default function FeedbackPage() {
 
           {/* Band-up actions - Actionable Cards Style */}
           <div className={cn('p-8 rounded-2xl', cardBase)}>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-6">次にBandを上げる3つの行動</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-text mb-6">次にBandを上げる3つの行動</h2>
             <div className="space-y-4">
               {feedback.band_up_actions.map((action) => {
                 const priorityColors: Record<number, string> = {
@@ -167,7 +167,7 @@ export default function FeedbackPage() {
                   <div 
                     key={action.priority} 
                     className={cn(
-                      'p-6 rounded-xl border-2 border-slate-200 bg-white',
+                      'p-6 rounded-xl border-2 border-border bg-surface',
                       'hover:shadow-md hover:border-indigo-300 transition-all duration-200',
                       'cursor-pointer'
                     )}
@@ -177,19 +177,19 @@ export default function FeedbackPage() {
                         <span className={`text-xl font-bold text-${color}-600`}>{action.priority}</span>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-bold text-slate-900 mb-3">{action.title}</h3>
+                        <h3 className="text-lg font-bold text-text mb-3">{action.title}</h3>
                         <div className="space-y-2 text-sm">
                           <div>
-                            <span className="font-semibold text-slate-700">理由:</span>
-                            <span className="ml-2 text-slate-600">{action.why}</span>
+                            <span className="font-semibold text-text">理由:</span>
+                            <span className="ml-2 text-text-muted">{action.why}</span>
                           </div>
                           <div>
-                            <span className="font-semibold text-slate-700">方法:</span>
-                            <span className="ml-2 text-slate-600">{action.how}</span>
+                            <span className="font-semibold text-text">方法:</span>
+                            <span className="ml-2 text-text-muted">{action.how}</span>
                           </div>
-                          <div className="mt-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
-                            <span className="font-semibold text-slate-700">例:</span>
-                            <span className="ml-2 text-slate-700">{action.example}</span>
+                          <div className="mt-3 p-3 rounded-lg bg-surface-2 border border-border">
+                            <span className="font-semibold text-text">例:</span>
+                            <span className="ml-2 text-text-muted">{action.example}</span>
                           </div>
                         </div>
                       </div>
@@ -202,7 +202,7 @@ export default function FeedbackPage() {
 
           {/* 4次元評価 - Data Visualization Style */}
           <div className={cn('p-8 rounded-2xl', cardBase)}>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-6">4次元評価</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-text mb-6">4次元評価</h2>
             <div className="grid md:grid-cols-2 gap-4">
               {feedback.dimensions.map((dim) => {
                 const dimensionLabels: Record<string, string> = {
@@ -221,22 +221,22 @@ export default function FeedbackPage() {
                 const bandValue = parseFloat(dim.band_estimate) || 0;
                 
                 return (
-                  <div key={dim.dimension} className="p-6 rounded-xl bg-slate-50 border border-slate-200">
+                  <div key={dim.dimension} className="p-6 rounded-xl bg-surface-2 border border-border">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <div className="text-lg font-bold text-slate-900">{dim.dimension}</div>
-                        <div className="text-xs text-slate-500">{dimensionLabels[dim.dimension]}</div>
+                        <div className="text-lg font-bold text-text">{dim.dimension}</div>
+                        <div className="text-xs text-text-muted">{dimensionLabels[dim.dimension]}</div>
                       </div>
                       <div className="text-2xl font-bold text-indigo-600">{bandValue.toFixed(1)}</div>
                     </div>
                     {/* Band Progress Bar */}
-                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden mb-3">
+                    <div className="w-full h-2 bg-surface-2 rounded-full overflow-hidden mb-3">
                       <div 
                         className={`h-full bg-gradient-to-r from-${color}-500 to-${color}-600 rounded-full transition-all duration-1000`}
                         style={{ width: `${(bandValue / 9.0) * 100}%` }}
                       />
                     </div>
-                    <p className="text-sm text-slate-700 leading-relaxed">{dim.short_comment}</p>
+                    <p className="text-sm text-text-muted leading-relaxed">{dim.short_comment}</p>
                   </div>
                 );
               })}

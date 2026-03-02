@@ -93,7 +93,7 @@ export default function HomePage() {
     return (
       <Layout>
         <div className="container mx-auto px-6 py-12">
-          <div className="text-center text-slate-500">読み込み中...</div>
+          <div className="text-center text-text-muted">読み込み中...</div>
         </div>
       </Layout>
     );
@@ -151,13 +151,13 @@ export default function HomePage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="relative">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Input Level</span>
-                    <span className="text-xs text-slate-400">{menu.xp.input.exp} / {menu.xp.input.nextLevelExp} exp</span>
+                    <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Input Level</span>
+                    <span className="text-xs text-text-subtle">{menu.xp.input.exp} / {menu.xp.input.nextLevelExp} exp</span>
                   </div>
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-3xl font-bold text-indigo-600">Lv.{menu.xp.input.level}</span>
                   </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, (menu.xp.input.exp / menu.xp.input.nextLevelExp) * 100)}%` }}
@@ -166,13 +166,13 @@ export default function HomePage() {
                 </div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Output Level</span>
-                    <span className="text-xs text-slate-400">{menu.xp.output.exp} / {menu.xp.output.nextLevelExp} exp</span>
+                    <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Output Level</span>
+                    <span className="text-xs text-text-subtle">{menu.xp.output.exp} / {menu.xp.output.nextLevelExp} exp</span>
                   </div>
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-3xl font-bold text-emerald-600">Lv.{menu.xp.output.level}</span>
                   </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, (menu.xp.output.exp / menu.xp.output.nextLevelExp) * 100)}%` }}
@@ -210,8 +210,8 @@ export default function HomePage() {
                     <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
                       {getModuleIcon(cat.module)}
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">{cat.title}</h3>
-                    <p className="text-sm text-slate-600 mb-4 leading-relaxed">{cat.description}</p>
+                    <h3 className="text-lg font-bold text-text mb-2">{cat.title}</h3>
+                    <p className="text-sm text-text-muted mb-4 leading-relaxed">{cat.description}</p>
                     <div className="flex flex-wrap gap-2">
                       {cat.skills.map((s) =>
                         s.disabled ? (
@@ -219,8 +219,8 @@ export default function HomePage() {
                             key={s.skill}
                             className={cn(
                               'inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm',
-                              'bg-slate-100 text-slate-400 cursor-not-allowed opacity-70',
-                              'border border-slate-200'
+                              'bg-surface-2 text-text-subtle cursor-not-allowed opacity-70',
+                              'border border-border'
                             )}
                           >
                             {s.label}
@@ -271,7 +271,7 @@ export default function HomePage() {
                       href={item.cta.href}
                       className={cn(
                         'group p-6 rounded-2xl border border-border bg-surface',
-                        'hover:shadow-md hover:-translate-y-1 hover:border-slate-300',
+                        'hover:shadow-md hover:-translate-y-1 hover:border-border-strong',
                         'transition-all duration-200 text-left',
                         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
                       )}
@@ -279,8 +279,8 @@ export default function HomePage() {
                       <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
                         {getModuleIcon(item.module)}
                       </div>
-                      <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
-                      <p className="text-sm text-slate-600 mb-4 leading-relaxed">{item.description}</p>
+                      <h3 className="text-lg font-bold text-text mb-2">{item.title}</h3>
+                      <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.description}</p>
                       <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
                         {item.cta.label}
                         <Icons.ArrowRight className="w-4 h-4" />
@@ -294,7 +294,7 @@ export default function HomePage() {
           {/* 通知（あれば表示） */}
           {menu && menu.notices && menu.notices.length > 0 && (
             <div className={cn('p-6', cardBase)}>
-              <h3 className="text-lg font-bold text-slate-900 mb-4">お知らせ</h3>
+              <h3 className="text-lg font-bold text-text mb-4">お知らせ</h3>
               <div className="space-y-3">
                 {menu.notices.map((notice, index) => (
                   <div
@@ -320,8 +320,8 @@ export default function HomePage() {
                 <Icons.FileText className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-bold text-slate-900 mb-2">Blog</h2>
-                <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+                <h2 className="text-lg font-bold text-text mb-2">Blog</h2>
+                <p className="text-sm text-text-muted mb-4 leading-relaxed">
                   IELTS学習に役立つ記事や最新情報をお届けします
                 </p>
                 <a
