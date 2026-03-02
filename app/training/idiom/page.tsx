@@ -60,13 +60,18 @@ function IdiomPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const effectiveSkill = (urlSkill === 'speaking' || urlSkill === 'writing') ? urlSkill : 'speaking';
+  const validSkillQuery = urlSkill === 'speaking' || urlSkill === 'writing';
   useEffect(() => {
+    if (!validSkillQuery) {
+      setSelectedSkill(null);
+      setStep('skill');
+      return;
+    }
     let cancelled = false;
-    setSelectedSkill(effectiveSkill);
+    setSelectedSkill(urlSkill);
     setLoading(true);
     setError(null);
-    fetchLexiconSets(effectiveSkill, 'idiom').then((response) => {
+    fetchLexiconSets(urlSkill, 'idiom').then((response) => {
       if (cancelled) return;
       if (response.ok && response.data) {
         setSets(response.data!.sets);
@@ -81,7 +86,7 @@ function IdiomPageContent() {
       if (!cancelled) setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [effectiveSkill]);
+  }, [urlSkill]);
 
   const handleSkillSelect = async (skill: 'speaking' | 'writing') => {
     setSelectedSkill(skill);
