@@ -4,6 +4,8 @@ import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
+import { normalizeSpeakingCategory } from '@/lib/data/speaking_categories';
+import { RECOMMENDED_EXPRESSIONS_FALLBACK } from '@/lib/data/speaking_recommended_fallback';
 import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 /** SPK-FR-4: 音声・テキスト入力なし。Task3 Discussion（深掘り質問）＋タイマー＋推奨表現 */
@@ -55,7 +57,7 @@ function getDiscussionQuestions(category: string): string[] {
 function Task3DrillContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const category = searchParams.get('category') || 'work_study';
+  const category = normalizeSpeakingCategory(searchParams.get('category'));
 
   const [recommended, setRecommended] = useState<RecommendedItem[]>([]);
   const [showExpressions, setShowExpressions] = useState(true);
@@ -73,9 +75,11 @@ function Task3DrillContent() {
       .then((data: { ok?: boolean; data?: { items?: { expression: string; ja_hint?: string }[] } }) => {
         if (data.ok && data.data?.items?.length) {
           setRecommended(data.data.items.map((i) => ({ expression: i.expression, ja_hint: i.ja_hint })));
+        } else {
+          setRecommended(RECOMMENDED_EXPRESSIONS_FALLBACK);
         }
       })
-      .catch(() => {});
+      .catch(() => setRecommended(RECOMMENDED_EXPRESSIONS_FALLBACK));
   }, []);
 
   useEffect(() => {
@@ -124,12 +128,12 @@ function Task3DrillContent() {
           </button>
           {showExpressions && (
             <ul className="mt-3 space-y-1.5 text-sm">
-              {recommended.length > 0 ? recommended.map((item, i) => (
+              {(recommended.length > 0 ? recommended : RECOMMENDED_EXPRESSIONS_FALLBACK).map((item, i) => (
                 <li key={i} className="text-slate-700">
                   <span className="font-medium">{item.expression}</span>
                   {item.ja_hint && <span className="text-slate-500 ml-2">（{item.ja_hint}）</span>}
                 </li>
-              )) : <li className="text-slate-500">表現を読み込み中…</li>}
+              ))}
             </ul>
           )}
         </div>

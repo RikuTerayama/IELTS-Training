@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import { getPhrasesByTopicAndLevel, type SpeakingPhrase } from '@/lib/data/speaking_phrases';
+import { normalizeSpeakingCategory } from '@/lib/data/speaking_categories';
+import { RECOMMENDED_EXPRESSIONS_FALLBACK } from '@/lib/data/speaking_recommended_fallback';
 import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 /** SPK-FR-4: 音声入力・テキスト入力なし。タイマー・次へ・お題を変える・推奨表現表示のみ */
@@ -20,7 +22,7 @@ const TIMER_PRESET_SEC = 30; // 1問あたりの目安時間（任意表示用�
 function Task1DrillContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const category = searchParams.get('category') || 'work_study';
+  const category = normalizeSpeakingCategory(searchParams.get('category'));
 
   const [phrases, setPhrases] = useState<SpeakingPhrase[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,9 +49,13 @@ function Task1DrillContent() {
               ja_hint: i.ja_hint,
             }))
           );
+        } else {
+          setRecommended(RECOMMENDED_EXPRESSIONS_FALLBACK.map((f) => ({ module: 'vocab', expression: f.expression, ja_hint: f.ja_hint })));
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setRecommended(RECOMMENDED_EXPRESSIONS_FALLBACK.map((f) => ({ module: 'vocab', expression: f.expression, ja_hint: f.ja_hint })));
+      });
   }, []);
 
   useEffect(() => {
@@ -130,16 +136,12 @@ function Task1DrillContent() {
           </button>
           {showExpressions && (
             <ul className="mt-3 space-y-1.5 text-sm">
-              {recommended.length > 0 ? (
-                recommended.map((item, i) => (
-                  <li key={i} className="text-slate-700">
-                    <span className="font-medium">{item.expression}</span>
-                    {item.ja_hint && <span className="text-slate-500 ml-2">（{item.ja_hint}）</span>}
-                  </li>
-                ))
-              ) : (
-                <li className="text-slate-500">表現を読み込み中…</li>
-              )}
+              {(recommended.length > 0 ? recommended : RECOMMENDED_EXPRESSIONS_FALLBACK.map((f) => ({ module: 'vocab', expression: f.expression, ja_hint: f.ja_hint }))).map((item, i) => (
+                <li key={i} className="text-slate-700">
+                  <span className="font-medium">{item.expression}</span>
+                  {item.ja_hint && <span className="text-slate-500 ml-2">（{item.ja_hint}）</span>}
+                </li>
+              ))}
             </ul>
           )}
         </div>

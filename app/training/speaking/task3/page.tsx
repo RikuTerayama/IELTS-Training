@@ -15,7 +15,7 @@ export default function SpeakingTask3Page() {
         </p>
         <div className="flex justify-center">
           <button
-            onClick={() => router.push('/training/speaking/task3/drill')}
+            onClick={() => router.push('/training/speaking/task3/drill?category=work_study')}
             className="px-8 py-3 bg-accent-violet text-accent-violet-foreground rounded-md hover:bg-accent-violet-hover transition-colors font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
             瞬間英作文を開始

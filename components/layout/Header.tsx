@@ -8,11 +8,11 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { cn, buttonSecondary, buttonPrimary } from '@/lib/ui/theme';
 import { BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
 
-/** ナビ項目（正規導線。未実装は disabled + Coming soon） */
+/** ナビ項目（正規導線。未実装は disabled + Coming soon）。/vocab は使わず /training/vocab が正。 */
 const NAV_INPUT = [
   { label: 'Vocab', href: '/training/vocab?skill=speaking', enabled: true },
-  { label: 'Idiom', href: '/training/idiom', enabled: true },
-  { label: 'Bank', href: '/training/lexicon', enabled: true },
+  { label: 'Idiom', href: '/training/idiom?skill=speaking', enabled: true },
+  { label: 'Bank', href: '/training/lexicon?skill=speaking', enabled: true },
 ] as const;
 
 const NAV_OUTPUT = [
@@ -22,7 +22,7 @@ const NAV_OUTPUT = [
 
 const NAV_BLOG: { label: string; href: string; enabled: boolean }[] = [
   { label: 'Official Blog', href: BLOG_OFFICIAL_URL, enabled: true },
-  ...(BLOG_NOTE_URL ? [{ label: 'Note', href: BLOG_NOTE_URL, enabled: true }] : []),
+  { label: 'Note', href: BLOG_NOTE_URL || '#', enabled: !!BLOG_NOTE_URL },
 ];
 
 export function Header() {
@@ -50,9 +50,13 @@ export function Header() {
     setOpenGroup((prev) => (prev === g ? null : g));
   };
 
+  const toggleDesktopGroup = (g: 'input' | 'output' | 'blog') => {
+    setDesktopOpenGroup((prev) => (prev === g ? null : g));
+  };
+
   return (
     <header className="sticky top-0 w-full z-50 transition-all duration-300">
-      <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border-b border-slate-200/50" />
+      <div className="absolute inset-0 bg-bg/80 backdrop-blur-xl border-b border-border/50" />
       <div className="container mx-auto px-6 h-16 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-6">
           <Link href="/home" className="flex items-center gap-2 group">
@@ -61,30 +65,102 @@ export function Header() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">
+            <span className="text-xl font-bold tracking-tight text-text">
               IELTS Training
             </span>
           </Link>
-          {/* デスクトップナビゲーション */}
-          <nav className="hidden md:flex gap-6">
-            <Link href="/home" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
+          {/* デスクトップナビ: Input / Output / Blog ドロップダウン */}
+          <nav className="hidden md:flex items-center gap-1">
+            <Link href="/home" className="text-ui font-medium text-text-muted hover:text-indigo-600 transition-colors duration-200 px-2 py-1 rounded">
               Home
             </Link>
-            {/* Progressへのリンクは非表示（Step0: 依存を断つ） */}
-            {/* <Link href="/progress" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
-              Progress
-            </Link> */}
-            <Link href="/vocab" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200">
-              Vocab
-            </Link>
-            <Link 
-              href="https://ieltsconsult.netlify.app/" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors duration-200"
-            >
-              Blog
-            </Link>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => toggleDesktopGroup('input')}
+                className={cn(
+                  'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
+                  desktopOpenGroup === 'input' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600'
+                )}
+              >
+                Input
+              </button>
+              {desktopOpenGroup === 'input' && (
+                <div className="absolute top-full left-0 mt-1 py-1 bg-surface rounded-lg border border-border shadow-lg min-w-[140px] z-50">
+                  {NAV_INPUT.map((item) =>
+                    item.enabled ? (
+                      <Link key={item.label} href={item.href} className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600">
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <span key={item.label} className="block px-3 py-2 text-sm text-slate-400 cursor-not-allowed opacity-70">
+                        {item.label} <span className="text-xs">Coming soon</span>
+                      </span>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => toggleDesktopGroup('output')}
+                className={cn(
+                  'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
+                  desktopOpenGroup === 'output' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600'
+                )}
+              >
+                Output
+              </button>
+              {desktopOpenGroup === 'output' && (
+                <div className="absolute top-full left-0 mt-1 py-1 bg-surface rounded-lg border border-border shadow-lg min-w-[140px] z-50">
+                  {NAV_OUTPUT.map((item) =>
+                    item.enabled ? (
+                      <Link key={item.label} href={item.href} className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600">
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <span key={item.label} className="block px-3 py-2 text-sm text-slate-400 cursor-not-allowed opacity-70">
+                        {item.label} <span className="text-xs">Coming soon</span>
+                      </span>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => toggleDesktopGroup('blog')}
+                className={cn(
+                  'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
+                  desktopOpenGroup === 'blog' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600'
+                )}
+              >
+                Blog
+              </button>
+              {desktopOpenGroup === 'blog' && (
+                <div className="absolute top-full left-0 mt-1 py-1 bg-surface rounded-lg border border-border shadow-lg min-w-[160px] z-50">
+                  {NAV_BLOG.map((item) =>
+                    item.enabled ? (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        target={item.href.startsWith('http') ? '_blank' : undefined}
+                        rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                      >
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <span key={item.label} className="block px-3 py-2 text-sm text-slate-400 cursor-not-allowed opacity-70">
+                        {item.label} <span className="text-xs">Coming soon</span>
+                      </span>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
           </nav>
         </div>
         <div className="flex items-center gap-4">
@@ -96,7 +172,7 @@ export function Header() {
           <div className="hidden md:flex items-center gap-4">
             {user ? (
               <>
-                <span className="text-sm text-slate-500">{user.email}</span>
+                <span className="text-sm text-text-muted truncate max-w-[180px]">{user.email}</span>
                 <button
                   onClick={handleLogout}
                   className={cn('px-4 py-2 text-sm', buttonSecondary)}
@@ -140,45 +216,81 @@ export function Header() {
           </div>
         </div>
       </div>
-      {/* モバイルメニュー */}
+      {/* モバイルメニュー（Input / Output / Blog アコーディオン） */}
       {menuOpen && (
-        <nav className="md:hidden mt-4 pb-4 border-t border-slate-200 pt-4">
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/home"
-              onClick={() => setMenuOpen(false)}
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
-            >
+        <nav className="md:hidden mt-4 pb-4 border-t border-slate-200 pt-4 px-6">
+          <div className="flex flex-col gap-1">
+            <Link href="/home" onClick={() => setMenuOpen(false)} className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200">
               Home
             </Link>
-            {/* Progressへのリンクは非表示（Step0: 依存を断つ） */}
-            {/* <Link
-              href="/progress"
-              onClick={() => setMenuOpen(false)}
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
-            >
-              Progress
-            </Link> */}
-            <Link
-              href="/vocab"
-              onClick={() => setMenuOpen(false)}
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
-            >
-              Vocab
-            </Link>
-            <Link
-              href="https://ieltsconsult.netlify.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setMenuOpen(false)}
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200"
-            >
-              Blog
-            </Link>
+            <div className="border-b border-slate-100 pb-2">
+              <button type="button" onClick={() => toggleMobileGroup('input')} className="w-full text-left text-sm font-medium text-slate-700 py-2 flex items-center justify-between">
+                Input
+                <span className="text-slate-400">{openGroup === 'input' ? '−' : '+'}</span>
+              </button>
+              {openGroup === 'input' && (
+                <div className="pl-3 space-y-1">
+                  {NAV_INPUT.map((item) =>
+                    item.enabled ? (
+                      <Link key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className="block py-1.5 text-sm text-slate-600 hover:text-indigo-600">
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <span key={item.label} className="block py-1.5 text-sm text-slate-400"> {item.label} <span className="text-xs">Coming soon</span></span>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="border-b border-slate-100 pb-2">
+              <button type="button" onClick={() => toggleMobileGroup('output')} className="w-full text-left text-sm font-medium text-slate-700 py-2 flex items-center justify-between">
+                Output
+                <span className="text-slate-400">{openGroup === 'output' ? '−' : '+'}</span>
+              </button>
+              {openGroup === 'output' && (
+                <div className="pl-3 space-y-1">
+                  {NAV_OUTPUT.map((item) =>
+                    item.enabled ? (
+                      <Link key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className="block py-1.5 text-sm text-slate-600 hover:text-indigo-600">
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <span key={item.label} className="block py-1.5 text-sm text-slate-400"> {item.label} <span className="text-xs">Coming soon</span></span>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="border-b border-slate-100 pb-2">
+              <button type="button" onClick={() => toggleMobileGroup('blog')} className="w-full text-left text-sm font-medium text-slate-700 py-2 flex items-center justify-between">
+                Blog
+                <span className="text-slate-400">{openGroup === 'blog' ? '−' : '+'}</span>
+              </button>
+              {openGroup === 'blog' && (
+                <div className="pl-3 space-y-1">
+                  {NAV_BLOG.map((item) =>
+                    item.enabled ? (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        target={item.href.startsWith('http') ? '_blank' : undefined}
+                        rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        onClick={() => setMenuOpen(false)}
+                        className="block py-1.5 text-sm text-slate-600 hover:text-indigo-600"
+                      >
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <span key={item.label} className="block py-1.5 text-sm text-slate-400"> {item.label} <span className="text-xs">Coming soon</span></span>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
             {user ? (
               <>
                 <div className="pt-2 border-t border-slate-200 mt-2">
-                  <div className="text-sm text-slate-500 py-2">{user.email}</div>
+                  <div className="text-sm text-text-muted truncate max-w-[240px] py-2">{user.email}</div>
                   <button
                     onClick={handleLogout}
                     className={cn('w-full text-left', buttonSecondary)}

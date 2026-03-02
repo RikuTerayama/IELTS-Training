@@ -7,6 +7,7 @@ import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
 import { cn, cardBase, cardTitle, cardDesc, textareaBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 import type { Task } from '@/lib/domain/types';
+import { WRITING_RECOMMENDED_FALLBACK } from '@/lib/data/writing_recommended_fallback';
 
 /** W2-FR-3: Task2 実施時の40分タイマー（Start/Pause/Reset） */
 function Task2TimerBlock() {
@@ -70,6 +71,7 @@ export default function PrepTaskPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [requiredItems, setRequiredItems] = useState<Array<{ module: string; expression: string; ja_hint?: string }>>([]);
 
   useEffect(() => {
     if (taskId === 'new') {
@@ -92,6 +94,7 @@ export default function PrepTaskPage() {
         },
         created_at: new Date().toISOString(),
       });
+      setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f) => ({ module: f.module, expression: f.expression, ja_hint: f.ja_hint })));
       setLoading(false);
       return;
     }
@@ -100,9 +103,7 @@ export default function PrepTaskPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.ok) {
-          // Task1の場合は /task/[taskId] にリダイレクト（Task1Flowを使用）
           if (data.data.question_type === 'Task 1') {
-            // URLからmodeパラメータを取得（window.location.searchを使用）
             const urlParams = new URLSearchParams(window.location.search);
             const modeParam = urlParams.get('mode');
             const modeQuery = modeParam === 'exam' ? '?mode=exam' : '';
@@ -111,6 +112,14 @@ export default function PrepTaskPage() {
           }
           setTask(data.data);
           setLevel(data.data.level);
+          // AC-X1: Task2 で推奨表現を取得
+          fetch('/api/input/items?skill=writing&modules=vocab,idiom,lexicon&limit=8')
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.ok && d.data?.items?.length) setRequiredItems(d.data.items.map((i: { module?: string; expression: string; ja_hint?: string }) => ({ module: i.module || 'vocab', expression: i.expression, ja_hint: i.ja_hint })));
+              else setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f) => ({ module: f.module, expression: f.expression, ja_hint: f.ja_hint })));
+            })
+            .catch(() => setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f) => ({ module: f.module, expression: f.expression, ja_hint: f.ja_hint }))));
         }
       })
       .catch(console.error)
@@ -461,6 +470,30 @@ export default function PrepTaskPage() {
             </p>
           </div>
         </div>
+
+        {/* AC-X1: 使う表現を常時表示。PREP回答・エッセイとの文字列一致で Used 表示 */}
+        {task?.question_type === 'Task 2' && (() => {
+          const displayItems = requiredItems.length > 0 ? requiredItems : WRITING_RECOMMENDED_FALLBACK.map((f) => ({ module: f.module, expression: f.expression, ja_hint: f.ja_hint }));
+          const combinedText = (answers.point + ' ' + answers.reason + ' ' + answers.example + ' ' + answers.point_again + ' ' + (englishEssay?.essay || '')).toLowerCase();
+          return (
+            <div className={cn('p-6 mb-6', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
+              <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">使う表現（{displayItems.length}個）</h3>
+              <div className="flex flex-wrap gap-2">
+                {displayItems.map((item, idx) => {
+                  const used = combinedText.includes(item.expression.toLowerCase());
+                  return (
+                    <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-sm shadow-sm">
+                      <span className="font-semibold text-indigo-900">{item.expression}</span>
+                      {item.ja_hint && <span className="text-xs text-slate-500">（{item.ja_hint}）</span>}
+                      <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
+                      {used && <span className="text-xs font-semibold text-emerald-600 ml-1">Used</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ステップ別コンテンツ */}
         {currentStep === 'japanese_evaluation' && japaneseEvaluation ? (

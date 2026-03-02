@@ -15,36 +15,36 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * カードベースクラス
- * LandingPageのデザイン言語に合わせて更新: bg-white, border-slate-200, rounded-2xl, shadow-sm
+ * ダークモード対応: bg-surface / border-border / text-text
  */
 export const cardBase = cn(
-  'rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm',
+  'rounded-2xl border border-border bg-surface text-text shadow-sm',
   'hover:shadow-md transition-shadow duration-200'
 );
 
 /**
  * カードタイトルクラス
- * LandingPageのデザイン言語に合わせて更新: text-slate-900, font-bold
+ * ダークモード対応: text-text
  */
 export const cardTitle = cn(
-  'text-lg font-bold text-slate-900 tracking-tight'
+  'text-heading-3 font-bold text-text tracking-tight'
 );
 
 /**
  * カード説明文クラス
- * LandingPageのデザイン言語に合わせて更新: text-slate-600
+ * ダークモード対応: text-text-muted。タイポ: text-small
  */
 export const cardDesc = cn(
-  'text-sm text-slate-600 leading-relaxed'
+  'text-small text-text-muted leading-relaxed'
 );
 
 /**
  * 入力欄ベースクラス
- * LandingPageのデザイン言語に合わせて更新: border-slate-200, bg-white, text-slate-900
+ * ダークモード対応: border-border / bg-surface / text-text / placeholder
  */
 export const inputBase = cn(
-  'w-full rounded-lg border border-slate-200 bg-white text-slate-900',
-  'placeholder:text-slate-400',
+  'w-full rounded-lg border border-border bg-surface text-text',
+  'placeholder:text-placeholder',
   'focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500',
   'transition-all duration-200 px-4 py-3'
 );
@@ -69,21 +69,21 @@ export const selectableCardBase = cn(
 
 /**
  * 選択可能カード - 選択状態
- * LandingPageのデザイン言語に合わせて更新: border-indigo-600, bg-indigo-50
+ * ダークモード対応: text-text（indigoアクセントは維持）
  */
 export const selectableSelected = cn(
   selectableCardBase,
-  'border-indigo-600 bg-indigo-50 text-slate-900 shadow-sm'
+  'border-indigo-600 bg-indigo-50 text-text shadow-sm dark:bg-indigo-950/50 dark:border-indigo-500'
 );
 
 /**
  * 選択可能カード - 未選択状態
- * LandingPageのデザイン言語に合わせて更新: border-slate-200, hover効果
+ * ダークモード対応: border-border / bg-surface / text-text
  */
 export const selectableUnselected = cn(
   selectableCardBase,
-  'border-slate-200 bg-white text-slate-900',
-  'hover:border-indigo-500/50 hover:bg-slate-50 hover:shadow-md hover:-translate-y-0.5'
+  'border-border bg-surface text-text',
+  'hover:border-indigo-500/50 hover:bg-surface-2 hover:shadow-md hover:-translate-y-0.5'
 );
 
 /**
@@ -109,11 +109,11 @@ export const buttonPrimary = cn(
 
 /**
  * ボタンベースクラス（セカンダリ）
- * LandingPageのデザイン言語に合わせて更新: border-slate-200, bg-white
+ * ダークモード対応: border-border / bg-surface / text-text
  */
 export const buttonSecondary = cn(
-  'rounded-lg border border-slate-200 bg-white text-slate-700 px-4 py-2',
-  'hover:bg-slate-50 hover:border-slate-300 shadow-sm',
+  'rounded-lg border border-border bg-surface text-text px-4 py-2',
+  'hover:bg-surface-2 hover:border-border-strong shadow-sm',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500',
   'disabled:opacity-50 disabled:cursor-not-allowed',
   'transition-all duration-200 active:scale-95'

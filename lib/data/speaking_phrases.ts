@@ -307,18 +307,23 @@ export const SPEAKING_PHRASES: SpeakingPhrase[] = [
 ];
 
 /**
- * トピックとレベルでフレーズをフィルタリング
+ * トピックとレベルでフレーズをフィルタリング。
+ * AC-S1: 該当がない場合は汎用フレーズ（work_study + 全トピック混在）でフォールバック
  */
 export function getPhrasesByTopicAndLevel(
   topic: string,
   level: 'B1' | 'B2' | 'C1' = 'B2',
   count: number = 10
 ): SpeakingPhrase[] {
-  const filtered = SPEAKING_PHRASES.filter(
+  let filtered = SPEAKING_PHRASES.filter(
     (phrase) => phrase.topic === topic && phrase.level === level
   );
-  
-  // ランダムにシャッフルして指定数まで取得
+  if (filtered.length === 0) {
+    filtered = SPEAKING_PHRASES.filter((p) => p.topic === 'work_study' && p.level === level);
+  }
+  if (filtered.length === 0) {
+    filtered = [...SPEAKING_PHRASES].sort(() => Math.random() - 0.5);
+  }
   const shuffled = [...filtered].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
