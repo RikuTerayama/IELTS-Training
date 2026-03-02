@@ -26,6 +26,6 @@ export const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}`;
 export const BLOG_OFFICIAL_URL =
   process.env.NEXT_PUBLIC_BLOG_OFFICIAL_URL || 'https://ieltsconsult.netlify.app/';
 
-/** Note（未確定なら TODO 用プレースホルダ。空ならナビで非表示可） */
+/** Note（公式。env 未設定時はフォールバックで確実に値あり） */
 export const BLOG_NOTE_URL =
-  process.env.NEXT_PUBLIC_BLOG_NOTE_URL || '';
+  process.env.NEXT_PUBLIC_BLOG_NOTE_URL || 'https://note.com/ielts_consult';

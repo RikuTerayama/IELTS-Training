@@ -33,8 +33,8 @@ const INPUT_CATEGORIES = [
     skills: [
       { skill: 'reading' as const, label: 'Reading', href: '', disabled: true },
       { skill: 'listening' as const, label: 'Listening', href: '', disabled: true },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/vocab?skill=speaking', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/vocab?skill=writing', disabled: false },
+      { skill: 'speaking' as const, label: 'Speaking', href: '/training/vocab', disabled: false },
+      { skill: 'writing' as const, label: 'Writing', href: '/training/vocab', disabled: false },
     ],
   },
   {
@@ -44,8 +44,8 @@ const INPUT_CATEGORIES = [
     skills: [
       { skill: 'reading' as const, label: 'Reading', href: '', disabled: true },
       { skill: 'listening' as const, label: 'Listening', href: '', disabled: true },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/idiom?skill=speaking', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/idiom?skill=writing', disabled: false },
+      { skill: 'speaking' as const, label: 'Speaking', href: '/training/idiom', disabled: false },
+      { skill: 'writing' as const, label: 'Writing', href: '/training/idiom', disabled: false },
     ],
   },
   {
@@ -55,8 +55,8 @@ const INPUT_CATEGORIES = [
     skills: [
       { skill: 'reading' as const, label: 'Reading', href: '', disabled: true },
       { skill: 'listening' as const, label: 'Listening', href: '', disabled: true },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/lexicon?skill=speaking', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/lexicon?skill=writing', disabled: false },
+      { skill: 'speaking' as const, label: 'Speaking', href: '/training/lexicon', disabled: false },
+      { skill: 'writing' as const, label: 'Writing', href: '/training/lexicon', disabled: false },
     ],
   },
 ];

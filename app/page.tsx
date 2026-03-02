@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { getContactFormEmbedUrl, CONTACT_GOOGLE_FORM_URL, CONTACT_EMAIL, CONTACT_MAILTO } from '@/lib/constants/contact';
+import { getContactFormEmbedUrl, CONTACT_GOOGLE_FORM_URL, CONTACT_EMAIL, CONTACT_MAILTO, BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 // --- アニメーションコンポーネント ---
@@ -265,12 +265,20 @@ export default function LandingPage() {
               Contact
             </button>
             <Link 
-              href="https://ieltsconsult.netlify.app/" 
+              href={BLOG_OFFICIAL_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-text-muted hover:text-indigo-600 transition-colors"
             >
               Blog
+            </Link>
+            <Link 
+              href={BLOG_NOTE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-text-muted hover:text-indigo-600 transition-colors"
+            >
+              Note
             </Link>
           </nav>
         </div>
@@ -324,6 +332,15 @@ export default function LandingPage() {
                     学習ロードマップ
                   </div>
                 </div>
+                <a
+                  href={BLOG_NOTE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+                >
+                  <Icons.Book className="w-4 h-4" />
+                  Noteを見る
+                </a>
               </FadeIn>
             </div>
 

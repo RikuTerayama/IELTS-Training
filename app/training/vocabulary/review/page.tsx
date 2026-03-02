@@ -90,7 +90,7 @@ export default function VocabularyReviewPage() {
           <div className="rounded-lg border border-border bg-surface p-8 text-center">
             <p className="text-text-muted mb-4">間違えた問題がまだありません。</p>
             <button
-              onClick={() => router.push('/training/vocab?skill=speaking')}
+              onClick={() => router.push('/training/vocab')}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               単語練習を開始

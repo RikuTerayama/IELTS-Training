@@ -69,11 +69,11 @@ export const selectableCardBase = cn(
 
 /**
  * 選択可能カード - 選択状態
- * ダークモード対応: text-text（indigoアクセントは維持）
+ * トークンで一括制御: ライト=薄いindigo、ダーク=surface系で白背景を防ぎ文字可読
  */
 export const selectableSelected = cn(
   selectableCardBase,
-  'border-indigo-600 bg-indigo-50 text-text shadow-sm dark:bg-indigo-950/50 dark:border-indigo-500'
+  'border-2 border-selectable-selected-border bg-selectable-selected-bg text-text shadow-sm'
 );
 
 /**

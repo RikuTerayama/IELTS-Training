@@ -34,6 +34,10 @@ const config: Config = {
         'text-subtle': 'rgb(var(--text-subtle) / <alpha-value>)',
         border: 'rgb(var(--border) / <alpha-value>)',
         'border-strong': 'rgb(var(--border-strong) / <alpha-value>)',
+        'selectable-selected': {
+          bg: 'rgb(var(--selectable-selected-bg) / <alpha-value>)',
+          border: 'rgb(var(--selectable-selected-border) / <alpha-value>)',
+        },
         primary: {
           DEFAULT: 'rgb(var(--primary) / <alpha-value>)',
           hover: 'rgb(var(--primary-hover) / <alpha-value>)',
