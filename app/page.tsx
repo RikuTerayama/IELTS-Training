@@ -548,7 +548,7 @@ export default function LandingPage() {
             </FadeIn>
             
             <FadeIn delay={0.2} className="max-w-md mx-auto">
-              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl p-8 border-2 border-indigo-200 shadow-xl relative overflow-hidden">
+              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl p-8 border-2 border-indigo-200 shadow-xl relative overflow-hidden text-slate-900">
                 <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
                   LIMITED TIME
                 </div>
@@ -556,10 +556,10 @@ export default function LandingPage() {
                   <div className="inline-block px-3 py-1 mb-4 rounded-full bg-indigo-600/10 text-indigo-700 text-xs font-bold">
                     FREE PLAN
                   </div>
-                  <div className="text-5xl font-bold text-text mb-2">
+                  <div className="text-5xl font-bold text-slate-900 mb-2">
                     ¥0
                   </div>
-                  <div className="text-text-muted text-sm">/ 月</div>
+                  <div className="text-slate-600 text-sm">/ 月</div>
                 </div>
                 
                 <ul className="space-y-4 mb-8">
@@ -572,10 +572,10 @@ export default function LandingPage() {
                     '忘却曲線ベースの復習システム',
                   ].map((feature, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <div className="mt-0.5 text-indigo-600">
+                      <div className="mt-0.5 text-indigo-600 shrink-0">
                         <Icons.Check className="w-5 h-5" />
                       </div>
-                      <span className="text-text font-medium">{feature}</span>
+                      <span className="text-slate-900 font-medium">{feature}</span>
                     </li>
                   ))}
                 </ul>
