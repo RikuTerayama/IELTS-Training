@@ -3,6 +3,9 @@
  * Task 1の次タスク推薦
  */
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 

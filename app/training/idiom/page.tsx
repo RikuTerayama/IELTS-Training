@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
@@ -45,7 +45,7 @@ function ComingSoonSkillsView({ basePath }: { basePath: string }) {
   );
 }
 
-export default function IdiomPage() {
+function IdiomPageContent() {
   const searchParams = useSearchParams();
   const urlSkill = searchParams.get('skill') as Skill | null;
   const [step, setStep] = useState<Step>('skill');
@@ -622,6 +622,24 @@ export default function IdiomPage() {
         )}
       </div>
     </Layout>
+  );
+}
+
+export default function IdiomPage() {
+  return (
+    <Suspense fallback={
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-6">
+            <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>熟語練習</h1>
+            <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須熟語を覚えましょう</p>
+          </div>
+          <div className="text-center text-text-muted py-12">読み込み中...</div>
+        </div>
+      </Layout>
+    }>
+      <IdiomPageContent />
+    </Suspense>
   );
 }
 

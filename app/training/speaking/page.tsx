@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
@@ -13,7 +14,7 @@ const TASKS = [
   { id: 3, label: 'Task 3', desc: '深掘りディスカッション' },
 ] as const;
 
-export default function SpeakingPage() {
+function SpeakingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const category = normalizeSpeakingCategory(searchParams.get('category'));
@@ -112,5 +113,23 @@ export default function SpeakingPage() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+export default function SpeakingPage() {
+  return (
+    <Suspense fallback={
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-6">
+            <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>Speaking練習</h1>
+            <p className={cn('text-sm', cardDesc)}>カテゴリとTaskを選んで、実施画面へ進みましょう</p>
+          </div>
+          <div className="text-center text-text-muted py-12">読み込み中...</div>
+        </div>
+      </Layout>
+    }>
+      <SpeakingPageContent />
+    </Suspense>
   );
 }

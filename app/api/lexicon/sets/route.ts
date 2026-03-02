@@ -3,6 +3,9 @@
  * categoryごとの件数、typing_enabled件数を返す
  */
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { getTokyoDateString } from '@/lib/utils/dateTokyo';
