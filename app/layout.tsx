@@ -1,4 +1,8 @@
 import type { Metadata } from 'next';
+
+/** ビルド時の静的生成をスキップ（Supabase/認証依存のため） */
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { Inter } from 'next/font/google';
 import { Noto_Sans_JP } from 'next/font/google';
 import './globals.css';

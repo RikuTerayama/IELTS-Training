@@ -3,6 +3,9 @@
  * 保存済みフィードバック取得
  */
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { Feedback } from '@/lib/domain/types';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
@@ -45,7 +45,7 @@ function ComingSoonSkillsView({ basePath }: { basePath: string }) {
   );
 }
 
-export default function VocabPage() {
+function VocabPageContent() {
   const searchParams = useSearchParams();
   const urlSkill = searchParams.get('skill') as Skill | null;
   const [step, setStep] = useState<Step>('skill');
@@ -650,6 +650,24 @@ export default function VocabPage() {
         )}
       </div>
     </Layout>
+  );
+}
+
+export default function VocabPage() {
+  return (
+    <Suspense fallback={
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-6">
+            <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>単語練習</h1>
+            <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須単語を覚えましょう</p>
+          </div>
+          <div className="text-center text-text-muted py-12">読み込み中...</div>
+        </div>
+      </Layout>
+    }>
+      <VocabPageContent />
+    </Suspense>
   );
 }
 

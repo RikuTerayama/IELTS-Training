@@ -4,6 +4,9 @@
  * Step0: 型とZodバリデーションを通す
  */
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { TodayMenuSchema, type TodayMenu } from '@/lib/api/schemas/menuToday';
 import { createDummyUserXPState } from '@/lib/domain/xp';

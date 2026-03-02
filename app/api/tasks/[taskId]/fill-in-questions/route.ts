@@ -3,6 +3,9 @@
  * 穴埋め問題生成（弱点別、最大3問）
  */
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { generateFillInQuestions as generateQuestions } from '@/lib/domain/fillInQuestions';
