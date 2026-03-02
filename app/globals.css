@@ -59,6 +59,10 @@
     
     --focus-ring: 79 70 229;
     
+    /* 選択中カード/ボタン（ライト: 薄い indigo、ダークでは surface 系で白背景を防ぐ） */
+    --selectable-selected-bg: 238 242 255;
+    --selectable-selected-border: 79 70 229;
+    
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   }
@@ -111,6 +115,9 @@
     
     --link: 129 140 248;
     --link-hover: 165 180 252;
+    
+    --selectable-selected-bg: 30 41 59;
+    --selectable-selected-border: 99 102 241;
     
     --placeholder: 148 163 184;
     

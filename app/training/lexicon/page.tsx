@@ -60,13 +60,13 @@ function LexiconPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const effectiveSkill = (urlSkill === 'speaking' || urlSkill === 'writing') ? urlSkill : 'speaking';
   useEffect(() => {
-    if (urlSkill !== 'speaking' && urlSkill !== 'writing') return;
     let cancelled = false;
-    setSelectedSkill(urlSkill);
+    setSelectedSkill(effectiveSkill);
     setLoading(true);
     setError(null);
-    fetchLexiconSets(urlSkill).then((response) => {
+    fetchLexiconSets(effectiveSkill).then((response) => {
       if (cancelled) return;
       if (response.ok && response.data) {
         setSets(response.data!.sets);
@@ -81,7 +81,7 @@ function LexiconPageContent() {
       if (!cancelled) setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [urlSkill]);
+  }, [effectiveSkill]);
 
   const handleSkillSelect = async (skill: 'speaking' | 'writing') => {
     setSelectedSkill(skill);

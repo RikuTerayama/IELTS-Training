@@ -8,11 +8,11 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { cn, buttonSecondary, buttonPrimary } from '@/lib/ui/theme';
 import { BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
 
-/** ナビ項目（正規導線。未実装は disabled + Coming soon）。/vocab は使わず /training/vocab が正。 */
+/** ナビ項目（正規導線はクエリ無し）。/vocab は使わず /training/vocab が正。 */
 const NAV_INPUT = [
-  { label: 'Vocab', href: '/training/vocab?skill=speaking', enabled: true },
-  { label: 'Idiom', href: '/training/idiom?skill=speaking', enabled: true },
-  { label: 'Bank', href: '/training/lexicon?skill=speaking', enabled: true },
+  { label: 'Vocab', href: '/training/vocab', enabled: true },
+  { label: 'Idiom', href: '/training/idiom', enabled: true },
+  { label: 'Bank', href: '/training/lexicon', enabled: true },
 ] as const;
 
 const NAV_OUTPUT = [

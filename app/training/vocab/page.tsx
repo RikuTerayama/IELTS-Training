@@ -60,14 +60,14 @@ function VocabPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // URL ?skill=speaking|writing の場合は自動でフェッチ
+  // URL ?skill=speaking|writing の場合はその値、無い場合はデフォルト speaking（URLは書き換えない）
+  const effectiveSkill = (urlSkill === 'speaking' || urlSkill === 'writing') ? urlSkill : 'speaking';
   useEffect(() => {
-    if (urlSkill !== 'speaking' && urlSkill !== 'writing') return;
     let cancelled = false;
-    setSelectedSkill(urlSkill);
+    setSelectedSkill(effectiveSkill);
     setLoading(true);
     setError(null);
-    fetchLexiconSets(urlSkill, 'vocab').then((response) => {
+    fetchLexiconSets(effectiveSkill, 'vocab').then((response) => {
       if (cancelled) return;
       if (response.ok && response.data) {
         setSets(response.data!.sets);
@@ -82,7 +82,7 @@ function VocabPageContent() {
       if (!cancelled) setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [urlSkill]);
+  }, [effectiveSkill]);
 
   // Step A: skill選択（API呼び出しは speaking/writing のみ）
   const handleSkillSelect = async (skill: 'speaking' | 'writing') => {
