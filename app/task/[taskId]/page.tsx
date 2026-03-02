@@ -5,8 +5,9 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { Task1Flow } from '@/components/task1/Task1Flow';
-import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary, textareaBase } from '@/lib/ui/theme';
 import type { Task, DraftContent, Attempt } from '@/lib/domain/types';
+import { WRITING_RECOMMENDED_FALLBACK } from '@/lib/data/writing_recommended_fallback';
 
 /** W2-FR-3: 40分タイマー（Start/Pause/Reset） */
 const TASK2_TIMER_DEFAULT_SEC = 40 * 60;
@@ -139,12 +140,17 @@ function TaskPageContent() {
               );
               if (itemsRes.ok) {
                 const itemsData = await itemsRes.json();
-                if (itemsData.ok && itemsData.data) {
+                if (itemsData.ok && itemsData.data?.items?.length) {
                   setRequiredItems(itemsData.data.items);
+                } else {
+                  setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f, i) => ({ module: f.module, item_id: `fallback-${i}`, skill: 'writing' as const, category: '', expression: f.expression, ja_hint: f.ja_hint })));
                 }
+              } else {
+                setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f, i) => ({ module: f.module, item_id: `fallback-${i}`, skill: 'writing' as const, category: '', expression: f.expression, ja_hint: f.ja_hint })));
               }
             } catch (error) {
               console.error('Failed to fetch required items:', error);
+              setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f, i) => ({ module: f.module, item_id: `fallback-${i}`, skill: 'writing' as const, category: '', expression: f.expression, ja_hint: f.ja_hint })));
             }
           }
         }
@@ -245,8 +251,9 @@ function TaskPageContent() {
       console.log('[TaskPage] Submit response:', data);
 
       if (data.ok) {
-        // Required Itemsの使用チェック（submit成功後）
-        if (requiredItems.length > 0) {
+        // Required Itemsの使用チェック（submit成功後）。フォールバックはAPIに送らない
+        const realRequiredItems = requiredItems.filter((item) => !String(item.item_id).startsWith('fallback-'));
+        if (realRequiredItems.length > 0) {
           try {
             const finalContent = draftContent.final || draftContent.fill_in || draftContent.skeleton || '';
             const outputType = task.question_type === 'Task 1' ? 'writing_task1' : 'writing_task2';
@@ -257,7 +264,7 @@ function TaskPageContent() {
               body: JSON.stringify({
                 output_type: outputType,
                 content: finalContent,
-                required_items: requiredItems.map(item => ({
+                required_items: realRequiredItems.map(item => ({
                   module: item.module,
                   item_id: item.item_id,
                   expression: item.expression,
@@ -413,21 +420,29 @@ function TaskPageContent() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          {/* Required Items表示 - Paper Interface Style */}
-          {requiredItems.length > 0 && (
-            <div className={cn('p-6 rounded-2xl', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
-              <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">必須使用表現（{requiredItems.length}個）</h3>
-              <div className="flex flex-wrap gap-2">
-                {requiredItems.map((item, idx) => (
-                  <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-sm shadow-sm">
-                    <span className="font-semibold text-indigo-900">{item.expression}</span>
-                    {item.ja_hint && <span className="text-xs text-slate-500">（{item.ja_hint}）</span>}
-                    <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
-                  </div>
-                ))}
+          {/* AC-X1: 使う表現を常時表示。本文との文字列一致で Used を表示 */}
+          {(() => {
+            const displayItems = requiredItems.length > 0 ? requiredItems : WRITING_RECOMMENDED_FALLBACK.map((f, i) => ({ module: f.module, item_id: `fallback-${i}`, skill: 'writing' as const, category: '', expression: f.expression, ja_hint: f.ja_hint }));
+            const combinedText = ((draftContent.final || '') + ' ' + (draftContent.japanese || '')).toLowerCase();
+            return (
+              <div className={cn('p-6 rounded-2xl', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">使う表現（{displayItems.length}個）</h3>
+                <div className="flex flex-wrap gap-2">
+                  {displayItems.map((item, idx) => {
+                    const used = combinedText.includes(item.expression.toLowerCase());
+                    return (
+                      <div key={item.item_id ?? idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-sm shadow-sm">
+                        <span className="font-semibold text-indigo-900">{item.expression}</span>
+                        {item.ja_hint && <span className="text-xs text-slate-500">（{item.ja_hint}）</span>}
+                        <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
+                        {used && <span className="text-xs font-semibold text-emerald-600 ml-1">Used</span>}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* 使用チェック結果表示 - Paper Interface Style */}
           {outputCheckResult && outputCheckResult.missing.length > 0 && (
@@ -525,7 +540,7 @@ function TaskPageContent() {
                 </div>
                 <button
                   onClick={() => router.push(`/task/${taskId}/prep`)}
-                  className={cn('px-6 py-3', buttonPrimary, 'whitespace-nowrap')}
+                  className={cn('px-6 py-3', buttonPrimary, 'sm:whitespace-nowrap')}
                 >
                   PREPモードで開始
                 </button>
@@ -534,8 +549,8 @@ function TaskPageContent() {
           )}
 
           {/* 入力エリア - Paper Interface Style */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm mb-6">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-6">回答</h2>
+          <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm mb-6">
+            <h2 className="text-heading-2 font-bold tracking-tight text-text mb-6">回答</h2>
             {level === 'beginner' ? (
               <div className="space-y-6">
                 <div>
@@ -548,7 +563,7 @@ function TaskPageContent() {
                       setDraftContent({ ...draftContent, japanese: e.target.value })
                     }
                     rows={5}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
+                    className={cn('w-full rounded-lg px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200', textareaBase)}
                     placeholder="日本語で回答を書いてください"
                   />
                 </div>
@@ -562,7 +577,7 @@ function TaskPageContent() {
                       setDraftContent({ ...draftContent, final: e.target.value })
                     }
                     rows={12}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
+                    className={cn('w-full rounded-lg px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200', textareaBase)}
                     placeholder="英語で回答を書いてください"
                   />
                 </div>
@@ -572,7 +587,7 @@ function TaskPageContent() {
                 value={draftContent.final || ''}
                 onChange={(e) => setDraftContent({ ...draftContent, final: e.target.value })}
                 rows={18}
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
+                className={cn('w-full rounded-lg px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200', textareaBase)}
                 placeholder="英語でPREP形式で回答を書いてください"
               />
             ) : (
@@ -580,7 +595,7 @@ function TaskPageContent() {
                 value={draftContent.final || ''}
                 onChange={(e) => setDraftContent({ ...draftContent, final: e.target.value })}
                 rows={18}
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
+                className={cn('w-full rounded-lg px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200', textareaBase)}
                 placeholder="英語で自由に回答を書いてください"
               />
             )}

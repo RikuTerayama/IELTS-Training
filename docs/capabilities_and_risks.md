@@ -1,136 +1,103 @@
-# ケイパビリティと潜在的リスク（棚卸し）
+# Capabilities and Risks
 
-更新日: 2025年時点。開発継続時の「何ができていて」「何が事故の種か」を明文化し、優先順位を付けられる状態にする。
+**目的**: 現状のケイパビリティ（機能・外部連携・データフロー）とリスクを整理し、優先順位を決められる状態にする。  
+**最終更新**: 2025-02-26（タイポ/レスポンシブ/ダークモード/theme 実装後）
 
 ---
 
-## 1. 画面・ルート一覧（CAP-FR-1）
+## 1. 画面・ルート一覧（主要ページ）
 
-| ルート | 説明 | 認証 |
+| ルート | 役割 | 備考 |
 |--------|------|------|
-| `/` | LP（ランディング） | 不要 |
-| `/login` | ログイン | 未認証時のみ |
-| `/onboarding` | 目的ヒアリング | 要 |
-| `/home` | Top（今日のメニュー） | 要 |
-| `/training/vocab` | 語彙トレーニング（正） | 要 |
-| `/training/idiom` | イディオム | 要 |
-| `/training/lexicon` | 表現バンク（Bank） | 要 |
-| `/training/speaking` | Speaking カテゴリ・Task選択 | 要 |
-| `/training/speaking/task{1,2,3}/drill` | Speaking 実施 | 要 |
-| `/training/writing/task1` | Writing Task1 入口 | 要 |
-| `/training/writing/task1/progress` | Task1 進捗 | 要 |
-| `/training/vocabulary` | 語彙（旧）→ /training/vocab へ誘導 | 要 |
-| `/training/vocabulary/review` | 語彙復習 | 要 |
-| `/task/select` | タスク選択（Task1/2） | 要 |
-| `/task/[taskId]` | タスク実施・提出 | 要 |
-| `/task/[taskId]/prep` | PREPモード（Task2 初級・中級） | 要 |
-| `/feedback/[attemptId]` | フィードバック閲覧 | 要 |
-| `/progress` | 進捗 | 要 |
-| `/rewrite/[attemptId]`, `/fillin/[attemptId]` | 穴埋め等 | 要 |
-| `/vocab` | 廃止 → 308 で /training/vocab へ | - |
+| / | LP、サインアップ/ログイン | メイン導線 |
+| /login | ログイン | 認証 |
+| /onboarding | 目的ヒアリング | profiles |
+| /home | 今日のメニュー、Input/Output 導線 | メイン導線 |
+| /task/select | タスク選択 | 出題 |
+| /task/[taskId] | タスク実施（Task1/2） | 出題・提出 |
+| /task/[taskId]/prep | PREP ヒアリング | LLM 連携 |
+| /training/vocab, idiom, lexicon | 語彙・熟語・表現学習 | 学習 |
+| /training/speaking/* | Speaking 練習 | 学習 |
+| /feedback/[attemptId] | フィードバック表示 | 結果表示 |
+| /fillin/[attemptId] | 穴埋め | 復習 |
+| /rewrite/[attemptId] | 書き直し | 復習 |
+| /progress | 進捗 | 可視化 |
 
 ---
 
-## 2. 学習機能（CAP-FR-1）
+## 2. 学習機能一覧
 
-| 機能 | 説明 | 依存API・データ |
-|------|------|-----------------|
-| 今日のメニュー | Input/Output カード、XP表示 | `GET /api/menu/today` |
-| Input 語彙・イディオム・Bank | 語彙/idiom/lexicon 学習 | lexicon API（sets, questions, submit）, `lexicon_items`, `lexicon_srs_state` |
-| SRS（復習） | 忘却曲線に基づく due 管理 | `lexicon_srs_state`, next_review_on |
-| Speaking Task1〜3 | カテゴリ×Task、推奨表現、タイマー | `/api/input/items`（表現）, 静的プロンプト |
-| Writing Task1 | グラフ等・ステップ学習 | task1 attempts, recommendation, review API |
-| Writing Task2 | レベル別（穴埋め/PREP/自由） | tasks/generate, tasks/[id]/submit, LLM（prep-to-essay, feedback） |
-| タスク生成 | ジャンル・レベル指定でタスク作成 | `POST /api/tasks/generate` |
-| フィードバック | 提出後のAIフィードバック | `POST /api/llm/feedback` 等 |
-| 進捗・履歴 | サマリー・履歴表示 | progress/summary, progress/history |
-
----
-
-## 3. 外部連携・依存先（CAP-FR-2）
-
-| 種別 | 依存先 | 用途 | データの流れ |
-|------|--------|------|--------------|
-| 認証 | Supabase Auth | ログイン・セッション | Cookie / JWT、middleware でガード |
-| DB | Supabase (PostgreSQL) | ユーザー、タスク、attempts、lexicon、SRS | API Routes から createClient（server）で R/W |
-| LLM | Groq / OpenAI（GPT-4o-mini） | フィードバック、PREP→エッセイ、評価 | API Routes 内で呼び出し、ユーザー入力を送信 |
-| ホスティング | （Vercel 等を想定） | デプロイ | 環境変数で Supabase/LLM キーを注入 |
-| 問い合わせ | メール / Google Forms | LP の Contact | 定数（環境変数）で URL 管理 |
+| 機能 | 説明 | 主要ルート |
+|------|------|------------|
+| SRS | 忘却曲線に基づく語彙定着 | /training/vocab, idiom, lexicon |
+| 出題 | Task1/2 エッセイ出題、穴埋め、Speaking ドリル | /task/*, /training/speaking/* |
+| 記録 | 回答履歴・attempt・フィードバック | attempts, feedback |
+| 今日のメニュー | Due 件数に基づく Input/Output 推奨 | /home, /api/menu/today |
+| 表現プール | 推奨表現・lexicon_* | /api/input/items, /task/[taskId] |
+| タイマー | 時間制限（一部画面） | task, speaking drill |
+| PREP ヒアリング | LLM が質問しながらエッセイ構築 | /task/[taskId]/prep |
+| AI フィードバック | LLM による採点・コメント | /feedback/[attemptId] |
 
 ---
 
-## 4. データの流れ（CAP-FR-2）
+## 3. 外部連携
 
-- **認証**: middleware で `getSession`/`getUser` → 保護パスは未認証時 `/login` へリダイレクト。
-- **今日のメニュー**: `GET /api/menu/today` が Supabase で due 件数等を取得し、Input/Output カードを返す。
-- **語彙・表現**: `lexicon_items`（module=vocab/idiom/lexicon）→ sets → questions → 回答は `lexicon_submit` 経由で SRS 更新（`lexicon_srs_state`）。
-- **タスク**: `tasks/generate` でタスク作成 → `task/[taskId]` で実施 → `tasks/[taskId]/submit` で保存。Task2 は prep API で日本語→英語変換、LLM でフィードバック。
-- **進捗**: `progress/summary`, `progress/history` が attempts 等を集約。
-
----
-
-## 5. リスク棚卸し（RISK-FR-1〜6）
-
-### 5.1 セキュリティ（RISK-FR-1）
-
-| リスク | 重大度 | 影響 | 対策案 | 優先 |
-|--------|--------|------|--------|------|
-| 環境変数・キーの露出 | 高 | 認証/DB/LLM の悪用 | キーは env のみ、ログに含めない、本番で console.log 削減 | 高 |
-| 認可漏れ | 中 | 未ログインで保護ページ閲覧 | middleware の protectedPaths の網羅確認、新ルート追加時の見直し | 中 |
-| 入力の扱い（XSS等） | 中 | 表示時のスクリプト実行 | ユーザー入力をそのまま dangerouslySetInnerHTML に渡さない、React のエスケープに依存 | 中 |
-
-### 5.2 信頼性・可用性（RISK-FR-2）
-
-| リスク | 重大度 | 影響 | 対策案 | 優先 |
-|--------|--------|------|--------|------|
-| Supabase 障害 | 高 | ログイン・DB 不可 | リトライ・エラー表示の統一、障害時のメッセージ | 中 |
-| LLM タイムアウト・失敗 | 中 | フィードバックが返らない | タイムアウト設定、リトライ、フォールバックメッセージ | 中 |
-| 静的生成時の動的利用 | 中 | ビルドエラー（request.url, cookies） | API/ページで dynamic 指定の明示、必要なら force-dynamic | 低 |
-
-### 5.3 コストと濫用耐性（RISK-FR-3）
-
-| リスク | 重大度 | 影響 | 対策案 | 優先 |
-|--------|--------|------|--------|------|
-| LLM API 連打 | 高 | コスト増・レート制限 | レート制限（API または middleware）、1ユーザーあたり制限 | 高 |
-| 認証なしでの API 直接叩き | 中 | 不正利用 | 全 API で getUser() チェック統一 | 中 |
-
-### 5.4 データ整合性（RISK-FR-4）
-
-| リスク | 重大度 | 影響 | 対策案 | 優先 |
-|--------|--------|------|--------|------|
-| SRS 更新の二重・不整合 | 中 | 復習日がおかしくなる | 更新は単一経路、トランザクション検討 | 中 |
-| /vocab と /training/vocab の二重管理 | 低 | 解消済み（/vocab はリダイレクト） | 現状維持 | - |
-
-### 5.5 UX・アクセシビリティ（RISK-FR-5）
-
-| リスク | 重大度 | 影響 | 対策案 | 優先 |
-|--------|--------|------|--------|------|
-| コントラスト・フォント | 中 | 可読性 | タイポトークン・ダーク背景の統一（今回対応） | 済 |
-| 横スクロール・折り返し | 中 | スマホで崩れ | min-w-0, break-words, overflow-x-hidden（今回対応） | 済 |
-| フォーカス・キーボード | 低 | アクセシビリティ | focus-visible の一貫、スキップリンク検討 | 低 |
-
-### 5.6 保守性（RISK-FR-6）
-
-| リスク | 重大度 | 影響 | 対策案 | 優先 |
-|--------|--------|------|--------|------|
-| 未使用ファイル・古い SQL | 低 | 複雑化 | 参照ゼロのもののみ削除、マイグレーションは触らない | 低 |
-| middleware の console.log | 中 | 本番ログ肥大化・情報漏れ | 本番では無効化またはレベル制御 | 中 |
-| 重複実装（例: 同じフォーム複数） | 低 | 修正漏れ | コンポーネント化の段階的推進 | 低 |
+| 連携先 | 用途 |
+|--------|------|
+| Supabase Auth | 認証・セッション |
+| Supabase DB | profiles, tasks, attempts, feedback, lexicon_* |
+| Groq / OpenAI (GPT-4o-mini) | LLM（タスク生成、フィードバック、PREP） |
+| ホスティング | Vercel / Netlify 等 |
 
 ---
 
-## 6. 直近でやるべき改善トップ5（CAP-AC-3）
+## 4. 依存先とデータフロー（画面→API→DB）
 
-1. **本番で middleware の console.log を無効化する**（セキュリティ・保守性）
-2. **LLM 呼び出しにレート制限を入れる**（コスト・濫用耐性）
-3. **全 API で認可チェックを統一する**（未認証での直叩き防止）
-4. **Supabase/LLM 障害時のエラー表示・リトライ方針を決め、1箇所で扱う**（信頼性）
-5. **環境変数チェックリストを README に明記し、キーがコードに混入していないか定期確認**（セキュリティ）
+```
+認証: Supabase Auth → session/cookies → middleware でガード
+メニュー: /api/menu/today → lexicon_srs_state, profiles → Input/Output カード
+タスク: /api/tasks/generate (LLM) → タスク作成 → /api/input/items → ユーザー実施
+      → /api/tasks/[id]/submit → /api/output/submit で使用チェック
+フィードバック: attempts → /api/llm/feedback → フィードバック生成・保存
+```
 
 ---
 
-## 7. ドキュメントの更新
+## 5. リスク棚卸し（重大度・影響・対策案・優先順位）
 
-- 新規ルート・API を追加したら本ドキュメントの「画面・ルート一覧」「学習機能」「外部連携」「データの流れ」を更新する。
-- 障害・インシデントがあったら「リスク」に事実と対策を追記する。
-- 四半期ごとに「直近でやるべき改善トップ5」を見直す。
+| 観点 | リスク | 重大度 | 影響 | 対策案 | 優先順位 |
+|------|--------|--------|------|--------|----------|
+| セキュリティ | 認可漏れ（他ユーザー attempt 参照等） | 中 | 情報漏洩 | attempt_id に user_id 紐付け確認、API で所有者チェック | 高 |
+| セキュリティ | 入力検証不足（XSS、インジェクション） | 中 | 脆弱性 | 出力のエスケープ、LLM 入力のサニタイズ | 中 |
+| 信頼性 | Supabase 未設定時のビルド失敗 | 高 | デプロイ不可 | 静的生成時は API をスキップ、env チェックで早期 return | 高 |
+| 信頼性 | LLM API 失敗時のフォールバック不足 | 中 | UX 悪化 | エラー時にフォールバック表示、リトライ案内 | 中 |
+| 信頼性 | 外部 API（Groq, OpenAI）制限・障害 | 中 | 機能停止 | レート制限、エラーハンドリング、フォールバック | 中 |
+| コスト | LLM API 連打・制限なし | 中 | コスト増 | クライアント側の連打防止、API 側のレート制限 | 中 |
+| データ整合性 | ルート重複（/vocab, /training/writing/task2） | 低 | 混乱 | middleware で 308 リダイレクト（既存） | 低 |
+| UX | 文字サイズ不統一 | 中 | 読みづらさ | タイポグラフィスケールの適用 | 高（対応済み） |
+| UX | ダークモードが LP/Layout で効かない | 中 | 可読性 | #FAFAFA を CSS 変数参照に置換 | 高（対応済み） |
+| UX | コントラスト不足（ダーク時） | 低 | 可読性 | トークン調整、WCAG 確認 | 中 |
+| 保守性 | タイポトークン未使用 | 中 | 一貫性低下 | text-display, text-heading-* 等の採用 | 高（対応済み） |
+| 保守性 | ハードコード色（#FAFAFA 等） | 中 | テーマ破綻 | CSS 変数・theme トークンへの移行 | 高（対応済み） |
+
+---
+
+## 6. 直近の改善トップ 5（今回実装で解消した点も含む）
+
+| # | 項目 | 状態 | メモ |
+|---|------|------|------|
+| 1 | LP・Layout・login の背景を CSS 変数参照に変更 | ✅ 対応済 | bg-bg-secondary 等に置換。ダークモード有効化 |
+| 2 | タイポグラフィトークンの採用 | ✅ 対応済 | text-heading-1/2/3, text-body, text-body-lg, text-ui 等を適用 |
+| 3 | theme.ts の cardBase 等を CSS 変数参照に変更 | ✅ 対応済 | bg-surface, border-border, text-text に置換 |
+| 4 | whitespace-nowrap の見直し | ✅ 対応済 | sm:whitespace-nowrap に変更、Header に truncate 追加 |
+| 5 | Supabase 未設定時のビルド堅牢化 | 未対応 | 静的生成時の API スキップ等が必要 |
+
+---
+
+## 7. 次にやるべき改善候補（優先度順）
+
+1. **Supabase 未設定時のビルド堅牢化**（信頼性・高）
+2. **認可漏れの確認と修正**（セキュリティ・高）
+3. **LLM API 失敗時のフォールバック強化**（信頼性・中）
+4. **入力検証・サニタイズ強化**（セキュリティ・中）
+5. **LLM API レート制限・連打防止**（コスト・中）

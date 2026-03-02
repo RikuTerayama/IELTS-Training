@@ -216,7 +216,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA] text-slate-900 font-sans relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center bg-bg-secondary text-text font-sans relative overflow-hidden">
       {/* 背景装飾（LandingPageスタイル） */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-50/60 rounded-[100%] blur-3xl opacity-70" />
@@ -225,7 +225,7 @@ export default function LoginPage() {
 
       {/* ログインフォームカード */}
       <div className="relative z-10 w-full max-w-md px-6">
-        <div className="rounded-2xl bg-white border border-slate-200 p-8 shadow-lg">
+        <div className="rounded-2xl bg-surface border border-border p-8 shadow-lg">
           {/* ロゴとタイトル */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-xl mb-4 shadow-lg shadow-indigo-500/20">
@@ -233,7 +233,7 @@ export default function LoginPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
+            <h1 className="text-heading-1 font-bold tracking-tight text-text mb-2">
               IELTS Training
             </h1>
             <p className="text-sm text-slate-500">
@@ -253,7 +253,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 required
                 placeholder="example@email.com"
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-text placeholder:text-placeholder focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
               />
             </div>
             <div>
@@ -268,7 +268,7 @@ export default function LoginPage() {
                 autoComplete={isSignUp ? "new-password" : "current-password"}
                 required
                 placeholder="••••••••"
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-text placeholder:text-placeholder focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
               />
             </div>
             {error && (

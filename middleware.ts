@@ -83,9 +83,11 @@ export async function middleware(request: NextRequest) {
   console.log('[Middleware] Cookies:', cookieNames);
   console.log('[Middleware] Has auth cookies:', cookieNames.some(name => name.includes('auth-token')));
 
-  // FR-8: /vocab は恒久リダイレクトで /training/vocab?skill=speaking へ（308）
+  // AC-4: /vocab は恒久リダイレクトで /training/vocab へ（308）。skill=writing|speaking は吸収、それ以外は skill=speaking にフォールバック
   if (request.nextUrl.pathname === '/vocab') {
-    return NextResponse.redirect(new URL('/training/vocab?skill=speaking', request.url), 308);
+    const skill = request.nextUrl.searchParams.get('skill');
+    const targetSkill = (skill === 'writing' || skill === 'speaking') ? skill : 'speaking';
+    return NextResponse.redirect(new URL(`/training/vocab?skill=${targetSkill}`, request.url), 308);
   }
 
   // W2-FR-2: /training/writing/task2 は廃止。308 で /task/select?task_type=Task%202 へ

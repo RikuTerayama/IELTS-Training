@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import {
   fetchLexiconSets,
@@ -12,7 +14,7 @@ import {
 } from '@/lib/api/lexicon';
 import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
-type Skill = 'writing' | 'speaking';
+type Skill = 'reading' | 'listening' | 'speaking' | 'writing';
 type Mode = 'click' | 'typing';
 
 type Step = 'skill' | 'category' | 'quiz';
@@ -30,7 +32,22 @@ interface QuizState {
   showResult: boolean;
 }
 
+function ComingSoonSkillsView({ basePath }: { basePath: string }) {
+  return (
+    <div className={cn('p-6', cardBase)}>
+      <h2 className={cn('text-xl font-semibold mb-4', cardTitle)}>Coming soon</h2>
+      <p className={cn('text-sm mb-6', cardDesc)}>この技能は準備中です。Speaking / Writing からお試しください。</p>
+      <div className="flex flex-wrap gap-3">
+        <Link href={`${basePath}?skill=speaking`} className={cn('px-4 py-2', buttonPrimary)}>Speaking を始める</Link>
+        <Link href={`${basePath}?skill=writing`} className={cn('px-4 py-2', buttonSecondary)}>Writing を始める</Link>
+      </div>
+    </div>
+  );
+}
+
 export default function LexiconPage() {
+  const searchParams = useSearchParams();
+  const urlSkill = searchParams.get('skill') as Skill | null;
   const [step, setStep] = useState<Step>('skill');
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -43,8 +60,30 @@ export default function LexiconPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Step A: skill選択
-  const handleSkillSelect = async (skill: Skill) => {
+  useEffect(() => {
+    if (urlSkill !== 'speaking' && urlSkill !== 'writing') return;
+    let cancelled = false;
+    setSelectedSkill(urlSkill);
+    setLoading(true);
+    setError(null);
+    fetchLexiconSets(urlSkill).then((response) => {
+      if (cancelled) return;
+      if (response.ok && response.data) {
+        setSets(response.data!.sets);
+        setStep('category');
+      } else {
+        setError(response.error?.message || 'Failed to fetch sets');
+      }
+    }).catch((err) => {
+      if (cancelled) return;
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [urlSkill]);
+
+  const handleSkillSelect = async (skill: 'speaking' | 'writing') => {
     setSelectedSkill(skill);
     setLoading(true);
     setError(null);
@@ -64,15 +103,15 @@ export default function LexiconPage() {
     }
   };
 
-  // Step B: category + mode選択 → quiz開始
+  // Step B: category + mode選択 → quiz開始（API は speaking/writing のみ）
   const handleStartQuiz = async () => {
-    if (!selectedSkill || !selectedCategory || !selectedMode) return;
+    if (!selectedCategory || !selectedMode || (selectedSkill !== 'speaking' && selectedSkill !== 'writing')) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetchLexiconQuestions(selectedSkill, selectedCategory, selectedMode, 10);
+      const response = await fetchLexiconQuestions(selectedSkill as 'speaking' | 'writing', selectedCategory, selectedMode, 10);
       if (response.ok && response.data) {
         if (response.data.questions.length === 0) {
           setError('この条件では問題がありません');
@@ -287,48 +326,42 @@ export default function LexiconPage() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>Lexicon学習</h1>
+          <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>表現バンク</h1>
           <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須表現を覚えましょう</p>
         </div>
 
+        {(urlSkill === 'reading' || urlSkill === 'listening') ? (
+          <ComingSoonSkillsView basePath="/training/lexicon" />
+        ) : (
+          <>
         {error && (
           <div className={cn('mb-4 p-4 rounded-lg', cardBase, 'bg-danger/10 border-danger')}>
             <p className="text-danger">{error}</p>
           </div>
         )}
 
-        {/* Step A: skill選択 */}
+        {/* Step A: skill選択（4技能、Reading/Listening は Coming soon） */}
         {step === 'skill' && (
           <div className="space-y-4">
             <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>スキルを選択</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              <button
-                onClick={() => handleSkillSelect('writing')}
-                disabled={loading}
-                className={cn(
-                  'p-6 rounded-lg border-2 border-border bg-surface-2',
-                  'hover:border-accent-indigo hover:bg-accent-indigo/10',
-                  'transition-all duration-200 text-left',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
-                  loading && 'opacity-50 cursor-not-allowed'
-                )}
-              >
-                <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Writing</div>
-                <div className={cn('text-sm', cardDesc)}>ライティングで使う表現</div>
-              </button>
-              <button
-                onClick={() => handleSkillSelect('speaking')}
-                disabled={loading}
-                className={cn(
-                  'p-6 rounded-lg border-2 border-border bg-surface-2',
-                  'hover:border-accent-violet hover:bg-accent-violet/10',
-                  'transition-all duration-200 text-left',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
-                  loading && 'opacity-50 cursor-not-allowed'
-                )}
-              >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
+              <span className={cn('p-6 rounded-lg border-2 border-border bg-slate-50 opacity-70 cursor-not-allowed text-left')}>
+                <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Reading</div>
+                <div className={cn('text-sm', cardDesc)}>Coming soon</div>
+              </span>
+              <span className={cn('p-6 rounded-lg border-2 border-border bg-slate-50 opacity-70 cursor-not-allowed text-left')}>
+                <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Listening</div>
+                <div className={cn('text-sm', cardDesc)}>Coming soon</div>
+              </span>
+              <button onClick={() => handleSkillSelect('speaking')} disabled={loading}
+                className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}>
                 <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Speaking</div>
                 <div className={cn('text-sm', cardDesc)}>スピーキングで使う表現</div>
+              </button>
+              <button onClick={() => handleSkillSelect('writing')} disabled={loading}
+                className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-indigo hover:bg-accent-indigo/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}>
+                <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Writing</div>
+                <div className={cn('text-sm', cardDesc)}>ライティングで使う表現</div>
               </button>
             </div>
           </div>
@@ -569,6 +602,8 @@ export default function LexiconPage() {
 
         {loading && step !== 'quiz' && (
           <div className="text-center text-text-muted">読み込み中...</div>
+        )}
+          </>
         )}
       </div>
     </Layout>

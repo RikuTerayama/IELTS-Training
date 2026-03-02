@@ -11,27 +11,27 @@ import { createClient } from '@/lib/supabase/server';
 import { getTokyoDateString } from '@/lib/utils/dateTokyo';
 
 export async function GET(): Promise<Response> {
+  const dateStr = getTokyoDateString();
+  const xp = createDummyUserXPState();
+  let lexiconDueClick = 0;
+  let lexiconDueTyping = 0;
+  let idiomDueClick = 0;
+  let idiomDueTyping = 0;
+  let vocabDueClick = 0;
+  let vocabDueTyping = 0;
+  let user: { id: string } | null = null;
+  let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
+
   try {
-    const supabase = await createClient();
-    
-    // 認証チェック（due件数を取得するため）
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    // 今日の日付を取得（Tokyo基準、YYYY-MM-DD形式）
-    const dateStr = getTokyoDateString();
+    supabase = await createClient();
+    const { data: { user: u } } = await supabase.auth.getUser();
+    user = u;
+  } catch {
+    // DB/Supabase 失敗時は user=null, due=0 で input は必ず返す
+  }
 
-    // ダミーのXP状態
-    const xp = createDummyUserXPState();
-
-    // Lexicon/Idiom/Vocab due件数を取得（認証済みの場合のみ）
-    let lexiconDueClick = 0;
-    let lexiconDueTyping = 0;
-    let idiomDueClick = 0;
-    let idiomDueTyping = 0;
-    let vocabDueClick = 0;
-    let vocabDueTyping = 0;
-    
-    if (user) {
+  try {
+    if (user && supabase) {
       const today = getTokyoDateString();
       
       // Lexicon clickモードのdue件数

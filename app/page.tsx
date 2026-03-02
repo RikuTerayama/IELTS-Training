@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { getContactFormEmbedUrl, CONTACT_GOOGLE_FORM_URL, CONTACT_EMAIL, CONTACT_MAILTO } from '@/lib/constants/contact';
 
 // --- アニメーションコンポーネント ---
 interface FadeInProps {
@@ -232,7 +233,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-bg-secondary text-text font-sans selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* 背景装飾 */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -254,6 +255,13 @@ export default function LandingPage() {
             </span>
           </Link>
           <nav className="flex items-center gap-6">
+            <button
+              type="button"
+              onClick={() => scrollToSection('contact')}
+              className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+            >
+              Contact
+            </button>
             <Link 
               href="https://ieltsconsult.netlify.app/" 
               target="_blank"
@@ -285,14 +293,15 @@ export default function LandingPage() {
               </FadeIn>
               
               <FadeIn delay={0.2}>
-                <h1 className="text-5xl lg:text-7xl font-bold tracking-tighter text-slate-900 leading-[1.1]">
+                {/* 例外: ヒーロー強調のため text-display より大きい text-5xl/lg:text-7xl を維持 */}
+                <h1 className="text-5xl lg:text-7xl font-bold tracking-tighter text-text leading-[1.1]">
                   Score Higher with <br />
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">Intelligent</span> Feedback.
                 </h1>
               </FadeIn>
               
               <FadeIn delay={0.3}>
-                <p className="text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium">
+                <p className="text-body-lg text-text-muted leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium">
                   データ駆動型アプローチで、IELTSスコアの伸び悩みを打破する。<br className="hidden lg:block"/>
                   最新のAIがあなたのライティングを瞬時に分析し、合格への最短ルートを提示します。
                 </p>
@@ -320,7 +329,7 @@ export default function LandingPage() {
             <FadeIn delay={0.5} className="lg:col-span-5 w-full max-w-md mx-auto">
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl ring-1 ring-slate-900/5 p-8">
+                <div className="relative bg-surface/80 backdrop-blur-xl rounded-2xl shadow-xl ring-1 ring-border p-8">
                   
                   <div className="mb-6">
                     <h2 className="text-xl font-bold text-slate-900">
@@ -414,10 +423,10 @@ export default function LandingPage() {
         </div>
 
         {/* 課題解決セクション */}
-        <section className="py-24 bg-white border-y border-slate-100">
+        <section className="py-24 bg-surface border-y border-border">
           <div className="container mx-auto px-6">
             <FadeIn className="max-w-3xl mx-auto text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+              <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                 なぜ、独学でのスコアアップは難しいのか
               </h2>
               <p className="text-slate-500 text-lg">
@@ -427,33 +436,33 @@ export default function LandingPage() {
             
             <StaggerContainer className="grid md:grid-cols-3 gap-8" staggerDelay={0.15}>
               <StaggerItem>
-                <div className="p-8 rounded-2xl bg-[#FAFAFA] border border-slate-100">
+                <div className="p-8 rounded-2xl bg-surface-2 border border-border">
                   <div className="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Alert className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">フィードバックの欠如</h3>
+                  <h3 className="text-heading-3 font-bold text-text mb-3">フィードバックの欠如</h3>
                   <p className="text-slate-600 leading-relaxed">
                     自分のライティングやスピーキングのどこが間違っているのか、どう改善すべきかが客観的に分からない。
                   </p>
                 </div>
               </StaggerItem>
               <StaggerItem>
-                <div className="p-8 rounded-2xl bg-[#FAFAFA] border border-slate-100">
+                <div className="p-8 rounded-2xl bg-surface-2 border border-border">
                   <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Chart className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">成長の停滞</h3>
+                  <h3 className="text-heading-3 font-bold text-text mb-3">成長の停滞</h3>
                   <p className="text-slate-600 leading-relaxed">
                     同じような表現ばかり使ってしまい、バンドスコア5.5〜6.0の壁をなかなか超えられない。
                   </p>
                 </div>
               </StaggerItem>
               <StaggerItem>
-                <div className="p-8 rounded-2xl bg-[#FAFAFA] border border-slate-100">
+                <div className="p-8 rounded-2xl bg-surface-2 border border-border">
                   <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Layers className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">非効率な学習戦略</h3>
+                  <h3 className="text-heading-3 font-bold text-text mb-3">非効率な学習戦略</h3>
                   <p className="text-slate-600 leading-relaxed">
                     闇雲に問題を解くだけで、体系的な語彙強化や論理構成のトレーニングができていない。
                   </p>
@@ -464,10 +473,10 @@ export default function LandingPage() {
         </section>
 
         {/* Features セクション (Bento Grid) */}
-        <section id="features" className="py-24 bg-[#FAFAFA]">
+        <section id="features" className="py-24 bg-bg-secondary">
           <div className="container mx-auto px-6">
             <FadeIn className="max-w-3xl mx-auto text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+              <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                 Everything you need to succeed
               </h2>
               <p className="text-slate-500 text-lg">
@@ -475,61 +484,49 @@ export default function LandingPage() {
               </p>
             </FadeIn>
 
-            <StaggerContainer className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto" staggerDelay={0.1}>
-              {/* Feature 1: Main (Large) */}
-              <StaggerItem className="md:col-span-2">
-                <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm overflow-hidden relative group hover:shadow-md transition-all">
-                  <div className="relative z-10">
-                    <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-6">
-                      <Icons.Brain className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-3">AI Instant Feedback</h3>
-                    <p className="text-slate-600 max-w-md mb-6">
-                      提出から数秒で、試験官レベルの詳細なフィードバックを受け取れます。文法ミスだけでなく、語彙の多様性や論理構成まで分析します。
-                    </p>
+            <StaggerContainer className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto" staggerDelay={0.1}>
+              <StaggerItem>
+                <div className="bg-surface rounded-3xl p-8 border border-border shadow-sm hover:shadow-md transition-all min-h-[220px] flex flex-col">
+                  <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-6">
+                    <Icons.Brain className="w-6 h-6" />
                   </div>
-                  <div className="absolute right-0 bottom-0 w-1/2 h-full bg-gradient-to-l from-indigo-50 to-transparent opacity-50" />
+                  <h3 className="text-heading-3 font-bold text-text mb-3">AI Instant Feedback</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    提出から数秒で、試験官レベルの詳細なフィードバックを受け取れます。文法ミスだけでなく、語彙の多様性や論理構成まで分析します。
+                  </p>
                 </div>
               </StaggerItem>
-
-              {/* Feature 2: Vocabulary */}
               <StaggerItem>
-                <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="bg-surface rounded-3xl p-8 border border-border shadow-sm hover:shadow-md transition-all min-h-[220px] flex flex-col">
                   <div className="w-12 h-12 bg-pink-100 text-pink-600 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Book className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">Smart Vocabulary</h3>
-                  <p className="text-slate-600 text-sm">
+                  <h3 className="text-heading-3 font-bold text-text mb-3">Smart Vocabulary</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
                     文脈に基づいた語彙学習。忘却曲線に基づくSRSシステムで、効率的に定着させます。
                   </p>
                 </div>
               </StaggerItem>
-
-              {/* Feature 3: Progress */}
               <StaggerItem>
-                <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="bg-surface rounded-3xl p-8 border border-border shadow-sm hover:shadow-md transition-all min-h-[220px] flex flex-col">
                   <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Chart className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">Visual Progress</h3>
-                  <p className="text-slate-600 text-sm">
+                  <h3 className="text-heading-3 font-bold text-text mb-3">Visual Progress</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
                     日々の学習進捗と弱点を可視化。自分の成長を実感しながら学習を継続できます。
                   </p>
                 </div>
               </StaggerItem>
-
-              {/* Feature 4: Curriculum */}
-              <StaggerItem className="md:col-span-2">
-                <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-all flex items-center">
-                  <div className="flex-1">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
-                      <Icons.Target className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-3">レベル別カリキュラム</h3>
-                    <p className="text-slate-600">
-                      現在のレベル（Beginner / Intermediate / Advanced）に合わせて、最適な学習コンテンツを自動で提供します。
-                    </p>
+              <StaggerItem>
+                <div className="bg-surface rounded-3xl p-8 border border-border shadow-sm hover:shadow-md transition-all min-h-[220px] flex flex-col">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                    <Icons.Target className="w-6 h-6" />
                   </div>
+                  <h3 className="text-heading-3 font-bold text-text mb-3">レベル別カリキュラム</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    現在のレベル（Beginner / Intermediate / Advanced）に合わせて、最適な学習コンテンツを自動で提供します。
+                  </p>
                 </div>
               </StaggerItem>
             </StaggerContainer>
@@ -537,10 +534,10 @@ export default function LandingPage() {
         </section>
 
         {/* Pricing セクション */}
-        <section id="pricing" className="py-24 bg-white border-y border-slate-100">
+        <section id="pricing" className="py-24 bg-surface border-y border-border">
           <div className="container mx-auto px-6">
             <FadeIn className="max-w-3xl mx-auto text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+              <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                 今は完全無料で始められます
               </h2>
               <p className="text-slate-500 text-lg">
@@ -596,65 +593,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Testimonials セクション */}
-        <section id="testimonials" className="py-24 bg-[#FAFAFA]">
-          <div className="container mx-auto px-6">
-            <FadeIn className="max-w-3xl mx-auto text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
-                ユーザーの声
-              </h2>
-              <p className="text-slate-500 text-lg">
-                実際にIELTS Trainingを利用している学習者からのフィードバック
-              </p>
-            </FadeIn>
-            
-            <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto" staggerDelay={0.15}>
-              {[
-                {
-                  name: 'T.K.さん',
-                  level: 'Intermediate',
-                  band: '6.5達成',
-                  text: 'AIのフィードバックが非常に具体的で、どこを改善すべきかが明確になりました。特に論理構成のアドバイスが役立ちました。',
-                  avatar: '👨‍💼'
-                },
-                {
-                  name: 'M.S.さん',
-                  level: 'Beginner',
-                  band: '5.5達成',
-                  text: 'レベル別のカリキュラムが自分に合っていて、無理なく学習を続けられています。語彙学習も効率的です。',
-                  avatar: '👩‍🎓'
-                },
-                {
-                  name: 'R.Y.さん',
-                  level: 'Advanced',
-                  band: '7.0達成',
-                  text: '進捗が可視化されることで、モチベーションが維持できています。弱点分析機能も優秀です。',
-                  avatar: '👨‍🎓'
-                },
-              ].map((testimonial, i) => (
-                <StaggerItem key={i}>
-                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="text-3xl bg-slate-50 w-10 h-10 flex items-center justify-center rounded-full">{testimonial.avatar}</div>
-                      <div>
-                        <div className="font-bold text-slate-900">{testimonial.name}</div>
-                        <div className="text-xs text-slate-500">{testimonial.level} • <span className="text-indigo-600 font-medium">{testimonial.band}</span></div>
-                      </div>
-                    </div>
-                    <p className="text-slate-600 text-sm leading-relaxed">"{testimonial.text}"</p>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        </section>
-
         {/* About セクション */}
-        <section id="about" className="py-24 bg-white border-y border-slate-100">
+        <section id="about" className="py-24 bg-surface border-y border-border">
           <div className="container mx-auto px-6">
             <div className="max-w-4xl mx-auto">
               <FadeIn className="text-center mb-16">
-                <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                   IELTS Trainingについて
                 </h2>
                 <p className="text-slate-500 text-lg">
@@ -669,7 +613,7 @@ export default function LandingPage() {
                       <span className="w-1 h-6 bg-indigo-600 rounded-full"></span>
                       ミッション
                     </h3>
-                    <p className="text-slate-600 leading-relaxed bg-[#FAFAFA] p-6 rounded-xl border border-slate-100">
+                    <p className="text-text-muted leading-relaxed bg-surface-2 p-6 rounded-xl border border-border">
                       IELTS Trainingは、AI技術を活用して、すべての学習者が効率的にIELTSスコアを向上させられるプラットフォームを目指しています。
                       独学では難しい「客観的なフィードバック」と「データに基づく学習戦略」を提供することで、目標スコア達成をサポートします。
                     </p>
@@ -684,27 +628,27 @@ export default function LandingPage() {
                     </h3>
                     <StaggerContainer className="grid md:grid-cols-2 gap-4" staggerDelay={0.1}>
                       <StaggerItem>
-                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                          <div className="font-semibold text-slate-900 mb-2">フロントエンド</div>
-                          <div className="text-sm text-slate-600">Next.js 14, React, TypeScript, Tailwind CSS</div>
+                        <div className="bg-surface-2 rounded-xl p-5 border border-border">
+                          <div className="font-semibold text-text mb-2">フロントエンド</div>
+                          <div className="text-sm text-text-muted">Next.js 14, React, TypeScript, Tailwind CSS</div>
                         </div>
                       </StaggerItem>
                       <StaggerItem>
-                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                          <div className="font-semibold text-slate-900 mb-2">バックエンド</div>
-                          <div className="text-sm text-slate-600">Supabase (PostgreSQL), Next.js API Routes</div>
+                        <div className="bg-surface-2 rounded-xl p-5 border border-border">
+                          <div className="font-semibold text-text mb-2">バックエンド</div>
+                          <div className="text-sm text-text-muted">Supabase (PostgreSQL), Next.js API Routes</div>
                         </div>
                       </StaggerItem>
                       <StaggerItem>
-                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                          <div className="font-semibold text-slate-900 mb-2">AI/LLM</div>
-                          <div className="text-sm text-slate-600">Groq, OpenAI (GPT-4o-mini)</div>
+                        <div className="bg-surface-2 rounded-xl p-5 border border-border">
+                          <div className="font-semibold text-text mb-2">AI/LLM</div>
+                          <div className="text-sm text-text-muted">Groq, OpenAI (GPT-4o-mini)</div>
                         </div>
                       </StaggerItem>
                       <StaggerItem>
-                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                          <div className="font-semibold text-slate-900 mb-2">その他</div>
-                          <div className="text-sm text-slate-600">Zod (バリデーション), SRSアルゴリズム</div>
+                        <div className="bg-surface-2 rounded-xl p-5 border border-border">
+                          <div className="font-semibold text-text mb-2">その他</div>
+                          <div className="text-sm text-text-muted">Zod (バリデーション), SRSアルゴリズム</div>
                         </div>
                       </StaggerItem>
                     </StaggerContainer>
@@ -715,75 +659,42 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Contact セクション */}
-        <section id="contact" className="py-24 bg-[#FAFAFA]">
+        {/* Contact セクション（Google Forms 埋め込み + 別タブリンク + mailto） */}
+        <section id="contact" className="py-24 bg-bg-secondary">
           <div className="container mx-auto px-6">
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-3xl mx-auto">
               <FadeIn className="text-center mb-12">
-                <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+                <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                   お問い合わせ
                 </h2>
                 <p className="text-slate-500 text-lg">
                   ご質問やフィードバックをお待ちしています
                 </p>
               </FadeIn>
-              
-              <FadeIn delay={0.2} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
-                <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('お問い合わせ機能は準備中です。メールにてご連絡ください。'); }}>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        お名前
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900"
-                        placeholder="山田 太郎"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        メールアドレス
-                      </label>
-                      <input
-                        type="email"
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900"
-                        placeholder="example@email.com"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      お問い合わせ内容
-                    </label>
-                    <select className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900">
-                      <option>機能について</option>
-                      <option>バグ報告</option>
-                      <option>改善提案</option>
-                      <option>その他</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      メッセージ
-                    </label>
-                    <textarea
-                      rows={4}
-                      className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900 resize-none"
-                      placeholder="お問い合わせ内容をご記入ください"
-                    />
-                  </div>
-                  
-                  <button
-                    type="submit"
-                    className="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all"
+              <FadeIn delay={0.1} className="space-y-4">
+                <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
+                  <iframe
+                    src={getContactFormEmbedUrl()}
+                    title="お問い合わせフォーム"
+                    className="w-full border-0"
+                    style={{ height: 'min(1000px, 90vh)' }}
+                  />
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+                  <a
+                    href={CONTACT_GOOGLE_FORM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 hover:text-indigo-700 font-medium underline"
                   >
-                    送信する
-                    </button>
-                </form>
-                
+                    別タブで開く
+                  </a>
+                  {CONTACT_EMAIL && CONTACT_EMAIL !== 'support@example.com' && (
+                    <a href={CONTACT_MAILTO} className="text-slate-600 hover:text-slate-800">
+                      メールで問い合わせ
+                    </a>
+                  )}
+                </div>
               </FadeIn>
             </div>
           </div>
@@ -818,11 +729,6 @@ export default function LandingPage() {
                 <li>
                   <button onClick={() => scrollToSection('pricing')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
                     Pricing
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => scrollToSection('testimonials')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
-                    Testimonials
                   </button>
                 </li>
               </ul>
