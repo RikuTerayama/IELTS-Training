@@ -176,9 +176,9 @@ export default function RewritePage() {
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           {/* ヘッダー */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
             <h2 className="mb-2 text-lg font-semibold">ガイド付き書き直し</h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-text-muted">
               指定された箇所のみを修正してください（最大2箇所）
             </p>
             <p className="mt-2 text-xs text-red-600">
@@ -190,9 +190,9 @@ export default function RewritePage() {
           <div className="grid gap-6 md:grid-cols-2">
             {/* 左側: 原文（読み取り専用） */}
             <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <h3 className="mb-3 font-semibold text-gray-700">原文（読み取り専用）</h3>
-                <div className="whitespace-pre-line rounded border border-gray-200 bg-white p-4 text-sm text-gray-700">
+              <div className="rounded-lg border border-border bg-surface-2 p-4">
+                <h3 className="mb-3 font-semibold text-text">原文（読み取り専用）</h3>
+                <div className="whitespace-pre-line rounded border border-border bg-surface p-4 text-sm text-text">
                   {originalText}
                 </div>
               </div>
@@ -200,10 +200,10 @@ export default function RewritePage() {
 
             {/* 右側: 編集可能エリア */}
             <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 bg-white p-4">
-                <h3 className="mb-3 font-semibold text-gray-700">編集エリア</h3>
+              <div className="rounded-lg border border-border bg-surface p-4">
+                <h3 className="mb-3 font-semibold text-text">編集エリア</h3>
                 {rewriteTargets.length === 0 ? (
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-text-muted">
                     書き直し対象が指定されていません。
                   </p>
                 ) : (
@@ -217,7 +217,7 @@ export default function RewritePage() {
                           <span className="rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white">
                             修正対象 {index + 1}
                           </span>
-                          <span className="rounded bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
+                          <span className="rounded bg-surface-2 px-2 py-1 text-xs font-semibold text-text">
                             {target.dimension}
                           </span>
                           {target.priority === 'high' && (
@@ -228,28 +228,28 @@ export default function RewritePage() {
                         </div>
                         
                         <div className="mb-2 text-sm">
-                          <p className="font-semibold text-gray-700">問題点:</p>
-                          <p className="text-gray-600">{target.issue_description}</p>
+                          <p className="font-semibold text-text">問題点:</p>
+                          <p className="text-text-muted">{target.issue_description}</p>
                         </div>
 
                         <div className="mb-2 text-sm">
-                          <p className="font-semibold text-gray-700">修正方針:</p>
-                          <p className="text-gray-600">{target.rewrite_guidance}</p>
+                          <p className="font-semibold text-text">修正方針:</p>
+                          <p className="text-text-muted">{target.rewrite_guidance}</p>
                         </div>
 
                         <div className="mb-2 text-sm">
-                          <p className="font-semibold text-gray-700">元のテキスト:</p>
-                          <p className="rounded bg-gray-100 p-2 text-gray-700">{target.original_text}</p>
+                          <p className="font-semibold text-text">元のテキスト:</p>
+                          <p className="rounded bg-surface-2 p-2 text-text">{target.original_text}</p>
                         </div>
 
                         <div>
-                          <label className="mb-1 block text-sm font-semibold text-gray-700">
+                          <label className="mb-1 block text-sm font-semibold text-text">
                             修正後のテキスト:
                           </label>
                           <textarea
                             value={revisedTexts[target.target_id] || target.original_text}
                             onChange={(e) => handleRevisedTextChange(target.target_id, e.target.value)}
-                            className="w-full rounded border border-gray-300 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full rounded border border-border p-2 text-sm text-text focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             rows={4}
                             placeholder="修正後のテキストを入力してください"
                           />
@@ -268,14 +268,14 @@ export default function RewritePage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="rounded-md bg-green-600 px-6 py-2 text-white hover:bg-green-700 disabled:bg-gray-400"
+                className="rounded-md bg-green-600 px-6 py-2 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? '再評価中...' : '再評価を実行'}
               </button>
             )}
             <button
               onClick={handleCancel}
-              className="rounded-md border border-gray-300 bg-white px-6 py-2 text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-border bg-surface px-6 py-2 text-text hover:bg-surface-2"
             >
               キャンセル
             </button>

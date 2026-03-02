@@ -18,7 +18,7 @@ export default function WritingTask2RedirectPage() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl text-center">
-        <p className="text-slate-600">Writing Task 2 はタスク選択画面に統合しました。リダイレクトしています...</p>
+        <p className="text-text-muted">Writing Task 2 はタスク選択画面に統合しました。リダイレクトしています...</p>
       </div>
     </Layout>
   );

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { getContactFormEmbedUrl, CONTACT_GOOGLE_FORM_URL, CONTACT_EMAIL, CONTACT_MAILTO } from '@/lib/constants/contact';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 // --- アニメーションコンポーネント ---
 interface FadeInProps {
@@ -244,21 +245,22 @@ export default function LandingPage() {
 
       {/* ヘッダー */}
       <header className="fixed top-0 w-full z-50 transition-all duration-300">
-        <div className="absolute inset-0 bg-white/70 backdrop-blur-xl border-b border-slate-200/50" />
+        <div className="absolute inset-0 bg-bg/80 backdrop-blur-xl border-b border-border/50" />
         <div className="container mx-auto px-6 h-16 flex items-center justify-between relative z-10">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">
+            <span className="text-xl font-bold tracking-tight text-text">
               IELTS Training
             </span>
           </Link>
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center gap-4">
+            <ThemeToggle />
             <button
               type="button"
               onClick={() => scrollToSection('contact')}
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+              className="text-sm font-medium text-text-muted hover:text-indigo-600 transition-colors"
             >
               Contact
             </button>
@@ -266,7 +268,7 @@ export default function LandingPage() {
               href="https://ieltsconsult.netlify.app/" 
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+              className="text-sm font-medium text-text-muted hover:text-indigo-600 transition-colors"
             >
               Blog
             </Link>
@@ -308,7 +310,7 @@ export default function LandingPage() {
               </FadeIn>
               
               <FadeIn delay={0.4}>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 text-sm font-semibold text-slate-700">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 text-sm font-semibold text-text">
                   <div className="flex items-center gap-2">
                     <div className="bg-green-100 p-1 rounded-full text-green-600"><Icons.Check className="w-3 h-3" /></div>
                     即時スコア判定
@@ -332,17 +334,17 @@ export default function LandingPage() {
                 <div className="relative bg-surface/80 backdrop-blur-xl rounded-2xl shadow-xl ring-1 ring-border p-8">
                   
                   <div className="mb-6">
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <h2 className="text-xl font-bold text-text">
                       {isSignUp ? 'Get started for free' : 'Welcome back'}
                     </h2>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-sm text-text-muted mt-1">
                       {isSignUp ? 'クレジットカードは不要です' : 'アカウントにアクセス'}
                     </p>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</label>
+                      <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider">Email</label>
                       <input
                         type="email"
                         value={email}
@@ -350,11 +352,11 @@ export default function LandingPage() {
                         autoComplete="username"
                         required
                         placeholder="hello@example.com"
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900 placeholder:text-slate-400"
+                        className="w-full px-4 py-3 rounded-lg border border-border bg-surface text-text placeholder:text-placeholder focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Password</label>
+                      <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider">Password</label>
                       <input
                         type="password"
                         value={password}
@@ -362,7 +364,7 @@ export default function LandingPage() {
                         autoComplete="current-password"
                         required
                         placeholder="••••••••"
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-900 placeholder:text-slate-400"
+                        className="w-full px-4 py-3 rounded-lg border border-border bg-surface text-text placeholder:text-placeholder focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
                       />
                     </div>
 
@@ -411,7 +413,7 @@ export default function LandingPage() {
                         setError(null);
                         setSignUpSuccess(false);
                       }}
-                      className="text-sm text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+                      className="text-sm text-text-muted hover:text-indigo-600 transition-colors font-medium"
                     >
                       {isSignUp ? 'すでにアカウントをお持ちですか？ ログイン' : 'アカウントをお持ちでないですか？ 新規登録'}
                     </button>
@@ -429,7 +431,7 @@ export default function LandingPage() {
               <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                 なぜ、独学でのスコアアップは難しいのか
               </h2>
-              <p className="text-slate-500 text-lg">
+              <p className="text-text-muted text-lg">
                 多くのIELTS学習者が直面する共通の課題があります。
               </p>
             </FadeIn>
@@ -441,7 +443,7 @@ export default function LandingPage() {
                     <Icons.Alert className="w-6 h-6" />
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">フィードバックの欠如</h3>
-                  <p className="text-slate-600 leading-relaxed">
+                  <p className="text-text-muted leading-relaxed">
                     自分のライティングやスピーキングのどこが間違っているのか、どう改善すべきかが客観的に分からない。
                   </p>
                 </div>
@@ -452,7 +454,7 @@ export default function LandingPage() {
                     <Icons.Chart className="w-6 h-6" />
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">成長の停滞</h3>
-                  <p className="text-slate-600 leading-relaxed">
+                  <p className="text-text-muted leading-relaxed">
                     同じような表現ばかり使ってしまい、バンドスコア5.5〜6.0の壁をなかなか超えられない。
                   </p>
                 </div>
@@ -463,7 +465,7 @@ export default function LandingPage() {
                     <Icons.Layers className="w-6 h-6" />
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">非効率な学習戦略</h3>
-                  <p className="text-slate-600 leading-relaxed">
+                  <p className="text-text-muted leading-relaxed">
                     闇雲に問題を解くだけで、体系的な語彙強化や論理構成のトレーニングができていない。
                   </p>
                 </div>
@@ -479,7 +481,7 @@ export default function LandingPage() {
               <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                 Everything you need to succeed
               </h2>
-              <p className="text-slate-500 text-lg">
+              <p className="text-text-muted text-lg">
                 AI技術と学習科学を組み合わせた、オールインワンの学習プラットフォーム
               </p>
             </FadeIn>
@@ -491,7 +493,7 @@ export default function LandingPage() {
                     <Icons.Brain className="w-6 h-6" />
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">AI Instant Feedback</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
+                  <p className="text-text-muted text-sm leading-relaxed">
                     提出から数秒で、試験官レベルの詳細なフィードバックを受け取れます。文法ミスだけでなく、語彙の多様性や論理構成まで分析します。
                   </p>
                 </div>
@@ -502,7 +504,7 @@ export default function LandingPage() {
                     <Icons.Book className="w-6 h-6" />
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">Smart Vocabulary</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
+                  <p className="text-text-muted text-sm leading-relaxed">
                     文脈に基づいた語彙学習。忘却曲線に基づくSRSシステムで、効率的に定着させます。
                   </p>
                 </div>
@@ -513,7 +515,7 @@ export default function LandingPage() {
                     <Icons.Chart className="w-6 h-6" />
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">Visual Progress</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
+                  <p className="text-text-muted text-sm leading-relaxed">
                     日々の学習進捗と弱点を可視化。自分の成長を実感しながら学習を継続できます。
                   </p>
                 </div>
@@ -524,7 +526,7 @@ export default function LandingPage() {
                     <Icons.Target className="w-6 h-6" />
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">レベル別カリキュラム</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
+                  <p className="text-text-muted text-sm leading-relaxed">
                     現在のレベル（Beginner / Intermediate / Advanced）に合わせて、最適な学習コンテンツを自動で提供します。
                   </p>
                 </div>
@@ -540,7 +542,7 @@ export default function LandingPage() {
               <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                 今は完全無料で始められます
               </h2>
-              <p className="text-slate-500 text-lg">
+              <p className="text-text-muted text-lg">
                 MVP期間中は、すべての機能を無料でお試しいただけます。
               </p>
             </FadeIn>
@@ -554,10 +556,10 @@ export default function LandingPage() {
                   <div className="inline-block px-3 py-1 mb-4 rounded-full bg-indigo-600/10 text-indigo-700 text-xs font-bold">
                     FREE PLAN
                   </div>
-                  <div className="text-5xl font-bold text-slate-900 mb-2">
+                  <div className="text-5xl font-bold text-text mb-2">
                     ¥0
                   </div>
-                  <div className="text-slate-500 text-sm">/ 月</div>
+                  <div className="text-text-muted text-sm">/ 月</div>
                 </div>
                 
                 <ul className="space-y-4 mb-8">
@@ -573,7 +575,7 @@ export default function LandingPage() {
                       <div className="mt-0.5 text-indigo-600">
                         <Icons.Check className="w-5 h-5" />
                       </div>
-                      <span className="text-slate-700 font-medium">{feature}</span>
+                      <span className="text-text font-medium">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -587,7 +589,7 @@ export default function LandingPage() {
               </div>
             </FadeIn>
             
-            <FadeIn delay={0.3} className="mt-8 text-center text-sm text-slate-500">
+            <FadeIn delay={0.3} className="mt-8 text-center text-sm text-text-muted">
               <p>※ 将来的に有料プランを導入する可能性がありますが、現在のユーザーには移行期間を設けます。</p>
             </FadeIn>
           </div>
@@ -601,7 +603,7 @@ export default function LandingPage() {
                 <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                   IELTS Trainingについて
                 </h2>
-                <p className="text-slate-500 text-lg">
+                <p className="text-text-muted text-lg">
                   データ駆動型アプローチで、IELTSスコアアップをサポートします
                 </p>
               </FadeIn>
@@ -609,7 +611,7 @@ export default function LandingPage() {
               <div className="space-y-12">
                 <FadeIn delay={0.1}>
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-text mb-4 flex items-center gap-2">
                       <span className="w-1 h-6 bg-indigo-600 rounded-full"></span>
                       ミッション
                     </h3>
@@ -622,7 +624,7 @@ export default function LandingPage() {
                 
                 <FadeIn delay={0.2}>
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-text mb-4 flex items-center gap-2">
                       <span className="w-1 h-6 bg-indigo-600 rounded-full"></span>
                       技術スタック
                     </h3>
@@ -667,7 +669,7 @@ export default function LandingPage() {
                 <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
                   お問い合わせ
                 </h2>
-                <p className="text-slate-500 text-lg">
+                <p className="text-text-muted text-lg">
                   ご質問やフィードバックをお待ちしています
                 </p>
               </FadeIn>
@@ -690,7 +692,7 @@ export default function LandingPage() {
                     別タブで開く
                   </a>
                   {CONTACT_EMAIL && CONTACT_EMAIL !== 'support@example.com' && (
-                    <a href={CONTACT_MAILTO} className="text-slate-600 hover:text-slate-800">
+                    <a href={CONTACT_MAILTO} className="text-text-muted hover:text-text transition-colors">
                       メールで問い合わせ
                     </a>
                   )}
@@ -703,7 +705,7 @@ export default function LandingPage() {
       </main>
 
       {/* フッター */}
-      <footer className="bg-white border-t border-slate-200 py-12">
+      <footer className="bg-surface border-t border-border py-12">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="col-span-1 md:col-span-1">
@@ -711,16 +713,16 @@ export default function LandingPage() {
                 <div className="w-6 h-6 bg-indigo-600 rounded text-white flex items-center justify-center">
                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </div>
-                <span className="font-bold text-slate-900">IELTS Training</span>
+                <span className="font-bold text-text">IELTS Training</span>
                </Link>
-               <p className="text-sm text-slate-500 leading-relaxed">
+               <p className="text-sm text-text-muted leading-relaxed">
                  AI-powered IELTS preparation platform designed to help you achieve your target score efficiently.
                </p>
             </div>
             
             <div className="md:col-start-3">
-              <h4 className="font-bold text-slate-900 mb-4 text-sm">Product</h4>
-              <ul className="space-y-2 text-sm text-slate-500">
+              <h4 className="font-bold text-text mb-4 text-sm">Product</h4>
+              <ul className="space-y-2 text-sm text-text-muted">
                 <li>
                   <button onClick={() => scrollToSection('features')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
                     Features
@@ -735,8 +737,8 @@ export default function LandingPage() {
             </div>
             
             <div>
-              <h4 className="font-bold text-slate-900 mb-4 text-sm">Company</h4>
-              <ul className="space-y-2 text-sm text-slate-500">
+              <h4 className="font-bold text-text mb-4 text-sm">Company</h4>
+              <ul className="space-y-2 text-sm text-text-muted">
                 <li>
                   <button onClick={() => scrollToSection('about')} className="hover:text-indigo-600 cursor-pointer transition-colors text-left">
                     About
@@ -761,15 +763,15 @@ export default function LandingPage() {
             </div>
           </div>
           
-          <div className="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-slate-400">
+          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-text-subtle">
               © {new Date().getFullYear()} IELTS Training. All rights reserved.
             </p>
-            <div className="flex gap-6 text-xs text-slate-400">
-              <button onClick={() => setShowPrivacyPolicy(true)} className="hover:text-slate-600 transition-colors">
+            <div className="flex gap-6 text-xs text-text-subtle">
+              <button onClick={() => setShowPrivacyPolicy(true)} className="hover:text-text transition-colors text-text-muted">
                 Privacy Policy
               </button>
-              <button onClick={() => setShowTermsOfService(true)} className="hover:text-slate-600 transition-colors">
+              <button onClick={() => setShowTermsOfService(true)} className="hover:text-text transition-colors text-text-muted">
                 Terms of Service
               </button>
             </div>
@@ -780,21 +782,21 @@ export default function LandingPage() {
       {/* Privacy Policy モーダル */}
       {showPrivacyPolicy && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowPrivacyPolicy(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-slate-900">Privacy Policy</h2>
+          <div className="bg-surface rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-text">Privacy Policy</h2>
               <button
                 onClick={() => setShowPrivacyPolicy(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="text-text-muted hover:text-text transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="px-6 py-8 space-y-6 text-slate-700">
+            <div className="px-6 py-8 space-y-6 text-text">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">1. 個人情報の収集</h3>
+                <h3 className="text-lg font-bold text-text mb-3">1. 個人情報の収集</h3>
                 <p className="leading-relaxed">
                   IELTS Training（以下「当サービス」）は、サービス提供のために以下の個人情報を収集します：
                 </p>
@@ -807,7 +809,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">2. 個人情報の利用目的</h3>
+                <h3 className="text-lg font-bold text-text mb-3">2. 個人情報の利用目的</h3>
                 <p className="leading-relaxed">
                   収集した個人情報は、以下の目的でのみ利用します：
                 </p>
@@ -821,7 +823,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">3. 個人情報の管理</h3>
+                <h3 className="text-lg font-bold text-text mb-3">3. 個人情報の管理</h3>
                 <p className="leading-relaxed">
                   当サービスは、Supabase（PostgreSQL）を使用して個人情報を安全に管理しています。
                   パスワードは暗号化され、学習データは認証済みユーザーのみがアクセス可能です。
@@ -829,7 +831,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">4. 第三者への提供</h3>
+                <h3 className="text-lg font-bold text-text mb-3">4. 第三者への提供</h3>
                 <p className="leading-relaxed">
                   当サービスは、法令に基づく場合を除き、個人情報を第三者に提供することはありません。
                   AIフィードバック生成のため、OpenAIやGroqなどのLLMサービスに回答内容を送信しますが、
@@ -838,7 +840,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">5. 個人情報の削除</h3>
+                <h3 className="text-lg font-bold text-text mb-3">5. 個人情報の削除</h3>
                 <p className="leading-relaxed">
                   アカウント削除により、すべての個人情報と学習データが削除されます。
                   アカウント削除は、設定画面から行うことができます。
@@ -846,14 +848,14 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">6. お問い合わせ</h3>
+                <h3 className="text-lg font-bold text-text mb-3">6. お問い合わせ</h3>
                 <p className="leading-relaxed">
                   個人情報に関するお問い合わせは、Contactセクションからご連絡ください。
                 </p>
               </div>
               
-              <div className="pt-4 border-t border-slate-200">
-                <p className="text-sm text-slate-500">
+              <div className="pt-4 border-t border-border">
+                <p className="text-sm text-text-muted">
                   最終更新日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
               </div>
@@ -865,21 +867,21 @@ export default function LandingPage() {
       {/* Terms of Service モーダル */}
       {showTermsOfService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowTermsOfService(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-slate-900">Terms of Service</h2>
+          <div className="bg-surface rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-text">Terms of Service</h2>
               <button
                 onClick={() => setShowTermsOfService(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="text-text-muted hover:text-text transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="px-6 py-8 space-y-6 text-slate-700">
+            <div className="px-6 py-8 space-y-6 text-text">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">1. サービスの利用</h3>
+                <h3 className="text-lg font-bold text-text mb-3">1. サービスの利用</h3>
                 <p className="leading-relaxed">
                   IELTS Training（以下「当サービス」）は、IELTS学習をサポートするためのプラットフォームです。
                   当サービスを利用することにより、本利用規約に同意したものとみなされます。
@@ -887,7 +889,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">2. アカウント</h3>
+                <h3 className="text-lg font-bold text-text mb-3">2. アカウント</h3>
                 <p className="leading-relaxed mb-2">
                   アカウント作成には、有効なメールアドレスとパスワードが必要です。
                 </p>
@@ -899,7 +901,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">3. 利用規約の遵守</h3>
+                <h3 className="text-lg font-bold text-text mb-3">3. 利用規約の遵守</h3>
                 <p className="leading-relaxed mb-2">
                   ユーザーは、以下の行為を禁止します：
                 </p>
@@ -913,7 +915,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">4. サービスの内容</h3>
+                <h3 className="text-lg font-bold text-text mb-3">4. サービスの内容</h3>
                 <p className="leading-relaxed">
                   当サービスは、AI技術を活用したIELTS学習サポートを提供します。
                   AIによるフィードバックは参考情報であり、実際のIELTS試験の結果を保証するものではありません。
@@ -921,7 +923,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">5. サービスの変更・終了</h3>
+                <h3 className="text-lg font-bold text-text mb-3">5. サービスの変更・終了</h3>
                 <p className="leading-relaxed">
                   当サービスは、事前の通知なく、サービスの内容を変更または終了する場合があります。
                   現在は無料で提供していますが、将来的に有料プランを導入する可能性があります。
@@ -929,7 +931,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">6. 免責事項</h3>
+                <h3 className="text-lg font-bold text-text mb-3">6. 免責事項</h3>
                 <p className="leading-relaxed">
                   当サービスは、以下の事項について責任を負いません：
                 </p>
@@ -942,7 +944,7 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">7. 知的財産権</h3>
+                <h3 className="text-lg font-bold text-text mb-3">7. 知的財産権</h3>
                 <p className="leading-relaxed">
                   当サービスのコンテンツ（テキスト、デザイン、ロゴ等）の知的財産権は、
                   当サービスまたはその提供者に帰属します。
@@ -950,15 +952,15 @@ export default function LandingPage() {
               </div>
               
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">8. 規約の変更</h3>
+                <h3 className="text-lg font-bold text-text mb-3">8. 規約の変更</h3>
                 <p className="leading-relaxed">
                   当サービスは、本利用規約を変更する場合があります。
                   変更後の規約は、当サービス上に掲載した時点から効力を生じます。
                 </p>
               </div>
               
-              <div className="pt-4 border-t border-slate-200">
-                <p className="text-sm text-slate-500">
+              <div className="pt-4 border-t border-border">
+                <p className="text-sm text-text-muted">
                   最終更新日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
               </div>

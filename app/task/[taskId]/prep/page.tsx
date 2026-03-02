@@ -22,8 +22,8 @@ function Task2TimerBlock() {
   const display = `${String(Math.floor(elapsedSec / 60)).padStart(2, '0')}:${String(elapsedSec % 60).padStart(2, '0')}`;
   return (
     <div className={cn('mb-6 p-4 rounded-xl', cardBase, 'flex flex-wrap items-center gap-4')}>
-      <span className="text-2xl font-mono font-bold text-slate-900">{display}</span>
-      <span className="text-sm text-slate-500">（目安 40分）</span>
+      <span className="text-2xl font-mono font-bold text-text">{display}</span>
+      <span className="text-sm text-text-muted">（目安 40分）</span>
       <div className="flex gap-2">
         <button type="button" onClick={() => setRunning((r) => !r)} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>{running ? 'Pause' : 'Start'}</button>
         <button type="button" onClick={() => { setRunning(false); setElapsedSec(0); }} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>Reset</button>
@@ -477,14 +477,14 @@ export default function PrepTaskPage() {
           const combinedText = (answers.point + ' ' + answers.reason + ' ' + answers.example + ' ' + answers.point_again + ' ' + (englishEssay?.essay || '')).toLowerCase();
           return (
             <div className={cn('p-6 mb-6', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
-              <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">使う表現（{displayItems.length}個）</h3>
+              <h3 className="text-sm font-semibold text-text-muted mb-3 uppercase tracking-wider">使う表現（{displayItems.length}個）</h3>
               <div className="flex flex-wrap gap-2">
                 {displayItems.map((item, idx) => {
                   const used = combinedText.includes(item.expression.toLowerCase());
                   return (
-                    <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-sm shadow-sm">
+                    <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-indigo-200 text-sm shadow-sm">
                       <span className="font-semibold text-indigo-900">{item.expression}</span>
-                      {item.ja_hint && <span className="text-xs text-slate-500">（{item.ja_hint}）</span>}
+                      {item.ja_hint && <span className="text-xs text-text-muted">（{item.ja_hint}）</span>}
                       <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
                       {used && <span className="text-xs font-semibold text-emerald-600 ml-1">Used</span>}
                     </div>

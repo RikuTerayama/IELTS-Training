@@ -80,7 +80,7 @@ export function Header() {
                 onClick={() => toggleDesktopGroup('input')}
                 className={cn(
                   'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
-                  desktopOpenGroup === 'input' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600'
+                  desktopOpenGroup === 'input' ? 'text-indigo-600 bg-indigo-50' : 'text-text-muted hover:text-indigo-600'
                 )}
               >
                 Input
@@ -89,7 +89,7 @@ export function Header() {
                 <div className="absolute top-full left-0 mt-1 py-1 bg-surface rounded-lg border border-border shadow-lg min-w-[140px] z-50">
                   {NAV_INPUT.map((item) =>
                     item.enabled ? (
-                      <Link key={item.label} href={item.href} className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600">
+                      <Link key={item.label} href={item.href} className="block px-3 py-2 text-sm text-text hover:bg-surface-2 hover:text-indigo-600">
                         {item.label}
                       </Link>
                     ) : (
@@ -107,7 +107,7 @@ export function Header() {
                 onClick={() => toggleDesktopGroup('output')}
                 className={cn(
                   'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
-                  desktopOpenGroup === 'output' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600'
+                  desktopOpenGroup === 'output' ? 'text-indigo-600 bg-indigo-50' : 'text-text-muted hover:text-indigo-600'
                 )}
               >
                 Output
@@ -116,7 +116,7 @@ export function Header() {
                 <div className="absolute top-full left-0 mt-1 py-1 bg-surface rounded-lg border border-border shadow-lg min-w-[140px] z-50">
                   {NAV_OUTPUT.map((item) =>
                     item.enabled ? (
-                      <Link key={item.label} href={item.href} className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600">
+                      <Link key={item.label} href={item.href} className="block px-3 py-2 text-sm text-text hover:bg-surface-2 hover:text-indigo-600">
                         {item.label}
                       </Link>
                     ) : (
@@ -134,7 +134,7 @@ export function Header() {
                 onClick={() => toggleDesktopGroup('blog')}
                 className={cn(
                   'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
-                  desktopOpenGroup === 'blog' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600'
+                  desktopOpenGroup === 'blog' ? 'text-indigo-600 bg-indigo-50' : 'text-text-muted hover:text-indigo-600'
                 )}
               >
                 Blog
@@ -148,7 +148,7 @@ export function Header() {
                         href={item.href}
                         target={item.href.startsWith('http') ? '_blank' : undefined}
                         rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                        className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                        className="block px-3 py-2 text-sm text-text hover:bg-surface-2 hover:text-indigo-600"
                       >
                         {item.label}
                       </Link>
@@ -194,7 +194,7 @@ export function Header() {
             <ThemeToggle />
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 text-slate-500 hover:text-slate-900 focus:outline-none transition-colors duration-200"
+              className="p-2 text-text-muted hover:text-text focus:outline-none transition-colors duration-200"
               aria-label="メニューを開く"
             >
               <svg
@@ -218,21 +218,21 @@ export function Header() {
       </div>
       {/* モバイルメニュー（Input / Output / Blog アコーディオン） */}
       {menuOpen && (
-        <nav className="md:hidden mt-4 pb-4 border-t border-slate-200 pt-4 px-6">
+        <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4 px-6">
           <div className="flex flex-col gap-1">
-            <Link href="/home" onClick={() => setMenuOpen(false)} className="text-sm font-medium text-slate-500 hover:text-indigo-600 py-2 transition-colors duration-200">
+            <Link href="/home" onClick={() => setMenuOpen(false)} className="text-sm font-medium text-text-muted hover:text-indigo-600 py-2 transition-colors duration-200">
               Home
             </Link>
-            <div className="border-b border-slate-100 pb-2">
-              <button type="button" onClick={() => toggleMobileGroup('input')} className="w-full text-left text-sm font-medium text-slate-700 py-2 flex items-center justify-between">
+            <div className="border-b border-border pb-2">
+              <button type="button" onClick={() => toggleMobileGroup('input')} className="w-full text-left text-sm font-medium text-text py-2 flex items-center justify-between">
                 Input
-                <span className="text-slate-400">{openGroup === 'input' ? '−' : '+'}</span>
+                <span className="text-text-muted">{openGroup === 'input' ? '−' : '+'}</span>
               </button>
               {openGroup === 'input' && (
                 <div className="pl-3 space-y-1">
                   {NAV_INPUT.map((item) =>
                     item.enabled ? (
-                      <Link key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className="block py-1.5 text-sm text-slate-600 hover:text-indigo-600">
+                      <Link key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className="block py-1.5 text-sm text-text-muted hover:text-indigo-600">
                         {item.label}
                       </Link>
                     ) : (
@@ -242,16 +242,16 @@ export function Header() {
                 </div>
               )}
             </div>
-            <div className="border-b border-slate-100 pb-2">
-              <button type="button" onClick={() => toggleMobileGroup('output')} className="w-full text-left text-sm font-medium text-slate-700 py-2 flex items-center justify-between">
+            <div className="border-b border-border pb-2">
+              <button type="button" onClick={() => toggleMobileGroup('output')} className="w-full text-left text-sm font-medium text-text py-2 flex items-center justify-between">
                 Output
-                <span className="text-slate-400">{openGroup === 'output' ? '−' : '+'}</span>
+                <span className="text-text-muted">{openGroup === 'output' ? '−' : '+'}</span>
               </button>
               {openGroup === 'output' && (
                 <div className="pl-3 space-y-1">
                   {NAV_OUTPUT.map((item) =>
                     item.enabled ? (
-                      <Link key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className="block py-1.5 text-sm text-slate-600 hover:text-indigo-600">
+                      <Link key={item.label} href={item.href} onClick={() => setMenuOpen(false)} className="block py-1.5 text-sm text-text-muted hover:text-indigo-600">
                         {item.label}
                       </Link>
                     ) : (
@@ -261,10 +261,10 @@ export function Header() {
                 </div>
               )}
             </div>
-            <div className="border-b border-slate-100 pb-2">
-              <button type="button" onClick={() => toggleMobileGroup('blog')} className="w-full text-left text-sm font-medium text-slate-700 py-2 flex items-center justify-between">
+            <div className="border-b border-border pb-2">
+              <button type="button" onClick={() => toggleMobileGroup('blog')} className="w-full text-left text-sm font-medium text-text py-2 flex items-center justify-between">
                 Blog
-                <span className="text-slate-400">{openGroup === 'blog' ? '−' : '+'}</span>
+                <span className="text-text-muted">{openGroup === 'blog' ? '−' : '+'}</span>
               </button>
               {openGroup === 'blog' && (
                 <div className="pl-3 space-y-1">
@@ -276,7 +276,7 @@ export function Header() {
                         target={item.href.startsWith('http') ? '_blank' : undefined}
                         rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                         onClick={() => setMenuOpen(false)}
-                        className="block py-1.5 text-sm text-slate-600 hover:text-indigo-600"
+                        className="block py-1.5 text-sm text-text-muted hover:text-indigo-600"
                       >
                         {item.label}
                       </Link>
@@ -289,7 +289,7 @@ export function Header() {
             </div>
             {user ? (
               <>
-                <div className="pt-2 border-t border-slate-200 mt-2">
+                <div className="pt-2 border-t border-border mt-2">
                   <div className="text-sm text-text-muted truncate max-w-[240px] py-2">{user.email}</div>
                   <button
                     onClick={handleLogout}

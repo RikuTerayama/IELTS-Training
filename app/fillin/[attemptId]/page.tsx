@@ -225,7 +225,7 @@ export default function FillInPage() {
               </button>
               <button
                 onClick={() => router.push('/task/new?level=beginner')}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
+                className="rounded-md border border-border bg-surface px-4 py-2 text-text hover:bg-surface-2"
               >
                 新しいタスクを開始
               </button>
@@ -241,17 +241,17 @@ export default function FillInPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           {/* ヘッダー */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
             <h2 className="mb-2 text-lg font-semibold">穴埋め問題</h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-text-muted">
               あなたの回答を基に、弱点を補強するための問題です（最大3問）
             </p>
           </div>
 
           {/* 問題表示 */}
           {questions.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-center text-gray-600">
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+              <p className="text-center text-text-muted">
                 穴埋め問題は現在準備中です。
                 <br />
                 スキップしてフィードバックに進むことができます。
@@ -262,26 +262,26 @@ export default function FillInPage() {
               {questions.map((question, index) => (
                 <div
                   key={question.id}
-                  className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                  className="rounded-lg border border-border bg-surface p-6 shadow-sm"
                 >
                   <div className="mb-3 flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-700">
+                    <span className="text-sm font-semibold text-text">
                       問題 {index + 1}:
                     </span>
                     <span className="rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800">
                       {question.question_type}
                     </span>
                     {question.question_type === 'CC' && (
-                      <span className="text-xs text-gray-600">（接続詞/指示語）</span>
+                      <span className="text-xs text-text-muted">（接続詞/指示語）</span>
                     )}
                     {question.question_type === 'LR' && (
-                      <span className="text-xs text-gray-600">（言い換え）</span>
+                      <span className="text-xs text-text-muted">（言い換え）</span>
                     )}
                     {question.question_type === 'GRA' && (
-                      <span className="text-xs text-gray-600">（文結合）</span>
+                      <span className="text-xs text-text-muted">（文結合）</span>
                     )}
                   </div>
-                  <div className="mb-4 whitespace-pre-line text-gray-700">
+                  <div className="mb-4 whitespace-pre-line text-text">
                     {question.question_text}
                   </div>
                   <div className="space-y-2">
@@ -291,7 +291,7 @@ export default function FillInPage() {
                         className={`flex cursor-pointer items-center gap-2 rounded border p-3 transition-colors ${
                           answers[question.id] === option.id
                             ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:bg-gray-50'
+                            : 'border-border hover:bg-surface-2'
                         }`}
                       >
                         <input
@@ -302,8 +302,8 @@ export default function FillInPage() {
                           onChange={() => handleAnswerChange(question.id, option.id)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="font-medium text-gray-700">{option.id})</span>
-                        <span className="text-gray-700">{option.text}</span>
+                        <span className="font-medium text-text">{option.id})</span>
+                        <span className="text-text">{option.text}</span>
                       </label>
                     ))}
                   </div>
@@ -318,14 +318,14 @@ export default function FillInPage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting || Object.keys(answers).length < questions.length}
-                className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+                className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? '送信中...' : '回答を確認'}
               </button>
             )}
             <button
               onClick={handleSkip}
-              className="rounded-md border border-gray-300 bg-white px-6 py-2 text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-border bg-surface px-6 py-2 text-text hover:bg-surface-2"
             >
               {questions.length > 0 ? 'スキップ' : 'フィードバックへ進む'}
             </button>

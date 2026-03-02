@@ -114,7 +114,7 @@ export default function WritingTask1Page() {
           </button>
           <button
             onClick={() => router.push('/training/writing/task1/progress')}
-            className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-800 px-8 py-3 font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
+            className="rounded-md border border-border bg-surface px-8 py-3 font-semibold text-text transition-colors hover:bg-surface-2"
           >
             進捗を見る
           </button>

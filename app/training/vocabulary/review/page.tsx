@@ -87,8 +87,8 @@ export default function VocabularyReviewPage() {
       <Layout>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <h1 className="text-2xl font-bold mb-6">復習 - 間違えた問題</h1>
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-            <p className="text-gray-600 mb-4">間違えた問題がまだありません。</p>
+          <div className="rounded-lg border border-border bg-surface p-8 text-center">
+            <p className="text-text-muted mb-4">間違えた問題がまだありません。</p>
             <button
               onClick={() => router.push('/training/vocab?skill=speaking')}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -118,7 +118,7 @@ export default function VocabularyReviewPage() {
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-2xl font-bold mb-6">復習 - 間違えた問題</h1>
-        <div className="mb-4 text-sm text-gray-600">
+        <div className="mb-4 text-sm text-text-muted">
           問題 {currentIndex + 1} / {incorrectQuestions.length}
         </div>
 
@@ -126,13 +126,13 @@ export default function VocabularyReviewPage() {
           <div className="space-y-6">
             {/* 単語情報 */}
             {currentQuestion.vocab && (
-              <div className="rounded-lg border border-gray-200 bg-white p-6">
+              <div className="rounded-lg border border-border bg-surface p-6">
                 <div className="mb-2">
                   <span className="text-2xl font-bold">{currentQuestion.vocab.word}</span>
-                  <span className="ml-2 text-gray-600">({currentQuestion.vocab.meaning})</span>
+                  <span className="ml-2 text-text-muted">({currentQuestion.vocab.meaning})</span>
                 </div>
                 {currentQuestion.vocab.example_sentence && (
-                  <p className="text-sm text-gray-600 italic mt-2">
+                  <p className="text-sm text-text-muted italic mt-2">
                     {currentQuestion.vocab.example_sentence}
                   </p>
                 )}
@@ -140,7 +140,7 @@ export default function VocabularyReviewPage() {
             )}
 
             {/* 問題 */}
-            <div className="rounded-lg border border-gray-200 bg-white p-6">
+            <div className="rounded-lg border border-border bg-surface p-6">
               <h2 className="text-lg font-semibold mb-4">{vocabQuestion.question}</h2>
               <div className="space-y-3">
                 {vocabQuestion.options.map((option) => {
@@ -161,7 +161,7 @@ export default function VocabularyReviewPage() {
                           ? 'border-green-500 bg-green-50'
                           : showIncorrect
                           ? 'border-red-500 bg-red-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          : 'border-border hover:border-text-muted'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -189,7 +189,7 @@ export default function VocabularyReviewPage() {
               <button
                 onClick={handlePrevious}
                 disabled={currentIndex === 0}
-                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                className="px-4 py-2 border border-border rounded-md hover:bg-surface-2 disabled:bg-surface-2 disabled:text-text-muted"
               >
                 前へ
               </button>
@@ -198,7 +198,7 @@ export default function VocabularyReviewPage() {
                 <button
                   onClick={handleCheckAnswer}
                   disabled={!answers[vocabQuestion.id]}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   答えを確認
                 </button>
@@ -206,7 +206,7 @@ export default function VocabularyReviewPage() {
                 <button
                   onClick={handleNext}
                   disabled={currentIndex === incorrectQuestions.length - 1}
-                  className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400"
+                  className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {currentIndex === incorrectQuestions.length - 1 ? '完了' : '次へ'}
                 </button>

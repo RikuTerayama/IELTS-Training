@@ -355,11 +355,11 @@ function IdiomPageContent() {
           <div className="space-y-4">
             <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>スキルを選択</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-              <span className={cn('p-6 rounded-lg border-2 border-border bg-slate-50 opacity-70 cursor-not-allowed text-left')}>
+              <span className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 opacity-70 cursor-not-allowed text-left')}>
                 <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Reading</div>
                 <div className={cn('text-sm', cardDesc)}>Coming soon</div>
               </span>
-              <span className={cn('p-6 rounded-lg border-2 border-border bg-slate-50 opacity-70 cursor-not-allowed text-left')}>
+              <span className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 opacity-70 cursor-not-allowed text-left')}>
                 <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Listening</div>
                 <div className={cn('text-sm', cardDesc)}>Coming soon</div>
               </span>

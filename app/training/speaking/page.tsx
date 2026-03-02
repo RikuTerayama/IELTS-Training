@@ -74,7 +74,7 @@ function SpeakingPageContent() {
                   'px-4 py-2 rounded-lg text-sm font-medium border-2 transition-all',
                   category === c.slug
                     ? 'bg-indigo-600 text-white border-indigo-600'
-                    : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'
+                    : 'bg-surface border-border text-text hover:border-indigo-300'
                 )}
               >
                 {c.label}
@@ -95,11 +95,11 @@ function SpeakingPageContent() {
                   'p-4 rounded-xl border-2 text-left transition-all',
                   task === t.id
                     ? 'border-indigo-600 bg-indigo-50'
-                    : 'border-slate-200 hover:border-indigo-200'
+                    : 'border-border hover:border-indigo-200'
                 )}
               >
-                <div className="font-bold text-slate-900">{t.label}</div>
-                <div className="text-sm text-slate-600 mt-1">{t.desc}</div>
+                <div className="font-bold text-text">{t.label}</div>
+                <div className="text-sm text-text-muted mt-1">{t.desc}</div>
               </button>
             ))}
           </div>

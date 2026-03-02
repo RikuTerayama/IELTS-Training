@@ -236,13 +236,13 @@ export default function LoginPage() {
             <h1 className="text-heading-1 font-bold tracking-tight text-text mb-2">
               IELTS Training
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-text-muted">
               {isSignUp ? '新規アカウントを作成' : 'アカウントにログイン'}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-900 mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-text mb-2">
                 メールアドレス
               </label>
               <input
@@ -257,7 +257,7 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-slate-900 mb-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-text mb-2">
                 パスワード
               </label>
               <input

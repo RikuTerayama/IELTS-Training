@@ -32,8 +32,8 @@ function Task2Timer({ onElapsedChange }: { onElapsedChange?: (sec: number) => vo
   const display = `${String(Math.floor(elapsedSec / 60)).padStart(2, '0')}:${String(elapsedSec % 60).padStart(2, '0')}`;
   return (
     <div className={cn('p-4 rounded-xl', cardBase, 'flex flex-wrap items-center gap-4')}>
-      <span className="text-2xl font-mono font-bold text-slate-900">{display}</span>
-      <span className="text-sm text-slate-500">（目安 40分）</span>
+      <span className="text-2xl font-mono font-bold text-text">{display}</span>
+      <span className="text-sm text-text-muted">（目安 40分）</span>
       <div className="flex gap-2">
         <button onClick={() => setRunning((r) => !r)} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>
           {running ? 'Pause' : 'Start'}
@@ -322,7 +322,7 @@ function TaskPageContent() {
     return (
       <Layout>
         <div className="container mx-auto px-6 py-12">
-          <div className="text-center text-slate-500">読み込み中...</div>
+          <div className="text-center text-text-muted">読み込み中...</div>
         </div>
       </Layout>
     );
@@ -332,7 +332,7 @@ function TaskPageContent() {
     return (
       <Layout>
         <div className="container mx-auto px-6 py-12">
-          <div className="text-center text-slate-500">タスクが見つかりません</div>
+          <div className="text-center text-text-muted">タスクが見つかりません</div>
         </div>
       </Layout>
     );
@@ -346,12 +346,12 @@ function TaskPageContent() {
           {/* Required Items表示 - Paper Interface Style */}
           {requiredItems.length > 0 && (
             <div className={cn('mb-6 p-6 rounded-2xl', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
-              <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">必須使用表現（{requiredItems.length}個）</h3>
+              <h3 className="text-sm font-semibold text-text-muted mb-3 uppercase tracking-wider">必須使用表現（{requiredItems.length}個）</h3>
               <div className="flex flex-wrap gap-2">
                 {requiredItems.map((item, idx) => (
-                  <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-sm shadow-sm">
+                  <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-indigo-200 text-sm shadow-sm">
                     <span className="font-semibold text-indigo-900">{item.expression}</span>
-                    {item.ja_hint && <span className="text-xs text-slate-500">（{item.ja_hint}）</span>}
+                    {item.ja_hint && <span className="text-xs text-text-muted">（{item.ja_hint}）</span>}
                     <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
                   </div>
                 ))}
@@ -362,16 +362,16 @@ function TaskPageContent() {
           <div className={cn('mb-6 p-8 rounded-2xl', cardBase)}>
             <div className="mb-6 flex items-start justify-between">
               <div className="flex-1">
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-4">お題</h2>
-                <p className="text-base text-slate-700 leading-relaxed mb-4">{task.question}</p>
+                <h2 className="text-2xl font-bold tracking-tight text-text mb-4">お題</h2>
+                <p className="text-base text-text-muted leading-relaxed mb-4">{task.question}</p>
                 <div className="flex flex-wrap items-center gap-4 mt-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-slate-500">目標:</span>
+                    <span className="text-sm font-semibold text-text-muted">目標:</span>
                     <span className="px-3 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-semibold text-sm">Band 6.0-6.5</span>
                   </div>
                   {task.required_vocab.length > 0 && (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-500">必須語彙:</span>
+                      <span className="text-sm font-semibold text-text-muted">必須語彙:</span>
                       <div className="flex flex-wrap gap-1.5">
                         {task.required_vocab.map((v) => (
                           <span key={v.word} className="px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">
@@ -426,14 +426,14 @@ function TaskPageContent() {
             const combinedText = ((draftContent.final || '') + ' ' + (draftContent.japanese || '')).toLowerCase();
             return (
               <div className={cn('p-6 rounded-2xl', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
-                <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">使う表現（{displayItems.length}個）</h3>
+                <h3 className="text-sm font-semibold text-text-muted mb-3 uppercase tracking-wider">使う表現（{displayItems.length}個）</h3>
                 <div className="flex flex-wrap gap-2">
                   {displayItems.map((item, idx) => {
                     const used = combinedText.includes(item.expression.toLowerCase());
                     return (
-                      <div key={item.item_id ?? idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-sm shadow-sm">
+                      <div key={item.item_id ?? idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-indigo-200 text-sm shadow-sm">
                         <span className="font-semibold text-indigo-900">{item.expression}</span>
-                        {item.ja_hint && <span className="text-xs text-slate-500">（{item.ja_hint}）</span>}
+                        {item.ja_hint && <span className="text-xs text-text-muted">（{item.ja_hint}）</span>}
                         <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
                         {used && <span className="text-xs font-semibold text-emerald-600 ml-1">Used</span>}
                       </div>
@@ -456,7 +456,7 @@ function TaskPageContent() {
                   return (
                     <div key={idx} className="text-sm text-amber-900">
                       <span className="font-semibold">{item.expression}</span>
-                      {requiredItem?.ja_hint && <span className="ml-2 text-slate-600">（{requiredItem.ja_hint}）</span>}
+                      {requiredItem?.ja_hint && <span className="ml-2 text-text-muted">（{requiredItem.ja_hint}）</span>}
                       <span className="ml-2 text-xs text-amber-700">[{item.module}]</span>
                     </div>
                   );
@@ -466,8 +466,8 @@ function TaskPageContent() {
           )}
 
           {/* お題 - Paper Interface Style */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm mb-6">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-4">お題</h2>
+          <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm mb-6">
+            <h2 className="text-2xl font-bold tracking-tight text-text mb-4">お題</h2>
             
             {/* Task1の場合は画像を表示 */}
             {task.question_type === 'Task 1' && (
@@ -482,15 +482,15 @@ function TaskPageContent() {
               </div>
             )}
             
-            <p className="text-base text-slate-700 leading-relaxed mb-6">{task.question}</p>
-            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-100">
+            <p className="text-base text-text-muted leading-relaxed mb-6">{task.question}</p>
+            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-border">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-slate-500">目標:</span>
+                <span className="text-sm font-semibold text-text-muted">目標:</span>
                 <span className="px-3 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-semibold text-sm">Band 6.0-6.5</span>
               </div>
               {task.required_vocab.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-500">必須語彙:</span>
+                  <span className="text-sm font-semibold text-text-muted">必須語彙:</span>
                   <div className="flex flex-wrap gap-1.5">
                     {task.required_vocab.map((v) => (
                       <span key={v.word} className="px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">
@@ -505,24 +505,24 @@ function TaskPageContent() {
 
           {/* PREPガイド（初級/中級のみ） - Paper Interface Style */}
           {task.prep_guide && (level === 'beginner' || level === 'intermediate') && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm mb-6">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-6">PREPガイド</h2>
+            <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm mb-6">
+              <h2 className="text-xl font-bold tracking-tight text-text mb-6">PREPガイド</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
                   <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">P (Point)</div>
-                  <p className="text-sm text-slate-700">{task.prep_guide.point}</p>
+                  <p className="text-sm text-text-muted">{task.prep_guide.point}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
                   <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">R (Reason)</div>
-                  <p className="text-sm text-slate-700">{task.prep_guide.reason}</p>
+                  <p className="text-sm text-text-muted">{task.prep_guide.reason}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
                   <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">E (Example)</div>
-                  <p className="text-sm text-slate-700">{task.prep_guide.example}</p>
+                  <p className="text-sm text-text-muted">{task.prep_guide.example}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-purple-50 border border-purple-100">
                   <div className="text-xs font-semibold text-purple-600 uppercase tracking-wider mb-1">P (Point again)</div>
-                  <p className="text-sm text-slate-700">{task.prep_guide.point_again}</p>
+                  <p className="text-sm text-text-muted">{task.prep_guide.point_again}</p>
                 </div>
               </div>
             </div>
@@ -533,8 +533,8 @@ function TaskPageContent() {
             <div className="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-6 mb-6">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-bold text-slate-900 mb-1">PREPヒアリングモード</h3>
-                  <p className="text-sm text-slate-600">
+                  <h3 className="font-bold text-text mb-1">PREPヒアリングモード</h3>
+                  <p className="text-sm text-text-muted">
                     キャラクターが質問しながら、段階的にエッセイを作成できます
                   </p>
                 </div>
@@ -554,7 +554,7 @@ function TaskPageContent() {
             {level === 'beginner' ? (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-sm font-semibold text-text mb-2">
                     日本語で回答
                   </label>
                   <textarea
@@ -568,7 +568,7 @@ function TaskPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-sm font-semibold text-text mb-2">
                     英語で回答（自由記述）
                   </label>
                   <textarea

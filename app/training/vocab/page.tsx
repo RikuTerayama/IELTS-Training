@@ -357,7 +357,7 @@ function VocabPageContent() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
               <span
                 className={cn(
-                  'p-6 rounded-lg border-2 border-border bg-slate-50',
+                  'p-6 rounded-lg border-2 border-border bg-surface-2',
                   'opacity-70 cursor-not-allowed text-left'
                 )}
               >
@@ -366,7 +366,7 @@ function VocabPageContent() {
               </span>
               <span
                 className={cn(
-                  'p-6 rounded-lg border-2 border-border bg-slate-50',
+                  'p-6 rounded-lg border-2 border-border bg-surface-2',
                   'opacity-70 cursor-not-allowed text-left'
                 )}
               >

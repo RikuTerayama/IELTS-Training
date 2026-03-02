@@ -116,7 +116,7 @@ function Task2DrillContent() {
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-slate-900">Speaking Task 2（Cue card）</h1>
+          <h1 className="text-xl font-bold text-text">Speaking Task 2（Cue card）</h1>
           <Link href="/training/speaking" className={cn('text-sm', buttonSecondary)}>
             お題を変える
           </Link>
@@ -141,7 +141,7 @@ function Task2DrillContent() {
             </button>
             {running && (
               <>
-                <span className="font-mono text-2xl font-bold text-slate-900">{displayTime}</span>
+                <span className="font-mono text-2xl font-bold text-text">{displayTime}</span>
                 <button onClick={resetTimer} className={cn('text-sm', buttonSecondary)}>Reset</button>
               </>
             )}
@@ -151,15 +151,15 @@ function Task2DrillContent() {
         {/* 推奨表現 */}
         <div className={cn('mb-6', cardBase, 'p-4')}>
           <button type="button" onClick={() => setShowExpressions((s) => !s)} className="flex items-center justify-between w-full text-left">
-            <h2 className="font-semibold text-slate-900">使う表現（vocab/idiom）</h2>
-            <span className="text-sm text-slate-500">{showExpressions ? '閉じる' : '開く'}</span>
+            <h2 className="font-semibold text-text">使う表現（vocab/idiom）</h2>
+            <span className="text-sm text-text-muted">{showExpressions ? '閉じる' : '開く'}</span>
           </button>
           {showExpressions && (
             <ul className="mt-3 space-y-1.5 text-sm">
               {(recommended.length > 0 ? recommended : RECOMMENDED_EXPRESSIONS_FALLBACK).map((item, i) => (
-                <li key={i} className="text-slate-700">
+                <li key={i} className="text-text-muted">
                   <span className="font-medium">{item.expression}</span>
-                  {item.ja_hint && <span className="text-slate-500 ml-2">（{item.ja_hint}）</span>}
+                  {item.ja_hint && <span className="text-text-muted ml-2">（{item.ja_hint}）</span>}
                 </li>
               ))}
             </ul>
@@ -167,17 +167,17 @@ function Task2DrillContent() {
         </div>
 
         {/* Cue card */}
-        <div className="rounded-xl border-2 border-slate-200 bg-slate-50 p-6 mb-4">
-          <h2 className="font-semibold text-slate-900 mb-3">Topic</h2>
-          <p className="text-lg text-slate-900 mb-4">{cueCard.title}</p>
-          <p className="text-sm text-slate-600 mb-2">You should say:</p>
-          <ul className="list-disc list-inside space-y-1 text-slate-700">
+        <div className="rounded-xl border-2 border-border bg-surface-2 p-6 mb-4">
+          <h2 className="font-semibold text-text mb-3">Topic</h2>
+          <p className="text-lg text-text mb-4">{cueCard.title}</p>
+          <p className="text-sm text-text-muted mb-2">You should say:</p>
+          <ul className="list-disc list-inside space-y-1 text-text-muted">
             {cueCard.bullets.map((b, i) => (
               <li key={i}>{b}</li>
             ))}
           </ul>
         </div>
-        <p className="text-sm text-slate-500">声に出して話してみましょう（録音・入力はありません）</p>
+        <p className="text-sm text-text-muted">声に出して話してみましょう（録音・入力はありません）</p>
       </div>
     </Layout>
   );
@@ -185,7 +185,7 @@ function Task2DrillContent() {
 
 export default function SpeakingTask2DrillPage() {
   return (
-    <Suspense fallback={<Layout><div className="container mx-auto px-4 py-8 text-center text-slate-500">読み込み中...</div></Layout>}>
+    <Suspense fallback={<Layout><div className="container mx-auto px-4 py-8 text-center text-text-muted">読み込み中...</div></Layout>}>
       <Task2DrillContent />
     </Suspense>
   );

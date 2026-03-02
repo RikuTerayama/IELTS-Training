@@ -49,16 +49,16 @@ export default function ProgressPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           {/* Attempts一覧 */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">Attempts一覧（最新10件）</h2>
             {history.length === 0 ? (
-              <p className="text-gray-500">まだタスクがありません</p>
+              <p className="text-text-muted">まだタスクがありません</p>
             ) : (
               <div className="space-y-2">
                 {history.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between border-b border-gray-100 pb-2"
+                    className="flex items-center justify-between border-b border-border pb-2"
                   >
                     <div>
                       <p className="text-sm">
@@ -66,7 +66,7 @@ export default function ProgressPage() {
                         Band {item.band_estimate}
                       </p>
                       {item.weakness_tags.length > 0 && (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-text-muted">
                           弱点: {item.weakness_tags.join(', ')}
                         </p>
                       )}
@@ -85,7 +85,7 @@ export default function ProgressPage() {
 
           {/* 平均bandと弱点タグ推移 */}
           {summary && (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
               <h2 className="mb-4 text-lg font-semibold">進捗サマリー</h2>
               <div className="space-y-2">
                 {summary.average_band && (
