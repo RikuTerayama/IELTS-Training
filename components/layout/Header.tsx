@@ -80,7 +80,7 @@ export function Header() {
                 onClick={() => toggleDesktopGroup('input')}
                 className={cn(
                   'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
-                  desktopOpenGroup === 'input' ? 'text-indigo-600 bg-indigo-50' : 'text-text-muted hover:text-indigo-600'
+                  desktopOpenGroup === 'input' ? 'text-primary bg-selectable-selected-bg' : 'text-text-muted hover:text-indigo-600'
                 )}
               >
                 Input
@@ -107,7 +107,7 @@ export function Header() {
                 onClick={() => toggleDesktopGroup('output')}
                 className={cn(
                   'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
-                  desktopOpenGroup === 'output' ? 'text-indigo-600 bg-indigo-50' : 'text-text-muted hover:text-indigo-600'
+                  desktopOpenGroup === 'output' ? 'text-primary bg-selectable-selected-bg' : 'text-text-muted hover:text-indigo-600'
                 )}
               >
                 Output
@@ -134,7 +134,7 @@ export function Header() {
                 onClick={() => toggleDesktopGroup('blog')}
                 className={cn(
                   'text-sm font-medium px-2 py-1 rounded transition-colors duration-200',
-                  desktopOpenGroup === 'blog' ? 'text-indigo-600 bg-indigo-50' : 'text-text-muted hover:text-indigo-600'
+                  desktopOpenGroup === 'blog' ? 'text-primary bg-selectable-selected-bg' : 'text-text-muted hover:text-indigo-600'
                 )}
               >
                 Blog

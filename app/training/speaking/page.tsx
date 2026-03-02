@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { SPEAKING_CATEGORIES, DEFAULT_SPEAKING_CATEGORY, normalizeSpeakingCategory } from '@/lib/data/speaking_categories';
-import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, selectableSelected, selectableUnselected } from '@/lib/ui/theme';
 
 /** AC-O2/AC-S2: カテゴリ×Task選択画面。textarea・録音・回答入力は置かない。開始で task{n}/drill?category= へ遷移 */
 const TASKS = [
@@ -91,12 +91,7 @@ function SpeakingPageContent() {
               <button
                 key={t.id}
                 onClick={() => setTask(t.id)}
-                className={cn(
-                  'p-4 rounded-xl border-2 text-left transition-all',
-                  task === t.id
-                    ? 'border-indigo-600 bg-indigo-50'
-                    : 'border-border hover:border-indigo-200'
-                )}
+                className={cn('p-4 rounded-xl text-left transition-all', task === t.id ? selectableSelected : selectableUnselected)}
               >
                 <div className="font-bold text-text">{t.label}</div>
                 <div className="text-sm text-text-muted mt-1">{t.desc}</div>
