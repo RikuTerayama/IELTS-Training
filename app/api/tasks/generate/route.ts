@@ -1,6 +1,6 @@
-/**
+﻿/**
  * POST /api/tasks/generate
- * タスク生成（LLM呼び出し）
+ * 繧ｿ繧ｹ繧ｯ逕滓・・・LM蜻ｼ縺ｳ蜃ｺ縺暦ｼ・
  */
 
 import { createClient } from '@/lib/supabase/server';
@@ -44,13 +44,20 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    // Task1の場合はアセット先行方式、Task2は従来通り
+    // Task1縺ｮ蝣ｴ蜷医・繧｢繧ｻ繝・ヨ蜈郁｡梧婿蠑上ゝask2縺ｯ蠕捺擂騾壹ｊ
     let taskData;
     let assetId: string | undefined;
     let imagePath: string | undefined;
     
     if (taskType === 'Task 1') {
-      // アセット先行方式: アセットを選択してから質問文を生成
+      if (level === 'beginner') {
+        return Response.json(
+          errorResponse('BAD_REQUEST', 'Task 1 beginner has been retired'),
+          { status: 400 }
+        );
+      }
+
+      // 繧｢繧ｻ繝・ヨ蜈郁｡梧婿蠑・ 繧｢繧ｻ繝・ヨ繧帝∈謚槭＠縺ｦ縺九ｉ雉ｪ蝠乗枚繧堤函謌・
       console.log('[Generate API] Task1: Selecting asset...');
       const asset = selectAssetByWeight(level, genre || undefined);
       
@@ -66,10 +73,10 @@ export async function POST(request: Request): Promise<Response> {
       assetId = asset.id;
       imagePath = asset.image_path;
       
-      // アセットから質問文を決定生成
+      // 繧｢繧ｻ繝・ヨ縺九ｉ雉ｪ蝠乗枚繧呈ｱｺ螳夂函謌・
       const question = buildTask1QuestionFromAsset(asset);
       
-      // バリデーション: 必須フレーズチェック
+      // 繝舌Μ繝・・繧ｷ繝ｧ繝ｳ: 蠢・医ヵ繝ｬ繝ｼ繧ｺ繝√ぉ繝・け
       const requiredPhrases = [
         'shows',
         'Summarise',
@@ -84,12 +91,12 @@ export async function POST(request: Request): Promise<Response> {
         );
       }
       
-      // LLMで語彙とprep_guideのみ生成
+      // LLM縺ｧ隱槫ｽ吶→prep_guide縺ｮ縺ｿ逕滓・
       console.log('[Generate API] Task1: Generating vocab and prep_guide...');
       try {
         const { required_vocab, prep_guide } = await generateTask1VocabOnly(level, asset);
         
-        // バリデーション: required_vocabが3-5語であることを確認
+        // 繝舌Μ繝・・繧ｷ繝ｧ繝ｳ: required_vocab縺・-5隱槭〒縺ゅｋ縺薙→繧堤｢ｺ隱・
         if (!Array.isArray(required_vocab) || required_vocab.length < 3 || required_vocab.length > 5) {
           console.warn('[Generate API] Invalid vocab count:', required_vocab.length, 'expected 3-5');
         }
@@ -120,7 +127,7 @@ export async function POST(request: Request): Promise<Response> {
         );
       }
     } else {
-      // Task2は従来通りLLMで質問文も生成
+      // Task2縺ｯ蠕捺擂騾壹ｊLLM縺ｧ雉ｪ蝠乗枚繧ら函謌・
       console.log('[Generate API] Task2: Calling LLM to generate task...');
       try {
         taskData = await generateTask(level, taskType, genre || null);
@@ -142,7 +149,7 @@ export async function POST(request: Request): Promise<Response> {
       }
     }
 
-    // DBに保存
+    // DB縺ｫ菫晏ｭ・
     console.log('[Generate API] Saving task to database...');
     const { data: task, error: insertError } = await supabase
       .from('tasks')
@@ -152,8 +159,8 @@ export async function POST(request: Request): Promise<Response> {
         question_type: taskData.question_type || taskType,
         required_vocab: taskData.required_vocab,
         prep_guide: taskData.prep_guide || null,
-        asset_id: assetId || null, // Task1の場合のみ設定
-        image_path: imagePath || null, // Task1の場合のみ設定
+        asset_id: assetId || null, // Task1縺ｮ蝣ｴ蜷医・縺ｿ險ｭ螳・
+        image_path: imagePath || null, // Task1縺ｮ蝣ｴ蜷医・縺ｿ險ｭ螳・
         is_cached: false,
       })
       .select()
@@ -183,4 +190,6 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 }
+
+
 

@@ -10,6 +10,7 @@ import { buildTask1StepReviewPrompt } from '@/lib/llm/prompts/task1_step_review'
 import { callLLM } from '@/lib/llm/client';
 import { parseLLMResponseWithRetry } from '@/lib/llm/parse';
 import type { Task1StepState } from '@/lib/domain/types';
+import { isRetiredTask1Beginner } from '@/lib/task1/retired';
 
 export async function POST(request: Request): Promise<Response> {
   console.log('[Task1 Review Steps API] Starting...');
@@ -50,7 +51,10 @@ export async function POST(request: Request): Promise<Response> {
         tasks:task_id (
           id,
           question,
-          question_type
+          question_type,
+          level,
+          asset_id,
+          image_path
         )
       `)
       .eq('id', attempt_id)
@@ -72,6 +76,13 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json(
         errorResponse('BAD_REQUEST', 'Task is not Task 1'),
         { status: 400 }
+      );
+    }
+
+    if (isRetiredTask1Beginner(task)) {
+      return Response.json(
+        errorResponse('NOT_FOUND', 'Task has been retired'),
+        { status: 404 }
       );
     }
 

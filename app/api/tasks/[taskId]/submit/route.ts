@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { DraftContent } from '@/lib/domain/types';
+import { isRetiredTask1Beginner } from '@/lib/task1/retired';
 
 export async function POST(
   request: Request,
@@ -56,7 +57,7 @@ export async function POST(
     console.log('[Submit API] Checking if task exists:', params.taskId);
     const { data: taskExists, error: taskError } = await supabase
       .from('tasks')
-      .select('id')
+      .select('id, question_type, level, asset_id, image_path')
       .eq('id', params.taskId)
       .single();
 
@@ -72,6 +73,13 @@ export async function POST(
       console.error('[Submit API] Task not found:', params.taskId);
       return Response.json(
         errorResponse('NOT_FOUND', `Task with id ${params.taskId} not found`),
+        { status: 404 }
+      );
+    }
+
+    if (isRetiredTask1Beginner(taskExists)) {
+      return Response.json(
+        errorResponse('NOT_FOUND', 'Task has been retired'),
         { status: 404 }
       );
     }
@@ -132,4 +140,3 @@ export async function POST(
     );
   }
 }
-

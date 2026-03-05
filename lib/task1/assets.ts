@@ -25,17 +25,6 @@ export interface Task1Asset {
 export const TASK1_ASSETS: Task1Asset[] = [
   // batch1: line_chart
   {
-    id: 'line_chart_1',
-    level: 'beginner',
-    genre: 'line_chart',
-    image_path: '/images/task1/batch1/1.png',
-    title: 'Population changes over time',
-    time_period: '2010 to 2020',
-    unit: 'millions',
-    categories: ['Country A', 'Country B', 'Country C'],
-    description: 'The line graph shows population changes in three countries from 2010 to 2020.',
-  },
-  {
     id: 'line_chart_2',
     level: 'intermediate',
     genre: 'line_chart',
@@ -59,17 +48,6 @@ export const TASK1_ASSETS: Task1Asset[] = [
   },
   
   // batch2: bar_chart
-  {
-    id: 'bar_chart_1',
-    level: 'beginner',
-    genre: 'bar_chart',
-    image_path: '/images/task1/batch2/2-1.png',
-    title: 'Student enrollment by department',
-    time_period: '2023',
-    unit: 'number of students',
-    categories: ['Engineering', 'Business', 'Arts', 'Science'],
-    description: 'The bar chart compares student enrollment across four departments in 2023.',
-  },
   {
     id: 'bar_chart_2',
     level: 'intermediate',
@@ -95,17 +73,6 @@ export const TASK1_ASSETS: Task1Asset[] = [
   
   // batch3: pie_chart
   {
-    id: 'pie_chart_1',
-    level: 'beginner',
-    genre: 'pie_chart',
-    image_path: '/images/task1/batch3/3-1.png',
-    title: 'Market share by company',
-    time_period: '2023',
-    unit: 'percentage',
-    categories: ['Company A', 'Company B', 'Company C', 'Others'],
-    description: 'The pie chart illustrates market share distribution among companies in 2023.',
-  },
-  {
     id: 'pie_chart_2',
     level: 'intermediate',
     genre: 'pie_chart',
@@ -129,17 +96,6 @@ export const TASK1_ASSETS: Task1Asset[] = [
   },
   
   // batch4: table
-  {
-    id: 'table_1',
-    level: 'beginner',
-    genre: 'table',
-    image_path: '/images/task1/batch4/4-1.png',
-    title: 'Student performance by subject',
-    time_period: '2023',
-    unit: 'average score',
-    categories: ['Math', 'English', 'Science', 'History'],
-    description: 'The table presents average student scores across four subjects in 2023.',
-  },
   {
     id: 'table_2',
     level: 'intermediate',
