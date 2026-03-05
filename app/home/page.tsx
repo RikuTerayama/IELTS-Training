@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import type { TodayMenu } from '@/lib/api/schemas/menuToday';
 import type { ApiResponse } from '@/lib/api/response';
+import { BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
 import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
 
 /** AC-O1: Output は API 失敗時も消えないようフォールバックを常時利用 */
@@ -324,15 +325,26 @@ export default function HomePage() {
                 <p className="text-sm text-text-muted mb-4 leading-relaxed">
                   IELTS学習に役立つ記事や最新情報をお届けします
                 </p>
-                <a
-                  href="https://ieltsconsult.netlify.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn('inline-flex items-center gap-2', buttonPrimary)}
-                >
-                  Blogを読む
-                  <Icons.ArrowRight className="w-4 h-4" />
-                </a>
+                <div className="flex flex-wrap items-center gap-3">
+                  <a
+                    href={BLOG_OFFICIAL_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn('inline-flex items-center gap-2', buttonPrimary)}
+                  >
+                    Blogを読む
+                    <Icons.ArrowRight className="w-4 h-4" />
+                  </a>
+                  <a
+                    href={BLOG_NOTE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn('inline-flex items-center gap-2', buttonPrimary)}
+                  >
+                    Noteを読む
+                    <Icons.ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
