@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { CreateOrResumeAttemptRequestSchema } from '@/lib/validators/task1';
+import { isRetiredTask1Beginner } from '@/lib/task1/retired';
 
 export async function POST(request: Request): Promise<Response> {
   console.log('[Task1 Create/Resume API] Starting...');
@@ -41,7 +42,7 @@ export async function POST(request: Request): Promise<Response> {
     // タスクが存在し、Task 1であることを確認
     const { data: task, error: taskError } = await supabase
       .from('tasks')
-      .select('id, question_type')
+      .select('id, question_type, level, asset_id, image_path')
       .eq('id', task_id)
       .single();
 
@@ -58,6 +59,13 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json(
         errorResponse('BAD_REQUEST', 'Task is not Task 1'),
         { status: 400 }
+      );
+    }
+
+    if (isRetiredTask1Beginner(task)) {
+      return Response.json(
+        errorResponse('NOT_FOUND', 'Task has been retired'),
+        { status: 404 }
       );
     }
 

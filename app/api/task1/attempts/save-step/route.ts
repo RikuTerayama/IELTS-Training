@@ -1,12 +1,13 @@
-/**
+﻿/**
  * POST /api/task1/attempts/save-step
- * Task 1のStepを保存
+ * Task 1縺ｮStep繧剃ｿ晏ｭ・
  */
 
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { SaveStepRequestSchema } from '@/lib/validators/task1';
 import { countWords, countParagraphs } from '@/lib/utils/task1Helpers';
+import { isRetiredTask1Beginner } from '@/lib/task1/retired';
 
 export async function POST(request: Request): Promise<Response> {
   console.log('[Task1 Save Step API] Starting...');
@@ -27,7 +28,7 @@ export async function POST(request: Request): Promise<Response> {
 
     const requestBody = await request.json();
     
-    // バリデーション
+    // 繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
     const validationResult = SaveStepRequestSchema.safeParse(requestBody);
     if (!validationResult.success) {
       console.error('[Task1 Save Step API] Validation error:', validationResult.error);
@@ -39,7 +40,7 @@ export async function POST(request: Request): Promise<Response> {
 
     const { attempt_id, step_index, content, observations, key_numbers, checklist } = validationResult.data;
 
-    // Attemptが存在し、ユーザーのものか確認
+    // Attempt縺悟ｭ伜惠縺励√Θ繝ｼ繧ｶ繝ｼ縺ｮ繧ゅ・縺狗｢ｺ隱・
     const { data: attempt, error: attemptError } = await supabase
       .from('attempts')
       .select('*')
@@ -56,7 +57,27 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    // step_stateを更新
+
+    const { data: task, error: taskError } = await supabase
+      .from('tasks')
+      .select('question_type, level, asset_id, image_path')
+      .eq('id', attempt.task_id)
+      .single();
+
+    if (taskError || !task || task.question_type !== 'Task 1') {
+      return Response.json(
+        errorResponse('NOT_FOUND', 'Task not found'),
+        { status: 404 }
+      );
+    }
+
+    if (isRetiredTask1Beginner(task)) {
+      return Response.json(
+        errorResponse('NOT_FOUND', 'Task has been retired'),
+        { status: 404 }
+      );
+    }
+    // step_state繧呈峩譁ｰ
     const currentStepState = (attempt.step_state || {}) as Record<string, unknown>;
     const stepKey = `step${step_index}`;
     
@@ -68,7 +89,7 @@ export async function POST(request: Request): Promise<Response> {
       ...(checklist !== undefined && { checklist }),
     };
 
-    // 語数と段落数を計算（step6の場合）
+    // 隱樊焚縺ｨ谿ｵ關ｽ謨ｰ繧定ｨ育ｮ暦ｼ・tep6縺ｮ蝣ｴ蜷茨ｼ・
     let wordCount: number | undefined;
     let paragraphCount: number | undefined;
     
@@ -77,7 +98,7 @@ export async function POST(request: Request): Promise<Response> {
       paragraphCount = countParagraphs(content);
     }
 
-    // データベースを更新
+    // 繝・・繧ｿ繝吶・繧ｹ繧呈峩譁ｰ
     const { data: updatedAttempt, error: updateError } = await supabase
       .from('attempts')
       .update({
@@ -113,4 +134,6 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 }
+
+
 

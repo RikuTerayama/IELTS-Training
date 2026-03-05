@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
+import { isRetiredTask1Beginner } from '@/lib/task1/retired';
 
 export async function GET(
   request: Request,
@@ -21,6 +22,13 @@ export async function GET(
     if (error || !task) {
       return Response.json(
         errorResponse('NOT_FOUND', 'Task not found'),
+        { status: 404 }
+      );
+    }
+
+    if (isRetiredTask1Beginner(task)) {
+      return Response.json(
+        errorResponse('NOT_FOUND', 'Task has been retired'),
         { status: 404 }
       );
     }
