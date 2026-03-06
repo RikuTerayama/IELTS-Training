@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
@@ -55,6 +55,7 @@ interface EnglishEssay {
 
 export default function PrepTaskPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const taskId = params.taskId as string;
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
@@ -72,6 +73,13 @@ export default function PrepTaskPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [requiredItems, setRequiredItems] = useState<Array<{ module: string; expression: string; ja_hint?: string }>>([]);
+
+  useEffect(() => {
+    if (searchParams.get('mode') === 'exam') {
+      router.replace(`/task/${taskId}?mode=exam`);
+      return;
+    }
+  }, [taskId, searchParams, router]);
 
   useEffect(() => {
     if (taskId === 'new') {

@@ -16,7 +16,7 @@ export async function GET(request: Request): Promise<Response> {
     const skill = searchParams.get('skill'); // 'writing' | 'speaking'
     const category = searchParams.get('category');
     const mode = searchParams.get('mode'); // 'click' | 'typing'
-    const module = searchParams.get('module') || 'lexicon'; // 'lexicon' | 'idiom' (default: 'lexicon')
+    const moduleName = searchParams.get('module') || 'lexicon'; // 'lexicon' | 'idiom' (default: 'lexicon')
     const limit = parseInt(searchParams.get('limit') || '10', 10);
 
     if (!skill || !['writing', 'speaking'].includes(skill)) {
@@ -52,7 +52,7 @@ export async function GET(request: Request): Promise<Response> {
       .select('item_id')
       .eq('user_id', user.id)
       .eq('mode', mode)
-      .eq('module', module)
+      .eq('module', moduleName)
       .lte('next_review_on', today);
 
     // categoryでフィルタ（item_idからcategoryを引く必要がある）
@@ -63,7 +63,7 @@ export async function GET(request: Request): Promise<Response> {
         .select('id')
         .eq('skill', skill)
         .eq('category', category)
-        .eq('module', module);
+        .eq('module', moduleName);
       categoryFilter = (categoryItems || []).map(item => item.id);
       
       if (categoryFilter.length > 0) {
@@ -78,7 +78,7 @@ export async function GET(request: Request): Promise<Response> {
         .from('lexicon_items')
         .select('id')
         .eq('skill', skill)
-        .eq('module', module);
+        .eq('module', moduleName);
       categoryFilter = (skillItems || []).map(item => item.id);
       
       if (categoryFilter.length > 0) {
@@ -94,7 +94,7 @@ export async function GET(request: Request): Promise<Response> {
       .from('lexicon_items')
       .select('id')
       .eq('skill', skill)
-      .eq('module', module);
+      .eq('module', moduleName);
 
     if (category) {
       newItemsQuery = newItemsQuery.eq('category', category);
@@ -114,7 +114,7 @@ export async function GET(request: Request): Promise<Response> {
       .select('item_id')
       .eq('user_id', user.id)
       .eq('mode', mode)
-      .eq('module', module)
+      .eq('module', moduleName)
       .in('item_id', Array.from(allItemIds));
 
     const existingItemIds = new Set((existingStates || []).map(s => s.item_id));
@@ -143,7 +143,7 @@ export async function GET(request: Request): Promise<Response> {
       .select('id, prompt, correct_expression, choices, hint_first_char, hint_length, item_id')
       .eq('skill', skill)
       .eq('mode', mode)
-      .eq('module', module)
+      .eq('module', moduleName)
       .in('item_id', selectedItemIds);
 
     // item_idごとにグループ化
@@ -178,7 +178,7 @@ export async function GET(request: Request): Promise<Response> {
         .select('id, prompt, correct_expression, choices, hint_first_char, hint_length, item_id')
         .eq('skill', skill)
         .eq('mode', mode)
-        .eq('module', module);
+        .eq('module', moduleName);
       
       if (category) {
         fallbackQuery = fallbackQuery.eq('category', category);

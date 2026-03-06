@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -103,6 +103,8 @@ function TaskSelectContent() {
     }
   }, [taskType, level]);
 
+  const modeFromUrl = searchParams.get('mode');
+
   const handleStart = async () => {
     if (!taskType) return;
 
@@ -131,6 +133,8 @@ function TaskSelectContent() {
         if (taskType === 'Task 1') {
           const modeQuery = selectedMode === 'exam' ? '?mode=exam' : '';
           router.push(`/task/${data.data.id}${modeQuery}`);
+        } else if (taskType === 'Task 2' && modeFromUrl === 'exam') {
+          router.push(`/task/${data.data.id}?mode=exam`);
         } else if (level === 'beginner' || level === 'intermediate') {
           router.push(`/task/${data.data.id}/prep`);
         } else {
@@ -243,6 +247,10 @@ function TaskSelectContent() {
               </button>
             </div>
           </div>
+        )}
+
+        {taskType === 'Task 2' && modeFromUrl === 'exam' && (
+          <p className="mb-4 text-sm text-text-muted">Exam Mode: PREP will be skipped.</p>
         )}
 
         {taskType === 'Task 2' && (
