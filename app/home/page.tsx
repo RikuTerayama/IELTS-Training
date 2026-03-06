@@ -25,6 +25,11 @@ const OUTPUT_FALLBACK: { module: string; title: string; description: string; cta
   },
 ];
 
+/** Exam Mode の Writing 入口（将来 exam 固定に差し替え可能） */
+const EXAM_WRITING_HREF = '/task/select?task_type=Task%202';
+/** Exam Mode Speaking プレースホルダ（Home の CTA は disabled） */
+const EXAM_SPEAKING_HREF = '/exam/speaking';
+
 /** AC-1: Input カテゴリは API に依存せず常に表示。4技能固定順: Reading→Listening→Speaking→Writing */
 const INPUT_CATEGORIES = [
   {
@@ -112,6 +117,24 @@ export default function HomePage() {
     };
     return iconMap[module] || <Icons.Book className="w-6 h-6" />;
   };
+
+  // Output 2レーン用: menu.output の href を優先、なければフォールバック
+  const outputSource = menu?.output?.length ? menu.output : OUTPUT_FALLBACK;
+  const hrefSpeaking = outputSource.find((o) => o.module === 'speaking')?.cta.href ?? '/training/speaking';
+  const hrefWritingTask2 = outputSource.find((o) => o.module === 'writing_task2')?.cta.href ?? '/task/select?task_type=Task%202';
+  const practiceCards = [
+    { module: 'speaking' as const, title: 'Speaking Drill', subtitle: 'Instant speaking drills by IELTS task type.', ctaLabel: 'Start practice', href: hrefSpeaking },
+    { module: 'writing_task2' as const, title: 'Writing PREP', subtitle: 'Plan and structure Task 2 ideas before writing.', ctaLabel: 'Start PREP', href: hrefWritingTask2 },
+  ];
+  const examCards = [
+    { module: 'writing_task2' as const, title: 'Writing AI Essay Checker', subtitle: 'Submit an essay and get band-style AI feedback.', ctaLabel: 'Start exam', href: EXAM_WRITING_HREF, comingSoon: false },
+    { module: 'speaking' as const, title: 'Speaking AI Interviewer', subtitle: 'Live-style IELTS speaking interview simulation.', ctaLabel: 'Not available yet', href: EXAM_SPEAKING_HREF, comingSoon: true },
+  ];
+  const outputCardClasses = cn(
+    'p-6 rounded-2xl border border-border bg-surface text-left transition-all duration-200',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
+  );
+  const outputCardInteractive = 'group hover:shadow-md hover:-translate-y-1 hover:border-border-strong';
 
   // モジュールカラー
   const getModuleColor = (module: string, isInput: boolean) => {
@@ -250,14 +273,19 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Outputセクション - AC-O1: 常時表示（API失敗時はフォールバック） */}
+          {/* Outputセクション - 2レーン: Practice / Exam Mode（AC-O1: 常時表示） */}
           <div>
             <div className="mb-6">
               <h2 className="text-heading-2 font-bold tracking-tight text-text mb-2">Output</h2>
               <p className="text-body text-text-muted">覚えた語彙・表現を実際に使いましょう（運用: 使わせる制約）</p>
             </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {(menu?.output?.length ? menu.output : OUTPUT_FALLBACK).map((item) => {
+
+            {/* Practice */}
+            <div className="mb-10">
+              <h3 className="text-lg font-bold text-text mb-1">Practice</h3>
+              <p className="text-sm text-text-muted mb-4">Build fluency with guided drills and structured writing practice.</p>
+              <div className="grid md:grid-cols-2 gap-6">
+                {practiceCards.map((item) => {
                   const color = getModuleColor(item.module, false);
                   const colorClasses: Record<string, string> = {
                     emerald: 'bg-emerald-50 border-emerald-200 text-emerald-600',
@@ -265,30 +293,82 @@ export default function HomePage() {
                     pink: 'bg-pink-50 border-pink-200 text-pink-600',
                   };
                   const iconBg = colorClasses[color] || colorClasses.indigo;
-                  
                   return (
                     <Link
-                      key={item.module}
-                      href={item.cta.href}
-                      className={cn(
-                        'group p-6 rounded-2xl border border-border bg-surface',
-                        'hover:shadow-md hover:-translate-y-1 hover:border-border-strong',
-                        'transition-all duration-200 text-left',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
-                      )}
+                      key={item.module + item.title}
+                      href={item.href}
+                      className={cn(outputCardClasses, outputCardInteractive)}
                     >
                       <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
                         {getModuleIcon(item.module)}
                       </div>
-                      <h3 className="text-lg font-bold text-text mb-2">{item.title}</h3>
-                      <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.description}</p>
+                      <h4 className="text-lg font-bold text-text mb-2">{item.title}</h4>
+                      <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.subtitle}</p>
                       <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-                        {item.cta.label}
+                        {item.ctaLabel}
                         <Icons.ArrowRight className="w-4 h-4" />
                       </span>
                     </Link>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Exam Mode */}
+            <div>
+              <h3 className="text-lg font-bold text-text mb-1">Exam Mode</h3>
+              <p className="text-sm text-text-muted mb-4">Simulate test-day performance with AI interviewer and essay evaluation.</p>
+              <div className="grid md:grid-cols-2 gap-6">
+                {examCards.map((item) => {
+                  const color = getModuleColor(item.module, false);
+                  const colorClasses: Record<string, string> = {
+                    emerald: 'bg-emerald-50 border-emerald-200 text-emerald-600',
+                    indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
+                    pink: 'bg-pink-50 border-pink-200 text-pink-600',
+                  };
+                  const iconBg = colorClasses[color] || colorClasses.indigo;
+                  if (item.comingSoon) {
+                    return (
+                      <div
+                        key={item.title}
+                        className={cn(outputCardClasses, 'opacity-90 cursor-default')}
+                        aria-disabled="true"
+                      >
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center shrink-0', iconBg)}>
+                            {getModuleIcon(item.module)}
+                          </div>
+                          <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                            Coming soon
+                          </span>
+                        </div>
+                        <h4 className="text-lg font-bold text-text mb-2">{item.title}</h4>
+                        <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.subtitle}</p>
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-text-muted cursor-not-allowed">
+                          {item.ctaLabel}
+                        </span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={item.title}
+                      href={item.href}
+                      className={cn(outputCardClasses, outputCardInteractive)}
+                    >
+                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
+                        {getModuleIcon(item.module)}
+                      </div>
+                      <h4 className="text-lg font-bold text-text mb-2">{item.title}</h4>
+                      <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.subtitle}</p>
+                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
+                        {item.ctaLabel}
+                        <Icons.ArrowRight className="w-4 h-4" />
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
