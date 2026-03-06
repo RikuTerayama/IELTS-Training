@@ -72,7 +72,7 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     // moduleを取得（question.moduleから、無い場合は'lexicon'をデフォルト）
-    const module = question.module || 'lexicon';
+    const moduleName = question.module || 'lexicon';
 
     // item_idを取得（question.item_idが無い場合はcorrect_expressionで引く）
     let itemId = question.item_id;
@@ -82,7 +82,7 @@ export async function POST(request: Request): Promise<Response> {
         .from('lexicon_items')
         .select('id')
         .eq('expression', question.correct_expression)
-        .eq('module', module)
+        .eq('module', moduleName)
         .limit(1)
         .single();
       
@@ -98,7 +98,7 @@ export async function POST(request: Request): Promise<Response> {
         user_id: user.id,
         item_id: itemId || null,
         mode: question.mode,
-        module: module,
+        module: moduleName,
         is_correct: isCorrect,
         user_answer: user_answer || null,
         time_ms: time_ms || null,
@@ -123,7 +123,7 @@ export async function POST(request: Request): Promise<Response> {
         .eq('user_id', user.id)
         .eq('item_id', itemId)
         .eq('mode', question.mode)
-        .eq('module', module)
+        .eq('module', moduleName)
         .single();
 
       // SRS状態を更新
@@ -137,7 +137,7 @@ export async function POST(request: Request): Promise<Response> {
             user_id: user.id,
             item_id: itemId,
             mode: question.mode,
-            module: module,
+            module: moduleName,
             stage: updatedState.stage,
             next_review_on: updatedState.next_review_on,
             last_review_on: updatedState.last_review_on,

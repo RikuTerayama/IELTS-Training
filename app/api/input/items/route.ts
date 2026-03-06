@@ -94,18 +94,18 @@ export async function GET(request: Request): Promise<Response> {
     
     // due優先（moduleごとに均等に配分）
     const dueItemsByModule: Record<string, string[]> = {};
-    for (const module of modules) {
-      const moduleDueItems = dueItemIdsByModule[module] || [];
-      dueItemsByModule[module] = moduleDueItems.filter(id => allItemIds.has(id));
+    for (const mod of modules) {
+      const moduleDueItems = dueItemIdsByModule[mod] || [];
+      dueItemsByModule[mod] = moduleDueItems.filter(id => allItemIds.has(id));
     }
 
     // 各moduleから均等に取得
     let remaining = limit;
     let moduleIndex = 0;
     while (remaining > 0 && selectedItemIds.length < limit) {
-      for (const module of modules) {
+      for (const mod of modules) {
         if (remaining <= 0) break;
-        const moduleDueItems = dueItemsByModule[module] || [];
+        const moduleDueItems = dueItemsByModule[mod] || [];
         if (moduleDueItems.length > 0) {
           const itemId = moduleDueItems.shift();
           if (itemId && !selectedItemIds.includes(itemId)) {

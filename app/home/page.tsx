@@ -25,8 +25,8 @@ const OUTPUT_FALLBACK: { module: string; title: string; description: string; cta
   },
 ];
 
-/** Exam Mode の Writing 入口（将来 exam 固定に差し替え可能） */
-const EXAM_WRITING_HREF = '/task/select?task_type=Task%202';
+/** Exam Mode の Writing 入口（PREPスキップで本番導線。将来 exam 固定に差し替え可能） */
+const EXAM_WRITING_HREF = '/task/select?task_type=Task%202&mode=exam';
 /** Exam Mode Speaking プレースホルダ（Home の CTA は disabled） */
 const EXAM_SPEAKING_HREF = '/exam/speaking';
 
@@ -162,7 +162,7 @@ export default function HomePage() {
           {/* ヒーローセクション */}
           <div className="text-center mb-12">
             <h1 className="text-heading-1 font-bold tracking-tight text-text mb-3">
-              Today's Menu
+              Today&apos;s Menu
             </h1>
             <p className="text-body-lg text-text-muted">
               今日の学習メニューを確認して、効率的にスキルアップしましょう

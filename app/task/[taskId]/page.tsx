@@ -103,6 +103,11 @@ function TaskPageContent() {
           setTask(data.data);
           setLevel(data.data.level);
 
+          if (data.data.question_type === 'Task 2') {
+            const modeParam = searchParams.get('mode');
+            if (modeParam === 'exam') setMode('exam');
+          }
+
           // Task 1の場合はattemptを作成または再開
           if (data.data.question_type === 'Task 1') {
             try {
@@ -157,7 +162,7 @@ function TaskPageContent() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [taskId]);
+  }, [taskId, searchParams]);
 
   const handleSubmit = async () => {
     if (!task) return;
@@ -503,8 +508,8 @@ function TaskPageContent() {
             </div>
           </div>
 
-          {/* PREPガイド（初級/中級のみ） - Paper Interface Style */}
-          {task.prep_guide && (level === 'beginner' || level === 'intermediate') && (
+          {/* PREPガイド（初級/中級のみ。Exam Modeでは非表示） - Paper Interface Style */}
+          {task.prep_guide && (level === 'beginner' || level === 'intermediate') && mode !== 'exam' && (
             <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm mb-6">
               <h2 className="text-xl font-bold tracking-tight text-text mb-6">PREPガイド</h2>
               <div className="grid md:grid-cols-2 gap-4">
@@ -528,8 +533,8 @@ function TaskPageContent() {
             </div>
           )}
 
-          {/* PREPヒアリングモードへの切り替えボタン（初級/中級のみ） - Paper Interface Style */}
-          {(level === 'beginner' || level === 'intermediate') && (
+          {/* PREPヒアリングモードへの切り替えボタン（初級/中級のみ。Exam Modeでは非表示） - Paper Interface Style */}
+          {(level === 'beginner' || level === 'intermediate') && mode !== 'exam' && (
             <div className="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-6 mb-6">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>

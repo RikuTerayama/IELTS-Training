@@ -14,7 +14,7 @@ export async function GET(request: Request): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url);
     const skill = searchParams.get('skill'); // 'writing' | 'speaking'
-    const module = searchParams.get('module') || 'lexicon'; // 'lexicon' | 'idiom' (default: 'lexicon')
+    const moduleName = searchParams.get('module') || 'lexicon'; // 'lexicon' | 'idiom' (default: 'lexicon')
 
     if (!skill || !['writing', 'speaking'].includes(skill)) {
       return Response.json(
@@ -41,7 +41,7 @@ export async function GET(request: Request): Promise<Response> {
       .from('lexicon_items')
       .select('category, typing_enabled')
       .eq('skill', skill)
-      .eq('module', module);
+      .eq('module', moduleName);
 
     if (itemsError) {
       console.error('[GET /api/lexicon/sets] Items error:', itemsError);
@@ -56,7 +56,7 @@ export async function GET(request: Request): Promise<Response> {
       .from('lexicon_questions')
       .select('category, mode')
       .eq('skill', skill)
-      .eq('module', module);
+      .eq('module', moduleName);
 
     if (questionsError) {
       console.error('[GET /api/lexicon/sets] Questions error:', questionsError);
@@ -122,7 +122,7 @@ export async function GET(request: Request): Promise<Response> {
         .select('id')
         .eq('skill', skill)
         .eq('category', cat)
-        .eq('module', module);
+        .eq('module', moduleName);
       
       const categoryItemIds = (categoryItems || []).map(item => item.id);
       
@@ -133,7 +133,7 @@ export async function GET(request: Request): Promise<Response> {
           .select('id', { count: 'exact' })
           .eq('user_id', user.id)
           .eq('mode', 'click')
-          .eq('module', module)
+          .eq('module', moduleName)
           .in('item_id', categoryItemIds)
           .lte('next_review_on', today);
         
@@ -145,7 +145,7 @@ export async function GET(request: Request): Promise<Response> {
           .select('id', { count: 'exact' })
           .eq('user_id', user.id)
           .eq('mode', 'typing')
-          .eq('module', module)
+          .eq('module', moduleName)
           .in('item_id', categoryItemIds)
           .lte('next_review_on', today);
         
