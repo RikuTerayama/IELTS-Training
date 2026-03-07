@@ -30,7 +30,19 @@ const LEVELS = [
   { value: 'advanced', label: 'Advanced' },
 ] as const;
 
-/** prompt 行から表示用・evaluation 用の質問テキストを組み立てる */
+const PARTS = [
+  { value: 'part1', label: 'Part 1 — Personal Questions', help: 'Short answers about familiar topics.' },
+  { value: 'part2', label: 'Part 2 — Cue Card', help: '1–2 minute long turn based on a cue card.' },
+  { value: 'part3', label: 'Part 3 — Discussion', help: 'Abstract discussion with deeper reasoning.' },
+] as const;
+
+const LEVEL_TO_API: Record<string, string> = {
+  beginner: 'B1',
+  intermediate: 'B2',
+  advanced: 'C1',
+};
+
+/** prompt 行から表示用の質問テキストを組み立てる */
 function buildPromptText(promptRow: Record<string, unknown>): string {
   const followup = promptRow?.followup_question as string | undefined;
   const question = promptRow?.question as string | undefined;
@@ -41,6 +53,48 @@ function buildPromptText(promptRow: Record<string, unknown>): string {
   return '(No question text)';
 }
 
+/** evaluations API に渡す prompt 文字列（評価品質のため情報を強化） */
+function buildEvaluationPromptText(
+  promptRow: Record<string, unknown>,
+  selectedPart: string
+): string {
+  const topic = promptRow?.topic ?? 'unknown';
+  const jpIntent = promptRow?.jp_intent ?? '';
+  const targetPoints = promptRow?.target_points;
+  const targetStr = targetPoints
+    ? JSON.stringify(targetPoints, null, 0)
+    : '';
+  const expectedStyle = promptRow?.expected_style ?? '';
+
+  const baseLines = [
+    `Part: ${selectedPart}`,
+    `Topic: ${topic}`,
+    `Intent(JP): ${jpIntent}`,
+    `Target points: ${targetStr}`,
+    `Expected style: ${expectedStyle}`,
+  ];
+
+  const cueCard = promptRow?.cue_card as { topic?: string; points?: string[] } | undefined;
+  if (selectedPart === 'part2' && cueCard && (cueCard.topic || (Array.isArray(cueCard.points) && cueCard.points.length > 0))) {
+    const points = Array.isArray(cueCard.points)
+      ? cueCard.points.map((p) => `- ${p}`).join('\n')
+      : '';
+    return [
+      ...baseLines.slice(0, 2),
+      `Cue Card: ${cueCard.topic ?? ''}`,
+      points ? `Points:\n${points}` : '',
+      ...baseLines.slice(2),
+    ].filter(Boolean).join('\n');
+  }
+
+  const questionText = buildPromptText(promptRow);
+  return [
+    ...baseLines.slice(0, 2),
+    `Question: ${questionText}`,
+    ...baseLines.slice(2),
+  ].join('\n');
+}
+
 const MIN_ANSWER_LENGTH = 30;
 
 export default function ExamSpeakingPage() {
@@ -49,6 +103,7 @@ export default function ExamSpeakingPage() {
 
   const [topic, setTopic] = useState<string>(TOPICS[0].value);
   const [level, setLevel] = useState<string>(LEVELS[0].value);
+  const [selectedPart, setSelectedPart] = useState<string>('part1');
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [promptRow, setPromptRow] = useState<Record<string, unknown> | null>(null);
@@ -72,9 +127,9 @@ export default function ExamSpeakingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: 'mock',
-          part: 'part1',
+          part: selectedPart,
           topic,
-          level: level || undefined,
+          level: LEVEL_TO_API[level] || level || undefined,
         }),
       });
       const sessionData = (await sessionRes.json()) as ApiResponse<{ id: string }>;
@@ -98,8 +153,8 @@ export default function ExamSpeakingPage() {
           session_id: sessionData.data.id,
           mode: 'mock',
           topic,
-          part: 'part1',
-          level: level || undefined,
+          part: selectedPart,
+          level: LEVEL_TO_API[level] || level || undefined,
           use_preset: true,
         }),
       });
@@ -157,7 +212,7 @@ export default function ExamSpeakingPage() {
       setAttemptId(attemptData.data.id);
 
       setPhase('evaluating');
-      const promptText = buildPromptText(promptRow);
+      const promptText = buildEvaluationPromptText(promptRow, selectedPart);
       const evalRes = await fetch('/api/speaking/evaluations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -198,6 +253,8 @@ export default function ExamSpeakingPage() {
   };
 
   const questionText = promptRow ? buildPromptText(promptRow) : '';
+  const cueCard = promptRow?.cue_card as { topic?: string; points?: string[] } | undefined;
+  const showCueCard = selectedPart === 'part2' && cueCard && (cueCard.topic || (Array.isArray(cueCard.points) && cueCard.points.length > 0));
 
   return (
     <Layout>
@@ -206,7 +263,7 @@ export default function ExamSpeakingPage() {
           <h1 className={cn('text-2xl font-bold tracking-tight text-text', cardTitle)}>
             Speaking AI Interviewer (Beta)
           </h1>
-          <p className={cn('mt-1 text-text-muted', cardDesc)}>Part 1 (Text-only)</p>
+          <p className={cn('mt-1 text-text-muted', cardDesc)}>Part 1 / 2 / 3 (Text-only)</p>
         </header>
 
         {phase === 'error' && errorMessage && (
@@ -246,6 +303,23 @@ export default function ExamSpeakingPage() {
                 </select>
               </div>
               <div>
+                <label className="block text-sm font-medium text-text mb-2">Part</label>
+                <select
+                  value={selectedPart}
+                  onChange={(e) => setSelectedPart(e.target.value)}
+                  className={cn('w-full', 'rounded-lg border border-border bg-surface text-text px-4 py-2')}
+                >
+                  {PARTS.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-text-muted">
+                  {PARTS.find((p) => p.value === selectedPart)?.help}
+                </p>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-text mb-2">Level (optional)</label>
                 <select
                   value={level}
@@ -280,8 +354,26 @@ export default function ExamSpeakingPage() {
         {(phase === 'answering' || phase === 'saving_attempt' || phase === 'evaluating') && (
           <div className="space-y-6">
             <div className={cn('p-6', cardBase)}>
-              <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-2">Question</h3>
-              <p className="text-lg text-text leading-relaxed">{questionText}</p>
+              {showCueCard ? (
+                <>
+                  <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-2">Cue Card</h3>
+                  {cueCard?.topic && (
+                    <p className="text-lg font-semibold text-text mb-3">{cueCard.topic}</p>
+                  )}
+                  {Array.isArray(cueCard?.points) && cueCard.points.length > 0 && (
+                    <ul className="list-disc list-inside space-y-1 text-text leading-relaxed">
+                      {cueCard.points.map((p, i) => (
+                        <li key={i}>{p}</li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              ) : (
+                <>
+                  <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-2">Question</h3>
+                  <p className="text-lg text-text leading-relaxed">{questionText}</p>
+                </>
+              )}
             </div>
             <div className={cn('p-6', cardBase)}>
               <label className="block text-sm font-semibold text-text mb-2">Your answer</label>
