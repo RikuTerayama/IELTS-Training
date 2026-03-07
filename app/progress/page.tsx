@@ -171,6 +171,12 @@ export default function ProgressPage() {
                         {item.question_preview}
                       </p>
                     </div>
+                    <Link
+                      href={`/speaking/feedback/${item.id}`}
+                      className="shrink-0 text-sm text-indigo-600 hover:underline"
+                    >
+                      View details
+                    </Link>
                   </div>
                 ))}
               </div>
