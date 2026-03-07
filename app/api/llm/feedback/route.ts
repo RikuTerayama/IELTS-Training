@@ -6,6 +6,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { generateFeedback } from '@/lib/llm/prompts/writing_feedback';
 import { successResponse, errorResponse } from '@/lib/api/response';
+import {
+  consumeOrThrow429,
+  isUsageRateLimitError,
+  toUsageRateLimitResponse,
+} from '@/lib/server/usageLimit';
 
 export async function POST(request: Request): Promise<Response> {
   console.log('[LLM Feedback API] Starting feedback generation...');
@@ -186,6 +191,15 @@ export async function POST(request: Request): Promise<Response> {
 
     // LLMでフィードバック生成
     console.log('[LLM Feedback API] Calling LLM to generate feedback...');
+    await consumeOrThrow429({
+      supabase,
+      userId: user.id,
+      scope: 'writing',
+      writingDelta: 1,
+      speakingDelta: 0,
+      llmUsed: true,
+      upgradeUrl: process.env.UPGRADE_URL ?? '/#pricing',
+    });
     let feedbackData;
     try {
       feedbackData = await generateFeedback(
@@ -253,6 +267,10 @@ export async function POST(request: Request): Promise<Response> {
       })
     );
   } catch (error) {
+    if (isUsageRateLimitError(error)) {
+      const rateLimitResponse = toUsageRateLimitResponse(error);
+      if (rateLimitResponse) return rateLimitResponse;
+    }
     console.error('[LLM Feedback API] Unexpected error:', error);
     console.error('[LLM Feedback API] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return Response.json(

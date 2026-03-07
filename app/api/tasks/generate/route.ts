@@ -7,6 +7,11 @@ import { createClient } from '@/lib/supabase/server';
 import { generateTask, generateTask1VocabOnly, buildTask1QuestionFromAsset } from '@/lib/llm/prompts/task_generate';
 import { selectAssetByWeight } from '@/lib/task1/assets';
 import { successResponse, errorResponse } from '@/lib/api/response';
+import {
+  consumeOrThrow429,
+  isUsageRateLimitError,
+  toUsageRateLimitResponse,
+} from '@/lib/server/usageLimit';
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -93,6 +98,15 @@ export async function POST(request: Request): Promise<Response> {
       
       // LLM縺ｧ隱槫ｽ吶→prep_guide縺ｮ縺ｿ逕滓・
       console.log('[Generate API] Task1: Generating vocab and prep_guide...');
+      await consumeOrThrow429({
+        supabase,
+        userId: user.id,
+        scope: 'writing',
+        writingDelta: 1,
+        speakingDelta: 0,
+        llmUsed: true,
+        upgradeUrl: process.env.UPGRADE_URL ?? '/#pricing',
+      });
       try {
         const { required_vocab, prep_guide } = await generateTask1VocabOnly(level, asset);
         
@@ -129,6 +143,15 @@ export async function POST(request: Request): Promise<Response> {
     } else {
       // Task2縺ｯ蠕捺擂騾壹ｊLLM縺ｧ雉ｪ蝠乗枚繧ら函謌・
       console.log('[Generate API] Task2: Calling LLM to generate task...');
+      await consumeOrThrow429({
+        supabase,
+        userId: user.id,
+        scope: 'writing',
+        writingDelta: 1,
+        speakingDelta: 0,
+        llmUsed: true,
+        upgradeUrl: process.env.UPGRADE_URL ?? '/#pricing',
+      });
       try {
         taskData = await generateTask(level, taskType, genre || null);
         console.log('[Generate API] Task2 generated successfully:', {
@@ -180,6 +203,10 @@ export async function POST(request: Request): Promise<Response> {
     console.log('[Generate API] Task saved successfully, ID:', task.id);
     return Response.json(successResponse(task));
   } catch (error) {
+    if (isUsageRateLimitError(error)) {
+      const rateLimitResponse = toUsageRateLimitResponse(error);
+      if (rateLimitResponse) return rateLimitResponse;
+    }
     console.error('[Generate API] Unexpected error:', error);
     return Response.json(
       errorResponse(
