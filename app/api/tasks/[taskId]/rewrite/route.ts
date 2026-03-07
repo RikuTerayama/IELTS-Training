@@ -7,6 +7,11 @@ import { createClient } from '@/lib/supabase/server';
 import { generateRewriteFeedback } from '@/lib/llm/prompts/rewrite_coach';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { RewriteTarget } from '@/lib/domain/types';
+import {
+  consumeOrThrow429,
+  isUsageRateLimitError,
+  toUsageRateLimitResponse,
+} from '@/lib/server/usageLimit';
 
 export async function POST(
   request: Request,
@@ -122,6 +127,15 @@ export async function POST(
     const revisedText = revised_content.map(r => r.revised_text).join(' ');
 
     console.log('[Rewrite API] Calling LLM to generate rewrite feedback...');
+    await consumeOrThrow429({
+      supabase,
+      userId: user.id,
+      scope: 'writing',
+      writingDelta: 1,
+      speakingDelta: 0,
+      llmUsed: true,
+      upgradeUrl: process.env.UPGRADE_URL ?? '/#pricing',
+    });
 
     // LLMで再評価
     let feedbackData;
@@ -207,6 +221,10 @@ export async function POST(
       })
     );
   } catch (error) {
+    if (isUsageRateLimitError(error)) {
+      const rateLimitResponse = toUsageRateLimitResponse(error);
+      if (rateLimitResponse) return rateLimitResponse;
+    }
     console.error('[Rewrite API] Unexpected error:', error);
     return Response.json(
       errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unknown error'),

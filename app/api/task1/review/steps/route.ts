@@ -11,6 +11,11 @@ import { callLLM } from '@/lib/llm/client';
 import { parseLLMResponseWithRetry } from '@/lib/llm/parse';
 import type { Task1StepState } from '@/lib/domain/types';
 import { isRetiredTask1Beginner } from '@/lib/task1/retired';
+import {
+  consumeOrThrow429,
+  isUsageRateLimitError,
+  toUsageRateLimitResponse,
+} from '@/lib/server/usageLimit';
 
 export async function POST(request: Request): Promise<Response> {
   console.log('[Task1 Review Steps API] Starting...');
@@ -101,6 +106,15 @@ export async function POST(request: Request): Promise<Response> {
 
     // LLMでレビュー生成
     console.log('[Task1 Review Steps API] Calling LLM for step review...');
+    await consumeOrThrow429({
+      supabase,
+      userId: user.id,
+      scope: 'writing',
+      writingDelta: 1,
+      speakingDelta: 0,
+      llmUsed: true,
+      upgradeUrl: process.env.UPGRADE_URL ?? '/#pricing',
+    });
     let reviewFeedback;
     try {
       const prompt = buildTask1StepReviewPrompt(
@@ -168,6 +182,10 @@ export async function POST(request: Request): Promise<Response> {
       attempt: updatedAttempt,
     }));
   } catch (error) {
+    if (isUsageRateLimitError(error)) {
+      const rateLimitResponse = toUsageRateLimitResponse(error);
+      if (rateLimitResponse) return rateLimitResponse;
+    }
     console.error('[Task1 Review Steps API] Unexpected error:', error);
     return Response.json(
       errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unknown error'),
