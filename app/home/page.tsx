@@ -128,7 +128,7 @@ export default function HomePage() {
   ];
   const examCards = [
     { module: 'writing_task2' as const, title: 'Writing AI Essay Checker', subtitle: 'Submit an essay and get band-style AI feedback.', ctaLabel: 'Start exam', href: EXAM_WRITING_HREF, comingSoon: false },
-    { module: 'speaking' as const, title: 'Speaking AI Interviewer', subtitle: 'Live-style IELTS speaking interview simulation.', ctaLabel: 'Start interview', href: EXAM_SPEAKING_HREF, comingSoon: false },
+    { module: 'speaking' as const, title: 'Speaking AI Interviewer', subtitle: 'Live-style IELTS speaking interview simulation (Part 1 text beta).', ctaLabel: 'Start beta', href: EXAM_SPEAKING_HREF, comingSoon: false, badge: 'Beta' as const },
   ];
   const outputCardClasses = cn(
     'p-6 rounded-2xl border border-border bg-surface text-left transition-all duration-200',
@@ -359,7 +359,14 @@ export default function HomePage() {
                       <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
                         {getModuleIcon(item.module)}
                       </div>
-                      <h4 className="text-lg font-bold text-text mb-2">{item.title}</h4>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h4 className="text-lg font-bold text-text">{item.title}</h4>
+                        {'badge' in item && item.badge && (
+                          <span className="inline-flex shrink-0 items-center rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.subtitle}</p>
                       <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
                         {item.ctaLabel}
