@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
@@ -72,7 +73,19 @@ export default function PrepTaskPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRateLimit, setIsRateLimit] = useState(false);
+  const [upgradeUrl, setUpgradeUrl] = useState('/#pricing');
   const [requiredItems, setRequiredItems] = useState<Array<{ module: string; expression: string; ja_hint?: string }>>([]);
+
+  const handleRateLimit = (data: { error?: { code?: string; message?: string; details?: unknown } }, res: Response) => {
+    if (data?.error?.code === 'RATE_LIMIT' || res.status === 429) {
+      setIsRateLimit(true);
+      const details = data?.error?.details;
+      setUpgradeUrl(details && typeof details === 'object' && 'upgrade_url' in details && typeof (details as { upgrade_url?: string }).upgrade_url === 'string'
+        ? (details as { upgrade_url: string }).upgrade_url
+        : '/#pricing');
+    }
+  };
 
   useEffect(() => {
     if (searchParams.get('mode') === 'exam') {
@@ -160,6 +173,7 @@ export default function PrepTaskPage() {
   const handleJapaneseEvaluation = async () => {
     setProcessing(true);
     setError(null);
+    setIsRateLimit(false);
 
     try {
       const response = await fetch('/api/llm/prep-evaluation', {
@@ -173,16 +187,13 @@ export default function PrepTaskPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('評価の生成に失敗しました');
-      }
-
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       if (data.ok) {
         setJapaneseEvaluation(data.data);
         setCurrentStep('japanese_evaluation');
       } else {
-        throw new Error(data.error?.message || '評価の生成に失敗しました');
+        handleRateLimit(data, response);
+        setError(data.error?.message || '評価の生成に失敗しました');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -194,6 +205,7 @@ export default function PrepTaskPage() {
   const handleEnglishGeneration = async () => {
     setProcessing(true);
     setError(null);
+    setIsRateLimit(false);
 
     try {
       const response = await fetch('/api/llm/prep-to-essay', {
@@ -209,16 +221,13 @@ export default function PrepTaskPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('英語エッセイの生成に失敗しました');
-      }
-
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       if (data.ok) {
         setEnglishEssay(data.data);
         setCurrentStep('english_generation');
       } else {
-        throw new Error(data.error?.message || '英語エッセイの生成に失敗しました');
+        handleRateLimit(data, response);
+        setError(data.error?.message || '英語エッセイの生成に失敗しました');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -232,6 +241,7 @@ export default function PrepTaskPage() {
 
     setProcessing(true);
     setError(null);
+    setIsRateLimit(false);
 
     try {
       // まずタスクを生成または取得
@@ -243,13 +253,12 @@ export default function PrepTaskPage() {
           body: JSON.stringify({ level }),
         });
 
-        if (!generateResponse.ok) {
-          throw new Error('タスクの生成に失敗しました');
-        }
-
-        const generateData = await generateResponse.json();
+        const generateData = await generateResponse.json().catch(() => ({}));
         if (!generateData.ok || !generateData.data?.id) {
-          throw new Error('タスクの生成に失敗しました');
+          handleRateLimit(generateData, generateResponse);
+          setError(generateData.error?.message || 'タスクの生成に失敗しました');
+          setProcessing(false);
+          return;
         }
 
         actualTaskId = generateData.data.id;
@@ -271,19 +280,17 @@ export default function PrepTaskPage() {
         }),
       });
 
-      if (!submitResponse.ok) {
-        throw new Error('回答の送信に失敗しました');
-      }
-
-      const submitData = await submitResponse.json();
+      const submitData = await submitResponse.json().catch(() => ({}));
       if (submitData.ok) {
         // フィードバックページにリダイレクト
         router.push(`/feedback/${submitData.data.attempt_id}`);
       } else {
-        throw new Error(submitData.error?.message || '回答の送信に失敗しました');
+        handleRateLimit(submitData, submitResponse);
+        setError(submitData.error?.message || '回答の送信に失敗しました');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
+    } finally {
       setProcessing(false);
     }
   };
@@ -566,8 +573,20 @@ export default function PrepTaskPage() {
 
         {/* エラー表示 */}
         {error && (
-          <div className={cn('rounded-lg border border-danger bg-danger/10 p-4 mb-6', 'text-danger')}>
-            {error}
+          <div className="mb-6 space-y-4">
+            <div className={cn('rounded-lg border border-danger bg-danger/10 p-4', 'text-danger')}>
+              {error}
+            </div>
+            {isRateLimit && (
+              <div className={cn('rounded-lg border border-border bg-surface p-4')}>
+                <h3 className="font-semibold text-text mb-1">You&apos;ve reached today&apos;s free limit.</h3>
+                <p className="text-sm text-text-muted mb-4">Upgrade to Pro to continue, or try again tomorrow.</p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href={upgradeUrl} className={cn(buttonPrimary)}>View pricing</Link>
+                  <Link href="/home" className={cn(buttonSecondary, 'inline-flex')}>Back to Home</Link>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

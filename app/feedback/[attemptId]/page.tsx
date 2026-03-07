@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import type { Feedback, Attempt } from '@/lib/domain/types';
 import { cn, cardBase, cardTitle, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
@@ -14,6 +15,9 @@ export default function FeedbackPage() {
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isRateLimit, setIsRateLimit] = useState(false);
+  const [upgradeUrl, setUpgradeUrl] = useState('/#pricing');
 
   useEffect(() => {
     // Attempt取得
@@ -31,6 +35,8 @@ export default function FeedbackPage() {
 
   const generateOrFetchFeedback = async (attemptData: Attempt) => {
     setGenerating(true);
+    setError(null);
+    setIsRateLimit(false);
 
     try {
       // まず既存のフィードバックを確認
@@ -65,24 +71,25 @@ export default function FeedbackPage() {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-        console.error('[FeedbackPage] Feedback generation failed:', errorData);
-        throw new Error(errorData.error?.message || `Failed to generate feedback: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
       console.log('[FeedbackPage] Feedback generation response:', data);
 
-      if (data.ok) {
+      if (response.ok && data.ok) {
         setFeedback(data.data.feedback);
       } else {
-        console.error('[FeedbackPage] API returned error:', data.error);
-        throw new Error(data.error?.message || 'フィードバック生成に失敗しました');
+        const err = data.error;
+        if (err?.code === 'RATE_LIMIT' || response.status === 429) {
+          setIsRateLimit(true);
+          const details = err?.details;
+          setUpgradeUrl(details && typeof details === 'object' && 'upgrade_url' in details && typeof (details as { upgrade_url?: string }).upgrade_url === 'string'
+            ? (details as { upgrade_url: string }).upgrade_url
+            : '/#pricing');
+        }
+        setError(err?.message || `Failed to generate feedback: ${response.status}`);
       }
-    } catch (error) {
-      console.error(error);
-      alert('エラーが発生しました');
+    } catch (err) {
+      console.error(err);
+      setError('エラーが発生しました');
     } finally {
       setLoading(false);
       setGenerating(false);
@@ -104,8 +111,42 @@ export default function FeedbackPage() {
   if (!feedback) {
     return (
       <Layout>
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center text-text-muted">フィードバックが見つかりません</div>
+        <div className="container mx-auto px-6 py-12 max-w-2xl">
+          <div className="space-y-4">
+            <div className={cn('p-6 rounded-xl', cardBase, 'border-red-200 bg-red-50')}>
+              <p className="text-sm text-red-800">
+                {error || 'フィードバックが見つかりません'}
+              </p>
+            </div>
+            {isRateLimit && (
+              <div className={cn('p-6 rounded-xl', cardBase, 'border-amber-200 bg-amber-50/80')}>
+                <h3 className="mb-1 font-semibold text-amber-900">
+                  You&apos;ve reached today&apos;s free limit.
+                </h3>
+                <p className="mb-3 text-sm text-amber-800">
+                  Upgrade to Pro to continue, or try again tomorrow.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href={upgradeUrl} className={cn(buttonPrimary)}>
+                    View pricing
+                  </Link>
+                  <Link href="/home" className={cn(buttonSecondary, 'inline-flex')}>
+                    Back to Home
+                  </Link>
+                </div>
+              </div>
+            )}
+            {!isRateLimit && (
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => router.push('/home')}
+                  className={cn(buttonPrimary)}
+                >
+                  ホームに戻る
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </Layout>
     );
