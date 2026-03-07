@@ -96,7 +96,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 認証が必要なパス（/vocab は廃止のためリストから削除）
-  const protectedPaths = ['/home', '/task', '/feedback', '/progress', '/rewrite', '/speak', '/fillin'];
+  const protectedPaths = ['/home', '/task', '/feedback', '/progress', '/rewrite', '/speak', '/fillin', '/exam'];
   const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
   
   // ログインページは認証済みならリダイレクト

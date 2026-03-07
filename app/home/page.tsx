@@ -27,7 +27,7 @@ const OUTPUT_FALLBACK: { module: string; title: string; description: string; cta
 
 /** Exam Mode の Writing 入口（PREPスキップで本番導線。将来 exam 固定に差し替え可能） */
 const EXAM_WRITING_HREF = '/task/select?task_type=Task%202&mode=exam';
-/** Exam Mode Speaking プレースホルダ（Home の CTA は disabled） */
+/** Exam Mode Speaking 入口（現状は /exam/speaking プレースホルダ） */
 const EXAM_SPEAKING_HREF = '/exam/speaking';
 
 /** AC-1: Input カテゴリは API に依存せず常に表示。4技能固定順: Reading→Listening→Speaking→Writing */
@@ -128,7 +128,7 @@ export default function HomePage() {
   ];
   const examCards = [
     { module: 'writing_task2' as const, title: 'Writing AI Essay Checker', subtitle: 'Submit an essay and get band-style AI feedback.', ctaLabel: 'Start exam', href: EXAM_WRITING_HREF, comingSoon: false },
-    { module: 'speaking' as const, title: 'Speaking AI Interviewer', subtitle: 'Live-style IELTS speaking interview simulation.', ctaLabel: 'Not available yet', href: EXAM_SPEAKING_HREF, comingSoon: true },
+    { module: 'speaking' as const, title: 'Speaking AI Interviewer', subtitle: 'Live-style IELTS speaking interview simulation.', ctaLabel: 'Start interview', href: EXAM_SPEAKING_HREF, comingSoon: false },
   ];
   const outputCardClasses = cn(
     'p-6 rounded-2xl border border-border bg-surface text-left transition-all duration-200',
