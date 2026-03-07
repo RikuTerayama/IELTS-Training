@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import type { Attempt, Feedback, RewriteTarget } from '@/lib/domain/types';
+import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 export default function RewritePage() {
   const params = useParams();
@@ -13,6 +15,9 @@ export default function RewritePage() {
   const [revisedTexts, setRevisedTexts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isRateLimit, setIsRateLimit] = useState(false);
+  const [upgradeUrl, setUpgradeUrl] = useState('/#pricing');
 
   const attemptId = params.attemptId as string;
 
@@ -66,6 +71,8 @@ export default function RewritePage() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setSubmitError(null);
+    setIsRateLimit(false);
 
     try {
       if (!attempt?.task_id) {
@@ -106,24 +113,39 @@ export default function RewritePage() {
         }),
       });
 
+      const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
         console.error('[RewritePage] Submit error:', errorData);
-        throw new Error(errorData.error?.message || `Failed to submit rewrite: ${response.status}`);
+        if (errorData.error?.code === 'RATE_LIMIT' || response.status === 429) {
+          setIsRateLimit(true);
+          const details = errorData.error?.details;
+          setUpgradeUrl(details && typeof details === 'object' && 'upgrade_url' in details && typeof (details as { upgrade_url?: string }).upgrade_url === 'string'
+            ? (details as { upgrade_url: string }).upgrade_url
+            : '/#pricing');
+        }
+        setSubmitError(errorData.error?.message || `Failed to submit rewrite: ${response.status}`);
+        return;
       }
 
-      const data = await response.json();
+      const data = errorData;
       console.log('[RewritePage] Submit response:', data);
 
       if (data.ok) {
-        // フィードバック画面に遷移
         router.push(`/feedback/${attemptId}`);
       } else {
-        alert(data.error?.message || '書き直しの送信に失敗しました');
+        if (data.error?.code === 'RATE_LIMIT') {
+          setIsRateLimit(true);
+          const details = data.error?.details;
+          setUpgradeUrl(details && typeof details === 'object' && 'upgrade_url' in details && typeof (details as { upgrade_url?: string }).upgrade_url === 'string'
+            ? (details as { upgrade_url: string }).upgrade_url
+            : '/#pricing');
+        }
+        setSubmitError(data.error?.message || '書き直しの送信に失敗しました');
       }
     } catch (error) {
       console.error('[RewritePage] Submit error:', error);
-      alert(`エラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSubmitError(error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setSubmitting(false);
     }
@@ -261,6 +283,33 @@ export default function RewritePage() {
               </div>
             </div>
           </div>
+
+          {/* エラー表示 */}
+          {submitError && (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                <p className="text-sm text-red-800">{submitError}</p>
+              </div>
+              {isRateLimit && (
+                <div className={cn('p-4', cardBase, 'border-amber-200 bg-amber-50/80')}>
+                  <h3 className="mb-1 font-semibold text-amber-900">
+                    You&apos;ve reached today&apos;s free limit.
+                  </h3>
+                  <p className="mb-3 text-sm text-amber-800">
+                    Upgrade to Pro to continue, or try again tomorrow.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <Link href={upgradeUrl} className={cn(buttonPrimary)}>
+                      View pricing
+                    </Link>
+                    <Link href="/home" className={cn(buttonSecondary, 'inline-flex')}>
+                      Back to Home
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* アクションボタン */}
           <div className="flex gap-4">
