@@ -7,6 +7,15 @@ import { Layout } from '@/components/layout/Layout';
 import type { AttemptHistory, ProgressSummary } from '@/lib/domain/types';
 import type { ApiResponse } from '@/lib/api/response';
 
+type UsageTodayData = {
+  is_pro: boolean;
+  writing_limit: number;
+  speaking_limit: number;
+  writing_remaining: number;
+  speaking_remaining: number;
+  reset_at: string;
+};
+
 export interface SpeakingHistoryItem {
   id: string;
   created_at: string;
@@ -24,7 +33,17 @@ export default function ProgressPage() {
   const [speakingHistory, setSpeakingHistory] = useState<SpeakingHistoryItem[]>([]);
   const [speakingHistoryLoading, setSpeakingHistoryLoading] = useState(true);
   const [speakingHistoryError, setSpeakingHistoryError] = useState<string | null>(null);
+  const [usageToday, setUsageToday] = useState<UsageTodayData | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/usage/today')
+      .then((res) => res.json())
+      .then((data: ApiResponse<UsageTodayData>) => {
+        if (data.ok && data.data) setUsageToday(data.data);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     // 履歴取得
@@ -86,6 +105,14 @@ export default function ProgressPage() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
+          {usageToday && !usageToday.is_pro && (
+            <p className="text-sm text-gray-600 flex flex-wrap items-baseline gap-x-1">
+              Need more attempts?{' '}
+              <Link href="/#pricing" className="text-indigo-600 hover:underline">
+                View pricing
+              </Link>
+            </p>
+          )}
           {/* Attempts一覧 */}
           <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">Attempts一覧（最新10件）</h2>

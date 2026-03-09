@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary, textareaBase } from '@/lib/ui/theme';
@@ -97,8 +97,18 @@ function buildEvaluationPromptText(
 
 const MIN_ANSWER_LENGTH = 30;
 
+type UsageTodayData = {
+  is_pro: boolean;
+  writing_limit: number;
+  speaking_limit: number;
+  writing_remaining: number;
+  speaking_remaining: number;
+  reset_at: string;
+};
+
 export default function ExamSpeakingPage() {
   const [phase, setPhase] = useState<Phase>('idle');
+  const [usageToday, setUsageToday] = useState<UsageTodayData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [topic, setTopic] = useState<string>(TOPICS[0].value);
@@ -110,6 +120,15 @@ export default function ExamSpeakingPage() {
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [answer, setAnswer] = useState('');
   const [feedbackRow, setFeedbackRow] = useState<Record<string, unknown> | null>(null);
+
+  useEffect(() => {
+    fetch('/api/usage/today')
+      .then((res) => res.json())
+      .then((data: ApiResponse<UsageTodayData>) => {
+        if (data.ok && data.data) setUsageToday(data.data);
+      })
+      .catch(() => {});
+  }, []);
 
   const isLoading =
     phase === 'creating_session' ||
@@ -285,7 +304,43 @@ export default function ExamSpeakingPage() {
         )}
 
         {phase === 'idle' && (
-          <div className={cn('p-6', cardBase)}>
+          <>
+            {usageToday && (
+              <p className={cn(
+                'mb-4 text-sm flex flex-wrap items-baseline gap-x-2',
+                usageToday.is_pro
+                  ? 'text-gray-500'
+                  : (usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0)
+                    ? 'text-red-700'
+                    : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1)
+                      ? 'text-amber-700'
+                      : 'text-gray-500'
+              )}>
+                <span className="font-medium text-inherit">Remaining today:</span>
+                {usageToday.is_pro ? (
+                  <span>Unlimited (Pro)</span>
+                ) : (
+                  <>
+                    <span>
+                      Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} • Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
+                    </span>
+                    {usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0 ? (
+                      <>
+                        <span>No free attempts left today.</span>
+                        <Link href="/#pricing" className="underline hover:no-underline">
+                          View pricing
+                        </Link>
+                      </>
+                    ) : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1) ? (
+                      <span>Last free attempt today.</span>
+                    ) : (
+                      <span className="text-xs text-text-subtle">(Resets at 00:00 JST)</span>
+                    )}
+                  </>
+                )}
+              </p>
+            )}
+            <div className={cn('p-6', cardBase)}>
             <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Settings</h2>
             <div className="space-y-4">
               <div>
@@ -343,6 +398,7 @@ export default function ExamSpeakingPage() {
               </button>
             </div>
           </div>
+          </>
         )}
 
         {(phase === 'creating_session' || phase === 'generating_prompt') && (

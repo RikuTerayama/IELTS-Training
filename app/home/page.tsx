@@ -78,10 +78,29 @@ const Icons = {
   ArrowRight: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>,
 };
 
+type UsageTodayData = {
+  is_pro: boolean;
+  writing_limit: number;
+  speaking_limit: number;
+  writing_remaining: number;
+  speaking_remaining: number;
+  reset_at: string;
+};
+
 export default function HomePage() {
   const [menu, setMenu] = useState<TodayMenu | null>(null);
+  const [usageToday, setUsageToday] = useState<UsageTodayData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/usage/today')
+      .then((res) => res.json())
+      .then((data: ApiResponse<UsageTodayData>) => {
+        if (data.ok && data.data) setUsageToday(data.data);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch('/api/menu/today')
@@ -318,6 +337,41 @@ export default function HomePage() {
             <div>
               <h3 className="text-lg font-bold text-text mb-1">Exam Mode</h3>
               <p className="text-sm text-text-muted mb-4">Simulate test-day performance with AI interviewer and essay evaluation.</p>
+              {usageToday && (
+                <p className={cn(
+                  'mb-4 text-sm flex flex-wrap items-baseline gap-x-2',
+                  usageToday.is_pro
+                    ? 'text-gray-500'
+                    : (usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0)
+                      ? 'text-red-700'
+                      : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1)
+                        ? 'text-amber-700'
+                        : 'text-gray-500'
+                )}>
+                  <span className="font-medium text-inherit">Remaining today:</span>
+                  {usageToday.is_pro ? (
+                    <span>Unlimited (Pro)</span>
+                  ) : (
+                    <>
+                      <span>
+                        Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} • Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
+                      </span>
+                      {usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0 ? (
+                        <>
+                          <span>No free attempts left today.</span>
+                          <Link href="/#pricing" className="underline hover:no-underline">
+                            View pricing
+                          </Link>
+                        </>
+                      ) : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1) ? (
+                        <span>Last free attempt today.</span>
+                      ) : (
+                        <span className="text-xs text-text-subtle">(Resets at 00:00 JST)</span>
+                      )}
+                    </>
+                  )}
+                </p>
+              )}
               <div className="grid md:grid-cols-2 gap-6">
                 {examCards.map((item) => {
                   const color = getModuleColor(item.module, false);

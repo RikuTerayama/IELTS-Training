@@ -552,62 +552,113 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Pricing セクション */}
-        <section id="pricing" className="py-24 bg-surface border-y border-border">
-          <div className="container mx-auto px-6">
-            <FadeIn className="max-w-3xl mx-auto text-center mb-16">
+        {/* Pricing セクション - #pricing で飛んできたユーザーがProの価値を即理解できる */}
+        <section
+          id="pricing"
+          className="py-24 bg-surface border-y border-border scroll-mt-24"
+        >
+          <div className="container mx-auto px-6 max-w-5xl">
+            <FadeIn className="text-center mb-12">
               <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
-                今は完全無料で始められます
+                Pricing
               </h2>
-              <p className="text-text-muted text-lg">
-                MVP期間中は、すべての機能を無料でお試しいただけます。
+              <p className="text-text-muted text-lg max-w-xl mx-auto">
+                Start free. Upgrade when you hit the daily limit.
               </p>
             </FadeIn>
-            
-            <FadeIn delay={0.2} className="max-w-md mx-auto">
-              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl p-8 border-2 border-indigo-200 shadow-xl relative overflow-hidden text-slate-900">
-                <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                  LIMITED TIME
-                </div>
-                <div className="text-center mb-6">
-                  <div className="inline-block px-3 py-1 mb-4 rounded-full bg-indigo-600/10 text-indigo-700 text-xs font-bold">
-                    FREE PLAN
+
+            <FadeIn delay={0.1} className="grid md:grid-cols-2 gap-8">
+              {/* Free */}
+              <div className="rounded-2xl border-2 border-border bg-surface-2 p-8 flex flex-col">
+                <div className="mb-6">
+                  <div className="inline-block px-3 py-1 mb-3 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
+                    FREE
                   </div>
-                  <div className="text-5xl font-bold text-slate-900 mb-2">
-                    ¥0
-                  </div>
-                  <div className="text-slate-600 text-sm">/ 月</div>
+                  <div className="text-3xl font-bold text-text mb-1">¥0</div>
+                  <div className="text-sm text-text-muted">/ month</div>
                 </div>
-                
-                <ul className="space-y-4 mb-8">
-                  {[
-                    'AIによる即時フィードバック（無制限）',
-                    'Writing Task 1/2 練習',
-                    'Speaking練習',
-                    '語彙・熟語・表現バンク学習',
-                    '進捗可視化・弱点分析',
-                    '忘却曲線ベースの復習システム',
-                  ].map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="mt-0.5 text-indigo-600 shrink-0">
-                        <Icons.Check className="w-5 h-5" />
-                      </div>
-                      <span className="text-slate-900 font-medium">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
+                <div className="mb-6 space-y-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-text mb-2 uppercase tracking-wider">
+                      Daily limits
+                    </h4>
+                    <ul className="space-y-1 text-sm text-text-muted">
+                      <li>• Writing AI: up to 10 / day</li>
+                      <li>• Speaking AI: up to 5 / day</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-text mb-2 uppercase tracking-wider">
+                      Includes
+                    </h4>
+                    <ul className="space-y-2">
+                      {['Practice (PREP, drills)', 'Exam mode (basic)', 'Progress tracking (recent)'].map(
+                        (item, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Icons.Check className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                            <span className="text-sm text-text">{item}</span>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                </div>
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30"
+                  className="mt-auto w-full py-3 px-4 border-2 border-border bg-surface text-text font-semibold rounded-lg hover:bg-surface-2 transition-colors"
                 >
-                  無料で始める
+                  Start for free
                 </button>
               </div>
+
+              {/* Pro */}
+              <div className="rounded-2xl border-2 border-indigo-300 bg-gradient-to-br from-indigo-50 to-blue-50 p-8 flex flex-col relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  EARLY ACCESS
+                </div>
+                <div className="mb-6">
+                  <div className="inline-block px-3 py-1 mb-3 rounded-full bg-indigo-600/15 text-indigo-700 text-xs font-bold">
+                    PRO
+                  </div>
+                  <div className="text-3xl font-bold text-text mb-1">
+                    Early access pricing
+                  </div>
+                  <div className="text-sm text-text-muted">
+                    (limited slots)
+                  </div>
+                </div>
+                <div className="mb-6 space-y-4">
+                  <ul className="space-y-2">
+                    {[
+                      'Unlimited (or higher limits) for Writing / Speaking AI',
+                      'Faster practice (no waiting)',
+                      'Full feedback history',
+                      'Priority compute (future)',
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <Icons.Check className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                        <span className="text-sm text-text">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <a
+                  href="#contact"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('contact');
+                  }}
+                  className="mt-auto w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 text-center"
+                >
+                  Request Pro
+                </a>
+              </div>
             </FadeIn>
-            
-            <FadeIn delay={0.3} className="mt-8 text-center text-sm text-text-muted">
-              <p>※ 将来的に有料プランを導入する可能性がありますが、現在のユーザーには移行期間を設けます。</p>
+
+            <FadeIn delay={0.2} className="mt-8 text-center text-sm text-text-muted">
+              <p>
+                Early access pricing (limited slots). Payment integration coming soon.
+              </p>
             </FadeIn>
           </div>
         </section>
@@ -679,7 +730,7 @@ export default function LandingPage() {
         </section>
 
         {/* Contact セクション（Google Forms 埋め込み + 別タブリンク + mailto） */}
-        <section id="contact" className="py-24 bg-bg-secondary">
+        <section id="contact" className="py-24 bg-bg-secondary scroll-mt-24">
           <div className="container mx-auto px-6">
             <div className="max-w-3xl mx-auto">
               <FadeIn className="text-center mb-12">
