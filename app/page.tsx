@@ -653,22 +653,26 @@ export default function LandingPage() {
                     ))}
                   </ul>
                 </div>
-                <a
-                  href="#contact"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('contact');
-                  }}
+                <Link
+                  href="/pricing"
                   className="mt-auto w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 text-center"
                 >
-                  Request Pro
-                </a>
+                  Upgrade to Pro
+                </Link>
+                <p className="mt-3 text-center">
+                  <Link
+                    href="/pro/request"
+                    className="text-xs text-indigo-600 hover:text-indigo-700 hover:underline"
+                  >
+                    Need manual approval? Request Pro
+                  </Link>
+                </p>
               </div>
             </FadeIn>
 
             <FadeIn delay={0.2} className="mt-8 text-center text-sm text-text-muted">
               <p>
-                Early access pricing (limited slots). Payment integration coming soon.
+                Secure checkout via Stripe.
               </p>
             </FadeIn>
           </div>
