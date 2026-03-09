@@ -1,6 +1,6 @@
-# Billing And Limits (Pre-Payment Operation)
+# Billing And Limits (Stripe Operation)
 
-This document defines how to operate Free limits and temporary Pro access before payment integration is available.
+This document defines Free limits and Stripe billing operation after Checkout, Webhook, and Portal integration.
 
 ## Free Limits (Default)
 
@@ -34,9 +34,78 @@ Only calls that actually enter an LLM branch are counted.
   - Counted only when LLM generation path is used
 - `POST /api/speaking/evaluations`
 
-## 429 Response Behavior
+## Stripe Environment Variables
 
-When limit or minimum interval is exceeded, APIs return HTTP `429` with `ApiResponse` shape:
+Required:
+
+- `STRIPE_SECRET_KEY` (server only)
+- `STRIPE_WEBHOOK_SECRET` (server only)
+- `STRIPE_PRICE_ID_PRO_MONTHLY` (server only)
+- `STRIPE_PRICE_ID_PRO_ANNUAL` (server only)
+
+Optional / compatibility:
+
+- `STRIPE_PRICE_ID_PRO` (legacy fallback for missing monthly/annual IDs)
+- `STRIPE_PORTAL_RETURN_URL` (default fallback is `${SITE_URL}/home`)
+- `NEXT_PUBLIC_SITE_URL` or `SITE_URL` (used for absolute success/cancel URLs)
+
+Existing limits env (still used):
+
+- `FREE_DAILY_WRITING_LIMIT`
+- `FREE_DAILY_SPEAKING_LIMIT`
+- `LLM_MIN_INTERVAL_SECONDS`
+- `UPGRADE_URL`
+
+## Billing Routes
+
+- Checkout API: `POST /api/billing/checkout`
+  - Starts subscription for `monthly` or `annual`
+  - Returns Stripe Checkout URL
+- Webhook API: `POST /api/billing/webhook`
+  - Verifies Stripe signature
+  - Syncs `profiles.plan` using subscription status
+- Portal API: `POST /api/billing/portal`
+  - Returns Stripe Customer Portal URL
+- Manage page: `/billing/manage`
+  - Calls portal API and redirects user to Stripe Portal
+
+## Return URLs
+
+- Success: `/billing/success`
+- Cancel: `/pricing?canceled=1`
+- Portal return: `/home` (or `STRIPE_PORTAL_RETURN_URL` if set)
+
+## Plan Source Of Truth
+
+The only source of truth for plan updates is Stripe Webhook.
+
+- `checkout.session.completed`
+  - Saves `stripe_customer_id` and `stripe_subscription_id` (best effort)
+  - Does not update `profiles.plan`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+  - Updates `profiles.plan` by subscription status:
+    - `active` or `trialing` => `pro`
+    - otherwise => `free`
+
+Do not update `profiles.plan` in Checkout API handlers.
+
+## Stripe Dashboard Setup (Webhook)
+
+1. Open Stripe Dashboard -> Developers -> Webhooks.
+2. Add endpoint:
+   - Production: `https://ielts-training.onrender.com/api/billing/webhook`
+3. Subscribe events:
+   - `checkout.session.completed`
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
+4. Copy Signing Secret and set `STRIPE_WEBHOOK_SECRET` in hosting env.
+
+## 429 Response Behavior (Limits)
+
+When usage limit or minimum interval is exceeded, APIs return HTTP `429` in `ApiResponse` shape:
 
 ```json
 {
@@ -55,49 +124,15 @@ When limit or minimum interval is exceeded, APIs return HTTP `429` with `ApiResp
 }
 ```
 
-`reason` is currently:
+`reason` values:
 
 - `DAILY_LIMIT`
 - `TOO_FAST`
 
-## Environment Variables
-
-- `FREE_DAILY_WRITING_LIMIT`
-- `FREE_DAILY_SPEAKING_LIMIT`
-- `LLM_MIN_INTERVAL_SECONDS`
-- `UPGRADE_URL` (current default/fallback: `/#pricing`)
-- `PRO_USER_IDS` (comma-separated Supabase user IDs)
-
-## Temporary Pro Grant Flow (Before Payment)
-
-Use `PRO_USER_IDS` to bypass usage counting for specific users.
-
-### Grant Pro
-
-1. Get target user `id` from Supabase Auth / `profiles`.
-2. Add the ID to `PRO_USER_IDS` (comma-separated).
-3. Save env vars and redeploy (or apply env update in hosting platform).
-4. Verify target user can continue beyond Free daily limits.
-
-### Revoke Pro
-
-1. Remove the user ID from `PRO_USER_IDS`.
-2. Save env vars and redeploy.
-3. Verify limits apply again for that user.
-
-## Pro Request Entry (Current)
-
-- Current request entry is LP contact section (`/#contact`, Google Form).
-- Pricing anchor is `/#pricing` and used by upgrade CTA fallback.
-
 ## Migration Apply Memo
 
-Before enabling this in production DB, apply:
+Apply these migrations in production DB:
 
 - `supabase/migrations/008_usage_limits.sql`
-
-This migration includes:
-
-- `public.user_usage_daily` table
-- RLS + policies
-- `public.consume_usage(...)` RPC (atomic check + increment)
+- `supabase/migrations/010_profiles_plan.sql`
+- `supabase/migrations/011_profiles_billing.sql`

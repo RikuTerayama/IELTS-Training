@@ -29,20 +29,15 @@ type UsageRow = {
   speaking_count: number | null;
 };
 
+type ProfileRow = {
+  plan: string | null;
+};
+
 function parseEnvInt(name: string, fallback: number): number {
   const raw = process.env[name];
   if (!raw) return fallback;
   const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function getProUserIds(): Set<string> {
-  const raw = process.env.PRO_USER_IDS || '';
-  const ids = raw
-    .split(',')
-    .map((id) => id.trim())
-    .filter(Boolean);
-  return new Set(ids);
 }
 
 function toResetAt(usageDate: string): string {
@@ -72,7 +67,12 @@ export async function GET(): Promise<Response> {
       'FREE_DAILY_SPEAKING_LIMIT',
       DEFAULT_FREE_DAILY_SPEAKING_LIMIT
     );
-    const isPro = getProUserIds().has(user.id);
+    const { data: profileRow, error: profileError } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .maybeSingle<ProfileRow>();
+    const isPro = !profileError && profileRow?.plan === 'pro';
 
     const { data: usageRow, error: usageError } = await supabase
       .from('user_usage_daily')
