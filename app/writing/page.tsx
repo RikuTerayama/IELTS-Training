@@ -4,6 +4,19 @@ import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
+const TASK2_TOPICS = [
+  { slug: 'education', title: 'Education' },
+  { slug: 'technology', title: 'Technology' },
+  { slug: 'environment', title: 'Environment' },
+  { slug: 'health', title: 'Health' },
+  { slug: 'work-career', title: 'Work & Career' },
+  { slug: 'government-society', title: 'Government & Society' },
+  { slug: 'media-advertising', title: 'Media & Advertising' },
+  { slug: 'crime-punishment', title: 'Crime & Punishment' },
+  { slug: 'culture-traditions', title: 'Culture & Traditions' },
+  { slug: 'transport-urban', title: 'Transport & Urban Life' },
+] as const;
+
 const WRITING_FAQ = [
   {
     question: 'What’s the difference between practice and exam mode?',
@@ -114,6 +127,29 @@ export default function WritingPage() {
               </p>
             </li>
           </ol>
+        </section>
+
+        {/* Task 2 Topics */}
+        <section className="mb-16" aria-labelledby="topics-heading">
+          <h2 id="topics-heading" className="mb-6 text-xl font-bold text-text">
+            Task 2 topics
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {TASK2_TOPICS.map((t) => (
+              <Link
+                key={t.slug}
+                href={`/writing/task2/topics/${t.slug}`}
+                className={cn(
+                  'p-6 rounded-2xl border border-border bg-surface text-left transition-all',
+                  'hover:shadow-md hover:border-indigo-200 hover:-translate-y-0.5',
+                  cardBase
+                )}
+              >
+                <h3 className="font-semibold text-text">{t.title}</h3>
+                <p className="mt-2 text-sm text-indigo-600">View topic →</p>
+              </Link>
+            ))}
+          </div>
         </section>
 
         {/* FAQ */}
