@@ -114,13 +114,18 @@ function getUsageLimitConfig(overrideUpgradeUrl?: string): UsageLimitConfig {
   };
 }
 
-function getProUserIds(): Set<string> {
-  const raw = process.env.PRO_USER_IDS || '';
-  const ids = raw
-    .split(',')
-    .map((id) => id.trim())
-    .filter(Boolean);
-  return new Set(ids);
+async function isProPlanUser(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', userId)
+    .maybeSingle<{ plan: string | null }>();
+
+  if (error || !data) {
+    return false;
+  }
+
+  return data.plan === 'pro';
 }
 
 function toResult(row: ConsumeUsageRpcRow): ConsumeUsageResult {
@@ -248,7 +253,7 @@ export async function consumeOrThrow429(params: ConsumeOrThrow429Params): Promis
   const llmUsed = params.llmUsed ?? true;
   if (!llmUsed) return;
 
-  if (getProUserIds().has(params.userId)) {
+  if (await isProPlanUser(params.supabase, params.userId)) {
     return;
   }
 
