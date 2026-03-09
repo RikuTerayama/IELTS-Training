@@ -97,6 +97,39 @@ const COMMON_MISTAKES = [
   'Forgetting a clear conclusion that restates your position.',
 ];
 
+const TASK2_TOPIC_FAQ = [
+  {
+    question: 'How should I structure a Task 2 essay on this topic?',
+    answer:
+      'Use a clear 4-paragraph structure: introduction, two body paragraphs, and conclusion. Focus each body paragraph on one main reason or example.',
+  },
+  {
+    question: 'What vocabulary should I use?',
+    answer:
+      'Use topic-specific nouns and verbs, plus linking phrases (however, moreover, as a result). Avoid memorized templates; keep it natural.',
+  },
+  {
+    question: 'Can I practice this in exam mode?',
+    answer:
+      'Yes. Use Exam Mode to write under test-like conditions and get band-style feedback.',
+  },
+] as const;
+
+function buildFaqPageJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: TASK2_TOPIC_FAQ.map((item) => ({
+      '@type': 'Question' as const,
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer' as const,
+        text: item.answer,
+      },
+    })),
+  };
+}
+
 export async function generateStaticParams() {
   return task2Topics.map((t) => ({ slug: t.slug }));
 }
@@ -112,8 +145,14 @@ export default async function Task2TopicPage({ params }: Props) {
   const examUrl = '/task/select?task_type=Task%202&mode=exam';
   const practiceUrl = '/task/select?task_type=Task%202';
 
+  const faqJsonLd = buildFaqPageJsonLd();
+
   return (
     <Layout>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         {/* Hero */}
         <section className="mb-12 text-center">
@@ -208,6 +247,26 @@ export default async function Task2TopicPage({ params }: Props) {
               View pricing
             </Link>
           </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="mt-12 border-t border-border pt-8" aria-labelledby="faq-heading">
+          <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
+            FAQ
+          </h2>
+          <ul className="space-y-4">
+            {TASK2_TOPIC_FAQ.map((item, i) => (
+              <li key={i} className={cn('rounded-lg border border-border bg-surface p-4', cardBase)}>
+                <h3 className="font-semibold text-text">{item.question}</h3>
+                <p className="mt-2 text-sm text-text-muted leading-relaxed">{item.answer}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-sm text-text-muted">
+            <Link href={examUrl} className="text-indigo-600 hover:underline">Try exam mode</Link>
+            {' · '}
+            <Link href="/pricing" className="text-indigo-600 hover:underline">View pricing</Link>
+          </p>
         </section>
       </div>
     </Layout>
