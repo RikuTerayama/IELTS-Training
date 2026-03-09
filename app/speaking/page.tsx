@@ -5,11 +5,11 @@ import { Layout } from '@/components/layout/Layout';
 import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 const TOPICS = [
-  { value: 'work_study', label: 'Work & Study' },
-  { value: 'hometown', label: 'Hometown' },
-  { value: 'free_time', label: 'Free Time' },
-  { value: 'travel', label: 'Travel' },
-  { value: 'technology', label: 'Technology' },
+  { value: 'work_study', label: 'Work & Study', slug: 'work-study' },
+  { value: 'hometown', label: 'Hometown', slug: 'hometown' },
+  { value: 'free_time', label: 'Free Time', slug: 'free-time' },
+  { value: 'travel', label: 'Travel', slug: 'travel' },
+  { value: 'technology', label: 'Technology', slug: 'technology' },
 ] as const;
 
 const SPEAKING_FAQ = [
@@ -124,7 +124,7 @@ export default function SpeakingPage() {
             {TOPICS.map((t) => (
               <Link
                 key={t.value}
-                href="/exam/speaking"
+                href={`/speaking/topics/${t.slug}`}
                 className={cn(
                   'p-6 rounded-2xl border border-border bg-surface text-left transition-all',
                   'hover:shadow-md hover:border-indigo-200 hover:-translate-y-0.5',
@@ -132,7 +132,7 @@ export default function SpeakingPage() {
                 )}
               >
                 <h3 className="font-semibold text-text">{t.label}</h3>
-                <p className="mt-2 text-sm text-indigo-600">Start →</p>
+                <p className="mt-2 text-sm text-indigo-600">View topic →</p>
               </Link>
             ))}
           </div>
