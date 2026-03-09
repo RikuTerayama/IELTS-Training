@@ -306,8 +306,17 @@ export default function ExamSpeakingPage() {
         {phase === 'idle' && (
           <>
             {usageToday && (
-              <p className="mb-4 text-sm text-gray-500 flex flex-wrap items-baseline gap-x-2">
-                <span className="font-medium text-text-muted">Remaining today:</span>
+              <p className={cn(
+                'mb-4 text-sm flex flex-wrap items-baseline gap-x-2',
+                usageToday.is_pro
+                  ? 'text-gray-500'
+                  : (usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0)
+                    ? 'text-red-700'
+                    : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1)
+                      ? 'text-amber-700'
+                      : 'text-gray-500'
+              )}>
+                <span className="font-medium text-inherit">Remaining today:</span>
                 {usageToday.is_pro ? (
                   <span>Unlimited (Pro)</span>
                 ) : (
@@ -315,7 +324,18 @@ export default function ExamSpeakingPage() {
                     <span>
                       Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} • Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
                     </span>
-                    <span className="text-xs text-text-subtle">(Resets at 00:00 JST)</span>
+                    {usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0 ? (
+                      <>
+                        <span>No free attempts left today.</span>
+                        <Link href="/#pricing" className="underline hover:no-underline">
+                          View pricing
+                        </Link>
+                      </>
+                    ) : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1) ? (
+                      <span>Last free attempt today.</span>
+                    ) : (
+                      <span className="text-xs text-text-subtle">(Resets at 00:00 JST)</span>
+                    )}
                   </>
                 )}
               </p>
