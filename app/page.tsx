@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { getContactFormEmbedUrl, CONTACT_GOOGLE_FORM_URL, CONTACT_EMAIL, CONTACT_MAILTO, BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
+import { buildContactGoogleFormUrl, CONTACT_EMAIL, CONTACT_MAILTO, BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 // --- アニメーションコンポーネント ---
@@ -114,7 +114,18 @@ export default function LandingPage() {
   const [resendingEmail, setResendingEmail] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // --- スムーズスクロール機能 ---
   const scrollToSection = (id: string) => {
@@ -740,11 +751,16 @@ export default function LandingPage() {
                 <p className="text-text-muted text-lg">
                   ご質問やフィードバックをお待ちしています
                 </p>
+                {userId && (
+                  <p className="mt-2 text-sm text-text-muted">
+                    Your user ID will be pre-filled to speed up approval.
+                  </p>
+                )}
               </FadeIn>
               <FadeIn delay={0.1} className="space-y-4">
                 <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
                   <iframe
-                    src={getContactFormEmbedUrl()}
+                    src={buildContactGoogleFormUrl({ userId, embedded: true })}
                     title="お問い合わせフォーム"
                     className="w-full border-0"
                     style={{ height: 'min(1000px, 90vh)' }}
@@ -752,7 +768,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
                   <a
-                    href={CONTACT_GOOGLE_FORM_URL}
+                    href={buildContactGoogleFormUrl({ userId, embedded: false })}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-indigo-600 hover:text-indigo-700 font-medium underline"
