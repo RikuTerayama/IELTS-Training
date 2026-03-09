@@ -7,7 +7,7 @@ import { Layout } from '@/components/layout/Layout';
 import type { TodayMenu } from '@/lib/api/schemas/menuToday';
 import type { ApiResponse } from '@/lib/api/response';
 import { BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
-import { cn, cardBase, cardTitle, cardDesc, buttonPrimary } from '@/lib/ui/theme';
+import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 /** AC-O1: Output は API 失敗時も消えないようフォールバックを常時利用 */
 const OUTPUT_FALLBACK: { module: string; title: string; description: string; cta: { label: string; href: string } }[] = [
@@ -338,39 +338,51 @@ export default function HomePage() {
               <h3 className="text-lg font-bold text-text mb-1">Exam Mode</h3>
               <p className="text-sm text-text-muted mb-4">Simulate test-day performance with AI interviewer and essay evaluation.</p>
               {usageToday && (
-                <p className={cn(
-                  'mb-4 text-sm flex flex-wrap items-baseline gap-x-2',
-                  usageToday.is_pro
-                    ? 'text-gray-500'
-                    : (usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0)
-                      ? 'text-red-700'
-                      : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1)
-                        ? 'text-amber-700'
-                        : 'text-gray-500'
-                )}>
-                  <span className="font-medium text-inherit">Remaining today:</span>
-                  {usageToday.is_pro ? (
-                    <span>Unlimited (Pro)</span>
-                  ) : (
-                    <>
-                      <span>
-                        Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} • Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
+                <div className="mb-4 space-y-2">
+                  <p className={cn(
+                    'text-sm flex flex-wrap items-baseline gap-x-2',
+                    usageToday.is_pro
+                      ? 'text-gray-500'
+                      : (usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0)
+                        ? 'text-red-700'
+                        : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1)
+                          ? 'text-amber-700'
+                          : 'text-gray-500'
+                  )}>
+                    <span className="font-medium text-inherit">Remaining today:</span>
+                    {usageToday.is_pro ? (
+                      <span>Unlimited (Pro)</span>
+                    ) : (
+                      <>
+                        <span>
+                          Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} • Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
+                        </span>
+                        {usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0 ? (
+                          <>
+                            <span>No free attempts left today.</span>
+                            <Link href="/#pricing" className="underline hover:no-underline">
+                              View pricing
+                            </Link>
+                          </>
+                        ) : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1) ? (
+                          <span>Last free attempt today.</span>
+                        ) : (
+                          <span className="text-xs text-text-subtle">(Resets at 00:00 JST)</span>
+                        )}
+                      </>
+                    )}
+                  </p>
+                  {usageToday.is_pro && (
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="inline-flex rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800">
+                        Pro Active
                       </span>
-                      {usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0 ? (
-                        <>
-                          <span>No free attempts left today.</span>
-                          <Link href="/#pricing" className="underline hover:no-underline">
-                            View pricing
-                          </Link>
-                        </>
-                      ) : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1) ? (
-                        <span>Last free attempt today.</span>
-                      ) : (
-                        <span className="text-xs text-text-subtle">(Resets at 00:00 JST)</span>
-                      )}
-                    </>
+                      <Link href="/billing/manage" className={cn(buttonSecondary, 'inline-flex text-sm')}>
+                        Manage billing
+                      </Link>
+                    </div>
                   )}
-                </p>
+                </div>
               )}
               <div className="grid md:grid-cols-2 gap-6">
                 {examCards.map((item) => {
