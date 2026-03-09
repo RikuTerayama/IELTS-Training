@@ -78,11 +78,21 @@ export default function PricingPage() {
 
         {!usageLoading && isPro && (
           <div className={cn('mb-6 p-6 rounded-2xl', cardBase, 'border-green-200 bg-green-50/80')}>
-            <p className="font-semibold text-green-900">You are currently Pro.</p>
-            <p className="mt-1 text-sm text-green-800">Manage your subscription below.</p>
-            <Link href="/billing/manage" className={cn(buttonSecondary, 'mt-4 inline-flex')}>
-              Manage billing
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-900">
+                Pro Active
+              </span>
+            </div>
+            <p className="mt-2 font-semibold text-green-900">You are currently Pro.</p>
+            <p className="mt-1 text-sm text-green-800">Manage your subscription or return to the app.</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link href="/billing/manage" className={cn(buttonPrimary, 'inline-flex !bg-green-600 hover:!bg-green-700')}>
+                Manage billing
+              </Link>
+              <Link href="/home" className={cn(buttonSecondary, 'inline-flex')}>
+                Go to Home
+              </Link>
+            </div>
           </div>
         )}
 
