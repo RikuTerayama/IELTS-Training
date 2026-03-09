@@ -11,10 +11,36 @@ const CONTACT_FORM_VIEW_URL =
   process.env.NEXT_PUBLIC_CONTACT_GOOGLE_FORM_URL ||
   'https://docs.google.com/forms/d/e/1FAIpQLSe8CCgMzEvuc2Nz7xNh-laT3YbyXMNVyfUsukjjg0sL7TggvQ/viewform?usp=publish-editor';
 
-/** 埋め込み用 URL（embedded=true）。iframe src に使用 */
-export function getContactFormEmbedUrl(): string {
+const CONTACT_GOOGLE_FORM_USER_ID_ENTRY =
+  process.env.NEXT_PUBLIC_CONTACT_GOOGLE_FORM_USER_ID_ENTRY || '';
+
+/**
+ * Contact Google Form URL を組み立て（embedded / userId prefill 対応）
+ * @param userId - ログイン中の場合 Supabase user_id。ある場合のみ entry に prefill
+ * @param embedded - true の場合 embedded=true を付与（iframe 用）
+ */
+export function buildContactGoogleFormUrl(params: {
+  userId?: string | null;
+  embedded?: boolean;
+}): string {
+  const { userId, embedded } = params;
   const base = CONTACT_FORM_VIEW_URL.split('?')[0];
-  return `${base}?embedded=true`;
+  const existing = CONTACT_FORM_VIEW_URL.includes('?')
+    ? new URLSearchParams(CONTACT_FORM_VIEW_URL.split('?')[1])
+    : new URLSearchParams();
+  if (embedded) {
+    existing.set('embedded', 'true');
+  }
+  if (userId && CONTACT_GOOGLE_FORM_USER_ID_ENTRY) {
+    existing.set(CONTACT_GOOGLE_FORM_USER_ID_ENTRY, encodeURIComponent(userId));
+  }
+  const query = existing.toString();
+  return query ? `${base}?${query}` : base;
+}
+
+/** 埋め込み用 URL（embedded=true）。iframe src に使用。後方互換のため維持 */
+export function getContactFormEmbedUrl(): string {
+  return buildContactGoogleFormUrl({ embedded: true });
 }
 
 /** 別タブで開く用の表示URL（そのまま） */
