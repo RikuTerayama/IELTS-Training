@@ -11,7 +11,8 @@
     "seed:lexicon": "tsx scripts/seed-lexicon.ts",
     "seed:lexicon:v2": "tsx scripts/seed-lexicon-v2.ts",
     "seed:idiom": "tsx scripts/seed-idiom.ts",
-    "seed:vocab": "tsx scripts/seed-vocab.ts"
+    "seed:vocab": "tsx scripts/seed-vocab.ts",
+    "seed:vocab:reading": "tsx scripts/seed-vocab-reading.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",

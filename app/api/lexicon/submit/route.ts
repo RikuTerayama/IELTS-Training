@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
+import type { ReadingSrsStateRow } from '@/lib/db/reading-srs';
 import { normalizeExpression } from '@/lib/lexicon/normalize';
 import { updateSRSState } from '@/lib/lexicon/srs';
 import { getTokyoDateString } from '@/lib/utils/dateTokyo';
@@ -42,10 +43,10 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    // 問題を取得
+    // 問題を取得（skill は Reading SRS 判定用）
     const { data: question, error: questionError } = await supabase
       .from('lexicon_questions')
-      .select('id, mode, correct_expression, item_id, module')
+      .select('id, mode, correct_expression, item_id, module, skill')
       .eq('id', question_id)
       .single();
 
@@ -91,18 +92,23 @@ export async function POST(request: Request): Promise<Response> {
       }
     }
 
-    // ログを保存（item_idがあればそれも保存して紐付ける）
+    // ログを保存。readingはitem_idなし・question_idで紐付け
+    const logPayload: Record<string, unknown> = {
+      user_id: user.id,
+      mode: question.mode,
+      module: moduleName,
+      is_correct: isCorrect,
+      user_answer: user_answer ?? null,
+      time_ms: time_ms ?? null,
+    };
+    if (itemId) {
+      logPayload.item_id = itemId;
+    } else {
+      logPayload.question_id = question_id;
+    }
     const { error: logError } = await supabase
       .from('lexicon_logs')
-      .insert({
-        user_id: user.id,
-        item_id: itemId || null,
-        mode: question.mode,
-        module: moduleName,
-        is_correct: isCorrect,
-        user_answer: user_answer || null,
-        time_ms: time_ms || null,
-      });
+      .insert(logPayload);
 
     if (logError) {
       console.error('[POST /api/lexicon/submit] Log insert error:', logError);
@@ -112,11 +118,10 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    // SRS状態を更新（item_idがある場合のみ）
+    const today = getTokyoDateString();
+
+    // SRS状態を更新（item_id あり → lexicon_srs_state / Reading → reading_srs_state）
     if (itemId) {
-      const today = getTokyoDateString();
-      
-      // 現在のSRS状態を取得
       const { data: currentState } = await supabase
         .from('lexicon_srs_state')
         .select('stage, next_review_on, last_review_on, correct_streak, total_correct, total_wrong')
@@ -126,10 +131,8 @@ export async function POST(request: Request): Promise<Response> {
         .eq('module', moduleName)
         .single();
 
-      // SRS状態を更新
       const updatedState = updateSRSState(currentState, isCorrect, today);
 
-      // upsert
       const { error: srsError } = await supabase
         .from('lexicon_srs_state')
         .upsert(
@@ -145,14 +148,47 @@ export async function POST(request: Request): Promise<Response> {
             total_correct: updatedState.total_correct,
             total_wrong: updatedState.total_wrong,
           },
-          {
-            onConflict: 'user_id,item_id,mode',
-          }
+          { onConflict: 'user_id,item_id,mode' }
         );
 
       if (srsError) {
         console.error('[POST /api/lexicon/submit] SRS update error:', srsError);
-        // SRS更新エラーはログのみ（回答は保存済み）
+      }
+    } else if (question.skill === 'reading') {
+      // Reading: question_id ベースで reading_srs_state を更新
+      const { data: currentState } = await supabase
+        .from('reading_srs_state')
+        .select('stage, next_review_on, last_review_on, correct_streak, total_correct, total_wrong')
+        .eq('user_id', user.id)
+        .eq('question_id', question_id)
+        .eq('mode', question.mode)
+        .single();
+
+      const updatedState = updateSRSState(
+        currentState as Pick<ReadingSrsStateRow, 'stage' | 'next_review_on' | 'last_review_on' | 'correct_streak' | 'total_correct' | 'total_wrong'> | null,
+        isCorrect,
+        today
+      );
+
+      const { error: srsError } = await supabase
+        .from('reading_srs_state')
+        .upsert(
+          {
+            user_id: user.id,
+            question_id: question_id,
+            mode: question.mode,
+            stage: updatedState.stage,
+            next_review_on: updatedState.next_review_on,
+            last_review_on: updatedState.last_review_on,
+            correct_streak: updatedState.correct_streak,
+            total_correct: updatedState.total_correct,
+            total_wrong: updatedState.total_wrong,
+          },
+          { onConflict: 'user_id,question_id,mode' }
+        );
+
+      if (srsError) {
+        console.error('[POST /api/lexicon/submit] Reading SRS update error:', srsError);
       }
     }
 

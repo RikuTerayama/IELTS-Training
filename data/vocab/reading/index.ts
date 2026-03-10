@@ -1,0 +1,75 @@
+/**
+ * Reading Academic v1 – combined seed and validation
+ */
+
+import { PARAPHRASE_DRILL_SEED } from './paraphraseDrill';
+import { MATCHING_HEADINGS_SEED } from './matchingHeadings';
+import { TFNG_SEED } from './tfng';
+import { SUMMARY_COMPLETION_SEED } from './summaryCompletion';
+import type { ReadingQuestionSeed } from './types';
+import { READING_TOPICS, READING_DIFFICULTIES } from './types';
+
+export * from './types';
+export { PARAPHRASE_DRILL_SEED } from './paraphraseDrill';
+export { MATCHING_HEADINGS_SEED } from './matchingHeadings';
+export { TFNG_SEED } from './tfng';
+export { SUMMARY_COMPLETION_SEED } from './summaryCompletion';
+
+export const READING_ACADEMIC_SEED: ReadingQuestionSeed[] = [
+  ...PARAPHRASE_DRILL_SEED,
+  ...MATCHING_HEADINGS_SEED,
+  ...TFNG_SEED,
+  ...SUMMARY_COMPLETION_SEED,
+];
+
+export interface ValidationResult {
+  ok: boolean;
+  errors: string[];
+}
+
+/**
+ * Simple validation: required fields, choices count, duplicates, topic/difficulty
+ */
+export function validateReadingSeed(questions: ReadingQuestionSeed[]): ValidationResult {
+  const errors: string[] = [];
+  const seen = new Set<string>();
+
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i];
+    const prefix = `Question ${i + 1} (${q.question_type}):`;
+
+    if (!q.prompt?.trim()) errors.push(`${prefix} missing prompt`);
+    if (!q.correct_expression?.trim()) errors.push(`${prefix} missing correct_expression`);
+    if (!q.passage_excerpt?.trim()) errors.push(`${prefix} missing passage_excerpt`);
+    if (!q.category?.trim()) errors.push(`${prefix} missing category`);
+    if (!q.mode || !['click', 'typing'].includes(q.mode)) errors.push(`${prefix} invalid mode`);
+
+    if (q.mode === 'click') {
+      if (!Array.isArray(q.choices) || q.choices.length < 2) {
+        errors.push(`${prefix} click mode requires at least 2 choices`);
+      }
+      if (q.choices && !q.choices.includes(q.correct_expression)) {
+        errors.push(`${prefix} correct_expression must be one of the choices`);
+      }
+    }
+
+    if (q.mode === 'typing' && (q.hint_first_char == null || q.hint_length == null)) {
+      errors.push(`${prefix} typing mode should have hint_first_char and hint_length`);
+    }
+
+    const key = `${q.category}|${q.mode}|${q.prompt.slice(0, 50)}|${q.correct_expression}`;
+    if (seen.has(key)) errors.push(`${prefix} duplicate (same category, mode, prompt, answer)`);
+    seen.add(key);
+
+    if (q.meta) {
+      if (q.meta.topic && !READING_TOPICS.includes(q.meta.topic)) {
+        errors.push(`${prefix} invalid meta.topic: ${q.meta.topic}`);
+      }
+      if (q.meta.difficulty && !READING_DIFFICULTIES.includes(q.meta.difficulty)) {
+        errors.push(`${prefix} invalid meta.difficulty: ${q.meta.difficulty}`);
+      }
+    }
+  }
+
+  return { ok: errors.length === 0, errors };
+}

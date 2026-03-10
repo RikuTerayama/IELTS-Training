@@ -50,16 +50,27 @@ export async function GET(request: Request): Promise<Response> {
       );
     }
 
-    // 1. dueItems: next_review_on <= today の item_id を取得
+    // item_ids that match skill (lexicon_srs_state has no skill; filter via lexicon_items)
+    const { data: skillItems } = await supabase
+      .from('lexicon_items')
+      .select('id')
+      .eq('skill', skill)
+      .in('module', modules);
+    const skillItemIds = new Set((skillItems || []).map((i) => i.id));
+    if (skillItemIds.size === 0) {
+      return Response.json(successResponse({ date: today, items: [] }));
+    }
+
+    // 1. dueItems: next_review_on <= today, item_id in skill items
     const { data: dueStates } = await supabase
       .from('lexicon_srs_state')
       .select('item_id, module')
       .eq('user_id', user.id)
-      .eq('skill', skill)
+      .in('item_id', Array.from(skillItemIds))
       .in('module', modules)
       .lte('next_review_on', today);
 
-    const dueItemIds = new Set((dueStates || []).map(s => s.item_id));
+    const dueItemIds = new Set((dueStates || []).map((s) => s.item_id));
     const dueItemIdsByModule: Record<string, string[]> = {};
     for (const state of dueStates || []) {
       if (!dueItemIdsByModule[state.module]) {

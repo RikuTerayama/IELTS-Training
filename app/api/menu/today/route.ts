@@ -11,6 +11,7 @@ import { successResponse, errorResponse } from '@/lib/api/response';
 import { TodayMenuSchema, type TodayMenu } from '@/lib/api/schemas/menuToday';
 import { createDummyUserXPState } from '@/lib/domain/xp';
 import { createClient } from '@/lib/supabase/server';
+import { countReadingDueToday } from '@/lib/db/reading-srs';
 import { getTokyoDateString } from '@/lib/utils/dateTokyo';
 
 export async function GET(): Promise<Response> {
@@ -22,6 +23,7 @@ export async function GET(): Promise<Response> {
   let idiomDueTyping = 0;
   let vocabDueClick = 0;
   let vocabDueTyping = 0;
+  let readingDue = 0;
   let user: { id: string } | null = null;
   let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
 
@@ -102,6 +104,9 @@ export async function GET(): Promise<Response> {
         .lte('next_review_on', today);
       
       vocabDueTyping = vocabDueTypingStates?.length || 0;
+
+      // Reading (question_id ベース) due件数（共通集計と整合）
+      readingDue = await countReadingDueToday(supabase, user.id);
     }
 
     // スタブデータ: Inputセクション（最小3件）
@@ -109,8 +114,8 @@ export async function GET(): Promise<Response> {
       {
         module: "vocab",
         title: "語彙練習",
-        description: vocabDueClick + vocabDueTyping > 0
-          ? `単語の意味を覚えましょう（Due: ${vocabDueClick + vocabDueTyping}）`
+        description: vocabDueClick + vocabDueTyping + readingDue > 0
+          ? `単語の意味を覚えましょう（Due: ${vocabDueClick + vocabDueTyping + readingDue}）`
           : "単語の意味を覚えましょう",
         cta: {
           label: "開始",
@@ -177,10 +182,17 @@ export async function GET(): Promise<Response> {
         message: `Idiom reviews due today: click ${idiomDueClick}, typing ${idiomDueTyping}`,
       });
     }
-    if (user && (vocabDueClick > 0 || vocabDueTyping > 0)) {
+    if (user && (vocabDueClick > 0 || vocabDueTyping > 0 || readingDue > 0)) {
+      const parts = [];
+      if (vocabDueClick > 0 || vocabDueTyping > 0) {
+        parts.push(`vocab ${vocabDueClick + vocabDueTyping}`);
+      }
+      if (readingDue > 0) {
+        parts.push(`reading ${readingDue}`);
+      }
       notices.push({
         type: "info",
-        message: `Vocab reviews due today: click ${vocabDueClick}, typing ${vocabDueTyping}`,
+        message: `Reviews due today: ${parts.join(', ')}`,
       });
     }
 
