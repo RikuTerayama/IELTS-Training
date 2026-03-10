@@ -49,6 +49,39 @@ const QUICK_TIPS = [
   'Keep answers clear and relevant; avoid going off-topic.',
 ];
 
+const SPEAKING_TOPIC_FAQ = [
+  {
+    question: 'How do I practice Part 2 cue cards for this topic?',
+    answer:
+      'Spend 1 minute planning 2–3 ideas, then speak for 1–2 minutes with examples.',
+  },
+  {
+    question: 'Do I need a microphone?',
+    answer:
+      'Not necessarily. You can practice in text mode first, then move to voice later.',
+  },
+  {
+    question: 'How is my score calculated?',
+    answer:
+      'We provide band-style feedback across Fluency, Lexical Resource, Grammar, and Pronunciation.',
+  },
+] as const;
+
+function buildFaqPageJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: SPEAKING_TOPIC_FAQ.map((item) => ({
+      '@type': 'Question' as const,
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer' as const,
+        text: item.answer,
+      },
+    })),
+  };
+}
+
 export async function generateStaticParams() {
   return speakingTopics.map((t) => ({ slug: t.slug }));
 }
@@ -61,9 +94,14 @@ export default async function SpeakingTopicPage({ params }: Props) {
   if (!topic) notFound();
 
   const samples = SAMPLE_QUESTIONS[topic.slug];
+  const faqJsonLd = buildFaqPageJsonLd();
 
   return (
     <Layout>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         {/* Hero */}
         <section className="mb-12 text-center">
@@ -151,6 +189,26 @@ export default async function SpeakingTopicPage({ params }: Props) {
           <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
             Practice this topic in Exam Mode
           </Link>
+        </section>
+
+        {/* FAQ */}
+        <section className="mt-12 border-t border-border pt-8" aria-labelledby="faq-heading">
+          <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
+            FAQ
+          </h2>
+          <ul className="space-y-4">
+            {SPEAKING_TOPIC_FAQ.map((item, i) => (
+              <li key={i} className={cn('rounded-lg border border-border bg-surface p-4', cardBase)}>
+                <h3 className="font-semibold text-text">{item.question}</h3>
+                <p className="mt-2 text-sm text-text-muted leading-relaxed">{item.answer}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-sm text-text-muted">
+            <Link href="/exam/speaking" className="text-indigo-600 hover:underline">Start interview</Link>
+            {' · '}
+            <Link href="/pricing" className="text-indigo-600 hover:underline">View pricing</Link>
+          </p>
         </section>
       </div>
     </Layout>
