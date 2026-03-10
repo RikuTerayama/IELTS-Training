@@ -8,7 +8,8 @@ export const revalidate = 0;
 
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
-import { getTokyoDateString } from '@/lib/utils/dateTokyo';
+import { getReadingDueDate } from '@/lib/db/reading-srs';
+import type { ReadingSrsStateRow } from '@/lib/db/reading-srs';
 
 export async function GET(request: Request): Promise<Response> {
   try {
@@ -18,10 +19,15 @@ export async function GET(request: Request): Promise<Response> {
     const mode = searchParams.get('mode'); // 'click' | 'typing'
     const moduleName = searchParams.get('module') || 'lexicon'; // 'lexicon' | 'idiom' (default: 'lexicon')
     const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const reviewOnly = searchParams.get('review_only') === 'true';
+    const newOnly = searchParams.get('new_only') === 'true';
+    const questionType = searchParams.get('question_type') || undefined;
+    const topic = searchParams.get('topic') || undefined;
+    const difficulty = searchParams.get('difficulty') || undefined;
 
-    if (!skill || !['writing', 'speaking'].includes(skill)) {
+    if (!skill || !['writing', 'speaking', 'reading'].includes(skill)) {
       return Response.json(
-        errorResponse('BAD_REQUEST', 'skill parameter is required and must be "writing" or "speaking"'),
+        errorResponse('BAD_REQUEST', 'skill parameter is required and must be "writing", "speaking", or "reading"'),
         { status: 400 }
       );
     }
@@ -35,7 +41,6 @@ export async function GET(request: Request): Promise<Response> {
 
     const supabase = await createClient();
 
-    // 認証チェック
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return Response.json(
@@ -44,7 +49,104 @@ export async function GET(request: Request): Promise<Response> {
       );
     }
 
-    const today = getTokyoDateString();
+    // Reading: filters (question_type, topic, difficulty), due-first / review_only / new_only
+    if (skill === 'reading') {
+      const today = getReadingDueDate();
+
+      let query = supabase
+        .from('lexicon_questions')
+        .select('id')
+        .eq('skill', 'reading')
+        .eq('module', moduleName)
+        .eq('category', category || '')
+        .eq('mode', mode);
+
+      if (questionType) {
+        query = query.eq('question_type', questionType);
+      }
+      const metaFilter: Record<string, string> = {};
+      if (topic) metaFilter.topic = topic;
+      if (difficulty) metaFilter.difficulty = difficulty;
+      if (Object.keys(metaFilter).length > 0) {
+        query = query.contains('meta', metaFilter);
+      }
+
+      const { data: categoryQuestions, error: catErr } = await query;
+
+      if (catErr || !categoryQuestions || categoryQuestions.length === 0) {
+        return Response.json(successResponse({ questions: [] }));
+      }
+
+      const categoryQuestionIds = categoryQuestions.map((q) => q.id);
+
+      const { data: dueStates } = await supabase
+        .from('reading_srs_state')
+        .select('question_id')
+        .eq('user_id', user.id)
+        .eq('mode', mode)
+        .in('question_id', categoryQuestionIds)
+        .lte('next_review_on', today);
+      const dueRows = (dueStates || []) as Pick<ReadingSrsStateRow, 'question_id'>[];
+      const dueQuestionIds = new Set(dueRows.map((s) => s.question_id));
+
+      const { data: existingStates } = await supabase
+        .from('reading_srs_state')
+        .select('question_id')
+        .eq('user_id', user.id)
+        .eq('mode', mode)
+        .in('question_id', categoryQuestionIds);
+      const existingRows = (existingStates || []) as Pick<ReadingSrsStateRow, 'question_id'>[];
+      const existingQuestionIds = new Set(existingRows.map((s) => s.question_id));
+      const newQuestionIds = categoryQuestionIds.filter((id) => !existingQuestionIds.has(id));
+
+      const dueIds = categoryQuestionIds.filter((id) => dueQuestionIds.has(id));
+      const dueShuffled = [...dueIds].sort(() => Math.random() - 0.5);
+      const newShuffled = [...newQuestionIds].sort(() => Math.random() - 0.5);
+
+      let selectedIds: string[];
+      if (reviewOnly) {
+        selectedIds = dueShuffled.slice(0, limit);
+      } else if (newOnly) {
+        selectedIds = newShuffled.slice(0, limit);
+      } else {
+        selectedIds = [...dueShuffled.slice(0, limit)];
+        if (selectedIds.length < limit) {
+          selectedIds.push(...newShuffled.slice(0, limit - selectedIds.length));
+        }
+      }
+
+      if (selectedIds.length === 0) {
+        return Response.json(successResponse({ questions: [] }));
+      }
+
+      const { data: readingQuestions, error: readErr } = await supabase
+        .from('lexicon_questions')
+        .select('id, prompt, correct_expression, choices, hint_first_char, hint_length, item_id, question_type, strategy, passage_excerpt, meta')
+        .in('id', selectedIds);
+
+      if (readErr || !readingQuestions || readingQuestions.length === 0) {
+        return Response.json(successResponse({ questions: [] }));
+      }
+
+      const orderMap = new Map(selectedIds.map((id, i) => [id, i]));
+      const sorted = [...readingQuestions].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
+      const questions = sorted.map((q) => ({
+        question_id: q.id,
+        prompt: q.prompt,
+        choices: q.choices || undefined,
+        hint_first_char: q.hint_first_char || undefined,
+        hint_length: q.hint_length || undefined,
+        item_id: q.item_id || undefined,
+        question_type: q.question_type || undefined,
+        strategy: q.strategy || undefined,
+        passage_excerpt: q.passage_excerpt || undefined,
+        meta: q.meta || undefined,
+      }));
+
+      return Response.json(successResponse({ questions }));
+    }
+
+    const today = getReadingDueDate();
 
     // 1. dueItems: next_review_on <= today の item_id を取得（そのcategoryに属するもの）
     let dueItemsQuery = supabase

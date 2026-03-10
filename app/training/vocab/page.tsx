@@ -53,6 +53,13 @@ function VocabPageContent() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
   const [sets, setSets] = useState<LexiconSetsResponse['sets'] | null>(null);
+  /** Reading 時のみ: 全カテゴリの復習Due合計（API total_due） */
+  const [readingTotalDue, setReadingTotalDue] = useState<number | null>(null);
+  /** Reading 時のみ: フィルタ用 topic/difficulty 一覧（API filters_meta） */
+  const [readingFiltersMeta, setReadingFiltersMeta] = useState<{ topics: string[]; difficulties: string[] } | null>(null);
+  /** Reading フィルタ: topic / difficulty */
+  const [readingFilterTopic, setReadingFilterTopic] = useState<string | null>(null);
+  const [readingFilterDifficulty, setReadingFilterDifficulty] = useState<string | null>(null);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [clickTimer, setClickTimer] = useState<number | null>(null);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
@@ -60,8 +67,8 @@ function VocabPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // URL ?skill=speaking|writing のときのみ fetch して category へ。クエリ無しなら 4技能選択を表示
-  const validSkillQuery = urlSkill === 'speaking' || urlSkill === 'writing';
+  // URL ?skill=speaking|writing|reading のとき fetch して category へ
+  const validSkillQuery = urlSkill === 'speaking' || urlSkill === 'writing' || urlSkill === 'reading';
   useEffect(() => {
     if (!validSkillQuery) {
       setSelectedSkill(null);
@@ -75,8 +82,20 @@ function VocabPageContent() {
     fetchLexiconSets(urlSkill, 'vocab').then((response) => {
       if (cancelled) return;
       if (response.ok && response.data) {
-        setSets(response.data!.sets);
-        setStep('category');
+        const setsData = response.data!.sets;
+        if (Object.keys(setsData).length === 0) {
+          setError(`${urlSkill === 'reading' ? 'Reading' : 'このスキル'}のデータがありません。シードを実行してください。`);
+        } else {
+          setSets(setsData);
+          if (urlSkill === 'reading') {
+            setReadingTotalDue(response.data!.total_due ?? 0);
+            setReadingFiltersMeta(response.data!.filters_meta ?? null);
+          } else {
+            setReadingTotalDue(null);
+            setReadingFiltersMeta(null);
+          }
+          setStep('category');
+        }
       } else {
         setError(response.error?.message || 'Failed to fetch sets');
       }
@@ -89,8 +108,8 @@ function VocabPageContent() {
     return () => { cancelled = true; };
   }, [urlSkill]);
 
-  // Step A: skill選択（API呼び出しは speaking/writing のみ）
-  const handleSkillSelect = async (skill: 'speaking' | 'writing') => {
+  // Step A: skill選択
+  const handleSkillSelect = async (skill: 'speaking' | 'writing' | 'reading') => {
     setSelectedSkill(skill);
     setLoading(true);
     setError(null);
@@ -98,8 +117,20 @@ function VocabPageContent() {
     try {
       const response = await fetchLexiconSets(skill, 'vocab');
       if (response.ok && response.data) {
-        setSets(response.data.sets);
-        setStep('category');
+        const setsData = response.data.sets;
+        if (Object.keys(setsData).length === 0) {
+          setError(`${skill === 'reading' ? 'Reading' : 'このスキル'}のデータがありません。シードを実行してください。`);
+        } else {
+          setSets(setsData);
+          if (skill === 'reading') {
+            setReadingTotalDue(response.data.total_due ?? 0);
+            setReadingFiltersMeta(response.data.filters_meta ?? null);
+          } else {
+            setReadingTotalDue(null);
+            setReadingFiltersMeta(null);
+          }
+          setStep('category');
+        }
       } else {
         setError(response.error?.message || 'Failed to fetch sets');
       }
@@ -110,18 +141,49 @@ function VocabPageContent() {
     }
   };
 
-  // Step B: category + mode選択 → quiz開始（API は speaking/writing のみ）
-  const handleStartQuiz = async () => {
-    if (!selectedCategory || !selectedMode || (selectedSkill !== 'speaking' && selectedSkill !== 'writing')) return;
+  // Step B: category + mode選択 → quiz開始
+  const handleStartQuiz = async (reviewOnly?: boolean, newOnly?: boolean) => {
+    if (!selectedCategory || !selectedMode || !selectedSkill) return;
+    if (selectedSkill === 'listening') return; // listening は Coming soon
 
     setLoading(true);
     setError(null);
 
+    const readingParams =
+      selectedSkill === 'reading'
+        ? {
+            review_only: reviewOnly,
+            new_only: newOnly,
+            topic: readingFilterTopic || undefined,
+            difficulty: readingFilterDifficulty || undefined,
+          }
+        : undefined;
+
     try {
-      const response = await fetchLexiconQuestions(selectedSkill as 'speaking' | 'writing', selectedCategory, selectedMode, 10, 'vocab');
-      if (response.ok && response.data) {
-        if (response.data.questions.length === 0) {
-          setError('この条件では問題がありません');
+      const response = await fetchLexiconQuestions(
+        selectedSkill as 'speaking' | 'writing' | 'reading',
+        selectedCategory,
+        selectedMode,
+        10,
+        'vocab',
+        readingParams
+      );
+        if (response.ok && response.data) {
+        if (!response.data.questions || response.data.questions.length === 0) {
+          const isReading = selectedSkill === 'reading';
+          const cat = sets?.[selectedCategory];
+          const hasDue = cat && (cat.due_click > 0 || cat.due_typing > 0);
+          setError(
+            isReading && reviewOnly
+              ? 'このカテゴリ・モードに復習Dueはありません。別のカテゴリやモードを選ぶか、「開始」で新規＋復習を試してください。'
+              : isReading && newOnly
+                ? 'この条件に該当する新規問題はありません。フィルタを変えるか、「復習＋新規で開始」を試してください。'
+                : isReading && hasDue
+                  ? 'このカテゴリ・モードには復習Dueがありません。別のモードかカテゴリをお試しください。'
+                  : isReading
+                    ? 'このカテゴリに復習Dueも新規問題もありません。'
+                    : 'この条件では問題がありません。別のカテゴリやモードをお試しください。'
+          );
           return;
         }
 
@@ -313,17 +375,19 @@ function VocabPageContent() {
 
   // category名を表示用ラベルに変換
   const getCategoryLabel = (category: string): string => {
+    const readingLabels: Record<string, string> = {
+      vocab_reading_paraphrase_drill: 'Paraphrase Drill',
+      vocab_reading_matching_headings: 'Matching Headings',
+      vocab_reading_tfng: 'True / False / Not Given',
+      vocab_reading_summary_completion: 'Summary Completion',
+    };
+    if (readingLabels[category]) return readingLabels[category];
     const parts = category.split('_');
     if (parts[0] === 'vocab') {
-      if (parts[1] === 'task1') {
-        return `Writing / Task1 / 単語`;
-      } else if (parts[1] === 'task2') {
-        return `Writing / Task2 / 単語`;
-      } else if (parts[1] === 'speaking') {
-        return `Speaking / 単語`;
-      } else if (parts[1] === 'general') {
-        return `General / 単語`;
-      }
+      if (parts[1] === 'task1') return `Writing / Task1 / 単語`;
+      if (parts[1] === 'task2') return `Writing / Task2 / 単語`;
+      if (parts[1] === 'speaking') return `Speaking / 単語`;
+      if (parts[1] === 'general') return `General / 単語`;
       return `単語 / ${parts.slice(1).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' / ')}`;
     }
     return category;
@@ -344,8 +408,8 @@ function VocabPageContent() {
           <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須単語を覚えましょう</p>
         </div>
 
-        {/* reading/listening: Coming soon、API呼び出しなし */}
-        {(urlSkill === 'reading' || urlSkill === 'listening') ? (
+        {/* listening: Coming soon。reading は有効 */}
+        {urlSkill === 'listening' ? (
           <ComingSoonSkillsView basePath="/training/vocab" />
         ) : (
           <>
@@ -360,15 +424,20 @@ function VocabPageContent() {
           <div className="space-y-4">
             <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>スキルを選択</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-              <span
+              <button
+                onClick={() => handleSkillSelect('reading')}
+                disabled={loading}
                 className={cn(
                   'p-6 rounded-lg border-2 border-border bg-surface-2',
-                  'opacity-70 cursor-not-allowed text-left'
+                  'hover:border-accent-violet hover:bg-accent-violet/10',
+                  'transition-all duration-200 text-left',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
+                  loading && 'opacity-50 cursor-not-allowed'
                 )}
               >
                 <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Reading</div>
-                <div className={cn('text-sm', cardDesc)}>Coming soon</div>
-              </span>
+                <div className={cn('text-sm', cardDesc)}>Academic Reading v1</div>
+              </button>
               <span
                 className={cn(
                   'p-6 rounded-lg border-2 border-border bg-surface-2',
@@ -419,15 +488,68 @@ function VocabPageContent() {
                   setStep('skill');
                   setSelectedSkill(null);
                   setSets(null);
+                  setReadingTotalDue(null);
+                  setReadingFiltersMeta(null);
+                  setReadingFilterTopic(null);
+                  setReadingFilterDifficulty(null);
                 }}
                 className={cn('text-sm', buttonSecondary)}
               >
                 ← 戻る
               </button>
               <h2 className={cn('text-lg font-semibold', cardTitle)}>
-                {selectedSkill === 'writing' ? 'Writing' : 'Speaking'} - カテゴリとモードを選択
+                {selectedSkill === 'reading' ? 'Reading' : selectedSkill === 'writing' ? 'Writing' : 'Speaking'} - カテゴリとモードを選択
               </h2>
             </div>
+
+            {selectedSkill === 'reading' && (
+              <>
+                <div className={cn('rounded-lg border border-border bg-surface-2 px-4 py-3 text-sm', cardDesc)}>
+                  {readingTotalDue != null && readingTotalDue > 0 ? (
+                    <>
+                      <span className="font-medium text-primary">復習Due: {readingTotalDue}問</span>
+                      <span className="ml-1">— Due がある問題から優先して出題されます。</span>
+                    </>
+                  ) : (
+                    '復習Dueはありません。カテゴリを選んで練習を始めましょう。'
+                  )}
+                </div>
+                {readingFiltersMeta && (readingFiltersMeta.topics.length > 0 || readingFiltersMeta.difficulties.length > 0) && (
+                  <div className={cn('flex flex-wrap items-center gap-3 text-sm')}>
+                    {readingFiltersMeta.topics.length > 0 && (
+                      <label className={cn('flex items-center gap-2', cardDesc)}>
+                        <span className="font-medium text-text">Topic:</span>
+                        <select
+                          value={readingFilterTopic ?? ''}
+                          onChange={(e) => setReadingFilterTopic(e.target.value || null)}
+                          className={cn('rounded border border-border bg-surface-2 px-2 py-1 text-text')}
+                        >
+                          <option value="">All</option>
+                          {readingFiltersMeta.topics.map((t) => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
+                    {readingFiltersMeta.difficulties.length > 0 && (
+                      <label className={cn('flex items-center gap-2', cardDesc)}>
+                        <span className="font-medium text-text">Difficulty:</span>
+                        <select
+                          value={readingFilterDifficulty ?? ''}
+                          onChange={(e) => setReadingFilterDifficulty(e.target.value || null)}
+                          className={cn('rounded border border-border bg-surface-2 px-2 py-1 text-text')}
+                        >
+                          <option value="">All</option>
+                          {readingFiltersMeta.difficulties.map((d) => (
+                            <option key={d} value={d}>{d}</option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
 
             {/* Category選択 */}
             <div>
@@ -450,11 +572,11 @@ function VocabPageContent() {
                       {getCategoryLabel(category)}
                     </div>
                     <div className={cn('text-xs', cardDesc)}>
-                      問題数: Click {stats.questions_click} / Typing {stats.questions_typing}
+                      {selectedSkill === 'reading' ? '出題数' : '問題数'}: Click {stats.questions_click} / Typing {stats.questions_typing}
                     </div>
                     {(stats.due_click > 0 || stats.due_typing > 0) && (
                       <div className={cn('text-xs mt-1', 'text-primary')}>
-                        Due: Click {stats.due_click} / Typing {stats.due_typing}
+                        {selectedSkill === 'reading' ? '復習Due' : 'Due'}: Click {stats.due_click} / Typing {stats.due_typing}
                       </div>
                     )}
                   </button>
@@ -519,14 +641,42 @@ function VocabPageContent() {
 
             {/* Startボタン */}
             {selectedCategory && selectedMode && (
-              <div className="flex justify-center">
-                <button
-                  onClick={handleStartQuiz}
-                  disabled={loading}
-                  className={cn('px-6 py-3', buttonPrimary, loading && 'opacity-50 cursor-not-allowed')}
-                >
-                  {loading ? '読み込み中...' : '開始'}
-                </button>
+              <div className="flex flex-col items-center gap-3">
+                {selectedSkill === 'reading' && (sets[selectedCategory].due_click > 0 || sets[selectedCategory].due_typing > 0) && (
+                  <p className={cn('text-xs', cardDesc)}>
+                    復習Dueがある問題から優先して出題されます
+                  </p>
+                )}
+                <div className="flex flex-wrap justify-center gap-3">
+                  {selectedSkill === 'reading' && (() => {
+                    const dueForMode = selectedMode === 'click' ? sets[selectedCategory].due_click : sets[selectedCategory].due_typing;
+                    return dueForMode > 0 ? (
+                      <button
+                        onClick={() => handleStartQuiz(true, false)}
+                        disabled={loading}
+                        className={cn('px-4 py-2 rounded-lg border-2 border-primary bg-primary/10 text-primary font-medium', 'hover:bg-primary/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}
+                      >
+                        {loading ? '読み込み中...' : `Review only（${dueForMode}問）`}
+                      </button>
+                    ) : null;
+                  })()}
+                  {selectedSkill === 'reading' && (
+                    <button
+                      onClick={() => handleStartQuiz(false, true)}
+                      disabled={loading}
+                      className={cn('px-4 py-2 rounded-lg border-2 border-border bg-surface-2 font-medium', 'hover:bg-surface-2 hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}
+                    >
+                      {loading ? '...' : 'New only'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleStartQuiz()}
+                    disabled={loading}
+                    className={cn('px-6 py-3', buttonPrimary, loading && 'opacity-50 cursor-not-allowed')}
+                  >
+                    {loading ? (selectedSkill === 'reading' ? 'Reading を読み込み中...' : '読み込み中...') : selectedSkill === 'reading' && (sets[selectedCategory].due_click > 0 || sets[selectedCategory].due_typing > 0) ? '復習＋新規で開始' : '開始'}
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -561,7 +711,7 @@ function VocabPageContent() {
                 </div>
                 <div className="flex gap-4">
                   <button
-                    onClick={handleStartQuiz}
+                    onClick={() => handleStartQuiz(undefined, undefined)}
                     className={cn('px-4 py-2', buttonPrimary)}
                   >
                     もう一度
@@ -582,6 +732,17 @@ function VocabPageContent() {
                 {/* 問題表示 */}
                 {!quizState.showResult ? (
                   <div className={cn('p-6', cardBase)}>
+                    {/* Reading: passage first */}
+                    {quizState.questions[quizState.currentIndex].passage_excerpt && (
+                      <div className={cn('mb-4 p-4 rounded-lg bg-surface-2 border border-border max-h-40 sm:max-h-48 overflow-y-auto overscroll-contain', 'text-sm text-text-muted leading-relaxed')}>
+                        {quizState.questions[quizState.currentIndex].passage_excerpt}
+                      </div>
+                    )}
+                    {quizState.questions[quizState.currentIndex].strategy && (
+                      <div className={cn('mb-3 text-xs text-text-muted italic')}>
+                        Strategy: {quizState.questions[quizState.currentIndex].strategy}
+                      </div>
+                    )}
                     <div className={cn('text-lg font-semibold mb-4', cardTitle)}>
                       {quizState.questions[quizState.currentIndex].prompt}
                     </div>
@@ -634,6 +795,23 @@ function VocabPageContent() {
                           あなたの回答: {quizState.answers[quizState.answers.length - 1].user_answer}
                         </div>
                       )}
+                      {(() => {
+                        const meta = quizState.questions[quizState.currentIndex].meta as { explanation?: string; distractor_note?: string; paraphrase_tip?: string } | undefined;
+                        if (!meta) return null;
+                        return (
+                          <div className={cn('mt-3 space-y-2 text-xs border-t border-border pt-3')}>
+                            {meta.explanation && (
+                              <div><span className="font-medium text-text">根拠:</span> <span className={cardDesc}>{meta.explanation}</span></div>
+                            )}
+                            {meta.distractor_note && (
+                              <div><span className="font-medium text-text">ひっかけ:</span> <span className={cardDesc}>{meta.distractor_note}</span></div>
+                            )}
+                            {meta.paraphrase_tip && (
+                              <div><span className="font-medium text-text">言い換え:</span> <span className={cardDesc}>{meta.paraphrase_tip}</span></div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                     <button
                       onClick={handleNext}
@@ -649,7 +827,9 @@ function VocabPageContent() {
         )}
 
         {loading && step !== 'quiz' && (
-          <div className="text-center text-text-muted">読み込み中...</div>
+          <div className="text-center text-text-muted">
+            {selectedSkill === 'reading' ? 'Reading を読み込み中...' : '読み込み中...'}
+          </div>
         )}
           </>
         )}

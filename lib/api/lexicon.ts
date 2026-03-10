@@ -13,6 +13,10 @@ export interface LexiconSetsResponse {
     due_click: number;
     due_typing: number;
   }>;
+  /** Reading の場合のみ: 全カテゴリの復習Due合計 */
+  total_due?: number;
+  /** Reading の場合のみ: フィルタ用 topic / difficulty 一覧 */
+  filters_meta?: { topics: string[]; difficulties: string[] };
 }
 
 export interface LexiconQuestion {
@@ -22,6 +26,10 @@ export interface LexiconQuestion {
   hint_first_char?: string;
   hint_length?: number;
   item_id?: string;
+  question_type?: 'paraphrase_drill' | 'matching_headings' | 'tfng' | 'summary_completion';
+  strategy?: string;
+  passage_excerpt?: string;
+  meta?: Record<string, unknown>;
 }
 
 export interface LexiconQuestionsResponse {
@@ -43,26 +51,48 @@ export interface LexiconSubmitResponse {
  * Lexicon setsを取得
  */
 export async function fetchLexiconSets(
-  skill: 'writing' | 'speaking',
+  skill: 'writing' | 'speaking' | 'reading',
   module: 'lexicon' | 'idiom' | 'vocab' = 'lexicon'
 ): Promise<ApiResponse<LexiconSetsResponse>> {
   const response = await fetch(`/api/lexicon/sets?skill=${skill}&module=${module}`);
   return response.json();
 }
 
+export interface LexiconQuestionsParams {
+  review_only?: boolean;
+  new_only?: boolean;
+  question_type?: string;
+  topic?: string;
+  difficulty?: string;
+}
+
 /**
  * Lexicon questionsを取得
+ * Reading の場合: review_only / new_only / topic / difficulty でフィルタ可能
  */
 export async function fetchLexiconQuestions(
-  skill: 'writing' | 'speaking',
+  skill: 'writing' | 'speaking' | 'reading',
   category: string,
   mode: 'click' | 'typing',
   limit: number = 10,
-  module: 'lexicon' | 'idiom' | 'vocab' = 'lexicon'
+  module: 'lexicon' | 'idiom' | 'vocab' = 'lexicon',
+  params?: LexiconQuestionsParams
 ): Promise<ApiResponse<LexiconQuestionsResponse>> {
-  const response = await fetch(
-    `/api/lexicon/questions?skill=${skill}&category=${category}&mode=${mode}&limit=${limit}&module=${module}`
-  );
+  const search = new URLSearchParams({
+    skill,
+    category,
+    mode,
+    limit: String(limit),
+    module,
+  });
+  if (skill === 'reading' && params) {
+    if (params.review_only) search.set('review_only', 'true');
+    if (params.new_only) search.set('new_only', 'true');
+    if (params.question_type) search.set('question_type', params.question_type);
+    if (params.topic) search.set('topic', params.topic);
+    if (params.difficulty) search.set('difficulty', params.difficulty);
+  }
+  const response = await fetch(`/api/lexicon/questions?${search.toString()}`);
   return response.json();
 }
 

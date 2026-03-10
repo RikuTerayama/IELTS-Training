@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import type { AttemptHistory, ProgressSummary } from '@/lib/domain/types';
 import type { ApiResponse } from '@/lib/api/response';
+import type { ReadingVocabHistoryResponse } from '@/app/api/progress/reading-vocab-history/route';
 
 type UsageTodayData = {
   is_pro: boolean;
@@ -26,6 +27,13 @@ export interface SpeakingHistoryItem {
   overall_band?: number | null;
 }
 
+const READING_QUESTION_TYPE_LABELS: Record<string, string> = {
+  paraphrase_drill: 'Paraphrase Drill',
+  matching_headings: 'Matching Headings',
+  tfng: 'True / False / Not Given',
+  summary_completion: 'Summary Completion',
+};
+
 export default function ProgressPage() {
   const [history, setHistory] = useState<AttemptHistory[]>([]);
   const [summary, setSummary] = useState<ProgressSummary | null>(null);
@@ -34,6 +42,9 @@ export default function ProgressPage() {
   const [speakingHistoryLoading, setSpeakingHistoryLoading] = useState(true);
   const [speakingHistoryError, setSpeakingHistoryError] = useState<string | null>(null);
   const [usageToday, setUsageToday] = useState<UsageTodayData | null>(null);
+  const [readingHistory, setReadingHistory] = useState<ReadingVocabHistoryResponse | null>(null);
+  const [readingHistoryLoading, setReadingHistoryLoading] = useState(true);
+  const [readingHistoryError, setReadingHistoryError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -89,6 +100,29 @@ export default function ProgressPage() {
       })
       .catch(() => setSpeakingHistoryError('Network error'))
       .finally(() => setSpeakingHistoryLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setReadingHistoryLoading(true);
+    setReadingHistoryError(null);
+    fetch('/api/progress/reading-vocab-history')
+      .then((res) => {
+        if (res.status === 401) {
+          setReadingHistoryError('ログインが必要です');
+          return { ok: false };
+        }
+        return res.json();
+      })
+      .then((data: ApiResponse<ReadingVocabHistoryResponse>) => {
+        if (data.ok && data.data) {
+          setReadingHistory(data.data);
+          setReadingHistoryError(null);
+        } else if (data.error?.message) {
+          setReadingHistoryError(data.error.message);
+        }
+      })
+      .catch(() => setReadingHistoryError('Network error'))
+      .finally(() => setReadingHistoryLoading(false));
   }, []);
 
   if (loading) {
@@ -214,6 +248,87 @@ export default function ProgressPage() {
                 className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
               >
                 Try another interview
+              </Link>
+            </div>
+          </div>
+
+          {/* Reading History (vocab Academic v1) */}
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+            <h2 className="mb-1 text-lg font-semibold">Reading History</h2>
+            <p className="mb-4 text-sm text-text-muted">
+              Recent Academic Reading vocab practice (paraphrase, headings, TFNG, summary).
+              {readingHistory?.due_count != null && readingHistory.due_count > 0 && (
+                <span className="ml-1 font-medium text-primary">
+                  · Due today: {readingHistory.due_count}
+                </span>
+              )}
+            </p>
+            {readingHistoryLoading ? (
+              <p className="text-sm text-text-muted">読み込み中...</p>
+            ) : readingHistoryError ? (
+              <p className="text-sm text-amber-600">{readingHistoryError}</p>
+            ) : !readingHistory || (readingHistory.history.length === 0 && readingHistory.stats_by_type.length === 0) ? (
+              <p className="text-sm text-text-muted">まだ Reading の記録がありません</p>
+            ) : (
+              <>
+                {readingHistory.stats_by_type.length > 0 && (
+                  <div className="mb-4 rounded-lg border border-border bg-surface-2 p-4">
+                    <h3 className="mb-2 text-sm font-semibold">By question type</h3>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {readingHistory.stats_by_type.map((s) => (
+                        <div key={s.question_type} className="text-sm">
+                          <span className="font-medium">{s.question_type}:</span>{' '}
+                          {s.correct}/{s.total} ({s.accuracy_percent}%)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {readingHistory.history.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex flex-wrap items-start justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-text">
+                          {new Date(item.created_at).toLocaleString('ja-JP', {
+                            dateStyle: 'short',
+                            timeStyle: 'short',
+                          })}{' '}
+                          · {READING_QUESTION_TYPE_LABELS[item.question_type ?? ''] ?? item.question_type ?? '-'}{' '}
+                          · {item.is_correct ? (
+                            <span className="text-green-600">Correct</span>
+                          ) : (
+                            <span className="text-amber-600">Incorrect</span>
+                          )}
+                        </p>
+                        {item.user_answer != null && item.user_answer !== '' && (
+                          <p className="text-xs text-text-muted">
+                            Answer: {item.user_answer}
+                          </p>
+                        )}
+                        <p
+                          className="mt-1 truncate text-xs text-text-muted"
+                          title={item.prompt}
+                        >
+                          {item.prompt.slice(0, 80)}
+                          {item.prompt.length > 80 ? '…' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href="/training/vocab?skill=reading"
+                className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+              >
+                {readingHistory?.due_count != null && readingHistory.due_count > 0
+                  ? 'Review Reading'
+                  : 'Practice Reading'}
               </Link>
             </div>
           </div>
