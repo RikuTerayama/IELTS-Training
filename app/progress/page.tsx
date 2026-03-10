@@ -8,7 +8,17 @@ import type { AttemptHistory, ProgressSummary } from '@/lib/domain/types';
 import type { ApiResponse } from '@/lib/api/response';
 import type { ReadingVocabHistoryResponse } from '@/app/api/progress/reading-vocab-history/route';
 import type { ReadingLexiconHistoryResponse } from '@/app/api/progress/reading-lexicon-history/route';
+import type { ListeningVocabHistoryResponse } from '@/app/api/progress/listening-vocab-history/route';
 import { READING_LEXICON_CATEGORY_LABELS } from '@/data/lexicon/reading/types';
+
+const LISTENING_VOCAB_CATEGORY_LABELS: Record<string, string> = {
+  vocab_listening_form_note: 'Form / note completion',
+  vocab_listening_campus_daily: 'Campus / daily life',
+  vocab_listening_lecture: 'Lecture vocabulary',
+  vocab_listening_numbers_dates_spelling: 'Numbers / dates / spelling',
+  vocab_listening_spoken_distractors: 'Spoken distractors',
+  vocab_listening_paraphrase_conversation: 'Paraphrase in conversation',
+};
 
 type UsageTodayData = {
   is_pro: boolean;
@@ -50,6 +60,9 @@ export default function ProgressPage() {
   const [readingLexiconHistory, setReadingLexiconHistory] = useState<ReadingLexiconHistoryResponse | null>(null);
   const [readingLexiconLoading, setReadingLexiconLoading] = useState(true);
   const [readingLexiconError, setReadingLexiconError] = useState<string | null>(null);
+  const [listeningVocabHistory, setListeningVocabHistory] = useState<ListeningVocabHistoryResponse | null>(null);
+  const [listeningVocabLoading, setListeningVocabLoading] = useState(true);
+  const [listeningVocabError, setListeningVocabError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -151,6 +164,29 @@ export default function ProgressPage() {
       })
       .catch(() => setReadingLexiconError('Network error'))
       .finally(() => setReadingLexiconLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setListeningVocabLoading(true);
+    setListeningVocabError(null);
+    fetch('/api/progress/listening-vocab-history')
+      .then((res) => {
+        if (res.status === 401) {
+          setListeningVocabError('ログインが必要です');
+          return { ok: false };
+        }
+        return res.json();
+      })
+      .then((data: ApiResponse<ListeningVocabHistoryResponse>) => {
+        if (data.ok && data.data) {
+          setListeningVocabHistory(data.data);
+          setListeningVocabError(null);
+        } else if (data.error?.message) {
+          setListeningVocabError(data.error.message);
+        }
+      })
+      .catch(() => setListeningVocabError('Network error'))
+      .finally(() => setListeningVocabLoading(false));
   }, []);
 
   if (loading) {
@@ -472,6 +508,104 @@ export default function ProgressPage() {
                     {readingLexiconHistory?.due_count != null && readingLexiconHistory.due_count > 0
                       ? 'Review Reading Lexicon'
                       : 'Practice Reading Lexicon'}
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Listening Vocab v1 – 履歴・Due・カテゴリ別正答率 */}
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+            <h2 className="mb-1 text-lg font-semibold">Listening Vocab</h2>
+            <p className="mb-4 text-sm text-text-muted">
+              IELTS Listening の語彙練習（Form/note, Campus, Lecture, Numbers, Distractors, Paraphrase）の記録。
+              {listeningVocabHistory?.due_count != null && listeningVocabHistory.due_count > 0 && (
+                <span className="ml-1 font-medium text-primary">
+                  · Due today: {listeningVocabHistory.due_count}
+                </span>
+              )}
+            </p>
+            {listeningVocabLoading ? (
+              <p className="text-sm text-text-muted">読み込み中...</p>
+            ) : listeningVocabError ? (
+              <p className="text-sm text-amber-600">{listeningVocabError}</p>
+            ) : !listeningVocabHistory ||
+              (listeningVocabHistory.history.length === 0 &&
+                listeningVocabHistory.stats_by_category.length === 0 &&
+                (listeningVocabHistory.due_count ?? 0) === 0) ? (
+              <div className="rounded-lg border border-border bg-surface-2 p-6 text-center">
+                <p className="text-sm text-text-muted">まだ Listening Vocab の記録がありません</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  単語練習で Listening を練習すると、ここに履歴と正答率が表示されます
+                </p>
+                <Link
+                  href="/training/vocab?skill=listening"
+                  className="mt-4 inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+                >
+                  Listening Vocab を始める
+                </Link>
+              </div>
+            ) : (
+              <>
+                {listeningVocabHistory.stats_by_category.length > 0 && (
+                  <div className="mb-4 rounded-lg border border-border bg-surface-2 p-4">
+                    <h3 className="mb-2 text-sm font-semibold">By category（正答率）</h3>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {listeningVocabHistory.stats_by_category.map((s) => (
+                        <div key={s.category} className="text-sm">
+                          <span className="font-medium">{s.category_label}:</span>{' '}
+                          {s.correct}/{s.total} ({s.accuracy_percent}%)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {listeningVocabHistory.history.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="mb-2 text-sm font-semibold">Recent attempts</h3>
+                    <div className="space-y-2">
+                      {listeningVocabHistory.history.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex flex-wrap items-start justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-text">
+                              {new Date(item.created_at).toLocaleString('ja-JP', {
+                                dateStyle: 'short',
+                                timeStyle: 'short',
+                              })}{' '}
+                              · {LISTENING_VOCAB_CATEGORY_LABELS[item.category] ?? item.category}{' '}
+                              · {item.is_correct ? (
+                                <span className="text-green-600">Correct</span>
+                              ) : (
+                                <span className="text-amber-600">Incorrect</span>
+                              )}
+                            </p>
+                            {item.user_answer != null && item.user_answer !== '' && (
+                              <p className="text-xs text-text-muted">Answer: {item.user_answer}</p>
+                            )}
+                            <p
+                              className="mt-1 truncate text-xs text-text-muted"
+                              title={item.prompt}
+                            >
+                              {item.prompt.slice(0, 80)}
+                              {item.prompt.length > 80 ? '…' : ''}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    href="/training/vocab?skill=listening"
+                    className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+                  >
+                    {listeningVocabHistory?.due_count != null && listeningVocabHistory.due_count > 0
+                      ? 'Review Listening Vocab'
+                      : 'Practice Listening Vocab'}
                   </Link>
                 </div>
               </>
