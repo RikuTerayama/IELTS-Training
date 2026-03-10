@@ -44,3 +44,28 @@ export async function countReadingDueToday(
     .lte('next_review_on', today);
   return data?.length ?? 0;
 }
+
+/**
+ * ユーザーの「今日 Due の Reading Lexicon（signal）件数」を集計する
+ * lexicon_questions の skill=reading, module=lexicon に該当する question_id のみ対象
+ */
+export async function countReadingLexiconDueToday(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<number> {
+  const today = getReadingDueDate();
+  const { data: questions } = await supabase
+    .from('lexicon_questions')
+    .select('id')
+    .eq('skill', 'reading')
+    .eq('module', 'lexicon');
+  const questionIds = (questions ?? []).map((q) => q.id);
+  if (questionIds.length === 0) return 0;
+  const { data } = await supabase
+    .from('reading_srs_state')
+    .select('id')
+    .eq('user_id', userId)
+    .in('question_id', questionIds)
+    .lte('next_review_on', today);
+  return data?.length ?? 0;
+}

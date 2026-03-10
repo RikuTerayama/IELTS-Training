@@ -26,7 +26,7 @@ export interface LexiconQuestion {
   hint_first_char?: string;
   hint_length?: number;
   item_id?: string;
-  question_type?: 'paraphrase_drill' | 'matching_headings' | 'tfng' | 'summary_completion';
+  question_type?: 'paraphrase_drill' | 'matching_headings' | 'tfng' | 'summary_completion' | 'matching_information' | 'sentence_completion' | 'signal';
   strategy?: string;
   passage_excerpt?: string;
   meta?: Record<string, unknown>;

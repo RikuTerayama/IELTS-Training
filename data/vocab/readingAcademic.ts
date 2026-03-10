@@ -1,7 +1,7 @@
 /**
  * Academic Reading v1 Seed Data
  * Re-exports from data/vocab/reading/ for backward compatibility.
- * 4 question types, 80+ questions, topic & difficulty in meta.
+ * 6 question types, 180+ questions, topic & difficulty in meta.
  */
 
 export {
