@@ -7,6 +7,8 @@ import { Layout } from '@/components/layout/Layout';
 import type { AttemptHistory, ProgressSummary } from '@/lib/domain/types';
 import type { ApiResponse } from '@/lib/api/response';
 import type { ReadingVocabHistoryResponse } from '@/app/api/progress/reading-vocab-history/route';
+import type { ReadingLexiconHistoryResponse } from '@/app/api/progress/reading-lexicon-history/route';
+import { READING_LEXICON_CATEGORY_LABELS } from '@/data/lexicon/reading/types';
 
 type UsageTodayData = {
   is_pro: boolean;
@@ -45,6 +47,9 @@ export default function ProgressPage() {
   const [readingHistory, setReadingHistory] = useState<ReadingVocabHistoryResponse | null>(null);
   const [readingHistoryLoading, setReadingHistoryLoading] = useState(true);
   const [readingHistoryError, setReadingHistoryError] = useState<string | null>(null);
+  const [readingLexiconHistory, setReadingLexiconHistory] = useState<ReadingLexiconHistoryResponse | null>(null);
+  const [readingLexiconLoading, setReadingLexiconLoading] = useState(true);
+  const [readingLexiconError, setReadingLexiconError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -123,6 +128,29 @@ export default function ProgressPage() {
       })
       .catch(() => setReadingHistoryError('Network error'))
       .finally(() => setReadingHistoryLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setReadingLexiconLoading(true);
+    setReadingLexiconError(null);
+    fetch('/api/progress/reading-lexicon-history')
+      .then((res) => {
+        if (res.status === 401) {
+          setReadingLexiconError('ログインが必要です');
+          return { ok: false };
+        }
+        return res.json();
+      })
+      .then((data: ApiResponse<ReadingLexiconHistoryResponse>) => {
+        if (data.ok && data.data) {
+          setReadingLexiconHistory(data.data);
+          setReadingLexiconError(null);
+        } else if (data.error?.message) {
+          setReadingLexiconError(data.error.message);
+        }
+      })
+      .catch(() => setReadingLexiconError('Network error'))
+      .finally(() => setReadingLexiconLoading(false));
   }, []);
 
   if (loading) {
@@ -284,6 +312,19 @@ export default function ProgressPage() {
                     </div>
                   </div>
                 )}
+                {readingHistory.stats_by_skill?.length > 0 && (
+                  <div className="mb-4 rounded-lg border border-border bg-surface-2 p-4">
+                    <h3 className="mb-2 text-sm font-semibold">By skill (weakness-aware)</h3>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {readingHistory.stats_by_skill.map((s) => (
+                        <div key={s.skill} className="text-sm">
+                          <span className="font-medium">{s.skill}:</span>{' '}
+                          {s.correct}/{s.total} ({s.accuracy_percent}%)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   {readingHistory.history.map((item) => (
                     <div
@@ -327,10 +368,114 @@ export default function ProgressPage() {
                 className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
               >
                 {readingHistory?.due_count != null && readingHistory.due_count > 0
-                  ? 'Review Reading'
-                  : 'Practice Reading'}
+                  ? 'Review Reading Vocab'
+                  : 'Practice Reading Vocab'}
+              </Link>
+              <Link
+                href="/training/lexicon?skill=reading"
+                className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+              >
+                Reading Lexicon (Signal Bank)
               </Link>
             </div>
+          </div>
+
+          {/* Reading Lexicon (Signal Bank) – 履歴・Due・カテゴリ別正答率 */}
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+            <h2 className="mb-1 text-lg font-semibold">Reading Lexicon (Signal Bank)</h2>
+            <p className="mb-4 text-sm text-text-muted">
+              Academic Reading の論理・構造・学術表現（Cause/Effect, Contrast, Evidence など）の練習記録。
+              {readingLexiconHistory?.due_count != null && readingLexiconHistory.due_count > 0 && (
+                <span className="ml-1 font-medium text-primary">
+                  · Due today: {readingLexiconHistory.due_count}
+                </span>
+              )}
+            </p>
+            {readingLexiconLoading ? (
+              <p className="text-sm text-text-muted">読み込み中...</p>
+            ) : readingLexiconError ? (
+              <p className="text-sm text-amber-600">{readingLexiconError}</p>
+            ) : !readingLexiconHistory ||
+              (readingLexiconHistory.history.length === 0 &&
+                readingLexiconHistory.stats_by_category.length === 0 &&
+                (readingLexiconHistory.due_count ?? 0) === 0) ? (
+              <div className="rounded-lg border border-border bg-surface-2 p-6 text-center">
+                <p className="text-sm text-text-muted">まだ Reading Lexicon の記録がありません</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  表現バンクで Signal phrase を練習すると、ここに履歴と正答率が表示されます
+                </p>
+                <Link
+                  href="/training/lexicon?skill=reading"
+                  className="mt-4 inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+                >
+                  Reading Lexicon を始める
+                </Link>
+              </div>
+            ) : (
+              <>
+                {readingLexiconHistory.stats_by_category.length > 0 && (
+                  <div className="mb-4 rounded-lg border border-border bg-surface-2 p-4">
+                    <h3 className="mb-2 text-sm font-semibold">By category（正答率）</h3>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {readingLexiconHistory.stats_by_category.map((s) => (
+                        <div key={s.category} className="text-sm">
+                          <span className="font-medium">{s.category_label}:</span>{' '}
+                          {s.correct}/{s.total} ({s.accuracy_percent}%)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {readingLexiconHistory.history.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="mb-2 text-sm font-semibold">Recent attempts</h3>
+                    <div className="space-y-2">
+                      {readingLexiconHistory.history.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex flex-wrap items-start justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-text">
+                              {new Date(item.created_at).toLocaleString('ja-JP', {
+                                dateStyle: 'short',
+                                timeStyle: 'short',
+                              })}{' '}
+                              · {READING_LEXICON_CATEGORY_LABELS[item.category as keyof typeof READING_LEXICON_CATEGORY_LABELS] ?? item.category}{' '}
+                              · {item.is_correct ? (
+                                <span className="text-green-600">Correct</span>
+                              ) : (
+                                <span className="text-amber-600">Incorrect</span>
+                              )}
+                            </p>
+                            {item.user_answer != null && item.user_answer !== '' && (
+                              <p className="text-xs text-text-muted">Answer: {item.user_answer}</p>
+                            )}
+                            <p
+                              className="mt-1 truncate text-xs text-text-muted"
+                              title={item.prompt}
+                            >
+                              {item.prompt.slice(0, 80)}
+                              {item.prompt.length > 80 ? '…' : ''}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    href="/training/lexicon?skill=reading"
+                    className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+                  >
+                    {readingLexiconHistory?.due_count != null && readingLexiconHistory.due_count > 0
+                      ? 'Review Reading Lexicon'
+                      : 'Practice Reading Lexicon'}
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

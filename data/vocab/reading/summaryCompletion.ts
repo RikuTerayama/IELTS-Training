@@ -175,7 +175,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 13,
     passage_excerpt:
       'Archaeologists have uncovered the remains of a settlement dating back to 3000 BCE. The site is expected to provide new insights into early farming communities.',
-    meta: { topic: 'history', difficulty: 'advanced' },
+    meta: {
+      topic: 'history',
+      difficulty: 'advanced',
+      explanation: 'The passage says "Archaeologists have uncovered" and describes the site. The one-word noun for who uncovered it is "archaeologists".',
+      paraphrase_tip: 'archaeologists = 考古学者',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -187,7 +192,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 9,
     passage_excerpt:
       'The agreement sets targets for reducing greenhouse gas emissions. Countries are expected to submit updated plans every five years.',
-    meta: { topic: 'environment', difficulty: 'intermediate' },
+    meta: {
+      topic: 'environment',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "reducing greenhouse gas emissions". The one-word noun is "emissions".',
+      paraphrase_tip: 'emissions = 排出',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -199,7 +209,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 8,
     passage_excerpt:
       'Tuition fees have risen sharply in recent years. Many students rely on loans to cover the cost of their degree programmes.',
-    meta: { topic: 'education', difficulty: 'intermediate' },
+    meta: {
+      topic: 'education',
+      difficulty: 'intermediate',
+      explanation: '"Tuition fees" appears in the passage. The one-word noun is "tuition".',
+      paraphrase_tip: 'tuition = 授業料',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -211,7 +226,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 11,
     passage_excerpt:
       'Vaccination has been one of the most effective ways to prevent infectious disease. Health authorities recommend that children receive a full schedule of vaccines.',
-    meta: { topic: 'health', difficulty: 'intermediate' },
+    meta: {
+      topic: 'health',
+      difficulty: 'intermediate',
+      explanation: 'The passage states "Vaccination has been one of the most effective ways". The one-word noun is "vaccination".',
+      paraphrase_tip: 'vaccination = 予防接種',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -223,7 +243,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 6,
     passage_excerpt:
       'The study used a sample of 1,000 adults selected at random from the electoral register. The sample was designed to be representative of the population as a whole.',
-    meta: { topic: 'science', difficulty: 'intermediate' },
+    meta: {
+      topic: 'science',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "used a sample" and "The sample was designed". The one-word noun is "sample".',
+      paraphrase_tip: 'sample = サンプル・標本',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -235,7 +260,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 9,
     passage_excerpt:
       'The algorithm analyses data from millions of transactions to detect unusual patterns. It has been trained to identify potential fraud with a high degree of accuracy.',
-    meta: { topic: 'technology', difficulty: 'advanced' },
+    meta: {
+      topic: 'technology',
+      difficulty: 'advanced',
+      explanation: 'The passage states "The algorithm analyses data". The one-word noun is "algorithm".',
+      paraphrase_tip: 'algorithm = アルゴリズム',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -247,7 +277,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 11,
     passage_excerpt:
       'The excavation has revealed a series of walls and foundations. Work is expected to continue for at least another two years.',
-    meta: { topic: 'history', difficulty: 'advanced' },
+    meta: {
+      topic: 'history',
+      difficulty: 'advanced',
+      explanation: 'The passage says "The excavation has revealed". The one-word noun is "excavation".',
+      paraphrase_tip: 'excavation = 発掘',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -259,7 +294,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 13,
     passage_excerpt:
       'Deforestation is a major cause of habitat loss and climate change. Efforts to slow the rate of deforestation have had mixed success.',
-    meta: { topic: 'environment', difficulty: 'advanced' },
+    meta: {
+      topic: 'environment',
+      difficulty: 'advanced',
+      explanation: 'The passage says "Deforestation is a major cause" and "rate of deforestation". The one-word noun is "deforestation".',
+      paraphrase_tip: 'deforestation = 森林破壊',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -271,7 +311,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 10,
     passage_excerpt:
       'Student assessment is based on a combination of coursework and final examinations. The weighting of each component varies from module to module.',
-    meta: { topic: 'education', difficulty: 'intermediate' },
+    meta: {
+      topic: 'education',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "Student assessment is based on". The one-word noun is "assessment".',
+      paraphrase_tip: 'assessment = 評価',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -283,7 +328,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 10,
     passage_excerpt:
       'Early diagnosis improves the chances of successful treatment. Patients are encouraged to report any unusual symptoms to their doctor without delay.',
-    meta: { topic: 'health', difficulty: 'advanced' },
+    meta: {
+      topic: 'health',
+      difficulty: 'advanced',
+      explanation: 'The passage states "Early diagnosis improves". The one-word noun is "diagnosis".',
+      paraphrase_tip: 'diagnosis = 診断',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -295,7 +345,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 10,
     passage_excerpt:
       'The experiment was conducted under controlled conditions. Each participant was tested individually to ensure consistent results.',
-    meta: { topic: 'science', difficulty: 'beginner' },
+    meta: {
+      topic: 'science',
+      difficulty: 'beginner',
+      explanation: 'The passage says "The experiment was conducted". The one-word noun is "experiment".',
+      paraphrase_tip: 'experiment = 実験',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -307,7 +362,12 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 10,
     passage_excerpt:
       'Encryption is used to protect sensitive data from unauthorised access. Modern systems use algorithms that are extremely difficult to break.',
-    meta: { topic: 'technology', difficulty: 'advanced' },
+    meta: {
+      topic: 'technology',
+      difficulty: 'advanced',
+      explanation: 'The passage states "Encryption is used to protect". The one-word noun is "encryption".',
+      paraphrase_tip: 'encryption = 暗号化',
+    },
   },
   {
     question_type: 'summary_completion',
@@ -319,6 +379,334 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 12,
     passage_excerpt:
       'The civilisation flourished for over 500 years before its decline. Its achievements in architecture and writing continue to be studied today.',
-    meta: { topic: 'history', difficulty: 'intermediate' },
+    meta: {
+      topic: 'history',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "The civilisation flourished". The one-word noun is "civilisation".',
+      paraphrase_tip: 'civilisation = 文明',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary with ONE WORD from the passage.',
+    correct_expression: 'recovery',
+    hint_first_char: 'R',
+    hint_length: 7,
+    passage_excerpt:
+      'Early diagnosis improves the chances of successful treatment and a full recovery. Patients are encouraged to report symptoms without delay.',
+    meta: {
+      topic: 'health',
+      difficulty: 'beginner',
+      explanation: 'The passage says "a full recovery". The one-word noun is "recovery".',
+      paraphrase_tip: 'recovery = 回復',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap. Use ONE WORD from the passage.',
+    correct_expression: 'barriers',
+    hint_first_char: 'B',
+    hint_length: 8,
+    passage_excerpt:
+      'The aim is to remove barriers to learning so that all students can participate fully. Schools are required to make reasonable adjustments.',
+    meta: {
+      topic: 'education',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "remove barriers to learning". The one-word noun is "barriers".',
+      paraphrase_tip: 'barriers = 障壁',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary with ONE WORD from the passage.',
+    correct_expression: 'literature',
+    hint_first_char: 'L',
+    hint_length: 10,
+    passage_excerpt:
+      'The team began by reviewing existing literature, then designed the experiment and obtained ethical approval. Data collection took place over twelve months.',
+    meta: {
+      topic: 'science',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "reviewing existing literature". The one-word noun is "literature".',
+      paraphrase_tip: 'literature = 文献',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap with ONE WORD from the passage.',
+    correct_expression: 'monitoring',
+    hint_first_char: 'M',
+    hint_length: 10,
+    passage_excerpt:
+      'Scientists continue to monitor the situation closely. Monitoring has shown that the ozone hole has begun to show signs of recovery.',
+    meta: {
+      topic: 'environment',
+      difficulty: 'intermediate',
+      explanation: 'The passage uses "monitor" and "Monitoring has shown". The one-word noun is "monitoring".',
+      paraphrase_tip: 'monitoring = 監視',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary. Use ONE WORD from the passage.',
+    correct_expression: 'hemisphere',
+    hint_first_char: 'H',
+    hint_length: 10,
+    passage_excerpt:
+      'The left hemisphere is typically more involved in language tasks. The right hemisphere also plays a role in understanding context and tone.',
+    meta: {
+      topic: 'science',
+      difficulty: 'advanced',
+      explanation: 'The passage refers to "The left hemisphere" and "The right hemisphere". The one-word noun is "hemisphere".',
+      paraphrase_tip: 'hemisphere = 大脳半球',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap with ONE WORD from the passage.',
+    correct_expression: 'activity',
+    hint_first_char: 'A',
+    hint_length: 8,
+    passage_excerpt:
+      'Experts recommend aiming for at least 150 minutes of moderate activity per week. Breaking up sitting time with short walks can reduce health risks.',
+    meta: {
+      topic: 'health',
+      difficulty: 'beginner',
+      explanation: 'The passage says "150 minutes of moderate activity". The one-word noun is "activity".',
+      paraphrase_tip: 'activity = 活動',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary with ONE WORD from the passage.',
+    correct_expression: 'platforms',
+    hint_first_char: 'P',
+    hint_length: 9,
+    passage_excerpt:
+      'Social media platforms have grown rapidly since the mid-2000s. They have changed how people communicate and share news.',
+    meta: {
+      topic: 'technology',
+      difficulty: 'beginner',
+      explanation: 'The passage says "Social media platforms". The one-word noun is "platforms".',
+      paraphrase_tip: 'platforms = プラットフォーム',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap. Use ONE WORD from the passage.',
+    correct_expression: 'reconstruction',
+    hint_first_char: 'R',
+    hint_length: 14,
+    passage_excerpt:
+      'The conflict left many countries in debt. Reconstruction took decades, and some regions never fully recovered.',
+    meta: {
+      topic: 'history',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "Reconstruction took decades". The one-word noun is "reconstruction".',
+      paraphrase_tip: 'reconstruction = 復興',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary with ONE WORD from the passage.',
+    correct_expression: 'adjustments',
+    hint_first_char: 'A',
+    hint_length: 12,
+    passage_excerpt:
+      'Schools are required to make reasonable adjustments so that all students can participate. This may include extra time in exams or assistive technology.',
+    meta: {
+      topic: 'education',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "make reasonable adjustments". The one-word noun is "adjustments".',
+      paraphrase_tip: 'adjustments = 配慮・調整',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap with ONE WORD from the passage.',
+    correct_expression: 'scepticism',
+    hint_first_char: 'S',
+    hint_length: 10,
+    passage_excerpt:
+      'When the theory was first put forward, it was met with scepticism. It took several decades before it gained general acceptance.',
+    meta: {
+      topic: 'science',
+      difficulty: 'advanced',
+      explanation: 'The passage says "met with scepticism". The one-word noun is "scepticism".',
+      paraphrase_tip: 'scepticism = 懐疑',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary. Use ONE WORD from the passage.',
+    correct_expression: 'connectivity',
+    hint_first_char: 'C',
+    hint_length: 13,
+    passage_excerpt:
+      'The device is designed for use in the field where connectivity may be limited. It has a long battery life and can store large amounts of data.',
+    meta: {
+      topic: 'technology',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "where connectivity may be limited". The one-word noun is "connectivity".',
+      paraphrase_tip: 'connectivity = 接続性',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap with ONE WORD from the passage.',
+    correct_expression: 'explanations',
+    hint_first_char: 'E',
+    hint_length: 13,
+    passage_excerpt:
+      'Historians have put forward several explanations for the collapse. These include economic problems, invasions, and political instability.',
+    meta: {
+      topic: 'history',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "put forward several explanations". The one-word noun is "explanations".',
+      paraphrase_tip: 'explanations = 説明・理由',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary with ONE WORD from the passage.',
+    correct_expression: 'reform',
+    hint_first_char: 'R',
+    hint_length: 6,
+    passage_excerpt:
+      'The author argues that reform is essential if the system is to meet future challenges. Without change, the approach will become unsustainable.',
+    meta: {
+      topic: 'education',
+      difficulty: 'advanced',
+      explanation: 'The passage states "reform is essential". The one-word noun is "reform".',
+      paraphrase_tip: 'reform = 改革',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap. Use ONE WORD from the passage.',
+    correct_expression: 'transmitted',
+    hint_first_char: 'T',
+    hint_length: 11,
+    passage_excerpt:
+      'The disease can be transmitted between humans and certain animal species. This has raised concerns about a coordinated response.',
+    meta: {
+      topic: 'health',
+      difficulty: 'advanced',
+      explanation: 'The passage says "can be transmitted between". The one-word verb (past participle) is "transmitted".',
+      paraphrase_tip: 'transmitted = 伝播する',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary with ONE WORD from the passage.',
+    correct_expression: 'assigned',
+    hint_first_char: 'A',
+    hint_length: 8,
+    passage_excerpt:
+      'Participants were randomly assigned to two groups. Group A received the treatment; Group B received a placebo.',
+    meta: {
+      topic: 'health',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "randomly assigned to two groups". The one-word verb (past participle) is "assigned".',
+      paraphrase_tip: 'assigned = 割り当てられた',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap with ONE WORD from the passage.',
+    correct_expression: 'ratified',
+    hint_first_char: 'R',
+    hint_length: 8,
+    passage_excerpt:
+      'The treaty was opened for signature in 2015 and has since been ratified by over 120 countries.',
+    meta: {
+      topic: 'environment',
+      difficulty: 'advanced',
+      explanation: 'The passage says "has since been ratified by over 120 countries". The one-word verb (past participle) is "ratified".',
+      paraphrase_tip: 'ratified = 批准された',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary. Use ONE WORD from the passage.',
+    correct_expression: 'accident',
+    hint_first_char: 'A',
+    hint_length: 8,
+    passage_excerpt:
+      'The material was discovered by accident in 1945 when a researcher noticed unusual properties in a sample left near a heat source.',
+    meta: {
+      topic: 'science',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "discovered by accident". The one-word noun is "accident".',
+      paraphrase_tip: 'by accident = 偶然',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Fill in the gap with ONE WORD from the passage.',
+    correct_expression: 'outcomes',
+    hint_first_char: 'O',
+    hint_length: 8,
+    passage_excerpt:
+      'Studies have shown that both medication and exercise can improve outcomes when used together. Early intervention is key.',
+    meta: {
+      topic: 'health',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "can improve outcomes when used together". The one-word noun is "outcomes".',
+      paraphrase_tip: 'outcomes = 結果',
+    },
+  },
+  {
+    question_type: 'summary_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the summary with ONE WORD from the passage.',
+    correct_expression: 'shift',
+    hint_first_char: 'S',
+    hint_length: 5,
+    passage_excerpt:
+      'Sales data from the past decade reveals a clear shift in how people shop. Online purchases have risen steadily.',
+    meta: {
+      topic: 'technology',
+      difficulty: 'beginner',
+      explanation: 'The passage says "a clear shift in how people shop". The one-word noun is "shift".',
+      paraphrase_tip: 'shift = 変化',
+    },
   },
 ];

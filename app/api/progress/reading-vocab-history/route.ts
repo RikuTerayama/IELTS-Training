@@ -28,9 +28,17 @@ export type ReadingVocabStatsByType = {
   accuracy_percent: number;
 };
 
+export type ReadingVocabStatsBySkill = {
+  skill: string;
+  total: number;
+  correct: number;
+  accuracy_percent: number;
+};
+
 export type ReadingVocabHistoryResponse = {
   history: ReadingVocabHistoryItem[];
   stats_by_type: ReadingVocabStatsByType[];
+  stats_by_skill: ReadingVocabStatsBySkill[];
   due_count: number;
 };
 
@@ -39,6 +47,17 @@ const QUESTION_TYPE_LABELS: Record<string, string> = {
   matching_headings: 'Matching Headings',
   tfng: 'True / False / Not Given',
   summary_completion: 'Summary Completion',
+  matching_information: 'Matching Information',
+  sentence_completion: 'Sentence Completion',
+};
+
+const READING_SKILL_LABELS: Record<string, string> = {
+  paraphrase: 'Paraphrase',
+  skimming: 'Skimming',
+  scanning: 'Scanning',
+  detail: 'Detail',
+  inference: 'Inference',
+  not_given_confusion: 'Not Given',
 };
 
 export async function GET(): Promise<Response> {
@@ -55,17 +74,22 @@ export async function GET(): Promise<Response> {
       });
     }
 
-    // 1. Get reading question ids (skill=reading, module=vocab)
+    // 1. Get reading questions (skill=reading, module=vocab) including meta for reading_skill
     const { data: readingQuestions, error: qError } = await supabase
       .from('lexicon_questions')
-      .select('id, prompt, question_type, category')
+      .select('id, prompt, question_type, category, meta')
       .eq('skill', 'reading')
       .eq('module', 'vocab');
 
     if (qError || !readingQuestions || readingQuestions.length === 0) {
       const due_count = await countReadingDueToday(supabase, user.id);
       return Response.json(
-        successResponse({ history: [], stats_by_type: [], due_count } as ReadingVocabHistoryResponse)
+        successResponse({
+          history: [],
+          stats_by_type: [],
+          stats_by_skill: [],
+          due_count,
+        } as ReadingVocabHistoryResponse)
       );
     }
 
@@ -107,7 +131,7 @@ export async function GET(): Promise<Response> {
 
     // 4. Build stats by question_type
     const statsByTypeMap = new Map<string, { total: number; correct: number }>();
-    const types = ['paraphrase_drill', 'matching_headings', 'tfng', 'summary_completion'];
+    const types = ['paraphrase_drill', 'matching_headings', 'tfng', 'summary_completion', 'matching_information', 'sentence_completion'];
 
     for (const qt of types) {
       statsByTypeMap.set(qt, { total: 0, correct: 0 });
@@ -133,10 +157,35 @@ export async function GET(): Promise<Response> {
         accuracy_percent: Math.round((s.correct / s.total) * 100),
       }));
 
+    // 5. Build stats by reading_skill (weakness-aware)
+    const statsBySkillMap = new Map<string, { total: number; correct: number }>();
+    for (const log of logList) {
+      const q = log.question_id ? questionById.get(log.question_id) : undefined;
+      const meta = q?.meta as { reading_skill?: string } | null | undefined;
+      const skill = meta?.reading_skill ?? 'other';
+      if (!statsBySkillMap.has(skill)) statsBySkillMap.set(skill, { total: 0, correct: 0 });
+      const s = statsBySkillMap.get(skill)!;
+      s.total++;
+      if (log.is_correct) s.correct++;
+    }
+    const stats_by_skill: ReadingVocabStatsBySkill[] = Array.from(statsBySkillMap.entries())
+      .filter(([, s]) => s.total > 0)
+      .map(([skill, s]) => ({
+        skill: READING_SKILL_LABELS[skill] ?? skill,
+        total: s.total,
+        correct: s.correct,
+        accuracy_percent: Math.round((s.correct / s.total) * 100),
+      }));
+
     const due_count = await countReadingDueToday(supabase, user.id);
 
     return Response.json(
-      successResponse({ history, stats_by_type, due_count } as ReadingVocabHistoryResponse)
+      successResponse({
+        history,
+        stats_by_type,
+        stats_by_skill,
+        due_count,
+      } as ReadingVocabHistoryResponse)
     );
   } catch (error) {
     console.error('[reading-vocab-history] Unexpected error:', error);
