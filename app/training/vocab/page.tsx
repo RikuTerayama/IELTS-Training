@@ -60,8 +60,6 @@ function VocabPageContent() {
   /** Reading フィルタ: topic / difficulty */
   const [readingFilterTopic, setReadingFilterTopic] = useState<string | null>(null);
   const [readingFilterDifficulty, setReadingFilterDifficulty] = useState<string | null>(null);
-  /** Reading 今回のクイズモード: 復習のみ / 新規のみ / 復習＋新規 */
-  const [readingSessionMode, setReadingSessionMode] = useState<'review_only' | 'new_only' | 'all' | null>(null);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   const [clickTimer, setClickTimer] = useState<number | null>(null);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
@@ -177,7 +175,7 @@ function VocabPageContent() {
           const hasDue = cat && (cat.due_click > 0 || cat.due_typing > 0);
           setError(
             isReading && reviewOnly
-              ? 'このカテゴリ・モードには、いま復習Dueの問題がありません。別のカテゴリやモードを選ぶか、「復習＋新規で開始」で練習を始めましょう。'
+              ? 'このカテゴリ・モードに復習Dueはありません。別のカテゴリやモードを選ぶか、「開始」で新規＋復習を試してください。'
               : isReading && newOnly
                 ? 'この条件に該当する新規問題はありません。フィルタを変えるか、「復習＋新規で開始」を試してください。'
                 : isReading && hasDue
@@ -195,11 +193,6 @@ function VocabPageContent() {
           answers: [],
           showResult: false,
         });
-        if (selectedSkill === 'reading') {
-          setReadingSessionMode(reviewOnly ? 'review_only' : newOnly ? 'new_only' : 'all');
-        } else {
-          setReadingSessionMode(null);
-        }
         setStep('quiz');
 
         // typingモードの場合は開始時刻を記録
@@ -692,13 +685,8 @@ function VocabPageContent() {
         {/* Step C: quizセッション */}
         {step === 'quiz' && quizState && (
           <div className="space-y-6">
-            {selectedSkill === 'reading' && readingSessionMode && (
-              <div className={cn('rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm', cardDesc)}>
-                今回: {readingSessionMode === 'review_only' ? '復習のみ' : readingSessionMode === 'new_only' ? '新規のみ' : '復習＋新規'}
-              </div>
-            )}
             {/* 進捗表示 */}
-            <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center justify-between">
               <div className={cn('text-sm', cardDesc)}>
                 問題 {quizState.currentIndex + 1} / {quizState.questions.length}
               </div>
@@ -713,46 +701,15 @@ function VocabPageContent() {
             {quizState.currentIndex >= quizState.questions.length ? (
               <div className={cn('p-6', cardBase)}>
                 <h2 className={cn('text-xl font-semibold mb-4', cardTitle)}>完了！</h2>
-                <div className="mb-4 space-y-1">
+                <div className="mb-4">
                   <p className={cn('text-lg', cardDesc)}>
-                    解いた問題: {getScore().total}問 / Correct: {getScore().correct} / Incorrect: {getScore().total - getScore().correct}
+                    正答数: {getScore().correct} / {getScore().total}
                   </p>
                   <p className={cn('text-sm', cardDesc)}>
-                    正答率: {getScore().total > 0 ? Math.round((getScore().correct / getScore().total) * 100) : 0}%
+                    正答率: {Math.round((getScore().correct / getScore().total) * 100)}%
                   </p>
-                  {selectedSkill === 'reading' && getScore().total - getScore().correct > 0 && (
-                    <p className={cn('text-xs mt-2', cardDesc)}>
-                      不正解だった問題は復習リストに残り、後日再度出題されます。
-                    </p>
-                  )}
-                  {selectedSkill === 'reading' && quizState.questions.length > 0 && (() => {
-                    const typeLabels: Record<string, string> = {
-                      paraphrase_drill: 'Paraphrase',
-                      matching_headings: 'Matching',
-                      tfng: 'TFNG',
-                      summary_completion: 'Summary',
-                    };
-                    const byType: Record<string, { correct: number; total: number }> = {};
-                    quizState.answers.forEach((a, i) => {
-                      const q = quizState.questions[i];
-                      const t = (q as LexiconQuestion & { question_type?: string }).question_type ?? 'other';
-                      if (!byType[t]) byType[t] = { correct: 0, total: 0 };
-                      byType[t].total++;
-                      if (a.is_correct) byType[t].correct++;
-                    });
-                    const entries = Object.entries(byType).filter(([, v]) => v.total > 0);
-                    if (entries.length === 0) return null;
-                    return (
-                      <div className={cn('mt-3 pt-3 border-t border-border text-xs', cardDesc)}>
-                        <span className="font-medium text-text">問題タイプ別: </span>
-                        {entries.map(([t, v]) => (
-                          <span key={t} className="mr-2">{typeLabels[t] ?? t} {v.correct}/{v.total}</span>
-                        ))}
-                      </div>
-                    );
-                  })()}
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex gap-4">
                   <button
                     onClick={() => handleStartQuiz(undefined, undefined)}
                     className={cn('px-4 py-2', buttonPrimary)}
@@ -763,7 +720,6 @@ function VocabPageContent() {
                     onClick={() => {
                       setStep('category');
                       setQuizState(null);
-                      setReadingSessionMode(null);
                     }}
                     className={cn('px-4 py-2', buttonSecondary)}
                   >
@@ -831,39 +787,27 @@ function VocabPageContent() {
                       ) : (
                         <div className={cn('text-lg font-semibold text-danger mb-2')}>✗ 不正解</div>
                       )}
-                      <div className={cn('text-sm font-medium text-text mb-1')}>Correct answer</div>
-                      <div className={cn('text-sm', cardDesc)}>{quizState.currentAnswer?.correct_expression}</div>
-                      {quizState.answers[quizState.answers.length - 1]?.user_answer && !quizState.currentAnswer?.is_correct && (
-                        <>
-                          <div className={cn('text-sm font-medium text-text mt-2 mb-1')}>Your answer</div>
-                          <div className={cn('text-sm', cardDesc)}>{quizState.answers[quizState.answers.length - 1].user_answer}</div>
-                        </>
+                      <div className={cn('text-sm', cardDesc)}>
+                        正答: {quizState.currentAnswer?.correct_expression}
+                      </div>
+                      {quizState.answers[quizState.answers.length - 1]?.user_answer && (
+                        <div className={cn('text-sm', cardDesc)}>
+                          あなたの回答: {quizState.answers[quizState.answers.length - 1].user_answer}
+                        </div>
                       )}
                       {(() => {
                         const meta = quizState.questions[quizState.currentIndex].meta as { explanation?: string; distractor_note?: string; paraphrase_tip?: string } | undefined;
-                        const isReading = selectedSkill === 'reading';
-                        if (!meta && !isReading) return null;
-                        const hasAny = meta && (meta.explanation || meta.distractor_note || meta.paraphrase_tip);
-                        if (!hasAny) return null;
+                        if (!meta) return null;
                         return (
-                          <div className={cn('mt-4 p-3 rounded-lg bg-surface-2 border border-border space-y-2', isReading ? 'text-sm' : 'text-xs')}>
-                            {meta!.explanation && (
-                              <>
-                                <div className={cn('font-medium text-text')}>Why this is correct</div>
-                                <div className={cardDesc}>{meta!.explanation}</div>
-                              </>
+                          <div className={cn('mt-3 space-y-2 text-xs border-t border-border pt-3')}>
+                            {meta.explanation && (
+                              <div><span className="font-medium text-text">根拠:</span> <span className={cardDesc}>{meta.explanation}</span></div>
                             )}
-                            {meta!.distractor_note && (
-                              <>
-                                <div className={cn('font-medium text-text mt-2')}>Why the distractor is wrong</div>
-                                <div className={cardDesc}>{meta!.distractor_note}</div>
-                              </>
+                            {meta.distractor_note && (
+                              <div><span className="font-medium text-text">ひっかけ:</span> <span className={cardDesc}>{meta.distractor_note}</span></div>
                             )}
-                            {meta!.paraphrase_tip && (
-                              <>
-                                <div className={cn('font-medium text-text mt-2')}>Key paraphrase</div>
-                                <div className={cardDesc}>{meta!.paraphrase_tip}</div>
-                              </>
+                            {meta.paraphrase_tip && (
+                              <div><span className="font-medium text-text">言い換え:</span> <span className={cardDesc}>{meta.paraphrase_tip}</span></div>
                             )}
                           </div>
                         );

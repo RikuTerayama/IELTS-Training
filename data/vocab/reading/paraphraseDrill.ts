@@ -19,12 +19,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     passage_excerpt:
       'The study found a significant increase in biodiversity after the conservation measures were introduced.',
     strategy: 'Look for context clues. "Increase" suggests something notable.',
-    meta: {
-      topic: 'environment',
-      difficulty: 'beginner',
-      explanation: 'Significant here means "large enough to matter". In context of "increase in biodiversity", "considerable" has the same meaning (notable, substantial).',
-      paraphrase_tip: 'significant ≈ considerable = かなりの・相当な',
-    },
+    meta: { topic: 'environment', difficulty: 'beginner' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -35,12 +30,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     choices: ['harmful', 'beneficial', 'neutral', 'essential'],
     passage_excerpt: 'Pollution has a detrimental effect on marine ecosystems.',
     strategy: 'Consider the overall topic. Pollution is negative.',
-    meta: {
-      topic: 'environment',
-      difficulty: 'beginner',
-      explanation: 'Detrimental means "harmful" or "damaging". In the context of pollution and ecosystems, "harmful" is the direct synonym.',
-      paraphrase_tip: 'detrimental = harmful = 有害な',
-    },
+    meta: { topic: 'environment', difficulty: 'beginner' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -51,12 +41,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     choices: ['vary', 'stabilize', 'disappear', 'increase'],
     passage_excerpt: 'Temperatures fluctuate throughout the year in temperate zones.',
     strategy: 'Think about seasonal temperature changes.',
-    meta: {
-      topic: 'science',
-      difficulty: 'beginner',
-      explanation: 'Fluctuate means to change or vary (go up and down). "Vary" is the closest synonym in this context.',
-      paraphrase_tip: 'fluctuate = vary = 変動する',
-    },
+    meta: { topic: 'science', difficulty: 'beginner' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -67,12 +52,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     choices: ['significant', 'tiny', 'brief', 'optional'],
     passage_excerpt: 'The project required a substantial investment of time and resources.',
     strategy: 'Substantial often means "large" or "considerable".',
-    meta: {
-      topic: 'technology',
-      difficulty: 'intermediate',
-      explanation: 'Substantial means large or considerable in amount. "Significant" carries the same idea of being notably large.',
-      paraphrase_tip: 'substantial = significant = 相当な・大きな',
-    },
+    meta: { topic: 'technology', difficulty: 'intermediate' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -83,12 +63,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     choices: ['unavoidable', 'unlikely', 'optional', 'reversible'],
     passage_excerpt:
       'Some experts argue that climate change will have inevitable consequences for future generations.',
-    meta: {
-      topic: 'environment',
-      difficulty: 'intermediate',
-      explanation: 'Inevitable means certain to happen and unable to be avoided. "Unavoidable" is the direct synonym.',
-      paraphrase_tip: 'inevitable = unavoidable = 避けられない',
-    },
+    meta: { topic: 'environment', difficulty: 'intermediate' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -98,12 +73,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     correct_expression: 'disputed',
     choices: ['disputed', 'popular', 'obvious', 'harmless'],
     passage_excerpt: 'The new curriculum has been controversial among parents and teachers.',
-    meta: {
-      topic: 'education',
-      difficulty: 'intermediate',
-      explanation: 'Controversial means causing disagreement or debate. "Disputed" means argued over or not agreed upon—the same idea.',
-      paraphrase_tip: 'controversial = disputed = 議論を呼ぶ',
-    },
+    meta: { topic: 'education', difficulty: 'intermediate' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -113,12 +83,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     correct_expression: 'reduce',
     choices: ['reduce', 'ignore', 'worsen', 'celebrate'],
     passage_excerpt: 'Measures to mitigate the impact of drought have been introduced in the region.',
-    meta: {
-      topic: 'environment',
-      difficulty: 'intermediate',
-      explanation: 'Mitigate means to make something bad less severe. "Reduce" (the impact) is the closest synonym here.',
-      paraphrase_tip: 'mitigate = reduce (the severity of) = 和らげる',
-    },
+    meta: { topic: 'environment', difficulty: 'intermediate' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -128,12 +93,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     correct_expression: 'initial',
     choices: ['initial', 'final', 'optional', 'secret'],
     passage_excerpt: 'Preliminary results suggest that the treatment is effective, but more trials are needed.',
-    meta: {
-      topic: 'health',
-      difficulty: 'intermediate',
-      explanation: 'Preliminary means early or initial, before something is final. "Initial" is the direct synonym.',
-      paraphrase_tip: 'preliminary = initial = 初期の・予備的な',
-    },
+    meta: { topic: 'health', difficulty: 'intermediate' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -143,12 +103,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     correct_expression: 'continuing',
     choices: ['continuing', 'rare', 'temporary', 'weak'],
     passage_excerpt: 'Persistent pain after the procedure should be reported to a doctor.',
-    meta: {
-      topic: 'health',
-      difficulty: 'beginner',
-      explanation: 'Persistent means continuing over time despite efforts to stop it. "Continuing" captures this meaning.',
-      paraphrase_tip: 'persistent = continuing = 続く・持続する',
-    },
+    meta: { topic: 'health', difficulty: 'beginner' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -158,12 +113,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     correct_expression: 'eliminate',
     choices: ['eliminate', 'spread', 'discover', 'ignore'],
     passage_excerpt: 'Health campaigns aim to eradicate the disease through vaccination.',
-    meta: {
-      topic: 'health',
-      difficulty: 'intermediate',
-      explanation: 'Eradicate means to remove or destroy completely. "Eliminate" has the same meaning in this context.',
-      paraphrase_tip: 'eradicate = eliminate = 根絶する',
-    },
+    meta: { topic: 'health', difficulty: 'intermediate' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -173,12 +123,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     correct_expression: 'new',
     choices: ['new', 'old', 'cheap', 'simple'],
     passage_excerpt: 'The company is known for its innovative approach to renewable energy.',
-    meta: {
-      topic: 'technology',
-      difficulty: 'beginner',
-      explanation: 'Innovative means using new ideas or methods. In this context "new" (approach) is the simplest synonym.',
-      paraphrase_tip: 'innovative = new (in approach) = 革新的な',
-    },
+    meta: { topic: 'technology', difficulty: 'beginner' },
   },
   {
     question_type: 'paraphrase_drill',
@@ -188,12 +133,7 @@ export const PARAPHRASE_DRILL_SEED: ReadingQuestionSeed[] = [
     correct_expression: 'essential',
     choices: ['essential', 'optional', 'minor', 'harmful'],
     passage_excerpt: 'Early diagnosis is crucial for successful treatment of the condition.',
-    meta: {
-      topic: 'health',
-      difficulty: 'intermediate',
-      explanation: 'Crucial means very important or necessary. "Essential" has the same meaning (absolutely necessary).',
-      paraphrase_tip: 'crucial = essential = 不可欠な',
-    },
+    meta: { topic: 'health', difficulty: 'intermediate' },
   },
   {
     question_type: 'paraphrase_drill',

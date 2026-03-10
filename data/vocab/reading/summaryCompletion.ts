@@ -20,12 +20,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     passage_excerpt:
       'In recent years, there has been a growing focus on renewable energy sources such as solar and wind power. Governments worldwide are investing in clean technology to reduce carbon emissions.',
     strategy: 'The gap describes the type of energy. Find the adjective before "energy".',
-    meta: {
-      topic: 'environment',
-      difficulty: 'beginner',
-      explanation: 'The passage says "renewable energy sources such as solar and wind". The adjective before "energy" is "renewable"—one word, from the passage.',
-      paraphrase_tip: 'renewable = 再生可能な（太陽・風など）',
-    },
+    meta: { topic: 'environment', difficulty: 'beginner' },
   },
   {
     question_type: 'summary_completion',
@@ -38,12 +33,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     passage_excerpt:
       'The rainforest is home to an enormous variety of plant and animal species. This biodiversity is under threat from deforestation and climate change.',
     strategy: 'The summary gap needs a noun meaning "variety of species".',
-    meta: {
-      topic: 'environment',
-      difficulty: 'beginner',
-      explanation: 'The passage uses "enormous variety of plant and animal species" and then the noun "This biodiversity". So the one-word answer from the passage is "biodiversity".',
-      paraphrase_tip: 'biodiversity = 生物多様性',
-    },
+    meta: { topic: 'environment', difficulty: 'beginner' },
   },
   {
     question_type: 'summary_completion',
@@ -55,12 +45,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 11,
     passage_excerpt:
       'Rising energy consumption has led to increased demand for fossil fuels. Many countries are now seeking alternative sources to meet their needs.',
-    meta: {
-      topic: 'science',
-      difficulty: 'intermediate',
-      explanation: '"Rising energy consumption" is in the passage. The noun that fits a summary about demand is "consumption"—one word.',
-      paraphrase_tip: 'consumption = 消費',
-    },
+    meta: { topic: 'science', difficulty: 'intermediate' },
   },
   {
     question_type: 'summary_completion',
@@ -73,12 +58,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     passage_excerpt:
       'The study relied on volunteers who agreed to participate without payment. Over 200 volunteers took part in the first phase of the research.',
     strategy: 'The gap refers to unpaid participants.',
-    meta: {
-      topic: 'health',
-      difficulty: 'beginner',
-      explanation: 'The passage says "relied on volunteers" and "Over 200 volunteers". So the one-word answer is "volunteers".',
-      paraphrase_tip: 'volunteers = ボランティア（無償で参加する人）',
-    },
+    meta: { topic: 'health', difficulty: 'beginner' },
   },
   {
     question_type: 'summary_completion',
@@ -90,12 +70,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 8,
     passage_excerpt:
       'Wildlife conservation efforts aim to protect natural habitats from destruction. Without suitable habitats, many species would face extinction.',
-    meta: {
-      topic: 'environment',
-      difficulty: 'beginner',
-      explanation: 'The passage says "protect natural habitats" and "suitable habitats". The one-word noun from the passage is "habitats".',
-      paraphrase_tip: 'habitats = 生息地',
-    },
+    meta: { topic: 'environment', difficulty: 'beginner' },
   },
   {
     question_type: 'summary_completion',
@@ -107,12 +82,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 9,
     passage_excerpt:
       'The new curriculum places greater emphasis on critical thinking and problem-solving. Schools have been given two years to implement the changes.',
-    meta: {
-      topic: 'education',
-      difficulty: 'intermediate',
-      explanation: '"The new curriculum" is the subject. The one-word noun that describes what is being changed is "curriculum".',
-      paraphrase_tip: 'curriculum = 教育課程・カリキュラム',
-    },
+    meta: { topic: 'education', difficulty: 'intermediate' },
   },
   {
     question_type: 'summary_completion',
@@ -124,12 +94,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 8,
     passage_excerpt:
       'Common symptoms include fever, headache, and fatigue. Anyone experiencing these symptoms for more than a few days should seek medical advice.',
-    meta: {
-      topic: 'health',
-      difficulty: 'beginner',
-      explanation: 'The passage uses "Common symptoms" and "these symptoms". The one-word answer is "symptoms".',
-      paraphrase_tip: 'symptoms = 症状',
-    },
+    meta: { topic: 'health', difficulty: 'beginner' },
   },
   {
     question_type: 'summary_completion',
@@ -141,12 +106,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 10,
     passage_excerpt:
       'The researchers began with the hypothesis that the treatment would reduce recovery time. The results of the trial supported this hypothesis.',
-    meta: {
-      topic: 'science',
-      difficulty: 'intermediate',
-      explanation: '"The researchers began with the hypothesis" and "supported this hypothesis"—the one-word noun is "hypothesis".',
-      paraphrase_tip: 'hypothesis = 仮説',
-    },
+    meta: { topic: 'science', difficulty: 'intermediate' },
   },
   {
     question_type: 'summary_completion',
@@ -158,12 +118,7 @@ export const SUMMARY_COMPLETION_SEED: ReadingQuestionSeed[] = [
     hint_length: 10,
     passage_excerpt:
       'The company has a strong record of innovation in digital services. Its latest product has been designed to meet the needs of small businesses.',
-    meta: {
-      topic: 'technology',
-      difficulty: 'intermediate',
-      explanation: '"A strong record of innovation" appears in the passage. The one-word noun is "innovation".',
-      paraphrase_tip: 'innovation = 革新・イノベーション',
-    },
+    meta: { topic: 'technology', difficulty: 'intermediate' },
   },
   {
     question_type: 'summary_completion',
