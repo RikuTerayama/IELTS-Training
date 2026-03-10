@@ -65,6 +65,9 @@ function VocabPageContent() {
   /** Listening 時のみ: 全カテゴリの復習Due合計 */
   const [listeningTotalDue, setListeningTotalDue] = useState<number | null>(null);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
+  /** Reading mini set: show brief set summary before next question/set */
+  const [showSetSummary, setShowSetSummary] = useState(false);
+  const [setSummaryData, setSetSummaryData] = useState<{ correct: number; total: number } | null>(null);
   const [clickTimer, setClickTimer] = useState<number | null>(null);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
@@ -207,6 +210,8 @@ function VocabPageContent() {
           return;
         }
 
+        setShowSetSummary(false);
+        setSetSummaryData(null);
         setQuizState({
           questions: response.data.questions,
           currentIndex: 0,
@@ -312,32 +317,56 @@ function VocabPageContent() {
     }
   };
 
-  // 次の問題へ
-  const handleNext = () => {
+  const advanceToNextQuestion = () => {
     if (!quizState) return;
-
     const nextIndex = quizState.currentIndex + 1;
-    if (nextIndex >= quizState.questions.length) {
-      // 全問終了
-      return;
-    }
-
     setQuizState({
       ...quizState,
       currentIndex: nextIndex,
       showResult: false,
       currentAnswer: undefined,
     });
+    if (selectedMode === 'typing') setTypingStartTime(Date.now());
+    if (selectedMode === 'click') setClickTimer(null);
+  };
 
-    // typingモードの場合は開始時刻を記録
-    if (selectedMode === 'typing') {
-      setTypingStartTime(Date.now());
+  // 次の問題へ（Reading では同一 passage_group のセット完了時に簡易サマリーを表示）
+  const handleNext = () => {
+    if (!quizState) return;
+
+    if (showSetSummary) {
+      setShowSetSummary(false);
+      setSetSummaryData(null);
+      advanceToNextQuestion();
+      return;
     }
 
-    // clickモードの場合はタイマーをリセット（useEffectで再起動される）
-    if (selectedMode === 'click') {
-      setClickTimer(null);
+    const nextIndex = quizState.currentIndex + 1;
+    if (nextIndex >= quizState.questions.length) {
+      advanceToNextQuestion();
+      return;
     }
+
+    const currentMeta = quizState.questions[quizState.currentIndex].meta as { passage_group?: string } | undefined;
+    const pg = currentMeta?.passage_group;
+    const nextMeta = quizState.questions[nextIndex].meta as { passage_group?: string } | undefined;
+    const atSetBoundary = pg && nextMeta?.passage_group !== pg;
+
+    if (atSetBoundary) {
+      let start = quizState.currentIndex;
+      while (start > 0) {
+        const prevMeta = quizState.questions[start - 1].meta as { passage_group?: string } | undefined;
+        if (prevMeta?.passage_group !== pg) break;
+        start--;
+      }
+      const total = quizState.currentIndex - start + 1;
+      const correct = quizState.answers.slice(start, quizState.currentIndex + 1).filter((a) => a.is_correct).length;
+      setSetSummaryData({ correct, total });
+      setShowSetSummary(true);
+      return;
+    }
+
+    advanceToNextQuestion();
   };
 
   // Clickタイマー処理
@@ -405,6 +434,8 @@ function VocabPageContent() {
       vocab_reading_matching_headings: 'Matching Headings',
       vocab_reading_tfng: 'True / False / Not Given',
       vocab_reading_summary_completion: 'Summary Completion',
+      vocab_reading_matching_information: 'Matching Information',
+      vocab_reading_sentence_completion: 'Sentence Completion',
     };
     if (readingLabels[category]) return readingLabels[category];
     const listeningLabels: Record<string, string> = {
@@ -774,6 +805,8 @@ function VocabPageContent() {
                       matching_headings: 'Matching',
                       tfng: 'TFNG',
                       summary_completion: 'Summary',
+                      matching_information: 'Matching Info',
+                      sentence_completion: 'Sentence',
                     };
                     const byType: Record<string, { correct: number; total: number }> = {};
                     quizState.answers.forEach((a, i) => {
@@ -790,6 +823,38 @@ function VocabPageContent() {
                         <span className="font-medium text-text">問題タイプ別: </span>
                         {entries.map(([t, v]) => (
                           <span key={t} className="mr-2">{typeLabels[t] ?? t} {v.correct}/{v.total}</span>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  {selectedSkill === 'reading' && quizState.questions.length > 0 && (() => {
+                    const skillLabels: Record<string, string> = {
+                      paraphrase: 'Paraphrase',
+                      skimming: 'Skimming',
+                      scanning: 'Scanning',
+                      detail: 'Detail',
+                      inference: 'Inference',
+                      not_given_confusion: 'Not Given',
+                    };
+                    const bySkill: Record<string, { correct: number; total: number }> = {};
+                    quizState.answers.forEach((a, i) => {
+                      const q = quizState.questions[i];
+                      const meta = q?.meta as { reading_skill?: string } | undefined;
+                      const sk = meta?.reading_skill ?? 'other';
+                      if (!bySkill[sk]) bySkill[sk] = { correct: 0, total: 0 };
+                      bySkill[sk].total++;
+                      if (a.is_correct) bySkill[sk].correct++;
+                    });
+                    const skillEntries = Object.entries(bySkill).filter(([, v]) => v.total > 0);
+                    const weakSkills = skillEntries.filter(([, v]) => v.total >= 1 && (v.correct / v.total) < 0.8);
+                    if (weakSkills.length === 0) return null;
+                    return (
+                      <div className={cn('mt-3 pt-3 border-t border-border text-xs', cardDesc)}>
+                        <span className="font-medium text-text">今回弱かったスキル: </span>
+                        {weakSkills.map(([sk, v]) => (
+                          <span key={sk} className="mr-2">
+                            {skillLabels[sk] ?? sk} {v.correct}/{v.total} ({Math.round((v.correct / v.total) * 100)}%)
+                          </span>
                         ))}
                       </div>
                     );
@@ -813,6 +878,23 @@ function VocabPageContent() {
                     戻る
                   </button>
                 </div>
+              </div>
+            ) : showSetSummary && setSummaryData ? (
+              <div className={cn('p-6', cardBase)}>
+                <h3 className={cn('text-lg font-semibold mb-2', cardTitle)}>このセットの結果</h3>
+                <p className={cn('text-sm', cardDesc)}>
+                  {setSummaryData.correct} / {setSummaryData.total} 正解
+                </p>
+                <button
+                  onClick={() => {
+                    setShowSetSummary(false);
+                    setSetSummaryData(null);
+                    advanceToNextQuestion();
+                  }}
+                  className={cn('mt-4 px-4 py-2', buttonPrimary)}
+                >
+                  続ける
+                </button>
               </div>
             ) : (
               <>

@@ -132,7 +132,31 @@ export async function GET(request: Request): Promise<Response> {
 
       const orderMap = new Map(selectedIds.map((id, i) => [id, i]));
       const sorted = [...readingQuestions].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
-      const questions = sorted.map((q) => ({
+
+      // Passage-based mini sets: reorder so questions with same passage_group are consecutive
+      type Row = (typeof sorted)[number];
+      const passageGroupKey = (q: Row) => {
+        const m = q.meta as { passage_group?: string } | null | undefined;
+        return m?.passage_group ? String(m.passage_group) : `__none_${q.id}`;
+      };
+      const groups = new Map<string, Row[]>();
+      for (const q of sorted) {
+        const key = passageGroupKey(q);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key)!.push(q);
+      }
+      const orderOfGroups: string[] = [];
+      const seen = new Set<string>();
+      for (const q of sorted) {
+        const key = passageGroupKey(q);
+        if (!seen.has(key)) {
+          seen.add(key);
+          orderOfGroups.push(key);
+        }
+      }
+      const reordered = orderOfGroups.flatMap((key) => groups.get(key) ?? []);
+
+      const questions = reordered.map((q) => ({
         question_id: q.id,
         prompt: q.prompt,
         choices: q.choices || undefined,

@@ -1,0 +1,443 @@
+/**
+ * Sentence Completion – complete the sentence (from passage or list)
+ * 20+ questions, topic/difficulty distributed
+ */
+
+import type { ReadingQuestionSeed } from './types';
+import { CATEGORY_BY_TYPE } from './types';
+
+const C = CATEGORY_BY_TYPE.sentence_completion;
+
+export const SENTENCE_COMPLETION_SEED: ReadingQuestionSeed[] = [
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The study found that regular exercise can _____ the risk of heart disease.',
+    correct_expression: 'reduce',
+    choices: ['reduce', 'increase', 'maintain', 'ignore'],
+    passage_excerpt:
+      'Research has shown that regular physical activity can reduce the risk of heart disease and stroke. Health authorities recommend at least 150 minutes of moderate exercise per week.',
+    strategy: 'Find the verb that fits "can ... the risk" in the passage.',
+    meta: {
+      topic: 'health',
+      difficulty: 'beginner',
+      explanation: 'The passage states "regular physical activity can reduce the risk of heart disease". So "reduce" is correct.',
+      distractor_note: '"Increase" would mean the opposite; "maintain" and "ignore" do not fit the research finding.',
+      paraphrase_tip: 'reduce the risk = リスクを減らす',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Wind and solar power are examples of _____ energy sources.',
+    correct_expression: 'renewable',
+    choices: ['renewable', 'fossil', 'nuclear', 'traditional'],
+    passage_excerpt:
+      'Renewable energy sources such as wind and solar are increasingly important. Unlike fossil fuels, they do not produce greenhouse gases when generating electricity.',
+    meta: {
+      topic: 'environment',
+      difficulty: 'beginner',
+      explanation: 'The passage says "Renewable energy sources such as wind and solar". So "renewable" completes the sentence.',
+      distractor_note: 'Fossil and nuclear are not used with "wind and solar"; "traditional" is too vague.',
+      paraphrase_tip: 'renewable = 再生可能な',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete the sentence with ONE WORD from the passage: The experiment was conducted under _____ conditions.',
+    correct_expression: 'controlled',
+    hint_first_char: 'C',
+    hint_length: 10,
+    passage_excerpt:
+      'The experiment was conducted under controlled conditions to ensure that external factors did not affect the results. Temperature and humidity were kept constant.',
+    strategy: 'Find the adjective that describes the conditions of the experiment.',
+    meta: {
+      topic: 'science',
+      difficulty: 'intermediate',
+      explanation: 'The passage states "under controlled conditions". So the one-word answer is "controlled".',
+      paraphrase_tip: 'controlled conditions = 管理された条件',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The report concluded that early _____ is key to treating the condition effectively.',
+    correct_expression: 'intervention',
+    choices: ['intervention', 'delay', 'avoidance', 'ignorance'],
+    passage_excerpt:
+      'The report concluded that early intervention is key to treating the condition effectively. Patients who received treatment within the first six months showed the best outcomes.',
+    meta: {
+      topic: 'health',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "early intervention is key to treating the condition effectively".',
+      distractor_note: '"Delay" and "avoidance" would contradict the finding; "ignorance" does not fit.',
+      paraphrase_tip: 'early intervention = 早期介入',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The building was _____ in 1850 and has been restored twice since then.',
+    correct_expression: 'completed',
+    choices: ['completed', 'destroyed', 'abandoned', 'planned'],
+    passage_excerpt:
+      'Construction began in 1847 and the building was completed in 1850. It has since been restored twice and is now open to the public.',
+    meta: {
+      topic: 'history',
+      difficulty: 'beginner',
+      explanation: 'The passage states "the building was completed in 1850".',
+      distractor_note: 'The sentence says "has been restored since then", so "destroyed" or "abandoned" would not fit.',
+      paraphrase_tip: 'completed = 完成した',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Deforestation and urban expansion have led to _____ loss in many regions.',
+    correct_expression: 'habitat',
+    choices: ['habitat', 'profit', 'interest', 'pressure'],
+    passage_excerpt:
+      'Deforestation and urban expansion have reduced the area available for wildlife. Habitat loss is one of the main threats to biodiversity worldwide.',
+    meta: {
+      topic: 'environment',
+      difficulty: 'intermediate',
+      explanation: 'The passage links deforestation and expansion to "Habitat loss" as a threat to biodiversity.',
+      distractor_note: '"Profit", "interest", and "pressure" do not complete the phrase "… loss" in this context.',
+      paraphrase_tip: 'habitat loss = 生息地の喪失',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete with ONE WORD from the passage: The sample size was relatively _____.',
+    correct_expression: 'small',
+    hint_first_char: 'S',
+    hint_length: 5,
+    passage_excerpt:
+      'The sample size was relatively small, and participants were drawn from a single region. Further research with larger groups is recommended.',
+    strategy: 'Find the adjective that describes the sample size.',
+    meta: {
+      topic: 'science',
+      difficulty: 'beginner',
+      explanation: 'The passage states "The sample size was relatively small".',
+      paraphrase_tip: 'sample size = サンプルサイズ',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The technology was first _____ in Japan in the early 1990s.',
+    correct_expression: 'developed',
+    choices: ['developed', 'rejected', 'forgotten', 'copied'],
+    passage_excerpt:
+      'The technology was first developed in Japan in the early 1990s, before being adopted by manufacturers in other countries.',
+    meta: {
+      topic: 'technology',
+      difficulty: 'beginner',
+      explanation: 'The passage says "first developed in Japan in the early 1990s".',
+      distractor_note: '"Rejected", "forgotten", and "copied" do not match "first ... in Japan".',
+      paraphrase_tip: 'developed = 開発された',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Schools are required to make reasonable _____ so that all students can participate.',
+    correct_expression: 'adjustments',
+    choices: ['adjustments', 'reductions', 'delays', 'restrictions'],
+    passage_excerpt:
+      'Schools are required to make reasonable adjustments so that all students can participate fully. This may include extra time in exams or assistive technology.',
+    meta: {
+      topic: 'education',
+      difficulty: 'intermediate',
+      explanation: 'The passage states "make reasonable adjustments so that all students can participate fully".',
+      distractor_note: '"Reductions", "delays", and "restrictions" would not support participation.',
+      paraphrase_tip: 'reasonable adjustments = 合理的な配慮',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The theory was initially met with _____ before gaining acceptance.',
+    correct_expression: 'scepticism',
+    choices: ['scepticism', 'enthusiasm', 'funding', 'approval'],
+    passage_excerpt:
+      'When the theory was first put forward, it was met with scepticism. It took several decades and further evidence before it gained general acceptance.',
+    meta: {
+      topic: 'science',
+      difficulty: 'advanced',
+      explanation: 'The passage says "met with scepticism" and later "gained general acceptance".',
+      distractor_note: '"Enthusiasm" and "approval" would contradict "before gaining acceptance".',
+      paraphrase_tip: 'met with scepticism = 懐疑的に受け止められた',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Pollution levels in the city centre have _____ since the low-emission zone was introduced.',
+    correct_expression: 'fallen',
+    choices: ['fallen', 'risen', 'stayed', 'spread'],
+    passage_excerpt:
+      'Since the introduction of the low-emission zone, pollution levels in the city centre have fallen by an average of 20 per cent.',
+    meta: {
+      topic: 'environment',
+      difficulty: 'beginner',
+      explanation: 'The passage states "pollution levels in the city centre have fallen by an average of 20 per cent".',
+      distractor_note: '"Risen" would be the opposite; "stayed" and "spread" do not fit the data.',
+      paraphrase_tip: 'fallen = 低下した',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete with ONE WORD from the passage: The treaty has been _____ by over 120 countries.',
+    correct_expression: 'ratified',
+    hint_first_char: 'R',
+    hint_length: 8,
+    passage_excerpt:
+      'The international treaty was opened for signature in 2015 and has since been ratified by over 120 countries.',
+    strategy: 'Find the verb used with "by over 120 countries".',
+    meta: {
+      topic: 'environment',
+      difficulty: 'advanced',
+      explanation: 'The passage says "has since been ratified by over 120 countries".',
+      paraphrase_tip: 'ratified = 批准された',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The material was discovered by _____ when a researcher noticed unusual properties.',
+    correct_expression: 'accident',
+    choices: ['accident', 'design', 'request', 'mistake'],
+    passage_excerpt:
+      'The material was discovered by accident in 1945 when a researcher noticed unusual properties in a sample that had been left near a heat source.',
+    meta: {
+      topic: 'science',
+      difficulty: 'intermediate',
+      explanation: 'The passage states "discovered by accident".',
+      distractor_note: '"By design" would mean intentional; "by mistake" is close but "by accident" is the exact phrase.',
+      paraphrase_tip: 'discovered by accident = 偶然発見された',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The disease can be _____ between humans and certain animal species.',
+    correct_expression: 'transmitted',
+    choices: ['transmitted', 'prevented', 'cured', 'ignored'],
+    passage_excerpt:
+      'The disease can be transmitted between humans and certain animal species. This has raised concerns about a coordinated response across human and veterinary health services.',
+    meta: {
+      topic: 'health',
+      difficulty: 'advanced',
+      explanation: 'The passage states "can be transmitted between humans and certain animal species".',
+      distractor_note: '"Prevented" and "cured" are responses, not how it spreads; "ignored" does not fit.',
+      paraphrase_tip: 'transmitted = 伝播する',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Online purchases have _____ steadily while visits to physical stores have declined.',
+    correct_expression: 'risen',
+    choices: ['risen', 'fallen', 'stopped', 'remained'],
+    passage_excerpt:
+      'Sales data from the past decade reveals a clear shift. Online purchases have risen steadily, while visits to physical stores have declined.',
+    meta: {
+      topic: 'technology',
+      difficulty: 'beginner',
+      explanation: 'The passage says "Online purchases have risen steadily".',
+      distractor_note: '"Fallen" would contradict "while visits... have declined"; "remained" would not show a shift.',
+      paraphrase_tip: 'risen steadily = 着実に増加した',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The author argues that _____ is essential if the system is to meet future challenges.',
+    correct_expression: 'reform',
+    choices: ['reform', 'delay', 'support', 'criticism'],
+    passage_excerpt:
+      'The author argues that reform is essential if the system is to meet future challenges. Without change, the approach will become unsustainable.',
+    meta: {
+      topic: 'education',
+      difficulty: 'advanced',
+      explanation: 'The passage states "reform is essential if the system is to meet future challenges".',
+      distractor_note: '"Delay" and "criticism" do not complete "… is essential"; "support" is vague.',
+      paraphrase_tip: 'reform is essential = 改革が不可欠である',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete with ONE WORD from the passage: The device is designed for use where _____ may be limited.',
+    correct_expression: 'connectivity',
+    hint_first_char: 'C',
+    hint_length: 13,
+    passage_excerpt:
+      'The device can store up to 32 GB of data and has a battery life of approximately ten hours. It is designed for use in the field where connectivity may be limited.',
+    strategy: 'Find the noun that describes what may be limited in the field.',
+    meta: {
+      topic: 'technology',
+      difficulty: 'intermediate',
+      explanation: 'The passage states "where connectivity may be limited".',
+      paraphrase_tip: 'connectivity = 接続性',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Historians have put forward several _____ for the collapse of the empire.',
+    correct_expression: 'explanations',
+    choices: ['explanations', 'celebrations', 'reductions', 'exceptions'],
+    passage_excerpt:
+      'Historians have put forward several explanations for the collapse. These include economic problems, invasions from the north, and internal political instability.',
+    meta: {
+      topic: 'history',
+      difficulty: 'intermediate',
+      explanation: 'The passage says "put forward several explanations for the collapse".',
+      distractor_note: '"Celebrations", "reductions", and "exceptions" do not fit "for the collapse".',
+      paraphrase_tip: 'explanations for = ～の説明・理由',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Health authorities recommend _____ processed foods and sugar to maintain long-term health.',
+    correct_expression: 'limiting',
+    choices: ['limiting', 'increasing', 'ignoring', 'exporting'],
+    passage_excerpt:
+      'Health authorities recommend limiting processed foods and sugar to maintain long-term health. A balanced diet rich in fruit and vegetables can lower the risk of many diseases.',
+    meta: {
+      topic: 'health',
+      difficulty: 'beginner',
+      explanation: 'The passage states "recommend limiting processed foods and sugar".',
+      distractor_note: '"Increasing" would contradict the advice; "ignoring" and "exporting" do not fit.',
+      paraphrase_tip: 'limiting = 制限すること',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'The left _____ is typically more involved in language tasks.',
+    correct_expression: 'hemisphere',
+    choices: ['hemisphere', 'muscle', 'organ', 'artery'],
+    passage_excerpt:
+      'The left hemisphere is typically more involved in language tasks, but the right hemisphere also plays a role in understanding context and tone.',
+    meta: {
+      topic: 'science',
+      difficulty: 'advanced',
+      explanation: 'The passage states "The left hemisphere is typically more involved in language tasks".',
+      distractor_note: '"Muscle", "organ", and "artery" are not used in this context for language.',
+      paraphrase_tip: 'hemisphere = 大脳半球',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'International agreements have led to the _____ out of chemicals that damage the ozone layer.',
+    correct_expression: 'phasing',
+    choices: ['phasing', 'speeding', 'cutting', 'breaking'],
+    passage_excerpt:
+      'International agreements have led to the phasing out of chemicals that damage the ozone layer. As a result, the ozone hole over Antarctica has begun to show signs of recovery.',
+    meta: {
+      topic: 'environment',
+      difficulty: 'advanced',
+      explanation: 'The passage says "the phasing out of chemicals". "Phasing out" means gradually stopping use.',
+      distractor_note: '"Speeding out", "cutting out", and "breaking out" are not the standard phrase here.',
+      paraphrase_tip: 'phasing out = 段階的に廃止すること',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Organisers announced that the event would be _____ again next year.',
+    correct_expression: 'held',
+    choices: ['held', 'cancelled', 'moved', 'shortened'],
+    passage_excerpt:
+      'Organisers described the level of interest as encouraging and announced that the event would be held again next year.',
+    meta: {
+      topic: 'education',
+      difficulty: 'intermediate',
+      explanation: 'The passage states "the event would be held again next year".',
+      distractor_note: '"Cancelled", "moved", and "shortened" would not match "again next year".',
+      paraphrase_tip: 'held again = 再び開催される',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Participants were randomly _____ to two groups.',
+    correct_expression: 'assigned',
+    choices: ['assigned', 'refused', 'invited', 'replaced'],
+    passage_excerpt:
+      'Participants were randomly assigned to two groups. Group A received the treatment twice daily for six weeks; Group B received a placebo.',
+    meta: {
+      topic: 'health',
+      difficulty: 'intermediate',
+      explanation: 'The passage states "Participants were randomly assigned to two groups".',
+      distractor_note: '"Refused", "invited", and "replaced" do not fit "randomly ... to two groups".',
+      paraphrase_tip: 'randomly assigned = 無作為に割り当てられた',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'typing',
+    prompt: 'Complete with ONE WORD from the passage: The building was _____ in 1850.',
+    correct_expression: 'completed',
+    hint_first_char: 'C',
+    hint_length: 9,
+    passage_excerpt:
+      'Construction began in 1847 and the building was completed in 1850. It has since been restored twice.',
+    strategy: 'Find the verb that describes what happened to the building in 1850.',
+    meta: {
+      topic: 'history',
+      difficulty: 'beginner',
+      explanation: 'The passage states "the building was completed in 1850".',
+      paraphrase_tip: 'completed = 完成した',
+    },
+  },
+  {
+    question_type: 'sentence_completion',
+    category: C,
+    mode: 'click',
+    prompt: 'Studies have shown that both medication and exercise can improve _____ when used together.',
+    correct_expression: 'outcomes',
+    choices: ['outcomes', 'costs', 'delays', 'objections'],
+    passage_excerpt:
+      'Guidelines recommend a combination of medication and lifestyle changes, including regular exercise. Studies have shown that both can improve outcomes when used together.',
+    meta: {
+      topic: 'health',
+      difficulty: 'intermediate',
+      explanation: 'The passage states "both can improve outcomes when used together".',
+      distractor_note: '"Costs", "delays", and "objections" do not fit "improve ... when used together".',
+      paraphrase_tip: 'improve outcomes = 結果を改善する',
+    },
+  },
+];

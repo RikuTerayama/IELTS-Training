@@ -6,21 +6,57 @@ import { PARAPHRASE_DRILL_SEED } from './paraphraseDrill';
 import { MATCHING_HEADINGS_SEED } from './matchingHeadings';
 import { TFNG_SEED } from './tfng';
 import { SUMMARY_COMPLETION_SEED } from './summaryCompletion';
+import { MATCHING_INFORMATION_SEED } from './matchingInformation';
+import { SENTENCE_COMPLETION_SEED } from './sentenceCompletion';
 import type { ReadingQuestionSeed } from './types';
-import { READING_TOPICS, READING_DIFFICULTIES } from './types';
+import type { ReadingQuestionType } from './types';
+import { READING_TOPICS, READING_DIFFICULTIES, READING_SKILLS } from './types';
+import type { ReadingSkill } from './types';
 
 export * from './types';
+
+/** Default reading_skill by question_type for weakness-aware stats */
+function defaultReadingSkill(type: ReadingQuestionType): ReadingSkill {
+  switch (type) {
+    case 'paraphrase_drill':
+      return 'paraphrase';
+    case 'matching_headings':
+      return 'skimming';
+    case 'tfng':
+      return 'not_given_confusion';
+    case 'summary_completion':
+    case 'matching_information':
+      return 'scanning';
+    case 'sentence_completion':
+      return 'detail';
+    default:
+      return 'detail';
+  }
+}
 export { PARAPHRASE_DRILL_SEED } from './paraphraseDrill';
 export { MATCHING_HEADINGS_SEED } from './matchingHeadings';
 export { TFNG_SEED } from './tfng';
 export { SUMMARY_COMPLETION_SEED } from './summaryCompletion';
+export { MATCHING_INFORMATION_SEED } from './matchingInformation';
+export { SENTENCE_COMPLETION_SEED } from './sentenceCompletion';
 
-export const READING_ACADEMIC_SEED: ReadingQuestionSeed[] = [
+const RAW_READING_SEED: ReadingQuestionSeed[] = [
   ...PARAPHRASE_DRILL_SEED,
   ...MATCHING_HEADINGS_SEED,
   ...TFNG_SEED,
   ...SUMMARY_COMPLETION_SEED,
+  ...MATCHING_INFORMATION_SEED,
+  ...SENTENCE_COMPLETION_SEED,
 ];
+
+/** Combined seed with default reading_skill applied where missing */
+export const READING_ACADEMIC_SEED: ReadingQuestionSeed[] = RAW_READING_SEED.map((q) => ({
+  ...q,
+  meta: {
+    ...q.meta,
+    reading_skill: q.meta?.reading_skill ?? defaultReadingSkill(q.question_type),
+  },
+}));
 
 export interface ValidationResult {
   ok: boolean;
@@ -68,7 +104,11 @@ export function validateReadingSeed(questions: ReadingQuestionSeed[]): Validatio
       if (q.meta.difficulty && !READING_DIFFICULTIES.includes(q.meta.difficulty)) {
         errors.push(`${prefix} invalid meta.difficulty: ${q.meta.difficulty}`);
       }
+      if (q.meta.reading_skill && !READING_SKILLS.includes(q.meta.reading_skill)) {
+        errors.push(`${prefix} invalid meta.reading_skill: ${q.meta.reading_skill}`);
+      }
     }
+    // New/updated questions should have meta.explanation for quality
   }
 
   return { ok: errors.length === 0, errors };

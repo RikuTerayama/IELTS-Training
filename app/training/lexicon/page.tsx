@@ -60,21 +60,28 @@ function LexiconPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validSkillQuery = urlSkill === 'speaking' || urlSkill === 'writing';
+  const validSkillQuery = urlSkill === 'speaking' || urlSkill === 'writing' || urlSkill === 'reading';
+  const [readingTotalDue, setReadingTotalDue] = useState<number | null>(null);
+  const [readingSessionMode, setReadingSessionMode] = useState<'review_only' | 'new_only' | 'all' | null>(null);
+
   useEffect(() => {
     if (!validSkillQuery) {
       setSelectedSkill(null);
       setStep('skill');
+      setReadingTotalDue(null);
       return;
     }
     let cancelled = false;
     setSelectedSkill(urlSkill);
     setLoading(true);
     setError(null);
-    fetchLexiconSets(urlSkill).then((response) => {
+    const lexiconModule = urlSkill === 'reading' ? 'lexicon' : 'lexicon';
+    fetchLexiconSets(urlSkill as 'speaking' | 'writing' | 'reading', lexiconModule).then((response) => {
       if (cancelled) return;
       if (response.ok && response.data) {
         setSets(response.data!.sets);
+        if (urlSkill === 'reading') setReadingTotalDue(response.data!.total_due ?? 0);
+        else setReadingTotalDue(null);
         setStep('category');
       } else {
         setError(response.error?.message || 'Failed to fetch sets');
@@ -88,15 +95,18 @@ function LexiconPageContent() {
     return () => { cancelled = true; };
   }, [urlSkill]);
 
-  const handleSkillSelect = async (skill: 'speaking' | 'writing') => {
+  const handleSkillSelect = async (skill: 'speaking' | 'writing' | 'reading') => {
     setSelectedSkill(skill);
     setLoading(true);
     setError(null);
+    setReadingTotalDue(null);
 
     try {
-      const response = await fetchLexiconSets(skill);
+      const lexiconModule = skill === 'reading' ? 'lexicon' : 'lexicon';
+      const response = await fetchLexiconSets(skill, lexiconModule);
       if (response.ok && response.data) {
         setSets(response.data.sets);
+        if (skill === 'reading') setReadingTotalDue(response.data.total_due ?? 0);
         setStep('category');
       } else {
         setError(response.error?.message || 'Failed to fetch sets');
@@ -108,18 +118,41 @@ function LexiconPageContent() {
     }
   };
 
-  // Step B: category + mode選択 → quiz開始（API は speaking/writing のみ）
-  const handleStartQuiz = async () => {
-    if (!selectedCategory || !selectedMode || (selectedSkill !== 'speaking' && selectedSkill !== 'writing')) return;
+  // Step B: category + mode選択 → quiz開始（Reading は review_only / new_only 対応）
+  const handleStartQuiz = async (reviewOnly?: boolean, newOnly?: boolean) => {
+    if (!selectedCategory || !selectedMode) return;
+    if (selectedSkill !== 'speaking' && selectedSkill !== 'writing' && selectedSkill !== 'reading') return;
 
     setLoading(true);
     setError(null);
 
+    const lexiconModule = selectedSkill === 'reading' ? 'lexicon' : 'lexicon';
+    const params =
+      selectedSkill === 'reading'
+        ? { review_only: reviewOnly, new_only: newOnly }
+        : undefined;
+
     try {
-      const response = await fetchLexiconQuestions(selectedSkill as 'speaking' | 'writing', selectedCategory, selectedMode, 10);
+      const response = await fetchLexiconQuestions(
+        selectedSkill as 'speaking' | 'writing' | 'reading',
+        selectedCategory,
+        selectedMode,
+        10,
+        lexiconModule,
+        params
+      );
       if (response.ok && response.data) {
         if (response.data.questions.length === 0) {
-          setError('この条件では問題がありません');
+          const isReading = selectedSkill === 'reading';
+          const cat = sets?.[selectedCategory];
+          const hasDue = cat && (cat.due_click > 0 || cat.due_typing > 0);
+          setError(
+            isReading && reviewOnly
+              ? 'このカテゴリ・モードには、いま復習Dueの問題がありません。「復習＋新規で開始」で練習を始めましょう。'
+              : isReading && newOnly
+                ? 'この条件に該当する新規問題はありません。「復習＋新規で開始」を試してください。'
+                : 'この条件では問題がありません'
+          );
           return;
         }
 
@@ -129,12 +162,14 @@ function LexiconPageContent() {
           answers: [],
           showResult: false,
         });
+        if (selectedSkill === 'reading') {
+          setReadingSessionMode(reviewOnly ? 'review_only' : newOnly ? 'new_only' : 'all');
+        } else {
+          setReadingSessionMode(null);
+        }
         setStep('quiz');
 
-        // typingモードの場合は開始時刻を記録
-        if (selectedMode === 'typing') {
-          setTypingStartTime(Date.now());
-        }
+        if (selectedMode === 'typing') setTypingStartTime(Date.now());
       } else {
         setError(response.error?.message || 'Failed to fetch questions');
       }
@@ -304,8 +339,17 @@ function LexiconPageContent() {
     }
   }, [step, selectedMode, quizState?.currentIndex, quizState?.showResult]);
 
-  // category名を表示用ラベルに変換
+  const readingLexiconLabels: Record<string, string> = {
+    reading_lexicon_cause_effect: 'Cause / Effect',
+    reading_lexicon_contrast_concession: 'Contrast / Concession',
+    reading_lexicon_definition_classification: 'Definition / Classification',
+    reading_lexicon_evidence_claim: 'Evidence / Claim',
+    reading_lexicon_process_sequence: 'Process / Sequence',
+    reading_lexicon_trend_change: 'Trend / Change',
+  };
+
   const getCategoryLabel = (category: string): string => {
+    if (readingLexiconLabels[category]) return readingLexiconLabels[category];
     const parts = category.split('_');
     if (parts[0] === 'writing') {
       if (parts[1] === 'task1') {
@@ -335,7 +379,7 @@ function LexiconPageContent() {
           <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須表現を覚えましょう</p>
         </div>
 
-        {(urlSkill === 'reading' || urlSkill === 'listening') ? (
+        {urlSkill === 'listening' ? (
           <ComingSoonSkillsView basePath="/training/lexicon" />
         ) : (
           <>
@@ -345,15 +389,16 @@ function LexiconPageContent() {
           </div>
         )}
 
-        {/* Step A: skill選択（4技能、Reading/Listening は Coming soon） */}
+        {/* Step A: skill選択 */}
         {step === 'skill' && (
           <div className="space-y-4">
             <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>スキルを選択</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-              <span className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 opacity-70 cursor-not-allowed text-left')}>
+              <button onClick={() => handleSkillSelect('reading')} disabled={loading}
+                className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 hover:border-primary hover:bg-primary/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}>
                 <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Reading</div>
-                <div className={cn('text-sm', cardDesc)}>Coming soon</div>
-              </span>
+                <div className={cn('text-sm', cardDesc)}>Academic Reading Signal Bank</div>
+              </button>
               <span className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 opacity-70 cursor-not-allowed text-left')}>
                 <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Listening</div>
                 <div className={cn('text-sm', cardDesc)}>Coming soon</div>
@@ -381,15 +426,29 @@ function LexiconPageContent() {
                   setStep('skill');
                   setSelectedSkill(null);
                   setSets(null);
+                  setReadingTotalDue(null);
                 }}
                 className={cn('text-sm', buttonSecondary)}
               >
                 ← 戻る
               </button>
               <h2 className={cn('text-lg font-semibold', cardTitle)}>
-                {selectedSkill === 'writing' ? 'Writing' : 'Speaking'} - カテゴリとモードを選択
+                {selectedSkill === 'reading' ? 'Reading' : selectedSkill === 'writing' ? 'Writing' : 'Speaking'} - カテゴリとモードを選択
               </h2>
             </div>
+
+            {selectedSkill === 'reading' && (
+              <div className={cn('rounded-lg border border-border bg-surface-2 px-4 py-3 text-sm', cardDesc)}>
+                {readingTotalDue != null && readingTotalDue > 0 ? (
+                  <>
+                    <span className="font-medium text-primary">復習Due: {readingTotalDue}問</span>
+                    <span className="ml-1">— Due がある問題から優先して出題されます。</span>
+                  </>
+                ) : (
+                  '復習Dueはありません。カテゴリを選んで練習を始めましょう。'
+                )}
+              </div>
+            )}
 
             {/* Category選択 */}
             <div>
@@ -412,7 +471,7 @@ function LexiconPageContent() {
                       {getCategoryLabel(category)}
                     </div>
                     <div className={cn('text-xs', cardDesc)}>
-                      問題数: Click {stats.questions_click} / Typing {stats.questions_typing}
+                      {selectedSkill === 'reading' ? '出題数' : '問題数'}: Click {stats.questions_click} / Typing {stats.questions_typing}
                     </div>
                     {(stats.due_click > 0 || stats.due_typing > 0) && (
                       <div className={cn('text-xs mt-1', 'text-primary')}>
@@ -476,14 +535,40 @@ function LexiconPageContent() {
 
             {/* Startボタン */}
             {selectedCategory && selectedMode && (
-              <div className="flex justify-center">
-                <button
-                  onClick={handleStartQuiz}
-                  disabled={loading}
-                  className={cn('px-6 py-3', buttonPrimary, loading && 'opacity-50 cursor-not-allowed')}
-                >
-                  {loading ? '読み込み中...' : '開始'}
-                </button>
+              <div className="flex flex-col items-center gap-3">
+                {selectedSkill === 'reading' && (sets[selectedCategory].due_click > 0 || sets[selectedCategory].due_typing > 0) && (
+                  <p className={cn('text-xs', cardDesc)}>復習Dueがある問題から優先して出題されます</p>
+                )}
+                <div className="flex flex-wrap justify-center gap-3">
+                  {selectedSkill === 'reading' && (() => {
+                    const dueForMode = selectedMode === 'click' ? sets[selectedCategory].due_click : sets[selectedCategory].due_typing;
+                    return dueForMode > 0 ? (
+                      <button
+                        onClick={() => handleStartQuiz(true, false)}
+                        disabled={loading}
+                        className={cn('px-4 py-2 rounded-lg border-2 border-primary bg-primary/10 text-primary font-medium hover:bg-primary/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}
+                      >
+                        {loading ? '読み込み中...' : `Review only（${dueForMode}問）`}
+                      </button>
+                    ) : null;
+                  })()}
+                  {selectedSkill === 'reading' && (
+                    <button
+                      onClick={() => handleStartQuiz(false, true)}
+                      disabled={loading}
+                      className={cn('px-4 py-2 rounded-lg border-2 border-border bg-surface-2 font-medium hover:bg-surface-2 hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}
+                    >
+                      {loading ? '...' : 'New only'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleStartQuiz()}
+                    disabled={loading}
+                    className={cn('px-6 py-3', buttonPrimary, loading && 'opacity-50 cursor-not-allowed')}
+                  >
+                    {loading ? (selectedSkill === 'reading' ? 'Reading を読み込み中...' : '読み込み中...') : selectedSkill === 'reading' && (sets[selectedCategory].due_click > 0 || sets[selectedCategory].due_typing > 0) ? '復習＋新規で開始' : '開始'}
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -492,6 +577,11 @@ function LexiconPageContent() {
         {/* Step C: quizセッション */}
         {step === 'quiz' && quizState && (
           <div className="space-y-6">
+            {selectedSkill === 'reading' && readingSessionMode && (
+              <div className={cn('rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm', cardDesc)}>
+                今回: {readingSessionMode === 'review_only' ? '復習のみ' : readingSessionMode === 'new_only' ? '新規のみ' : '復習＋新規'}
+              </div>
+            )}
             {/* 進捗表示 */}
             <div className="flex items-center justify-between">
               <div className={cn('text-sm', cardDesc)}>
@@ -518,7 +608,7 @@ function LexiconPageContent() {
                 </div>
                 <div className="flex gap-4">
                   <button
-                    onClick={handleStartQuiz}
+                    onClick={() => handleStartQuiz()}
                     className={cn('px-4 py-2', buttonPrimary)}
                   >
                     もう一度
@@ -527,6 +617,7 @@ function LexiconPageContent() {
                     onClick={() => {
                       setStep('category');
                       setQuizState(null);
+                      setReadingSessionMode(null);
                     }}
                     className={cn('px-4 py-2', buttonSecondary)}
                   >
@@ -539,6 +630,16 @@ function LexiconPageContent() {
                 {/* 問題表示 */}
                 {!quizState.showResult ? (
                   <div className={cn('p-6', cardBase)}>
+                    {quizState.questions[quizState.currentIndex].passage_excerpt && (
+                      <div className={cn('mb-4 p-4 rounded-lg bg-surface-2 border border-border max-h-40 overflow-y-auto text-sm text-text-muted leading-relaxed')}>
+                        {quizState.questions[quizState.currentIndex].passage_excerpt}
+                      </div>
+                    )}
+                    {quizState.questions[quizState.currentIndex].strategy && (
+                      <div className={cn('mb-3 text-xs text-text-muted italic')}>
+                        Strategy: {quizState.questions[quizState.currentIndex].strategy}
+                      </div>
+                    )}
                     <div className={cn('text-lg font-semibold mb-4', cardTitle)}>
                       {quizState.questions[quizState.currentIndex].prompt}
                     </div>
@@ -591,6 +692,26 @@ function LexiconPageContent() {
                           あなたの回答: {quizState.answers[quizState.answers.length - 1].user_answer}
                         </div>
                       )}
+                      {(() => {
+                        const meta = quizState.questions[quizState.currentIndex].meta as { explanation?: string; usage_note?: string } | undefined;
+                        if (!meta?.explanation && !meta?.usage_note) return null;
+                        return (
+                          <div className={cn('mt-4 p-3 rounded-lg bg-surface-2 border border-border space-y-2 text-sm', cardDesc)}>
+                            {meta.explanation && (
+                              <>
+                                <div className="font-medium text-text">Why</div>
+                                <div>{meta.explanation}</div>
+                              </>
+                            )}
+                            {meta.usage_note && (
+                              <>
+                                <div className="font-medium text-text mt-2">Usage</div>
+                                <div>{meta.usage_note}</div>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                     <button
                       onClick={handleNext}
