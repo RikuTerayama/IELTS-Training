@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { ReadingSrsStateRow } from '@/lib/db/reading-srs';
+import type { ListeningSrsStateRow } from '@/lib/db/listening-srs';
 import { normalizeExpression } from '@/lib/lexicon/normalize';
 import { updateSRSState } from '@/lib/lexicon/srs';
 import { getTokyoDateString } from '@/lib/utils/dateTokyo';
@@ -189,6 +190,42 @@ export async function POST(request: Request): Promise<Response> {
 
       if (srsError) {
         console.error('[POST /api/lexicon/submit] Reading SRS update error:', srsError);
+      }
+    } else if (question.skill === 'listening') {
+      // Listening: question_id ベースで listening_srs_state を更新
+      const { data: currentState } = await supabase
+        .from('listening_srs_state')
+        .select('stage, next_review_on, last_review_on, correct_streak, total_correct, total_wrong')
+        .eq('user_id', user.id)
+        .eq('question_id', question_id)
+        .eq('mode', question.mode)
+        .single();
+
+      const updatedState = updateSRSState(
+        currentState as Pick<ListeningSrsStateRow, 'stage' | 'next_review_on' | 'last_review_on' | 'correct_streak' | 'total_correct' | 'total_wrong'> | null,
+        isCorrect,
+        today
+      );
+
+      const { error: srsError } = await supabase
+        .from('listening_srs_state')
+        .upsert(
+          {
+            user_id: user.id,
+            question_id: question_id,
+            mode: question.mode,
+            stage: updatedState.stage,
+            next_review_on: updatedState.next_review_on,
+            last_review_on: updatedState.last_review_on,
+            correct_streak: updatedState.correct_streak,
+            total_correct: updatedState.total_correct,
+            total_wrong: updatedState.total_wrong,
+          },
+          { onConflict: 'user_id,question_id,mode' }
+        );
+
+      if (srsError) {
+        console.error('[POST /api/lexicon/submit] Listening SRS update error:', srsError);
       }
     }
 

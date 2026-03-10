@@ -29,7 +29,7 @@ export function getListeningDueDate(): string {
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
 /**
- * ユーザーの「今日 Due の Listening Vocab 件数」を集計する
+ * ユーザーの「今日 Due の Listening 件数」を集計する
  * skill=listening, module=vocab の question_id のみ対象
  */
 export async function countListeningDueToday(
