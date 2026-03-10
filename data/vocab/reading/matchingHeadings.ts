@@ -24,7 +24,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     passage_excerpt:
       "Wind and water have been used as sources of power for centuries. Early windmills were built in Persia around 500 AD, while water wheels were common in ancient China and Rome. These simple technologies laid the foundation for today's renewable energy sector.",
     strategy: 'The paragraph focuses on history and origins, not problems or future.',
-    meta: { topic: 'history', difficulty: 'intermediate' },
+    meta: {
+      topic: 'history',
+      difficulty: 'intermediate',
+      explanation: 'The paragraph describes when and where wind and water power were first used (centuries ago, Persia, China, Rome) and says they "laid the foundation" for today\'s sector—i.e. origins.',
+      distractor_note: '"Problems with fossil fuels" and "Future technology" are not discussed; "Government policy" is not mentioned.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -41,7 +46,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     passage_excerpt:
       'Scientists working on the project encountered numerous obstacles. Equipment failures, unpredictable weather, and limited access to remote sites delayed progress. Despite these setbacks, the team remained committed to their goals.',
     strategy: 'Key phrases: obstacles, delays, setbacks.',
-    meta: { topic: 'science', difficulty: 'intermediate' },
+    meta: {
+      topic: 'science',
+      difficulty: 'intermediate',
+      explanation: 'The main idea is difficulties: "obstacles", "equipment failures", "unpredictable weather", "limited access", "delayed progress", "setbacks". The heading captures this.',
+      distractor_note: '"Successful experiments" is the opposite; "Public opinion" and "Funding sources" are not discussed.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -58,7 +68,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     passage_excerpt:
       'Participants were randomly assigned to two groups. Group A received the new treatment twice daily for six weeks, while Group B received a placebo. Researchers measured outcomes at the start, midpoint, and end of the study.',
     strategy: 'The text describes methodology: groups, treatment, measurements.',
-    meta: { topic: 'health', difficulty: 'intermediate' },
+    meta: {
+      topic: 'health',
+      difficulty: 'intermediate',
+      explanation: 'The paragraph describes the method: random assignment, two groups, what each group received (treatment vs placebo), and when outcomes were measured. So "how" the experiment was conducted.',
+      distractor_note: '"Why the study failed" is not suggested; "Interview" and "Recommendations" are unrelated.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -74,7 +89,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     ],
     passage_excerpt:
       'Sales data from the past decade reveals a clear shift in how people shop. Online purchases have risen steadily, while visits to physical stores have declined. Many consumers now compare prices on their phones before buying.',
-    meta: { topic: 'technology', difficulty: 'beginner' },
+    meta: {
+      topic: 'technology',
+      difficulty: 'beginner',
+      explanation: 'The paragraph is about a "clear shift" in how people shop: more online, fewer physical visits, comparing prices on phones. So a change in consumer behaviour.',
+      distractor_note: '"History of retail" is too broad; "Technical specifications" and "Environmental legislation" are not mentioned.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -90,7 +110,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     ],
     passage_excerpt:
       'Studies show that identifying and addressing learning difficulties at an early age leads to better outcomes. Children who receive support before the age of five often catch up with their peers, while delays can have long-term effects.',
-    meta: { topic: 'education', difficulty: 'intermediate' },
+    meta: {
+      topic: 'education',
+      difficulty: 'intermediate',
+      explanation: 'The paragraph focuses on early identification and support ("early age", "before five") and the positive result ("better outcomes", "catch up"). So the benefits of early intervention.',
+      distractor_note: '"Cost", "Staff training", and "Patient complaints" are not discussed.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -106,7 +131,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     ],
     passage_excerpt:
       'Deforestation, urban expansion, and intensive farming have reduced the area available for wildlife. As a result, many species are confined to smaller and more fragmented areas, which affects their ability to find food and reproduce.',
-    meta: { topic: 'environment', difficulty: 'intermediate' },
+    meta: {
+      topic: 'environment',
+      difficulty: 'intermediate',
+      explanation: 'The paragraph lists causes (deforestation, urban expansion, intensive farming) that "have reduced the area" for wildlife—i.e. causes of habitat loss.',
+      distractor_note: '"Benefits of wildlife" and "New species" are not the focus; "Tourism" is not mentioned.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -122,7 +152,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     ],
     passage_excerpt:
       'Research has consistently shown that a balanced diet rich in fruit and vegetables can lower the risk of heart disease and some cancers. Health authorities recommend limiting processed foods and sugar to maintain long-term health.',
-    meta: { topic: 'health', difficulty: 'beginner' },
+    meta: {
+      topic: 'health',
+      difficulty: 'beginner',
+      explanation: 'The paragraph is about diet (balanced diet, fruit and vegetables, processed foods, sugar) and its effect on reducing disease risk—i.e. the role of diet in disease prevention.',
+      distractor_note: '"Surgery", "History of medicine", and "Cost" are not discussed.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -138,7 +173,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     ],
     passage_excerpt:
       'The sample size was relatively small, and participants were drawn from a single region. In addition, the follow-up period of six months may not be long enough to observe long-term effects. These factors should be considered when interpreting the findings.',
-    meta: { topic: 'science', difficulty: 'advanced' },
+    meta: {
+      topic: 'science',
+      difficulty: 'advanced',
+      explanation: 'The paragraph lists weaknesses: small sample, single region, short follow-up. It says "these factors should be considered when interpreting"—so limitations of the study.',
+      distractor_note: '"Main results" would be outcomes; "Acknowledgements" and "Future research" are different sections.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -154,7 +194,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     ],
     passage_excerpt:
       'Automation and artificial intelligence are changing the nature of work. Some jobs have disappeared, while new roles have been created. Governments and employers are being urged to invest in retraining so that workers can adapt to these changes.',
-    meta: { topic: 'technology', difficulty: 'intermediate' },
+    meta: {
+      topic: 'technology',
+      difficulty: 'intermediate',
+      explanation: 'The paragraph is about how technology (automation, AI) affects work: jobs lost, new roles, retraining. So the impact of technology on employment.',
+      distractor_note: '"Education in the past", "Leisure", and "Transport" are not the main idea.',
+    },
   },
   {
     question_type: 'matching_headings',
@@ -170,7 +215,12 @@ export const MATCHING_HEADINGS_SEED: ReadingQuestionSeed[] = [
     ],
     passage_excerpt:
       'Historians have put forward several explanations for the collapse. These include economic problems, invasions from the north, and internal political instability. No single factor is thought to be entirely responsible.',
-    meta: { topic: 'history', difficulty: 'advanced' },
+    meta: {
+      topic: 'history',
+      difficulty: 'advanced',
+      explanation: 'The paragraph gives "explanations for the collapse" and lists reasons: economic problems, invasions, political instability. So reasons for the decline of the empire.',
+      distractor_note: '"Military victories" and "Art and culture" are not about decline; "Daily life" is unrelated.',
+    },
   },
   {
     question_type: 'matching_headings',
