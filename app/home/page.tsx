@@ -38,7 +38,7 @@ const INPUT_CATEGORIES = [
     description: '単語の意味を覚えましょう',
     skills: [
       { skill: 'reading' as const, label: 'Reading', href: '/training/vocab?skill=reading', disabled: false },
-      { skill: 'listening' as const, label: 'Listening', href: '', disabled: true },
+      { skill: 'listening' as const, label: 'Listening', href: '/training/vocab?skill=listening', disabled: false },
       { skill: 'speaking' as const, label: 'Speaking', href: '/training/vocab', disabled: false },
       { skill: 'writing' as const, label: 'Writing', href: '/training/vocab', disabled: false },
     ],

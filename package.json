@@ -13,7 +13,7 @@
     "seed:idiom": "tsx scripts/seed-idiom.ts",
     "seed:vocab": "tsx scripts/seed-vocab.ts",
     "seed:vocab:reading": "tsx scripts/seed-vocab-reading.ts",
-    "seed:lexicon:reading": "tsx scripts/seed-lexicon-reading.ts"
+    "seed:vocab:listening": "tsx scripts/seed-vocab-listening.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
