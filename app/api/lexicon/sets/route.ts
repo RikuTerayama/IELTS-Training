@@ -9,16 +9,17 @@ export const revalidate = 0;
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { getReadingDueDate } from '@/lib/db/reading-srs';
+import { getListeningDueDate } from '@/lib/db/listening-srs';
 
 export async function GET(request: Request): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url);
-    const skill = searchParams.get('skill'); // 'writing' | 'speaking'
+    const skill = searchParams.get('skill'); // 'writing' | 'speaking' | 'reading' | 'listening'
     const moduleName = searchParams.get('module') || 'lexicon'; // 'lexicon' | 'idiom' (default: 'lexicon')
 
-    if (!skill || !['writing', 'speaking', 'reading'].includes(skill)) {
+    if (!skill || !['writing', 'speaking', 'reading', 'listening'].includes(skill)) {
       return Response.json(
-        errorResponse('BAD_REQUEST', 'skill parameter is required and must be "writing", "speaking", or "reading"'),
+        errorResponse('BAD_REQUEST', 'skill parameter is required and must be "writing", "speaking", "reading", or "listening"'),
         { status: 400 }
       );
     }
@@ -105,6 +106,60 @@ export async function GET(request: Request): Promise<Response> {
         difficulties: [...difficultiesSet].sort(),
       };
       return Response.json(successResponse({ sets, total_due, filters_meta }));
+    }
+
+    // Listening: lexicon_questions + listening_srs_state (same shape as Reading)
+    if (skill === 'listening') {
+      const today = getListeningDueDate();
+      const { data: questions, error: questionsError } = await supabase
+        .from('lexicon_questions')
+        .select('id, category, mode, meta')
+        .eq('skill', 'listening')
+        .eq('module', moduleName);
+
+      if (questionsError) {
+        console.error('[GET /api/lexicon/sets] Listening questions error:', questionsError);
+        return Response.json(
+          errorResponse('DATABASE_ERROR', questionsError.message),
+          { status: 500 }
+        );
+      }
+
+      for (const q of questions || []) {
+        if (!sets[q.category]) {
+          sets[q.category] = {
+            items_total: 0,
+            items_typing_enabled: 0,
+            questions_click: 0,
+            questions_typing: 0,
+            due_click: 0,
+            due_typing: 0,
+          };
+        }
+        if (q.mode === 'click') sets[q.category].questions_click++;
+        else if (q.mode === 'typing') sets[q.category].questions_typing++;
+      }
+
+      const categoryList = Object.keys(sets);
+      for (const cat of categoryList) {
+        const questionIdsInCat = (questions || [])
+          .filter((q) => q.category === cat)
+          .map((q) => q.id);
+        if (questionIdsInCat.length === 0) continue;
+
+        const { data: dueStates } = await supabase
+          .from('listening_srs_state')
+          .select('mode')
+          .eq('user_id', user.id)
+          .in('question_id', questionIdsInCat)
+          .lte('next_review_on', today);
+        for (const s of dueStates || []) {
+          if (s.mode === 'click') sets[cat].due_click++;
+          else if (s.mode === 'typing') sets[cat].due_typing++;
+        }
+      }
+      const total_due = Object.values(sets).reduce((sum, s) => sum + s.due_click + s.due_typing, 0);
+      return Response.json(successResponse({ sets, total_due }));
     }
 
     // Writing/Speaking: items + questions + SRS due

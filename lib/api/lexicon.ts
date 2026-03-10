@@ -51,7 +51,7 @@ export interface LexiconSubmitResponse {
  * Lexicon setsを取得
  */
 export async function fetchLexiconSets(
-  skill: 'writing' | 'speaking' | 'reading',
+  skill: 'writing' | 'speaking' | 'reading' | 'listening',
   module: 'lexicon' | 'idiom' | 'vocab' = 'lexicon'
 ): Promise<ApiResponse<LexiconSetsResponse>> {
   const response = await fetch(`/api/lexicon/sets?skill=${skill}&module=${module}`);
@@ -71,7 +71,7 @@ export interface LexiconQuestionsParams {
  * Reading の場合: review_only / new_only / topic / difficulty でフィルタ可能
  */
 export async function fetchLexiconQuestions(
-  skill: 'writing' | 'speaking' | 'reading',
+  skill: 'writing' | 'speaking' | 'reading' | 'listening',
   category: string,
   mode: 'click' | 'typing',
   limit: number = 10,
@@ -85,12 +85,14 @@ export async function fetchLexiconQuestions(
     limit: String(limit),
     module,
   });
-  if (skill === 'reading' && params) {
+  if ((skill === 'reading' || skill === 'listening') && params) {
     if (params.review_only) search.set('review_only', 'true');
     if (params.new_only) search.set('new_only', 'true');
     if (params.question_type) search.set('question_type', params.question_type);
-    if (params.topic) search.set('topic', params.topic);
-    if (params.difficulty) search.set('difficulty', params.difficulty);
+    if (skill === 'reading') {
+      if (params.topic) search.set('topic', params.topic);
+      if (params.difficulty) search.set('difficulty', params.difficulty);
+    }
   }
   const response = await fetch(`/api/lexicon/questions?${search.toString()}`);
   return response.json();

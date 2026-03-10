@@ -10,6 +10,8 @@ import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { getReadingDueDate } from '@/lib/db/reading-srs';
 import type { ReadingSrsStateRow } from '@/lib/db/reading-srs';
+import { getListeningDueDate } from '@/lib/db/listening-srs';
+import type { ListeningSrsStateRow } from '@/lib/db/listening-srs';
 
 export async function GET(request: Request): Promise<Response> {
   try {
@@ -25,9 +27,9 @@ export async function GET(request: Request): Promise<Response> {
     const topic = searchParams.get('topic') || undefined;
     const difficulty = searchParams.get('difficulty') || undefined;
 
-    if (!skill || !['writing', 'speaking', 'reading'].includes(skill)) {
+    if (!skill || !['writing', 'speaking', 'reading', 'listening'].includes(skill)) {
       return Response.json(
-        errorResponse('BAD_REQUEST', 'skill parameter is required and must be "writing", "speaking", or "reading"'),
+        errorResponse('BAD_REQUEST', 'skill parameter is required and must be "writing", "speaking", "reading", or "listening"'),
         { status: 400 }
       );
     }
@@ -130,6 +132,91 @@ export async function GET(request: Request): Promise<Response> {
 
       const orderMap = new Map(selectedIds.map((id, i) => [id, i]));
       const sorted = [...readingQuestions].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
+      const questions = sorted.map((q) => ({
+        question_id: q.id,
+        prompt: q.prompt,
+        choices: q.choices || undefined,
+        hint_first_char: q.hint_first_char || undefined,
+        hint_length: q.hint_length || undefined,
+        item_id: q.item_id || undefined,
+        question_type: q.question_type || undefined,
+        strategy: q.strategy || undefined,
+        passage_excerpt: q.passage_excerpt || undefined,
+        meta: q.meta || undefined,
+      }));
+
+      return Response.json(successResponse({ questions }));
+    }
+
+    // Listening: due-first / review_only / new_only (same logic as Reading)
+    if (skill === 'listening') {
+      const today = getListeningDueDate();
+
+      const { data: categoryQuestions, error: catErr } = await supabase
+        .from('lexicon_questions')
+        .select('id')
+        .eq('skill', 'listening')
+        .eq('module', moduleName)
+        .eq('category', category || '')
+        .eq('mode', mode);
+
+      if (catErr || !categoryQuestions || categoryQuestions.length === 0) {
+        return Response.json(successResponse({ questions: [] }));
+      }
+
+      const categoryQuestionIds = categoryQuestions.map((q) => q.id);
+
+      const { data: dueStates } = await supabase
+        .from('listening_srs_state')
+        .select('question_id')
+        .eq('user_id', user.id)
+        .eq('mode', mode)
+        .in('question_id', categoryQuestionIds)
+        .lte('next_review_on', today);
+      const dueRows = (dueStates || []) as Pick<ListeningSrsStateRow, 'question_id'>[];
+      const dueQuestionIds = new Set(dueRows.map((s) => s.question_id));
+
+      const { data: existingStates } = await supabase
+        .from('listening_srs_state')
+        .select('question_id')
+        .eq('user_id', user.id)
+        .eq('mode', mode)
+        .in('question_id', categoryQuestionIds);
+      const existingRows = (existingStates || []) as Pick<ListeningSrsStateRow, 'question_id'>[];
+      const existingQuestionIds = new Set(existingRows.map((s) => s.question_id));
+      const newQuestionIds = categoryQuestionIds.filter((id) => !existingQuestionIds.has(id));
+
+      const dueIds = categoryQuestionIds.filter((id) => dueQuestionIds.has(id));
+      const dueShuffled = [...dueIds].sort(() => Math.random() - 0.5);
+      const newShuffled = [...newQuestionIds].sort(() => Math.random() - 0.5);
+
+      let selectedIds: string[];
+      if (reviewOnly) {
+        selectedIds = dueShuffled.slice(0, limit);
+      } else if (newOnly) {
+        selectedIds = newShuffled.slice(0, limit);
+      } else {
+        selectedIds = [...dueShuffled.slice(0, limit)];
+        if (selectedIds.length < limit) {
+          selectedIds.push(...newShuffled.slice(0, limit - selectedIds.length));
+        }
+      }
+
+      if (selectedIds.length === 0) {
+        return Response.json(successResponse({ questions: [] }));
+      }
+
+      const { data: listeningQuestions, error: readErr } = await supabase
+        .from('lexicon_questions')
+        .select('id, prompt, correct_expression, choices, hint_first_char, hint_length, item_id, question_type, strategy, passage_excerpt, meta')
+        .in('id', selectedIds);
+
+      if (readErr || !listeningQuestions || listeningQuestions.length === 0) {
+        return Response.json(successResponse({ questions: [] }));
+      }
+
+      const orderMap = new Map(selectedIds.map((id, i) => [id, i]));
+      const sorted = [...listeningQuestions].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
       const questions = sorted.map((q) => ({
         question_id: q.id,
         prompt: q.prompt,
