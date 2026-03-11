@@ -9,7 +9,9 @@ import type { ApiResponse } from '@/lib/api/response';
 import type { ReadingVocabHistoryResponse } from '@/app/api/progress/reading-vocab-history/route';
 import type { ReadingLexiconHistoryResponse } from '@/app/api/progress/reading-lexicon-history/route';
 import type { ListeningVocabHistoryResponse } from '@/app/api/progress/listening-vocab-history/route';
+import type { ListeningIdiomHistoryResponse } from '@/app/api/progress/listening-idiom-history/route';
 import { READING_LEXICON_CATEGORY_LABELS } from '@/data/lexicon/reading/types';
+import { LISTENING_IDIOM_CATEGORY_LABELS } from '@/data/idiom/listening';
 
 const LISTENING_VOCAB_CATEGORY_LABELS: Record<string, string> = {
   vocab_listening_form_note: 'Form / note completion',
@@ -63,6 +65,9 @@ export default function ProgressPage() {
   const [listeningVocabHistory, setListeningVocabHistory] = useState<ListeningVocabHistoryResponse | null>(null);
   const [listeningVocabLoading, setListeningVocabLoading] = useState(true);
   const [listeningVocabError, setListeningVocabError] = useState<string | null>(null);
+  const [listeningIdiomHistory, setListeningIdiomHistory] = useState<ListeningIdiomHistoryResponse | null>(null);
+  const [listeningIdiomLoading, setListeningIdiomLoading] = useState(true);
+  const [listeningIdiomError, setListeningIdiomError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -187,6 +192,29 @@ export default function ProgressPage() {
       })
       .catch(() => setListeningVocabError('Network error'))
       .finally(() => setListeningVocabLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setListeningIdiomLoading(true);
+    setListeningIdiomError(null);
+    fetch('/api/progress/listening-idiom-history')
+      .then((res) => {
+        if (res.status === 401) {
+          setListeningIdiomError('ログインが必要です');
+          return { ok: false };
+        }
+        return res.json();
+      })
+      .then((data: ApiResponse<ListeningIdiomHistoryResponse>) => {
+        if (data.ok && data.data) {
+          setListeningIdiomHistory(data.data);
+          setListeningIdiomError(null);
+        } else if (data.error?.message) {
+          setListeningIdiomError(data.error.message);
+        }
+      })
+      .catch(() => setListeningIdiomError('Network error'))
+      .finally(() => setListeningIdiomLoading(false));
   }, []);
 
   if (loading) {
@@ -606,6 +634,104 @@ export default function ProgressPage() {
                     {listeningVocabHistory?.due_count != null && listeningVocabHistory.due_count > 0
                       ? 'Review Listening Vocab'
                       : 'Practice Listening Vocab'}
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Listening Idiom v1 – 履歴・Due・カテゴリ別正答率 */}
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+            <h2 className="mb-1 text-lg font-semibold">Listening Idiom</h2>
+            <p className="mb-4 text-sm text-text-muted">
+              句動詞・会話表現・口語パラフレーズ（Phrasal verbs, Conversational chunks など）の練習記録。
+              {listeningIdiomHistory?.due_count != null && listeningIdiomHistory.due_count > 0 && (
+                <span className="ml-1 font-medium text-primary">
+                  · Due today: {listeningIdiomHistory.due_count}
+                </span>
+              )}
+            </p>
+            {listeningIdiomLoading ? (
+              <p className="text-sm text-text-muted">読み込み中...</p>
+            ) : listeningIdiomError ? (
+              <p className="text-sm text-amber-600">{listeningIdiomError}</p>
+            ) : !listeningIdiomHistory ||
+              (listeningIdiomHistory.history.length === 0 &&
+                listeningIdiomHistory.stats_by_category.length === 0 &&
+                (listeningIdiomHistory.due_count ?? 0) === 0) ? (
+              <div className="rounded-lg border border-border bg-surface-2 p-6 text-center">
+                <p className="text-sm text-text-muted">まだ Listening Idiom の記録がありません</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  熟語練習で Listening を練習すると、ここに履歴と正答率が表示されます
+                </p>
+                <Link
+                  href="/training/idiom?skill=listening"
+                  className="mt-4 inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+                >
+                  Listening Idiom を始める
+                </Link>
+              </div>
+            ) : (
+              <>
+                {listeningIdiomHistory.stats_by_category.length > 0 && (
+                  <div className="mb-4 rounded-lg border border-border bg-surface-2 p-4">
+                    <h3 className="mb-2 text-sm font-semibold">By category（正答率）</h3>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {listeningIdiomHistory.stats_by_category.map((s) => (
+                        <div key={s.category} className="text-sm">
+                          <span className="font-medium">{s.category_label}:</span>{' '}
+                          {s.correct}/{s.total} ({s.accuracy_percent}%)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {listeningIdiomHistory.history.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="mb-2 text-sm font-semibold">Recent attempts</h3>
+                    <div className="space-y-2">
+                      {listeningIdiomHistory.history.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex flex-wrap items-start justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-text">
+                              {new Date(item.created_at).toLocaleString('ja-JP', {
+                                dateStyle: 'short',
+                                timeStyle: 'short',
+                              })}{' '}
+                              · {LISTENING_IDIOM_CATEGORY_LABELS[item.category as keyof typeof LISTENING_IDIOM_CATEGORY_LABELS] ?? item.category}{' '}
+                              · {item.is_correct ? (
+                                <span className="text-green-600">Correct</span>
+                              ) : (
+                                <span className="text-amber-600">Incorrect</span>
+                              )}
+                            </p>
+                            {item.user_answer != null && item.user_answer !== '' && (
+                              <p className="text-xs text-text-muted">Answer: {item.user_answer}</p>
+                            )}
+                            <p
+                              className="mt-1 truncate text-xs text-text-muted"
+                              title={item.prompt}
+                            >
+                              {item.prompt.slice(0, 80)}
+                              {item.prompt.length > 80 ? '…' : ''}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    href="/training/idiom?skill=listening"
+                    className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+                  >
+                    {listeningIdiomHistory?.due_count != null && listeningIdiomHistory.due_count > 0
+                      ? 'Review Listening Idiom'
+                      : 'Practice Listening Idiom'}
                   </Link>
                 </div>
               </>
