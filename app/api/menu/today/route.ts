@@ -173,26 +173,26 @@ export async function GET(): Promise<Response> {
     if (user && (lexiconDueClick > 0 || lexiconDueTyping > 0)) {
       notices.push({
         type: "info",
-        message: `Lexicon reviews due today: click ${lexiconDueClick}, typing ${lexiconDueTyping}`,
+        message: `表現バンクの復習が今日 due: Click ${lexiconDueClick}問・Typing ${lexiconDueTyping}問`,
       });
     }
     if (user && (idiomDueClick > 0 || idiomDueTyping > 0)) {
       notices.push({
         type: "info",
-        message: `Idiom reviews due today: click ${idiomDueClick}, typing ${idiomDueTyping}`,
+        message: `熟語練習の復習が今日 due: Click ${idiomDueClick}問・Typing ${idiomDueTyping}問`,
       });
     }
     if (user && (vocabDueClick > 0 || vocabDueTyping > 0 || readingDue > 0)) {
       const parts = [];
       if (vocabDueClick > 0 || vocabDueTyping > 0) {
-        parts.push(`vocab ${vocabDueClick + vocabDueTyping}`);
+        parts.push(`単語 ${vocabDueClick + vocabDueTyping}問`);
       }
       if (readingDue > 0) {
-        parts.push(`reading ${readingDue}`);
+        parts.push(`Reading ${readingDue}問`);
       }
       notices.push({
         type: "info",
-        message: `Reviews due today: ${parts.join(', ')}`,
+        message: `今日の復習 due: ${parts.join('、')}`,
       });
     }
 

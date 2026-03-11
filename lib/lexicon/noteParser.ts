@@ -134,21 +134,19 @@ export function parseNote(noteContent: string): ParsedLexiconItem[] {
       continue;
     }
     
-    // 見出し（# で始まる）を検出
+    // ### のみ: category を階層追加し、skill は変更しない（親 ## の skill を維持）
+    if (trimmed.startsWith('###')) {
+      const heading = trimmed.replace(/^#+\s*/, '');
+      const subCategory = generateCategoryFromHeading(heading);
+      currentCategory = currentCategory ? `${currentCategory}_${subCategory}` : subCategory;
+      continue;
+    }
+    
+    // ## または #: skill と category を更新
     if (trimmed.startsWith('#')) {
       const heading = trimmed.replace(/^#+\s*/, '');
       currentSkill = inferSkillFromHeading(heading);
       currentCategory = generateCategoryFromHeading(heading);
-      continue;
-    }
-    
-    // サブ見出し（## で始まる）を検出
-    if (trimmed.startsWith('##')) {
-      const heading = trimmed.replace(/^#+\s*/, '');
-      // サブ見出しはcategoryを更新（親見出し + サブ見出し）
-      const parentCategory = currentCategory;
-      const subCategory = generateCategoryFromHeading(heading);
-      currentCategory = parentCategory ? `${parentCategory}_${subCategory}` : subCategory;
       continue;
     }
     

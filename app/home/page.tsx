@@ -34,35 +34,35 @@ const EXAM_SPEAKING_HREF = '/exam/speaking';
 const INPUT_CATEGORIES = [
   {
     module: 'vocab' as const,
-    title: '語彙練習',
-    description: '単語の意味を覚えましょう',
+    title: '単語練習',
+    description: '4技能の必須単語を覚えましょう',
     skills: [
       { skill: 'reading' as const, label: 'Reading', href: '/training/vocab?skill=reading', disabled: false },
       { skill: 'listening' as const, label: 'Listening', href: '/training/vocab?skill=listening', disabled: false },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/vocab', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/vocab', disabled: false },
+      { skill: 'speaking' as const, label: 'Speaking', href: '/training/vocab?skill=speaking', disabled: false },
+      { skill: 'writing' as const, label: 'Writing', href: '/training/vocab?skill=writing', disabled: false },
     ],
   },
   {
     module: 'idiom' as const,
     title: '熟語練習',
-    description: 'イディオムを覚えましょう',
+    description: '4技能の必須熟語を覚えましょう',
     skills: [
       { skill: 'reading' as const, label: 'Reading', href: '/training/idiom?skill=reading', disabled: false },
       { skill: 'listening' as const, label: 'Listening', href: '/training/idiom?skill=listening', disabled: false },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/idiom', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/idiom', disabled: false },
+      { skill: 'speaking' as const, label: 'Speaking', href: '/training/idiom?skill=speaking', disabled: false },
+      { skill: 'writing' as const, label: 'Writing', href: '/training/idiom?skill=writing', disabled: false },
     ],
   },
   {
     module: 'lexicon' as const,
     title: '表現バンク',
-    description: 'よく使う表現を覚えましょう',
+    description: '4技能の必須表現を覚えましょう',
     skills: [
       { skill: 'reading' as const, label: 'Reading', href: '/training/lexicon?skill=reading', disabled: false },
       { skill: 'listening' as const, label: 'Listening', href: '/training/lexicon?skill=listening', disabled: false },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/lexicon', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/lexicon', disabled: false },
+      { skill: 'speaking' as const, label: 'Speaking', href: '/training/lexicon?skill=speaking', disabled: false },
+      { skill: 'writing' as const, label: 'Writing', href: '/training/lexicon?skill=writing', disabled: false },
     ],
   },
 ];
@@ -142,12 +142,12 @@ export default function HomePage() {
   const hrefSpeaking = outputSource.find((o) => o.module === 'speaking')?.cta.href ?? '/training/speaking';
   const hrefWritingTask2 = outputSource.find((o) => o.module === 'writing_task2')?.cta.href ?? '/task/select?task_type=Task%202';
   const practiceCards = [
-    { module: 'speaking' as const, title: 'Speaking Drill', subtitle: 'Instant speaking drills by IELTS task type.', ctaLabel: 'Start practice', href: hrefSpeaking },
-    { module: 'writing_task2' as const, title: 'Writing PREP', subtitle: 'Plan and structure Task 2 ideas before writing.', ctaLabel: 'Start PREP', href: hrefWritingTask2 },
+    { module: 'speaking' as const, title: 'Speaking Drill', subtitle: 'IELTS のタスク別で瞬間英作文ドリル', ctaLabel: '練習する', href: hrefSpeaking },
+    { module: 'writing_task2' as const, title: 'Writing PREP', subtitle: 'Task 2 のアイデアを整理してから書く', ctaLabel: 'PREPを始める', href: hrefWritingTask2 },
   ];
   const examCards = [
-    { module: 'writing_task2' as const, title: 'Writing AI Essay Checker', subtitle: 'Submit an essay and get band-style AI feedback.', ctaLabel: 'Start exam', href: EXAM_WRITING_HREF, comingSoon: false },
-    { module: 'speaking' as const, title: 'Speaking AI Interviewer', subtitle: 'Live-style IELTS speaking interview simulation (Part 1 text beta).', ctaLabel: 'Start beta', href: EXAM_SPEAKING_HREF, comingSoon: false, badge: 'Beta' as const },
+    { module: 'writing_task2' as const, title: 'Writing AI Essay Checker', subtitle: 'エッセイを提出してバンド式のAIフィードバックを受け取る', ctaLabel: '試験モード', href: EXAM_WRITING_HREF, comingSoon: false },
+    { module: 'speaking' as const, title: 'Speaking AI Interviewer', subtitle: '本番形式のスピーキング面接シミュレーション（Part 1 テキスト版ベータ）', ctaLabel: 'ベータを試す', href: EXAM_SPEAKING_HREF, comingSoon: false, badge: 'Beta' as const },
   ];
   const outputCardClasses = cn(
     'p-6 rounded-2xl border border-border bg-surface text-left transition-all duration-200',
@@ -230,7 +230,7 @@ export default function HomePage() {
           <div>
             <div className="mb-6">
               <h2 className="text-heading-2 font-bold tracking-tight text-text mb-2">Input</h2>
-              <p className="text-body text-text-muted">語彙・熟語・表現を覚えましょう（定着: 認知と想起）</p>
+              <p className="text-body text-text-muted">語彙・熟語・表現を覚えましょう</p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 min-w-0">
               {INPUT_CATEGORIES.map((cat) => {
@@ -255,13 +255,13 @@ export default function HomePage() {
                     </div>
                     <h3 className="text-lg font-bold text-text mb-2">{cat.title}</h3>
                     <p className="text-sm text-text-muted mb-4 leading-relaxed">{cat.description}</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {cat.skills.map((s) =>
                         s.disabled ? (
                           <span
                             key={s.skill}
                             className={cn(
-                              'inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm',
+                              'inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg text-sm min-w-0',
                               'bg-surface-2 text-text-subtle cursor-not-allowed opacity-70',
                               'border border-border'
                             )}
@@ -274,14 +274,14 @@ export default function HomePage() {
                             key={s.skill}
                             href={s.href}
                             className={cn(
-                              'inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-semibold',
+                              'inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg text-sm font-semibold min-w-0',
                               'bg-indigo-50 text-indigo-600 border border-indigo-200',
                               'hover:bg-indigo-100 hover:border-indigo-300 transition-all',
                               'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-indigo-500'
                             )}
                           >
-                            {s.label}
-                            <Icons.ArrowRight className="w-4 h-4" />
+                            <span className="truncate">{s.label}</span>
+                            <Icons.ArrowRight className="w-4 h-4 shrink-0" />
                           </Link>
                         )
                       )}
@@ -296,13 +296,13 @@ export default function HomePage() {
           <div>
             <div className="mb-6">
               <h2 className="text-heading-2 font-bold tracking-tight text-text mb-2">Output</h2>
-              <p className="text-body text-text-muted">覚えた語彙・表現を実際に使いましょう（運用: 使わせる制約）</p>
+              <p className="text-body text-text-muted">覚えた語彙・表現を実際に使いましょう</p>
             </div>
 
             {/* Practice */}
             <div className="mb-10">
               <h3 className="text-lg font-bold text-text mb-1">Practice</h3>
-              <p className="text-sm text-text-muted mb-4">Build fluency with guided drills and structured writing practice.</p>
+              <p className="text-sm text-text-muted mb-4">ドリルと構成されたライティング練習で流暢さを高めます。</p>
               <div className="grid md:grid-cols-2 gap-6">
                 {practiceCards.map((item) => {
                   const color = getModuleColor(item.module, false);
@@ -336,7 +336,7 @@ export default function HomePage() {
             {/* Exam Mode */}
             <div>
               <h3 className="text-lg font-bold text-text mb-1">Exam Mode</h3>
-              <p className="text-sm text-text-muted mb-4">Simulate test-day performance with AI interviewer and essay evaluation.</p>
+              <p className="text-sm text-text-muted mb-4">AI面接官・エッセイ採点で本番に近いパフォーマンスをシミュレートします。</p>
               {usageToday && (
                 <div className="mb-4 space-y-2">
                   <p className={cn(
