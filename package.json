@@ -11,6 +11,7 @@
     "seed:lexicon": "tsx scripts/seed-lexicon.ts",
     "seed:lexicon:v2": "tsx scripts/seed-lexicon-v2.ts",
     "seed:idiom": "tsx scripts/seed-idiom.ts",
+    "seed:idiom:listening": "tsx scripts/seed-idiom-listening.ts",
     "seed:vocab": "tsx scripts/seed-vocab.ts",
     "seed:vocab:reading": "tsx scripts/seed-vocab-reading.ts",
     "seed:vocab:listening": "tsx scripts/seed-vocab-listening.ts"
