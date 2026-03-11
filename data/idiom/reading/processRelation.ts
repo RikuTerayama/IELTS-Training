@@ -1,0 +1,287 @@
+/**
+ * Process / relation phrases – IELTS Reading
+ */
+
+import type { ReadingIdiomSeed } from './types';
+
+const C = 'idiom_reading_process_relation' as const;
+
+export const PROCESS_RELATION_SEED: ReadingIdiomSeed[] = [
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The process _____ three main stages.',
+    correct_expression: 'consists of',
+    choices: ['consists of', 'complains of', 'confirms of', 'consents to'],
+    passage_excerpt: 'The process consists of three main stages.',
+    meta: {
+      explanation: '"Consists of" introduces the parts or stages of a whole (process).',
+      paraphrase_tip: 'consists of = is made up of, comprises',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the first stage, data are collected.',
+    correct_expression: 'In',
+    choices: ['In', 'On', 'At', 'To'],
+    passage_excerpt: 'In the first stage, data are collected.',
+    meta: {
+      explanation: '"In the first stage" refers to a step in a process.',
+      paraphrase_tip: 'in the first stage = in step one, first',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'This _____ the next phase of the project.',
+    correct_expression: 'leads to',
+    choices: ['leads to', 'leans to', 'leaves to', 'learns to'],
+    passage_excerpt: 'This leads to the next phase of the project.',
+    meta: {
+      explanation: '"Leads to" indicates a cause–effect or sequence (process step → next step).',
+      paraphrase_tip: 'leads to = results in, brings about',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the data were analysed, the results were published.',
+    correct_expression: 'Once',
+    choices: ['Once', 'Unless', 'Until', 'Whereas'],
+    passage_excerpt: 'Once the data were analysed, the results were published.',
+    meta: {
+      explanation: '"Once" indicates a sequence (after this step, the next happened).',
+      paraphrase_tip: 'once = after, when',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The method _____ several steps.',
+    correct_expression: 'involves',
+    choices: ['involves', 'invites', 'invests', 'insists'],
+    passage_excerpt: 'The method involves several steps.',
+    meta: {
+      explanation: '"Involves" means "includes" (parts of a process).',
+      paraphrase_tip: 'involves = includes, requires',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ this, the solution is heated.',
+    correct_expression: 'Following',
+    choices: ['Following', 'Finding', 'Failing', 'Facing'],
+    passage_excerpt: 'Following this, the solution is heated.',
+    meta: {
+      explanation: '"Following" means "after" (sequence in a process).',
+      paraphrase_tip: 'following = after',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The two factors are closely _____.',
+    correct_expression: 'related',
+    choices: ['related', 'reduced', 'removed', 'refused'],
+    passage_excerpt: 'The two factors are closely related.',
+    meta: {
+      explanation: '"Related" describes a connection or relationship between things.',
+      paraphrase_tip: 'related = connected, linked',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ step one, add the reagent.',
+    correct_expression: 'In',
+    choices: ['In', 'On', 'At', 'To'],
+    passage_excerpt: 'In step one, add the reagent.',
+    meta: {
+      explanation: '"In step one" refers to a stage in a process.',
+      paraphrase_tip: 'in step one = in the first step',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The outcome _____ on the initial conditions.',
+    correct_expression: 'depends',
+    choices: ['depends', 'demands', 'denies', 'delays'],
+    passage_excerpt: 'The outcome depends on the initial conditions.',
+    meta: {
+      explanation: '"Depends on" indicates a relationship (one thing affects another).',
+      paraphrase_tip: 'depends on = is determined by, relies on',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the completion of the first phase, the second began.',
+    correct_expression: 'Upon',
+    choices: ['Upon', 'Under', 'Until', 'Unlike'],
+    passage_excerpt: 'Upon the completion of the first phase, the second began.',
+    meta: {
+      explanation: '"Upon" means "on" or "after" (sequence: after completion, next phase started).',
+      paraphrase_tip: 'upon = on, after',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The process _____ with the mixing of the components.',
+    correct_expression: 'begins',
+    choices: ['begins', 'becomes', 'belongs', 'behaves'],
+    passage_excerpt: 'The process begins with the mixing of the components.',
+    meta: {
+      explanation: '"Begins with" introduces the first step of a process.',
+      paraphrase_tip: 'begins with = starts with',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'This is _____ by a period of cooling.',
+    correct_expression: 'followed',
+    choices: ['followed', 'forced', 'formed', 'filled'],
+    passage_excerpt: 'This is followed by a period of cooling.',
+    meta: {
+      explanation: '"Is followed by" indicates the next step in a sequence.',
+      paraphrase_tip: 'is followed by = comes before, then',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The relationship _____ the two variables is complex.',
+    correct_expression: 'between',
+    choices: ['between', 'beyond', 'behind', 'below'],
+    passage_excerpt: 'The relationship between the two variables is complex.',
+    meta: {
+      explanation: '"Between" indicates a relation linking two things.',
+      paraphrase_tip: 'between = linking, connecting (two)',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the final stage, the product is tested.',
+    correct_expression: 'In',
+    choices: ['In', 'On', 'At', 'To'],
+    passage_excerpt: 'In the final stage, the product is tested.',
+    meta: {
+      explanation: '"In the final stage" refers to the last step in a process.',
+      paraphrase_tip: 'in the final stage = in the last step',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The effect _____ the way the two interact.',
+    correct_expression: 'results from',
+    choices: ['results from', 'results in', 'refers to', 'relies on'],
+    passage_excerpt: 'The effect results from the way the two interact.',
+    meta: {
+      explanation: '"Results from" indicates cause (the interaction causes the effect).',
+      distractor_note: '"Results in" introduces the effect; "results from" introduces the cause.',
+      paraphrase_tip: 'results from = is caused by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ to the diagram, the flow is clockwise.',
+    correct_expression: 'According',
+    choices: ['According', 'Account', 'Accompany', 'Achieve'],
+    passage_excerpt: 'According to the diagram, the flow is clockwise.',
+    meta: {
+      explanation: '"According to" attributes the description to a source (the diagram).',
+      paraphrase_tip: 'according to = as shown in, as in',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The stages _____ in a fixed order.',
+    correct_expression: 'occur',
+    choices: ['occur', 'offer', 'oppose', 'obtain'],
+    passage_excerpt: 'The stages occur in a fixed order.',
+    meta: {
+      explanation: '"Occur" means "happen" (process steps take place).',
+      paraphrase_tip: 'occur = happen, take place',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the previous step, the mixture is stirred.',
+    correct_expression: 'After',
+    choices: ['After', 'Against', 'Ahead', 'Along'],
+    passage_excerpt: 'After the previous step, the mixture is stirred.',
+    meta: {
+      explanation: '"After" indicates sequence (following the previous step).',
+      paraphrase_tip: 'after = following',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The two processes _____ each other.',
+    correct_expression: 'complement',
+    choices: ['complement', 'compete', 'complain', 'complete'],
+    passage_excerpt: 'The two processes complement each other.',
+    meta: {
+      explanation: '"Complement" means they work well together (relation).',
+      paraphrase_tip: 'complement = go well with, support',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The cycle _____ with the release of the product.',
+    correct_expression: 'ends',
+    choices: ['ends', 'enters', 'extends', 'exceeds'],
+    passage_excerpt: 'The cycle ends with the release of the product.',
+    meta: {
+      explanation: '"Ends with" introduces the final step of a process.',
+      paraphrase_tip: 'ends with = finishes with, concludes with',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the initial phase, little change was seen.',
+    correct_expression: 'During',
+    choices: ['During', 'Despite', 'Besides', 'Between'],
+    passage_excerpt: 'During the initial phase, little change was seen.',
+    meta: {
+      explanation: '"During" indicates when something happens (within a phase).',
+      paraphrase_tip: 'during = in the course of, throughout',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The link _____ the two has been established.',
+    correct_expression: 'between',
+    choices: ['between', 'beyond', 'behind', 'below'],
+    passage_excerpt: 'The link between the two has been established.',
+    meta: {
+      explanation: '"Between" indicates the relation connecting two things.',
+      paraphrase_tip: 'between = connecting (two)',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The procedure _____ four stages.',
+    correct_expression: 'comprises',
+    choices: ['comprises', 'compares', 'complains', 'competes'],
+    passage_excerpt: 'The procedure comprises four stages.',
+    meta: {
+      explanation: '"Comprises" means "consists of" (the parts of the process).',
+      paraphrase_tip: 'comprises = consists of, is made up of',
+    },
+  },
+];

@@ -13,6 +13,7 @@ import {
   type LexiconSetsResponse,
 } from '@/lib/api/lexicon';
 import { LISTENING_IDIOM_CATEGORY_LABELS } from '@/data/idiom/listening';
+import { READING_IDIOM_CATEGORY_LABELS } from '@/data/idiom/reading';
 import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 type Skill = 'reading' | 'listening' | 'speaking' | 'writing';
@@ -65,7 +66,7 @@ function IdiomPageContent() {
   /** Listening 今回のクイズモード: 復習のみ / 新規のみ / 復習＋新規 */
   const [listeningSessionMode, setListeningSessionMode] = useState<'review_only' | 'new_only' | 'all' | null>(null);
 
-  const validSkillQuery = urlSkill === 'speaking' || urlSkill === 'writing' || urlSkill === 'listening';
+  const validSkillQuery = urlSkill === 'speaking' || urlSkill === 'writing' || urlSkill === 'listening' || urlSkill === 'reading';
   useEffect(() => {
     if (!validSkillQuery) {
       setSelectedSkill(null);
@@ -83,10 +84,10 @@ function IdiomPageContent() {
         const data = response.data!;
         const setsData = data.sets;
         if (Object.keys(setsData).length === 0) {
-          setError(urlSkill === 'listening' ? 'Listening のデータがありません。シードを実行してください。' : 'このスキルのデータがありません。');
+          setError(urlSkill === 'listening' ? 'Listening のデータがありません。シードを実行してください。' : urlSkill === 'reading' ? 'Reading のデータがありません。シードを実行してください。' : 'このスキルのデータがありません。シードを実行してください。');
         } else {
           setSets(setsData);
-          if (urlSkill === 'listening') {
+          if (urlSkill === 'listening' || urlSkill === 'reading') {
             setListeningTotalDue(data.total_due ?? 0);
           } else {
             setListeningTotalDue(null);
@@ -105,7 +106,7 @@ function IdiomPageContent() {
     return () => { cancelled = true; };
   }, [urlSkill]);
 
-  const handleSkillSelect = async (skill: 'speaking' | 'writing' | 'listening') => {
+  const handleSkillSelect = async (skill: 'speaking' | 'writing' | 'listening' | 'reading') => {
     setSelectedSkill(skill);
     setLoading(true);
     setError(null);
@@ -116,10 +117,10 @@ function IdiomPageContent() {
         const data = response.data;
         const setsData = data.sets;
         if (Object.keys(setsData).length === 0) {
-          setError(skill === 'listening' ? 'Listening のデータがありません。シードを実行してください。' : 'このスキルのデータがありません。');
+          setError(skill === 'listening' ? 'Listening のデータがありません。シードを実行してください。' : skill === 'reading' ? 'Reading のデータがありません。シードを実行してください。' : 'このスキルのデータがありません。シードを実行してください。');
         } else {
           setSets(setsData);
-          if (skill === 'listening') {
+          if (skill === 'listening' || skill === 'reading') {
             setListeningTotalDue(data.total_due ?? 0);
           } else {
             setListeningTotalDue(null);
@@ -139,18 +140,18 @@ function IdiomPageContent() {
   // Step B: category + mode選択 → quiz開始（Listening は review_only / new_only 対応）
   const handleStartQuiz = async (reviewOnly?: boolean, newOnly?: boolean) => {
     if (!selectedCategory || !selectedMode) return;
-    if (selectedSkill !== 'speaking' && selectedSkill !== 'writing' && selectedSkill !== 'listening') return;
+    if (selectedSkill !== 'speaking' && selectedSkill !== 'writing' && selectedSkill !== 'listening' && selectedSkill !== 'reading') return;
 
     setLoading(true);
     setError(null);
 
     try {
       const params =
-        selectedSkill === 'listening'
+        selectedSkill === 'listening' || selectedSkill === 'reading'
           ? { review_only: reviewOnly ?? false, new_only: newOnly ?? false }
           : undefined;
       const response = await fetchLexiconQuestions(
-        selectedSkill as 'speaking' | 'writing' | 'listening',
+        selectedSkill as 'speaking' | 'writing' | 'listening' | 'reading',
         selectedCategory,
         selectedMode,
         10,
@@ -160,12 +161,14 @@ function IdiomPageContent() {
       if (response.ok && response.data) {
         if (response.data.questions.length === 0) {
           const isListening = selectedSkill === 'listening';
+          const isReading = selectedSkill === 'reading';
+          const isDueMode = isListening || isReading;
           setError(
-            isListening && reviewOnly
+            isDueMode && reviewOnly
               ? 'このカテゴリ・モードには、いま復習Dueの問題がありません。別のカテゴリやモードを選ぶか、「復習＋新規で開始」で練習を始めましょう。'
-              : isListening && newOnly
+              : isDueMode && newOnly
                 ? 'この条件に該当する新規問題はありません。「復習＋新規で開始」を試してください。'
-                : isListening
+                : isDueMode
                   ? 'このカテゴリに復習Dueも新規問題もありません。'
                   : 'この条件では問題がありません'
           );
@@ -178,7 +181,7 @@ function IdiomPageContent() {
           answers: [],
           showResult: false,
         });
-        if (selectedSkill === 'listening') {
+        if (selectedSkill === 'listening' || selectedSkill === 'reading') {
           setListeningSessionMode(reviewOnly ? 'review_only' : newOnly ? 'new_only' : 'all');
         } else {
           setListeningSessionMode(null);
@@ -367,6 +370,9 @@ function IdiomPageContent() {
     if (category.startsWith('idiom_listening_')) {
       return LISTENING_IDIOM_CATEGORY_LABELS[category as keyof typeof LISTENING_IDIOM_CATEGORY_LABELS] ?? category;
     }
+    if (category.startsWith('idiom_reading_')) {
+      return READING_IDIOM_CATEGORY_LABELS[category as keyof typeof READING_IDIOM_CATEGORY_LABELS] ?? category;
+    }
     const parts = category.split('_');
     if (parts[0] === 'writing') {
       if (parts[1] === 'essay') {
@@ -401,25 +407,22 @@ function IdiomPageContent() {
           <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須熟語を覚えましょう</p>
         </div>
 
-        {urlSkill === 'reading' ? (
-          <ComingSoonSkillsView basePath="/training/idiom" />
-        ) : (
-          <>
         {error && (
           <div className={cn('mb-4 p-4 rounded-lg', cardBase, 'bg-danger/10 border-danger')}>
             <p className="text-danger">{error}</p>
           </div>
         )}
 
-        {/* Step A: skill選択（Reading は Coming soon / Listening は有効） */}
+        {/* Step A: skill選択 */}
         {step === 'skill' && (
           <div className="space-y-4">
             <h2 className={cn('text-lg font-semibold mb-4', cardTitle)}>スキルを選択</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-              <span className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 opacity-70 cursor-not-allowed text-left')}>
+              <button onClick={() => handleSkillSelect('reading')} disabled={loading}
+                className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}>
                 <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Reading</div>
-                <div className={cn('text-sm', cardDesc)}>Coming soon</div>
-              </span>
+                <div className={cn('text-sm', cardDesc)}>Academic Reading 頻出フレーズ</div>
+              </button>
               <button onClick={() => handleSkillSelect('listening')} disabled={loading}
                 className={cn('p-6 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}>
                 <div className={cn('font-semibold text-xl mb-2', cardTitle)}>Listening</div>
@@ -454,9 +457,9 @@ function IdiomPageContent() {
                 ← 戻る
               </button>
               <h2 className={cn('text-lg font-semibold', cardTitle)}>
-                {selectedSkill === 'listening' ? 'Listening' : selectedSkill === 'writing' ? 'Writing' : 'Speaking'} - カテゴリとモードを選択
+                {selectedSkill === 'listening' ? 'Listening' : selectedSkill === 'reading' ? 'Reading' : selectedSkill === 'writing' ? 'Writing' : 'Speaking'} - カテゴリとモードを選択
               </h2>
-              {selectedSkill === 'listening' && listeningTotalDue != null && listeningTotalDue > 0 && (
+              {(selectedSkill === 'listening' || selectedSkill === 'reading') && listeningTotalDue != null && listeningTotalDue > 0 && (
                 <p className={cn('text-sm', cardDesc)}>復習Due: 合計 {listeningTotalDue}問</p>
               )}
             </div>
@@ -549,14 +552,14 @@ function IdiomPageContent() {
               </div>
             )}
 
-            {/* Startボタン（Listening は 復習のみ / 新規のみ / 復習＋新規） */}
+            {/* Startボタン（Listening / Reading は 復習のみ / 新規のみ / 復習＋新規） */}
             {selectedCategory && selectedMode && (
               <div className="flex flex-col items-center gap-3">
-                {selectedSkill === 'listening' && (sets[selectedCategory].due_click > 0 || sets[selectedCategory].due_typing > 0) && (
+                {(selectedSkill === 'listening' || selectedSkill === 'reading') && (sets[selectedCategory].due_click > 0 || sets[selectedCategory].due_typing > 0) && (
                   <p className={cn('text-xs', cardDesc)}>復習Dueがある問題から優先して出題されます</p>
                 )}
                 <div className="flex flex-wrap justify-center gap-3">
-                  {selectedSkill === 'listening' && (() => {
+                  {(selectedSkill === 'listening' || selectedSkill === 'reading') && (() => {
                     const dueForMode = selectedMode === 'click' ? sets[selectedCategory].due_click : sets[selectedCategory].due_typing;
                     return dueForMode > 0 ? (
                       <button
@@ -569,7 +572,7 @@ function IdiomPageContent() {
                       </button>
                     ) : null;
                   })()}
-                  {selectedSkill === 'listening' && (
+                  {(selectedSkill === 'listening' || selectedSkill === 'reading') && (
                     <button
                       key="new"
                       onClick={() => handleStartQuiz(false, true)}
@@ -596,7 +599,7 @@ function IdiomPageContent() {
         {/* Step C: quizセッション */}
         {step === 'quiz' && quizState && (
           <div className="space-y-6">
-            {selectedSkill === 'listening' && listeningSessionMode && (
+            {(selectedSkill === 'listening' || selectedSkill === 'reading') && listeningSessionMode && (
               <div className={cn('rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm', cardDesc)}>
                 今回: {listeningSessionMode === 'review_only' ? '復習のみ' : listeningSessionMode === 'new_only' ? '新規のみ' : '復習＋新規'}
               </div>
@@ -700,24 +703,31 @@ function IdiomPageContent() {
                           あなたの回答: {quizState.answers[quizState.answers.length - 1].user_answer}
                         </div>
                       )}
-                      {selectedSkill === 'listening' && (() => {
+                      {(selectedSkill === 'listening' || selectedSkill === 'reading') && (() => {
                         const q = quizState.questions[quizState.currentIndex];
-                        const meta = q?.meta as { explanation?: string; transcript_excerpt?: string; speaker_type?: string; distractor_note?: string; paraphrase_tip?: string } | undefined;
+                        const meta = q?.meta as { explanation?: string; transcript_excerpt?: string; speaker_type?: string; distractor_note?: string; paraphrase_tip?: string; passage_excerpt?: string } | undefined;
                         if (!meta?.explanation) return null;
                         return (
                           <div className={cn('mt-3 pt-3 border-t border-border space-y-2')}>
                             <p className={cn('text-sm font-medium text-text')}>{meta.explanation}</p>
-                            {meta.transcript_excerpt && (
+                            {selectedSkill === 'listening' && meta.transcript_excerpt && (
                               <p className={cn('text-xs', cardDesc)}><span className="font-medium text-text">Transcript:</span> {meta.transcript_excerpt}</p>
                             )}
-                            {meta.speaker_type && (
+                            {selectedSkill === 'listening' && meta.speaker_type && (
                               <p className={cn('text-xs', cardDesc)}><span className="font-medium text-text">Speaker:</span> {meta.speaker_type}</p>
                             )}
-                            {meta.distractor_note && (
-                              <p className={cn('text-xs', cardDesc)}><span className="font-medium text-text">Distractor:</span> {meta.distractor_note}</p>
+                            {(meta.distractor_note || meta.paraphrase_tip) && (
+                              <>
+                                {meta.distractor_note && (
+                                  <p className={cn('text-xs', cardDesc)}><span className="font-medium text-text">Distractor:</span> {meta.distractor_note}</p>
+                                )}
+                                {meta.paraphrase_tip && (
+                                  <p className={cn('text-xs', cardDesc)}><span className="font-medium text-text">Tip:</span> {meta.paraphrase_tip}</p>
+                                )}
+                              </>
                             )}
-                            {meta.paraphrase_tip && (
-                              <p className={cn('text-xs', cardDesc)}><span className="font-medium text-text">Tip:</span> {meta.paraphrase_tip}</p>
+                            {selectedSkill === 'reading' && meta.passage_excerpt && (
+                              <p className={cn('text-xs', cardDesc)}><span className="font-medium text-text">Passage:</span> {meta.passage_excerpt}</p>
                             )}
                           </div>
                         );
@@ -738,8 +748,6 @@ function IdiomPageContent() {
 
         {loading && step !== 'quiz' && (
           <div className="text-center text-text-muted">読み込み中...</div>
-        )}
-          </>
         )}
       </div>
     </Layout>

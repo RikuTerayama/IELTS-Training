@@ -1,0 +1,288 @@
+/**
+ * Contrast / concession phrases – IELTS Reading
+ */
+
+import type { ReadingIdiomSeed } from './types';
+
+const C = 'idiom_reading_contrast_concession' as const;
+
+export const CONTRAST_CONCESSION_SEED: ReadingIdiomSeed[] = [
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The data was limited. _____, the trend was clear.',
+    correct_expression: 'Nevertheless',
+    choices: ['Nevertheless', 'Therefore', 'Moreover', 'Accordingly'],
+    passage_excerpt: 'The data was limited. Nevertheless, the trend was clear.',
+    meta: {
+      explanation: '"Nevertheless" introduces a contrast (despite the limitation, the trend was clear).',
+      paraphrase_tip: 'nevertheless = despite that, however',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the risks, the benefits were judged to outweigh them.',
+    correct_expression: 'Although',
+    choices: ['Although', 'Because', 'Whenever', 'Unless'],
+    passage_excerpt: 'Although the risks were significant, the benefits were judged to outweigh them.',
+    meta: {
+      explanation: '"Although" introduces a concession (the risks existed but did not prevent the conclusion).',
+      paraphrase_tip: 'although = despite the fact that',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The first study found no effect. _____, a later study did.',
+    correct_expression: 'By contrast',
+    choices: ['By contrast', 'In addition', 'As a result', 'For example'],
+    passage_excerpt: 'The first study found no effect. By contrast, a later study did.',
+    meta: {
+      explanation: '"By contrast" signals a difference between two things (first vs later study).',
+      paraphrase_tip: 'by contrast = in contrast, on the other hand',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ previous findings, the new data suggest a different pattern.',
+    correct_expression: 'Unlike',
+    choices: ['Unlike', 'Like', 'Besides', 'Despite'],
+    passage_excerpt: 'Unlike previous findings, the new data suggest a different pattern.',
+    meta: {
+      explanation: '"Unlike" introduces a contrast (new data differ from previous findings).',
+      paraphrase_tip: 'unlike = in contrast to, different from',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The theory is widely accepted. _____, some researchers disagree.',
+    correct_expression: 'However',
+    choices: ['However', 'Thus', 'Hence', 'Furthermore'],
+    passage_excerpt: 'The theory is widely accepted. However, some researchers disagree.',
+    meta: {
+      explanation: '"However" introduces a contrast or limitation to the previous statement.',
+      paraphrase_tip: 'however = but, yet',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the lack of evidence, the claim was rejected.',
+    correct_expression: 'In view of',
+    choices: ['In view of', 'In place of', 'In favour of', 'In charge of'],
+    passage_excerpt: 'In view of the lack of evidence, the claim was rejected.',
+    meta: {
+      explanation: '"In view of" means "considering" (the lack of evidence led to the rejection).',
+      distractor_note: 'Here it works as a concession: given this fact, this decision was made.',
+      paraphrase_tip: 'in view of = considering, because of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The sample was small. _____, the results were consistent.',
+    correct_expression: 'Even so',
+    choices: ['Even so', 'So far', 'As such', 'In turn'],
+    passage_excerpt: 'The sample was small. Even so, the results were consistent across groups.',
+    meta: {
+      explanation: '"Even so" means "despite that" (concession: small sample, but results were still consistent).',
+      paraphrase_tip: 'even so = nevertheless, despite that',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the difficulties, the project was completed on time.',
+    correct_expression: 'Notwithstanding',
+    choices: ['Notwithstanding', 'Regarding', 'Concerning', 'Following'],
+    passage_excerpt: 'Notwithstanding the difficulties, the project was completed on time.',
+    meta: {
+      explanation: '"Notwithstanding" means "in spite of" (formal concession).',
+      paraphrase_tip: 'notwithstanding = despite, in spite of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'Region A saw growth. _____, Region B declined.',
+    correct_expression: 'Conversely',
+    choices: ['Conversely', 'Similarly', 'Consequently', 'Subsequently'],
+    passage_excerpt: 'Region A saw growth. Conversely, Region B declined.',
+    meta: {
+      explanation: '"Conversely" introduces an opposite or contrasting outcome.',
+      paraphrase_tip: 'conversely = on the contrary, in contrast',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the cost is high, the quality justifies it.',
+    correct_expression: 'While',
+    choices: ['While', 'Because', 'If', 'Until'],
+    passage_excerpt: 'While the cost is high, the quality justifies it.',
+    meta: {
+      explanation: '"While" can introduce a contrast (although the cost is high, quality justifies it).',
+      paraphrase_tip: 'while = although (when contrasting)',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The earlier model failed. _____, the new one succeeded.',
+    correct_expression: 'In contrast',
+    choices: ['In contrast', 'In fact', 'In short', 'In general'],
+    passage_excerpt: 'The earlier model failed. In contrast, the new one succeeded.',
+    meta: {
+      explanation: '"In contrast" signals a difference between two things.',
+      paraphrase_tip: 'in contrast = by contrast, on the other hand',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ these limitations, the study offers useful insights.',
+    correct_expression: 'Despite',
+    choices: ['Despite', 'Owing to', 'According to', 'Thanks to'],
+    passage_excerpt: 'Despite these limitations, the study offers useful insights.',
+    meta: {
+      explanation: '"Despite" introduces a concession (limitations exist but insights are still useful).',
+      paraphrase_tip: 'despite = in spite of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The method is time-consuming. _____, it is highly accurate.',
+    correct_expression: 'On the other hand',
+    choices: ['On the other hand', 'On the whole', 'On average', 'On purpose'],
+    passage_excerpt: 'The method is time-consuming. On the other hand, it is highly accurate.',
+    meta: {
+      explanation: '"On the other hand" introduces a contrasting point (drawback vs advantage).',
+      paraphrase_tip: 'on the other hand = however, in contrast',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the criticism, the approach remains popular.',
+    correct_expression: 'For all',
+    choices: ['For all', 'After all', 'Above all', 'All in all'],
+    passage_excerpt: 'For all the criticism, the approach remains popular among practitioners.',
+    meta: {
+      explanation: '"For all" means "despite" (concession: criticism exists but it is still popular).',
+      paraphrase_tip: 'for all = despite',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The figures were revised. _____, the conclusion stood.',
+    correct_expression: 'Even then',
+    choices: ['Even then', 'Until then', 'Since then', 'By then'],
+    passage_excerpt: 'The figures were revised. Even then, the conclusion stood.',
+    meta: {
+      explanation: '"Even then" means "despite that" (concession: even after revision, conclusion unchanged).',
+      paraphrase_tip: 'even then = nevertheless, despite that',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the two groups differed in age, their scores were similar.',
+    correct_expression: 'Whereas',
+    choices: ['Whereas', 'Because', 'Unless', 'Whether'],
+    passage_excerpt: 'Whereas the two groups differed in age, their scores were similar.',
+    meta: {
+      explanation: '"Whereas" introduces a contrast (difference in one aspect, similarity in another).',
+      paraphrase_tip: 'whereas = while, but (contrast)',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the fact that funding was cut, output increased.',
+    correct_expression: 'Despite',
+    choices: ['Despite', 'Because', 'Given', 'Provided'],
+    passage_excerpt: 'Despite the fact that funding was cut, output increased.',
+    meta: {
+      explanation: '"Despite the fact that" introduces a concession (unexpected result).',
+      paraphrase_tip: 'despite the fact that = although',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The first experiment failed. _____, the team tried a different method.',
+    correct_expression: 'Accordingly',
+    choices: ['Accordingly', 'Otherwise', 'Instead', 'Rather'],
+    passage_excerpt: 'The first experiment failed. Accordingly, the team tried a different method.',
+    meta: {
+      explanation: '"Accordingly" can mean "in response to that" (result/consequence). Here the contrast is failure → new attempt.',
+      usage_note: 'Sometimes used to show consequence; here it links failure to a change of approach.',
+      paraphrase_tip: 'accordingly = therefore, in response',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the outcome was positive, the process was criticised.',
+    correct_expression: 'While',
+    choices: ['While', 'Because', 'If', 'When'],
+    passage_excerpt: 'While the outcome was positive, the process was criticised.',
+    meta: {
+      explanation: '"While" contrasts two aspects (positive outcome vs criticised process).',
+      paraphrase_tip: 'while = although',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ earlier studies, this one used a larger sample.',
+    correct_expression: 'Unlike',
+    choices: ['Unlike', 'Like', 'As', 'With'],
+    passage_excerpt: 'Unlike earlier studies, this one used a larger sample.',
+    meta: {
+      explanation: '"Unlike" signals a difference (this study differs from earlier ones).',
+      paraphrase_tip: 'unlike = in contrast to',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The policy was unpopular. _____, it was effective.',
+    correct_expression: 'Yet',
+    choices: ['Yet', 'So', 'And', 'Or'],
+    passage_excerpt: 'The policy was unpopular. Yet it was effective.',
+    meta: {
+      explanation: '"Yet" introduces a contrast (unpopular but effective).',
+      paraphrase_tip: 'yet = but, nevertheless',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the results were mixed, the overall trend was positive.',
+    correct_expression: 'Although',
+    choices: ['Although', 'Because', 'Whenever', 'Whereas'],
+    passage_excerpt: 'Although the results were mixed, the overall trend was positive.',
+    meta: {
+      explanation: '"Although" introduces a concession (mixed results but positive trend).',
+      paraphrase_tip: 'although = though, even though',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the high cost, demand remained strong.',
+    correct_expression: 'In spite of',
+    choices: ['In spite of', 'On top of', 'Because of', 'As well as'],
+    passage_excerpt: 'In spite of the high cost, demand remained strong.',
+    meta: {
+      explanation: '"In spite of" means "despite" (concession).',
+      paraphrase_tip: 'in spite of = despite',
+    },
+  },
+];
