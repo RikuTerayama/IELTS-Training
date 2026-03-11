@@ -204,8 +204,10 @@ function IdiomPageContent() {
   // Click回答
   const handleClickAnswer = async (choice: string) => {
     if (!quizState || !selectedMode) return;
+    const { questions, currentIndex } = quizState;
+    if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
 
-    const currentQuestion = quizState.questions[quizState.currentIndex];
+    const currentQuestion = questions[currentIndex];
     const timeMs = clickTimer !== null ? (10 - clickTimer) * 1000 : 0;
 
     // タイマー停止
@@ -246,8 +248,10 @@ function IdiomPageContent() {
   // Typing回答
   const handleTypingSubmit = async (answer: string) => {
     if (!quizState || !selectedMode || !typingStartTime) return;
+    const { questions, currentIndex } = quizState;
+    if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
 
-    const currentQuestion = quizState.questions[quizState.currentIndex];
+    const currentQuestion = questions[currentIndex];
     const timeMs = Date.now() - typingStartTime;
 
     setLoading(true);
@@ -326,9 +330,10 @@ function IdiomPageContent() {
         if (timer <= 0) {
           clearInterval(interval);
           setTimerInterval(null);
-          // 自動submit（不正解）
-          const currentQuestion = quizState.questions[quizState.currentIndex];
-          submitLexiconAnswer(currentQuestion.question_id, '', 10000).then((response) => {
+          const { questions, currentIndex } = quizState;
+          if (questions.length > 0 && currentIndex >= 0 && currentIndex < questions.length) {
+            const currentQuestion = questions[currentIndex];
+            submitLexiconAnswer(currentQuestion.question_id, '', 10000).then((response) => {
             if (response.ok && response.data) {
               setQuizState((prev) => {
                 if (!prev) return null;
@@ -349,6 +354,7 @@ function IdiomPageContent() {
               });
             }
           });
+          }
           setClickTimer(null);
         }
       }, 1000);
@@ -404,7 +410,7 @@ function IdiomPageContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>熟語練習</h1>
-          <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須熟語を覚えましょう</p>
+          <p className={cn('text-sm', cardDesc)}>Reading / Listening を含む4技能の必須熟語を覚えましょう</p>
         </div>
 
         {error && (
@@ -649,18 +655,23 @@ function IdiomPageContent() {
             ) : (
               <>
                 {/* 問題表示 */}
-                {!quizState.showResult ? (
+                {(() => {
+                  const idx = quizState.currentIndex;
+                  const questions = quizState.questions;
+                  if (questions.length === 0 || idx < 0 || idx >= questions.length) return null;
+                  const currentQuestion = questions[idx];
+                  return !quizState.showResult ? (
                   <div className={cn('p-6', cardBase)}>
                     <div className={cn('text-lg font-semibold mb-4', cardTitle)}>
-                      {quizState.questions[quizState.currentIndex].prompt}
+                      {currentQuestion.prompt}
                     </div>
 
                     {/* Clickモード */}
-                    {selectedMode === 'click' && quizState.questions[quizState.currentIndex].choices && (
+                    {selectedMode === 'click' && currentQuestion.choices && (
                       <div className="space-y-3">
-                        {quizState.questions[quizState.currentIndex].choices!.map((choice, idx) => (
+                        {currentQuestion.choices.map((choice, choiceIdx) => (
                           <button
-                            key={idx}
+                            key={choiceIdx}
                             onClick={() => handleClickAnswer(choice)}
                             disabled={loading}
                             className={cn(
@@ -680,7 +691,7 @@ function IdiomPageContent() {
                     {/* Typingモード */}
                     {selectedMode === 'typing' && (
                       <TypingInput
-                        question={quizState.questions[quizState.currentIndex]}
+                        question={currentQuestion}
                         onSubmit={handleTypingSubmit}
                         loading={loading}
                       />
@@ -704,7 +715,7 @@ function IdiomPageContent() {
                         </div>
                       )}
                       {(selectedSkill === 'listening' || selectedSkill === 'reading') && (() => {
-                        const q = quizState.questions[quizState.currentIndex];
+                        const q = currentQuestion;
                         const meta = q?.meta as { explanation?: string; transcript_excerpt?: string; speaker_type?: string; distractor_note?: string; paraphrase_tip?: string; passage_excerpt?: string } | undefined;
                         if (!meta?.explanation) return null;
                         return (
@@ -740,7 +751,8 @@ function IdiomPageContent() {
                       次へ
                     </button>
                   </div>
-                )}
+                );
+                })()}
               </>
             )}
           </div>
@@ -761,7 +773,7 @@ export default function IdiomPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>熟語練習</h1>
-            <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須熟語を覚えましょう</p>
+            <p className={cn('text-sm', cardDesc)}>Reading / Listening を含む4技能の必須熟語を覚えましょう</p>
           </div>
           <div className="text-center text-text-muted py-12">読み込み中...</div>
         </div>

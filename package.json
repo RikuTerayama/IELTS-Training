@@ -10,6 +10,7 @@
     "lint:theme": "node scripts/lint-theme-colors.mjs",
     "seed:lexicon": "tsx scripts/seed-lexicon.ts",
     "seed:lexicon:v2": "tsx scripts/seed-lexicon-v2.ts",
+    "seed:lexicon:reading": "tsx scripts/seed-lexicon-reading.ts",
     "seed:lexicon:listening": "tsx scripts/seed-lexicon-listening.ts",
     "seed:idiom": "tsx scripts/seed-idiom.ts",
     "seed:idiom:listening": "tsx scripts/seed-idiom-listening.ts",
@@ -17,7 +18,9 @@
     "seed:vocab": "tsx scripts/seed-vocab.ts",
     "seed:vocab:reading": "tsx scripts/seed-vocab-reading.ts",
     "seed:vocab:listening": "tsx scripts/seed-vocab-listening.ts",
-    "seed:vocab:all": "tsx scripts/seed-vocab.ts && tsx scripts/seed-vocab-reading.ts && tsx scripts/seed-vocab-listening.ts"
+    "seed:vocab:all": "tsx scripts/seed-vocab.ts && tsx scripts/seed-vocab-reading.ts && tsx scripts/seed-vocab-listening.ts",
+    "seed:public-input": "npm run seed:vocab:all && npm run seed:idiom && npm run seed:idiom:listening && npm run seed:idiom:reading && npm run seed:lexicon && npm run seed:lexicon:listening && npm run seed:lexicon:reading",
+    "check:public-input": "tsx scripts/check-public-input.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
