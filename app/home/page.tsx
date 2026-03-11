@@ -60,7 +60,7 @@ const INPUT_CATEGORIES = [
     description: 'よく使う表現を覚えましょう',
     skills: [
       { skill: 'reading' as const, label: 'Reading', href: '/training/lexicon?skill=reading', disabled: false },
-      { skill: 'listening' as const, label: 'Listening', href: '', disabled: true },
+      { skill: 'listening' as const, label: 'Listening', href: '/training/lexicon?skill=listening', disabled: false },
       { skill: 'speaking' as const, label: 'Speaking', href: '/training/lexicon', disabled: false },
       { skill: 'writing' as const, label: 'Writing', href: '/training/lexicon', disabled: false },
     ],

@@ -10,6 +10,7 @@
     "lint:theme": "node scripts/lint-theme-colors.mjs",
     "seed:lexicon": "tsx scripts/seed-lexicon.ts",
     "seed:lexicon:v2": "tsx scripts/seed-lexicon-v2.ts",
+    "seed:lexicon:listening": "tsx scripts/seed-lexicon-listening.ts",
     "seed:idiom": "tsx scripts/seed-idiom.ts",
     "seed:idiom:listening": "tsx scripts/seed-idiom-listening.ts",
     "seed:vocab": "tsx scripts/seed-vocab.ts",
