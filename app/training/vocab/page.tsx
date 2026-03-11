@@ -261,8 +261,10 @@ function VocabPageContent() {
   // Click回答
   const handleClickAnswer = async (choice: string) => {
     if (!quizState || !selectedMode) return;
+    const { questions, currentIndex } = quizState;
+    if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
 
-    const currentQuestion = quizState.questions[quizState.currentIndex];
+    const currentQuestion = questions[currentIndex];
     const timeMs = clickTimer !== null ? (10 - clickTimer) * 1000 : 0;
 
     // タイマー停止
@@ -303,8 +305,10 @@ function VocabPageContent() {
   // Typing回答
   const handleTypingSubmit = async (answer: string) => {
     if (!quizState || !selectedMode || !typingStartTime) return;
+    const { questions, currentIndex } = quizState;
+    if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
 
-    const currentQuestion = quizState.questions[quizState.currentIndex];
+    const currentQuestion = questions[currentIndex];
     const timeMs = Date.now() - typingStartTime;
 
     setLoading(true);
@@ -403,7 +407,9 @@ function VocabPageContent() {
     }
 
     if (step === 'quiz' && selectedMode === 'click' && quizState && !quizState.showResult) {
-      let timer = 10;
+      const limitSeconds = selectedSkill === 'reading' ? 30 : 10;
+      const timeMs = limitSeconds * 1000;
+      let timer = limitSeconds;
       setClickTimer(timer);
 
       const interval = setInterval(() => {
@@ -413,29 +419,31 @@ function VocabPageContent() {
         if (timer <= 0) {
           clearInterval(interval);
           setTimerInterval(null);
-          // 自動submit（不正解）
-          const currentQuestion = quizState.questions[quizState.currentIndex];
-          submitLexiconAnswer(currentQuestion.question_id, '', 10000).then((response) => {
-            if (response.ok && response.data) {
-              setQuizState((prev) => {
-                if (!prev) return null;
-                return {
-                  ...prev,
-                  answers: [
-                    ...prev.answers,
-                    {
-                      question_id: currentQuestion.question_id,
-                      is_correct: false,
-                      user_answer: '',
-                      time_ms: 10000,
-                    },
-                  ],
-                  currentAnswer: response.data,
-                  showResult: true,
-                };
-              });
-            }
-          });
+          const { questions, currentIndex } = quizState;
+          if (questions.length > 0 && currentIndex >= 0 && currentIndex < questions.length) {
+            const currentQuestion = questions[currentIndex];
+            submitLexiconAnswer(currentQuestion.question_id, '', timeMs).then((response) => {
+              if (response.ok && response.data) {
+                setQuizState((prev) => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    answers: [
+                      ...prev.answers,
+                      {
+                        question_id: currentQuestion.question_id,
+                        is_correct: false,
+                        user_answer: '',
+                        time_ms: timeMs,
+                      },
+                    ],
+                    currentAnswer: response.data,
+                    showResult: true,
+                  };
+                });
+              }
+            });
+          }
           setClickTimer(null);
         }
       }, 1000);
@@ -450,7 +458,7 @@ function VocabPageContent() {
       // タイマーをクリア
       setClickTimer(null);
     }
-  }, [step, selectedMode, quizState?.currentIndex, quizState?.showResult]);
+  }, [step, selectedMode, selectedSkill, quizState?.currentIndex, quizState?.showResult]);
 
   // Reading: passage_group からセット番号・総セット数を算出
   const getReadingSetInfo = (questions: LexiconQuestion[], index: number): { setIndex: number; setTotal: number; setSize: number } | null => {
@@ -531,7 +539,7 @@ function VocabPageContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>単語練習</h1>
-          <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須単語を覚えましょう</p>
+          <p className={cn('text-sm', cardDesc)}>Reading / Listening を含む4技能の必須単語を覚えましょう</p>
         </div>
 
         {error && (
@@ -746,7 +754,7 @@ function VocabPageContent() {
                   >
                     <div className={cn('font-semibold mb-1', cardTitle)}>Click（選択式）</div>
                     <div className={cn('text-xs', cardDesc)}>
-                      {sets[selectedCategory].questions_click}問 / 10秒制限
+                      {sets[selectedCategory].questions_click}問 / {selectedSkill === 'reading' ? '30' : '10'}秒制限
                     </div>
                     {sets[selectedCategory].due_click > 0 && (
                       <div className={cn('text-xs mt-1', 'text-primary')}>
@@ -992,29 +1000,34 @@ function VocabPageContent() {
             ) : (
               <>
                 {/* 問題表示 */}
-                {!quizState.showResult ? (
+                {(() => {
+                  const idx = quizState.currentIndex;
+                  const questions = quizState.questions;
+                  if (questions.length === 0 || idx < 0 || idx >= questions.length) return null;
+                  const currentQuestion = questions[idx];
+                  return !quizState.showResult ? (
                   <div className={cn('p-6', cardBase)}>
                     {/* Reading: passage first */}
-                    {quizState.questions[quizState.currentIndex].passage_excerpt && (
+                    {currentQuestion.passage_excerpt && (
                       <div className={cn('mb-4 p-4 rounded-lg bg-surface-2 border border-border max-h-40 sm:max-h-48 overflow-y-auto overscroll-contain', 'text-sm text-text-muted leading-relaxed')}>
-                        {quizState.questions[quizState.currentIndex].passage_excerpt}
+                        {currentQuestion.passage_excerpt}
                       </div>
                     )}
-                    {quizState.questions[quizState.currentIndex].strategy && (
+                    {currentQuestion.strategy && (
                       <div className={cn('mb-3 text-xs text-text-muted italic')}>
-                        Strategy: {quizState.questions[quizState.currentIndex].strategy}
+                        Strategy: {currentQuestion.strategy}
                       </div>
                     )}
                     <div className={cn('text-lg font-semibold mb-4', cardTitle)}>
-                      {quizState.questions[quizState.currentIndex].prompt}
+                      {currentQuestion.prompt}
                     </div>
 
                     {/* Clickモード */}
-                    {selectedMode === 'click' && quizState.questions[quizState.currentIndex].choices && (
+                    {selectedMode === 'click' && currentQuestion.choices && (
                       <div className="space-y-3">
-                        {quizState.questions[quizState.currentIndex].choices!.map((choice, idx) => (
+                        {currentQuestion.choices.map((choice, choiceIdx) => (
                           <button
-                            key={idx}
+                            key={choiceIdx}
                             onClick={() => handleClickAnswer(choice)}
                             disabled={loading}
                             className={cn(
@@ -1034,7 +1047,7 @@ function VocabPageContent() {
                     {/* Typingモード */}
                     {selectedMode === 'typing' && (
                       <TypingInput
-                        question={quizState.questions[quizState.currentIndex]}
+                        question={currentQuestion}
                         onSubmit={handleTypingSubmit}
                         loading={loading}
                       />
@@ -1058,7 +1071,7 @@ function VocabPageContent() {
                         </>
                       )}
                       {(() => {
-                        const meta = quizState.questions[quizState.currentIndex].meta as { explanation?: string; distractor_note?: string; paraphrase_tip?: string } | undefined;
+                        const meta = currentQuestion.meta as { explanation?: string; distractor_note?: string; paraphrase_tip?: string } | undefined;
                         const showMeta = selectedSkill === 'reading' || selectedSkill === 'listening';
                         if (!meta && !showMeta) return null;
                         const hasAny = meta && (meta.explanation || meta.distractor_note || meta.paraphrase_tip);
@@ -1094,7 +1107,8 @@ function VocabPageContent() {
                       次へ
                     </button>
                   </div>
-                )}
+                );
+                })()}
               </>
             )}
           </div>
@@ -1117,7 +1131,7 @@ export default function VocabPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>単語練習</h1>
-            <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須単語を覚えましょう</p>
+            <p className={cn('text-sm', cardDesc)}>Reading / Listening を含む4技能の必須単語を覚えましょう</p>
           </div>
           <div className="text-center text-text-muted py-12">読み込み中...</div>
         </div>

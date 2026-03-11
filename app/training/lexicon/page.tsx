@@ -214,8 +214,10 @@ function LexiconPageContent() {
   // Click回答
   const handleClickAnswer = async (choice: string) => {
     if (!quizState || !selectedMode) return;
+    const { questions, currentIndex } = quizState;
+    if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
 
-    const currentQuestion = quizState.questions[quizState.currentIndex];
+    const currentQuestion = questions[currentIndex];
     const timeMs = clickTimer !== null ? (10 - clickTimer) * 1000 : 0;
 
     // タイマー停止
@@ -256,8 +258,10 @@ function LexiconPageContent() {
   // Typing回答
   const handleTypingSubmit = async (answer: string) => {
     if (!quizState || !selectedMode || !typingStartTime) return;
+    const { questions, currentIndex } = quizState;
+    if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
 
-    const currentQuestion = quizState.questions[quizState.currentIndex];
+    const currentQuestion = questions[currentIndex];
     const timeMs = Date.now() - typingStartTime;
 
     setLoading(true);
@@ -331,9 +335,10 @@ function LexiconPageContent() {
         if (timer <= 0) {
           clearInterval(interval);
           setTimerInterval(null);
-          // 自動submit（不正解）
-          const currentQuestion = quizState.questions[quizState.currentIndex];
-          submitLexiconAnswer(currentQuestion.question_id, '', 10000).then((response) => {
+          const { questions, currentIndex } = quizState;
+          if (questions.length > 0 && currentIndex >= 0 && currentIndex < questions.length) {
+            const currentQuestion = questions[currentIndex];
+            submitLexiconAnswer(currentQuestion.question_id, '', 10000).then((response) => {
             if (response.ok && response.data) {
               setQuizState((prev) => {
                 if (!prev) return null;
@@ -354,6 +359,7 @@ function LexiconPageContent() {
               });
             }
           });
+          }
           setClickTimer(null);
         }
       }, 1000);
@@ -410,7 +416,7 @@ function LexiconPageContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>表現バンク</h1>
-          <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須表現を覚えましょう</p>
+          <p className={cn('text-sm', cardDesc)}>Reading / Listening を含む4技能の必須表現を覚えましょう</p>
         </div>
 
         <>
@@ -680,28 +686,33 @@ function LexiconPageContent() {
             ) : (
               <>
                 {/* 問題表示 */}
-                {!quizState.showResult ? (
+                {(() => {
+                  const idx = quizState.currentIndex;
+                  const questions = quizState.questions;
+                  if (questions.length === 0 || idx < 0 || idx >= questions.length) return null;
+                  const currentQuestion = questions[idx];
+                  return !quizState.showResult ? (
                   <div className={cn('p-6', cardBase)}>
-                    {quizState.questions[quizState.currentIndex].passage_excerpt && (
+                    {currentQuestion.passage_excerpt && (
                       <div className={cn('mb-4 p-4 rounded-lg bg-surface-2 border border-border max-h-40 overflow-y-auto text-sm text-text-muted leading-relaxed')}>
-                        {quizState.questions[quizState.currentIndex].passage_excerpt}
+                        {currentQuestion.passage_excerpt}
                       </div>
                     )}
-                    {quizState.questions[quizState.currentIndex].strategy && (
+                    {currentQuestion.strategy && (
                       <div className={cn('mb-3 text-xs text-text-muted italic')}>
-                        Strategy: {quizState.questions[quizState.currentIndex].strategy}
+                        Strategy: {currentQuestion.strategy}
                       </div>
                     )}
                     <div className={cn('text-lg font-semibold mb-4', cardTitle)}>
-                      {quizState.questions[quizState.currentIndex].prompt}
+                      {currentQuestion.prompt}
                     </div>
 
                     {/* Clickモード */}
-                    {selectedMode === 'click' && quizState.questions[quizState.currentIndex].choices && (
+                    {selectedMode === 'click' && currentQuestion.choices && (
                       <div className="space-y-3">
-                        {quizState.questions[quizState.currentIndex].choices!.map((choice, idx) => (
+                        {currentQuestion.choices.map((choice, choiceIdx) => (
                           <button
-                            key={idx}
+                            key={choiceIdx}
                             onClick={() => handleClickAnswer(choice)}
                             disabled={loading}
                             className={cn(
@@ -721,7 +732,7 @@ function LexiconPageContent() {
                     {/* Typingモード */}
                     {selectedMode === 'typing' && (
                       <TypingInput
-                        question={quizState.questions[quizState.currentIndex]}
+                        question={currentQuestion}
                         onSubmit={handleTypingSubmit}
                         loading={loading}
                       />
@@ -745,7 +756,7 @@ function LexiconPageContent() {
                         </div>
                       )}
                       {(() => {
-                        const meta = quizState.questions[quizState.currentIndex].meta as {
+                        const meta = currentQuestion.meta as {
                           explanation?: string;
                           usage_note?: string;
                           transcript_excerpt?: string;
@@ -794,7 +805,8 @@ function LexiconPageContent() {
                       次へ
                     </button>
                   </div>
-                )}
+                );
+                })()}
               </>
             )}
           </div>
@@ -816,7 +828,7 @@ export default function LexiconPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>表現バンク</h1>
-            <p className={cn('text-sm', cardDesc)}>Writing/Speakingで使う必須表現を覚えましょう</p>
+            <p className={cn('text-sm', cardDesc)}>Reading / Listening を含む4技能の必須表現を覚えましょう</p>
           </div>
           <div className="text-center text-text-muted py-12">読み込み中...</div>
         </div>

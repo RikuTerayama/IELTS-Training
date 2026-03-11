@@ -68,7 +68,7 @@ export interface ValidationResult {
  */
 export function validateReadingSeed(questions: ReadingQuestionSeed[]): ValidationResult {
   const errors: string[] = [];
-  const seen = new Set<string>();
+  const seen = new Map<string, number>();
 
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i];
@@ -94,8 +94,12 @@ export function validateReadingSeed(questions: ReadingQuestionSeed[]): Validatio
     }
 
     const key = `${q.category}|${q.mode}|${q.prompt.slice(0, 50)}|${q.correct_expression}`;
-    if (seen.has(key)) errors.push(`${prefix} duplicate (same category, mode, prompt, answer)`);
-    seen.add(key);
+    const firstIndex = seen.get(key);
+    if (firstIndex !== undefined) {
+      errors.push(`${prefix} duplicate (same category, mode, prompt, answer) — already at question ${firstIndex + 1}`);
+    } else {
+      seen.set(key, i);
+    }
 
     if (q.meta) {
       if (q.meta.topic && !READING_TOPICS.includes(q.meta.topic)) {
