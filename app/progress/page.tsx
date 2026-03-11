@@ -10,8 +10,10 @@ import type { ReadingVocabHistoryResponse } from '@/app/api/progress/reading-voc
 import type { ReadingLexiconHistoryResponse } from '@/app/api/progress/reading-lexicon-history/route';
 import type { ListeningVocabHistoryResponse } from '@/app/api/progress/listening-vocab-history/route';
 import type { ListeningIdiomHistoryResponse } from '@/app/api/progress/listening-idiom-history/route';
+import type { ListeningLexiconHistoryResponse } from '@/app/api/progress/listening-lexicon-history/route';
 import { READING_LEXICON_CATEGORY_LABELS } from '@/data/lexicon/reading/types';
 import { LISTENING_IDIOM_CATEGORY_LABELS } from '@/data/idiom/listening';
+import { LISTENING_LEXICON_CATEGORY_LABELS } from '@/data/lexicon/listening';
 
 const LISTENING_VOCAB_CATEGORY_LABELS: Record<string, string> = {
   vocab_listening_form_note: 'Form / note completion',
@@ -68,6 +70,9 @@ export default function ProgressPage() {
   const [listeningIdiomHistory, setListeningIdiomHistory] = useState<ListeningIdiomHistoryResponse | null>(null);
   const [listeningIdiomLoading, setListeningIdiomLoading] = useState(true);
   const [listeningIdiomError, setListeningIdiomError] = useState<string | null>(null);
+  const [listeningLexiconHistory, setListeningLexiconHistory] = useState<ListeningLexiconHistoryResponse | null>(null);
+  const [listeningLexiconLoading, setListeningLexiconLoading] = useState(true);
+  const [listeningLexiconError, setListeningLexiconError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -215,6 +220,29 @@ export default function ProgressPage() {
       })
       .catch(() => setListeningIdiomError('Network error'))
       .finally(() => setListeningIdiomLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setListeningLexiconLoading(true);
+    setListeningLexiconError(null);
+    fetch('/api/progress/listening-lexicon-history')
+      .then((res) => {
+        if (res.status === 401) {
+          setListeningLexiconError('ログインが必要です');
+          return { ok: false };
+        }
+        return res.json();
+      })
+      .then((data: ApiResponse<ListeningLexiconHistoryResponse>) => {
+        if (data.ok && data.data) {
+          setListeningLexiconHistory(data.data);
+          setListeningLexiconError(null);
+        } else if (data.error?.message) {
+          setListeningLexiconError(data.error.message);
+        }
+      })
+      .catch(() => setListeningLexiconError('Network error'))
+      .finally(() => setListeningLexiconLoading(false));
   }, []);
 
   if (loading) {
@@ -732,6 +760,104 @@ export default function ProgressPage() {
                     {listeningIdiomHistory?.due_count != null && listeningIdiomHistory.due_count > 0
                       ? 'Review Listening Idiom'
                       : 'Practice Listening Idiom'}
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Listening Lexicon v1 – 履歴・Due・カテゴリ別正答率 */}
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+            <h2 className="mb-1 text-lg font-semibold">Listening Lexicon</h2>
+            <p className="mb-4 text-sm text-text-muted">
+              講義・セミナーの signposting、説明・例のマーカー、比較・対比、強調・スタンス、プロセス・順序、ディスカッション表現の練習記録。
+              {listeningLexiconHistory?.due_count != null && listeningLexiconHistory.due_count > 0 && (
+                <span className="ml-1 font-medium text-primary">
+                  · Due today: {listeningLexiconHistory.due_count}
+                </span>
+              )}
+            </p>
+            {listeningLexiconLoading ? (
+              <p className="text-sm text-text-muted">読み込み中...</p>
+            ) : listeningLexiconError ? (
+              <p className="text-sm text-amber-600">{listeningLexiconError}</p>
+            ) : !listeningLexiconHistory ||
+              (listeningLexiconHistory.history.length === 0 &&
+                listeningLexiconHistory.stats_by_category.length === 0 &&
+                (listeningLexiconHistory.due_count ?? 0) === 0) ? (
+              <div className="rounded-lg border border-border bg-surface-2 p-6 text-center">
+                <p className="text-sm text-text-muted">まだ Listening Lexicon の記録がありません</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  表現バンクで Listening を練習すると、ここに履歴と正答率が表示されます
+                </p>
+                <Link
+                  href="/training/lexicon?skill=listening"
+                  className="mt-4 inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+                >
+                  Listening Lexicon を始める
+                </Link>
+              </div>
+            ) : (
+              <>
+                {listeningLexiconHistory.stats_by_category.length > 0 && (
+                  <div className="mb-4 rounded-lg border border-border bg-surface-2 p-4">
+                    <h3 className="mb-2 text-sm font-semibold">By category（正答率）</h3>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {listeningLexiconHistory.stats_by_category.map((s) => (
+                        <div key={s.category} className="text-sm">
+                          <span className="font-medium">{s.category_label}:</span>{' '}
+                          {s.correct}/{s.total} ({s.accuracy_percent}%)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {listeningLexiconHistory.history.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="mb-2 text-sm font-semibold">Recent attempts</h3>
+                    <div className="space-y-2">
+                      {listeningLexiconHistory.history.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex flex-wrap items-start justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-text">
+                              {new Date(item.created_at).toLocaleString('ja-JP', {
+                                dateStyle: 'short',
+                                timeStyle: 'short',
+                              })}{' '}
+                              · {LISTENING_LEXICON_CATEGORY_LABELS[item.category as keyof typeof LISTENING_LEXICON_CATEGORY_LABELS] ?? item.category}{' '}
+                              · {item.is_correct ? (
+                                <span className="text-green-600">Correct</span>
+                              ) : (
+                                <span className="text-amber-600">Incorrect</span>
+                              )}
+                            </p>
+                            {item.user_answer != null && item.user_answer !== '' && (
+                              <p className="text-xs text-text-muted">Answer: {item.user_answer}</p>
+                            )}
+                            <p
+                              className="mt-1 truncate text-xs text-text-muted"
+                              title={item.prompt}
+                            >
+                              {item.prompt.slice(0, 80)}
+                              {item.prompt.length > 80 ? '…' : ''}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    href="/training/lexicon?skill=listening"
+                    className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
+                  >
+                    {listeningLexiconHistory?.due_count != null && listeningLexiconHistory.due_count > 0
+                      ? 'Review Listening Lexicon'
+                      : 'Practice Listening Lexicon'}
                   </Link>
                 </div>
               </>
