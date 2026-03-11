@@ -30,6 +30,7 @@ export type ReadingVocabStatsByType = {
 
 export type ReadingVocabStatsBySkill = {
   skill: string;
+  skill_key: string;
   total: number;
   correct: number;
   accuracy_percent: number;
@@ -172,6 +173,7 @@ export async function GET(): Promise<Response> {
       .filter(([, s]) => s.total > 0)
       .map(([skill, s]) => ({
         skill: READING_SKILL_LABELS[skill] ?? skill,
+        skill_key: skill,
         total: s.total,
         correct: s.correct,
         accuracy_percent: Math.round((s.correct / s.total) * 100),

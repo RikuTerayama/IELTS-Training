@@ -64,10 +64,14 @@ function VocabPageContent() {
   const [readingSessionMode, setReadingSessionMode] = useState<'review_only' | 'new_only' | 'all' | null>(null);
   /** Listening 時のみ: 全カテゴリの復習Due合計 */
   const [listeningTotalDue, setListeningTotalDue] = useState<number | null>(null);
+  /** Reading 時のみ: 進捗APIの skill 別成績（苦手スキル導線用） */
+  const [readingStatsBySkill, setReadingStatsBySkill] = useState<Array<{ skill: string; skill_key: string; total: number; correct: number; accuracy_percent: number }>>([]);
+  /** Reading: 苦手スキル優先で開始するときの skill_key */
+  const [weakSkillKey, setWeakSkillKey] = useState<string | null>(null);
   const [quizState, setQuizState] = useState<QuizState | null>(null);
   /** Reading mini set: show brief set summary before next question/set */
   const [showSetSummary, setShowSetSummary] = useState(false);
-  const [setSummaryData, setSetSummaryData] = useState<{ correct: number; total: number } | null>(null);
+  const [setSummaryData, setSetSummaryData] = useState<{ correct: number; total: number; setIndex?: number; setTotal?: number } | null>(null);
   const [clickTimer, setClickTimer] = useState<number | null>(null);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
@@ -121,6 +125,20 @@ function VocabPageContent() {
     return () => { cancelled = true; };
   }, [urlSkill]);
 
+  // Reading: fetch skill-wise stats for weakness-aware CTA when on category step
+  useEffect(() => {
+    if (selectedSkill !== 'reading' || step !== 'category') {
+      setReadingStatsBySkill([]);
+      return;
+    }
+    let cancelled = false;
+    fetch('/api/progress/reading-vocab-history').then((res) => res.json()).then((data) => {
+      if (cancelled || !data?.data?.stats_by_skill) return;
+      setReadingStatsBySkill(data.data.stats_by_skill);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [selectedSkill, step]);
+
   // Step A: skill選択
   const handleSkillSelect = async (skill: 'speaking' | 'writing' | 'reading' | 'listening') => {
     setSelectedSkill(skill);
@@ -161,7 +179,7 @@ function VocabPageContent() {
   };
 
   // Step B: category + mode選択 → quiz開始
-  const handleStartQuiz = async (reviewOnly?: boolean, newOnly?: boolean) => {
+  const handleStartQuiz = async (reviewOnly?: boolean, newOnly?: boolean, weakSkill?: string | null) => {
     if (!selectedCategory || !selectedMode || !selectedSkill) return;
 
     setLoading(true);
@@ -174,6 +192,7 @@ function VocabPageContent() {
             new_only: newOnly,
             topic: readingFilterTopic || undefined,
             difficulty: readingFilterDifficulty || undefined,
+            weak_skill: weakSkill || undefined,
           }
         : undefined;
     const listeningParams =
@@ -361,7 +380,13 @@ function VocabPageContent() {
       }
       const total = quizState.currentIndex - start + 1;
       const correct = quizState.answers.slice(start, quizState.currentIndex + 1).filter((a) => a.is_correct).length;
-      setSetSummaryData({ correct, total });
+      const setInfo = getReadingSetInfo(quizState.questions, quizState.currentIndex);
+      setSetSummaryData({
+        correct,
+        total,
+        setIndex: setInfo?.setIndex,
+        setTotal: setInfo?.setTotal,
+      });
       setShowSetSummary(true);
       return;
     }
@@ -426,6 +451,42 @@ function VocabPageContent() {
       setClickTimer(null);
     }
   }, [step, selectedMode, quizState?.currentIndex, quizState?.showResult]);
+
+  // Reading: passage_group からセット番号・総セット数を算出
+  const getReadingSetInfo = (questions: LexiconQuestion[], index: number): { setIndex: number; setTotal: number; setSize: number } | null => {
+    if (questions.length === 0 || index < 0 || index >= questions.length) return null;
+    const pg = (questions[index].meta as { passage_group?: string } | undefined)?.passage_group;
+    let start = index;
+    while (start > 0) {
+      const prev = (questions[start - 1].meta as { passage_group?: string } | undefined)?.passage_group;
+      if (prev !== pg) break;
+      start--;
+    }
+    let end = index;
+    while (end < questions.length - 1) {
+      const next = (questions[end + 1].meta as { passage_group?: string } | undefined)?.passage_group;
+      if (next !== pg) break;
+      end++;
+    }
+    const setSize = end - start + 1;
+    let setIndex = 1;
+    let i = 0;
+    while (i < start) {
+      const g = (questions[i].meta as { passage_group?: string } | undefined)?.passage_group;
+      i++;
+      while (i < questions.length && (questions[i].meta as { passage_group?: string } | undefined)?.passage_group === g) i++;
+      setIndex++;
+    }
+    let setTotal = setIndex;
+    let j = end + 1;
+    while (j < questions.length) {
+      const g = (questions[j].meta as { passage_group?: string } | undefined)?.passage_group;
+      j++;
+      while (j < questions.length && (questions[j].meta as { passage_group?: string } | undefined)?.passage_group === g) j++;
+      setTotal++;
+    }
+    return { setIndex, setTotal, setSize };
+  };
 
   // category名を表示用ラベルに変換
   const getCategoryLabel = (category: string): string => {
@@ -728,6 +789,27 @@ function VocabPageContent() {
                     復習Dueがある問題から優先して出題されます
                   </p>
                 )}
+                {selectedSkill === 'reading' && readingStatsBySkill.length > 0 && (() => {
+                  const weak = readingStatsBySkill.filter((s) => s.accuracy_percent < 80 && s.total >= 1);
+                  if (weak.length === 0) return null;
+                  return (
+                    <div className={cn('w-full rounded-lg border border-border bg-surface-2 p-3 text-left')}>
+                      <p className={cn('text-xs font-medium mb-2', cardTitle)}>苦手スキルを優先して復習</p>
+                      <div className="flex flex-wrap gap-2">
+                        {weak.map((s) => (
+                          <button
+                            key={s.skill_key}
+                            onClick={() => handleStartQuiz(true, false, s.skill_key)}
+                            disabled={loading}
+                            className={cn('px-3 py-1.5 rounded-lg border border-primary/50 bg-primary/10 text-primary text-sm font-medium', 'hover:bg-primary/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring', loading && 'opacity-50 cursor-not-allowed')}
+                          >
+                            {s.skill} ({s.accuracy_percent}%) で復習
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
                 <div className="flex flex-wrap justify-center gap-3">
                   {(selectedSkill === 'reading' || selectedSkill === 'listening') && (() => {
                     const dueForMode = selectedMode === 'click' ? sets[selectedCategory].due_click : sets[selectedCategory].due_typing;
@@ -774,7 +856,14 @@ function VocabPageContent() {
             {/* 進捗表示 */}
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className={cn('text-sm', cardDesc)}>
-                問題 {quizState.currentIndex + 1} / {quizState.questions.length}
+                {selectedSkill === 'reading' && (() => {
+                  const setInfo = getReadingSetInfo(quizState.questions, quizState.currentIndex);
+                  if (setInfo && setInfo.setTotal > 1) {
+                    return <>Set {setInfo.setIndex}/{setInfo.setTotal} · 問題 {quizState.currentIndex + 1}/{quizState.questions.length}</>;
+                  }
+                  return <>問題 {quizState.currentIndex + 1} / {quizState.questions.length}</>;
+                })()}
+                {selectedSkill !== 'reading' && <>問題 {quizState.currentIndex + 1} / {quizState.questions.length}</>}
               </div>
               {selectedMode === 'click' && clickTimer !== null && (
                 <div className={cn('text-lg font-semibold', clickTimer <= 3 ? 'text-danger' : 'text-text')}>
@@ -881,9 +970,13 @@ function VocabPageContent() {
               </div>
             ) : showSetSummary && setSummaryData ? (
               <div className={cn('p-6', cardBase)}>
-                <h3 className={cn('text-lg font-semibold mb-2', cardTitle)}>このセットの結果</h3>
+                <h3 className={cn('text-lg font-semibold mb-2', cardTitle)}>
+                  {setSummaryData.setIndex != null && setSummaryData.setTotal != null && setSummaryData.setTotal > 1
+                    ? `セット ${setSummaryData.setIndex}/${setSummaryData.setTotal} の結果`
+                    : 'このセットの結果'}
+                </h3>
                 <p className={cn('text-sm', cardDesc)}>
-                  {setSummaryData.correct} / {setSummaryData.total} 正解
+                  {setSummaryData.correct} / {setSummaryData.total} 問正解
                 </p>
                 <button
                   onClick={() => {
@@ -893,7 +986,7 @@ function VocabPageContent() {
                   }}
                   className={cn('mt-4 px-4 py-2', buttonPrimary)}
                 >
-                  続ける
+                  次のセットへ
                 </button>
               </div>
             ) : (
