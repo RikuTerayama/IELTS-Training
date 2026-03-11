@@ -64,6 +64,7 @@ export interface LexiconQuestionsParams {
   question_type?: string;
   topic?: string;
   difficulty?: string;
+  weak_skill?: string;
 }
 
 /**
@@ -92,6 +93,7 @@ export async function fetchLexiconQuestions(
     if (skill === 'reading') {
       if (params.topic) search.set('topic', params.topic);
       if (params.difficulty) search.set('difficulty', params.difficulty);
+      if (params.weak_skill) search.set('weak_skill', params.weak_skill);
     }
   }
   const response = await fetch(`/api/lexicon/questions?${search.toString()}`);

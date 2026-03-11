@@ -26,6 +26,7 @@ export async function GET(request: Request): Promise<Response> {
     const questionType = searchParams.get('question_type') || undefined;
     const topic = searchParams.get('topic') || undefined;
     const difficulty = searchParams.get('difficulty') || undefined;
+    const weakSkill = searchParams.get('weak_skill') || undefined; // reading_skill for weakness-aware start
 
     if (!skill || !['writing', 'speaking', 'reading', 'listening'].includes(skill)) {
       return Response.json(
@@ -69,6 +70,7 @@ export async function GET(request: Request): Promise<Response> {
       const metaFilter: Record<string, string> = {};
       if (topic) metaFilter.topic = topic;
       if (difficulty) metaFilter.difficulty = difficulty;
+      if (weakSkill) metaFilter.reading_skill = weakSkill;
       if (Object.keys(metaFilter).length > 0) {
         query = query.contains('meta', metaFilter);
       }
@@ -105,58 +107,65 @@ export async function GET(request: Request): Promise<Response> {
       const dueShuffled = [...dueIds].sort(() => Math.random() - 0.5);
       const newShuffled = [...newQuestionIds].sort(() => Math.random() - 0.5);
 
-      let selectedIds: string[];
+      // Pool more ids so we can form whole passage_group sets (no mid-set splits)
+      const poolSize = Math.min(limit * 3, dueShuffled.length + newShuffled.length);
+      let poolIds: string[];
       if (reviewOnly) {
-        selectedIds = dueShuffled.slice(0, limit);
+        poolIds = dueShuffled.slice(0, poolSize);
       } else if (newOnly) {
-        selectedIds = newShuffled.slice(0, limit);
+        poolIds = newShuffled.slice(0, poolSize);
       } else {
-        selectedIds = [...dueShuffled.slice(0, limit)];
-        if (selectedIds.length < limit) {
-          selectedIds.push(...newShuffled.slice(0, limit - selectedIds.length));
-        }
+        const dueTake = Math.min(dueShuffled.length, limit * 2);
+        const newTake = Math.min(newShuffled.length, limit * 2);
+        poolIds = [...dueShuffled.slice(0, dueTake), ...newShuffled.slice(0, newTake)];
       }
 
-      if (selectedIds.length === 0) {
+      if (poolIds.length === 0) {
         return Response.json(successResponse({ questions: [] }));
       }
 
       const { data: readingQuestions, error: readErr } = await supabase
         .from('lexicon_questions')
         .select('id, prompt, correct_expression, choices, hint_first_char, hint_length, item_id, question_type, strategy, passage_excerpt, meta')
-        .in('id', selectedIds);
+        .in('id', poolIds);
 
       if (readErr || !readingQuestions || readingQuestions.length === 0) {
         return Response.json(successResponse({ questions: [] }));
       }
 
-      const orderMap = new Map(selectedIds.map((id, i) => [id, i]));
-      const sorted = [...readingQuestions].sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
-
-      // Passage-based mini sets: reorder so questions with same passage_group are consecutive
-      type Row = (typeof sorted)[number];
+      type Row = (typeof readingQuestions)[number];
       const passageGroupKey = (q: Row) => {
         const m = q.meta as { passage_group?: string } | null | undefined;
         return m?.passage_group ? String(m.passage_group) : `__none_${q.id}`;
       };
+      const poolIndex = new Map(poolIds.map((id, i) => [id, i]));
+
       const groups = new Map<string, Row[]>();
-      for (const q of sorted) {
+      for (const q of readingQuestions) {
         const key = passageGroupKey(q);
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key)!.push(q);
       }
-      const orderOfGroups: string[] = [];
-      const seen = new Set<string>();
-      for (const q of sorted) {
-        const key = passageGroupKey(q);
-        if (!seen.has(key)) {
-          seen.add(key);
-          orderOfGroups.push(key);
-        }
-      }
-      const reordered = orderOfGroups.flatMap((key) => groups.get(key) ?? []);
 
-      const questions = reordered.map((q) => ({
+      const groupKeys = Array.from(groups.keys());
+      const groupMeta = groupKeys.map((key) => {
+        const rows = groups.get(key)!;
+        const isDue = rows.some((q) => dueQuestionIds.has(q.id));
+        const minIndex = Math.min(...rows.map((q) => poolIndex.get(q.id) ?? 1e9));
+        return { key, isDue, minIndex, rows };
+      });
+      groupMeta.sort((a, b) => {
+        if (a.isDue !== b.isDue) return a.isDue ? -1 : 1;
+        return a.minIndex - b.minIndex;
+      });
+
+      const result: Row[] = [];
+      for (const { rows } of groupMeta) {
+        if (result.length >= limit) break;
+        result.push(...rows);
+      }
+
+      const questions = result.map((q) => ({
         question_id: q.id,
         prompt: q.prompt,
         choices: q.choices || undefined,
