@@ -551,22 +551,6 @@ export const TFNG_SEED: ReadingQuestionSeed[] = [
     question_type: 'tfng',
     category: C,
     mode: 'click',
-    prompt: 'The building was completed in 1850.',
-    correct_expression: 'True',
-    choices: ['True', 'False', 'Not Given'],
-    passage_excerpt:
-      'Construction began in 1847 and the building was completed in 1850. It has since been restored twice.',
-    meta: {
-      topic: 'history',
-      difficulty: 'beginner',
-      explanation: 'The passage explicitly states "the building was completed in 1850".',
-      distractor_note: 'False would mean it was not completed in 1850; Not Given would mean the date was not stated. Here it is stated.',
-    },
-  },
-  {
-    question_type: 'tfng',
-    category: C,
-    mode: 'click',
     prompt: 'The sample size was large.',
     correct_expression: 'False',
     choices: ['True', 'False', 'Not Given'],
