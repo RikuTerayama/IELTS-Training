@@ -46,3 +46,6 @@ Well, Actually, I mean, You know, Let me see
 
 ### Opinion starters
 I think, I believe, In my view, From my point of view
+
+### Signposting
+To start with, For example, As I said, So to sum up, That's why

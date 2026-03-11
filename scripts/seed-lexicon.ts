@@ -119,10 +119,13 @@ async function seedLexicon() {
       }
 
       const bySkillCategory: Record<string, typeof items> = {};
+      const bySkill: Record<string, typeof items> = {};
       for (const it of items) {
         const key = `${it.skill}:${it.category}`;
         if (!bySkillCategory[key]) bySkillCategory[key] = [];
         bySkillCategory[key].push(it);
+        if (!bySkill[it.skill]) bySkill[it.skill] = [];
+        bySkill[it.skill].push(it);
       }
 
       const questionsToInsert: Array<{
@@ -141,7 +144,13 @@ async function seedLexicon() {
       for (const item of items) {
         const key = `${item.skill}:${item.category}`;
         const pool = bySkillCategory[key] || [];
-        const others = pool.filter((o) => o.id !== item.id).map((o) => o.expression);
+        let others = pool.filter((o) => o.id !== item.id).map((o) => o.expression);
+        if (others.length < 3) {
+          const skillPool = bySkill[item.skill] || [];
+          const otherExpressions = skillPool.filter((o) => o.id !== item.id && o.expression !== item.expression).map((o) => o.expression);
+          const deduped = [...new Set(otherExpressions)];
+          others = [...others, ...deduped].slice(0, 3);
+        }
 
         if (!hasClick.has(item.id)) {
           const wrongs = others.slice(0, 3);

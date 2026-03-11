@@ -416,7 +416,7 @@ function LexiconPageContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>表現バンク</h1>
-          <p className={cn('text-sm', cardDesc)}>Reading / Listening を含む4技能の必須表現を覚えましょう</p>
+          <p className={cn('text-sm', cardDesc)}>4技能の必須表現を覚えましょう</p>
         </div>
 
         <>
@@ -828,7 +828,7 @@ export default function LexiconPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6">
             <h1 className={cn('text-2xl font-bold mb-2', cardTitle)}>表現バンク</h1>
-            <p className={cn('text-sm', cardDesc)}>Reading / Listening を含む4技能の必須表現を覚えましょう</p>
+            <p className={cn('text-sm', cardDesc)}>4技能の必須表現を覚えましょう</p>
           </div>
           <div className="text-center text-text-muted py-12">読み込み中...</div>
         </div>
