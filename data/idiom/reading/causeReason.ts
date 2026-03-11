@@ -1,0 +1,266 @@
+/**
+ * Cause / reason phrases – IELTS Reading で頻出
+ */
+
+import type { ReadingIdiomSeed } from './types';
+
+const C = 'idiom_reading_cause_reason' as const;
+
+export const CAUSE_REASON_SEED: ReadingIdiomSeed[] = [
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The decline was _____ the introduction of stricter regulations.',
+    correct_expression: 'due to',
+    choices: ['due to', 'in spite of', 'as well as', 'prior to'],
+    passage_excerpt: 'The decline in emissions was due to the introduction of stricter regulations in 2018.',
+    meta: {
+      explanation: '"Due to" introduces the cause or reason (stricter regulations caused the decline).',
+      distractor_note: '"In spite of" is contrast; "prior to" is time; "as well as" adds information.',
+      paraphrase_tip: 'due to = because of, caused by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the lack of funding, the project was abandoned.',
+    correct_expression: 'Owing to',
+    choices: ['Owing to', 'Regardless of', 'In addition to', 'Apart from'],
+    passage_excerpt: 'Owing to the lack of funding, the project was abandoned after the first phase.',
+    meta: {
+      explanation: '"Owing to" means "because of" and introduces the reason.',
+      paraphrase_tip: 'owing to = due to, because of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The rise in temperatures is largely _____ human activity.',
+    correct_expression: 'attributable to',
+    choices: ['attributable to', 'consistent with', 'dependent on', 'relevant to'],
+    passage_excerpt: 'The rise in global temperatures is largely attributable to human activity.',
+    meta: {
+      explanation: '"Attributable to" means the cause can be assigned to (human activity).',
+      paraphrase_tip: 'attributable to = caused by, explained by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the fact that demand was high, supply remained limited.',
+    correct_expression: 'Despite',
+    choices: ['Despite', 'Because', 'Unless', 'Whereas'],
+    passage_excerpt: 'Despite the fact that demand was high, supply remained limited.',
+    meta: {
+      explanation: '"Despite" introduces a contrast (expected outcome did not happen). Here it is cause vs result.',
+      distractor_note: '"Because" would make supply limited due to demand, which is the opposite meaning.',
+      paraphrase_tip: 'despite = in spite of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The change came _____ pressure from campaigners.',
+    correct_expression: 'as a result of',
+    choices: ['as a result of', 'in place of', 'in line with', 'in view of'],
+    passage_excerpt: 'The policy change came as a result of sustained pressure from campaigners.',
+    meta: {
+      explanation: '"As a result of" introduces the cause (pressure led to the change).',
+      paraphrase_tip: 'as a result of = because of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the evidence, we can conclude that the treatment works.',
+    correct_expression: 'On the basis of',
+    choices: ['On the basis of', 'In contrast to', 'In favour of', 'In charge of'],
+    passage_excerpt: 'On the basis of the evidence, we can conclude that the treatment works.',
+    meta: {
+      explanation: '"On the basis of" means "using X as the reason or foundation for a conclusion".',
+      paraphrase_tip: 'on the basis of = based on, because of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The delay was _____ unforeseen circumstances.',
+    correct_expression: 'on account of',
+    choices: ['on account of', 'in case of', 'in terms of', 'in spite of'],
+    passage_excerpt: 'The delay was on account of unforeseen circumstances beyond our control.',
+    meta: {
+      explanation: '"On account of" means "because of" (reason for the delay).',
+      paraphrase_tip: 'on account of = because of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the reasons outlined above, the committee rejected the proposal.',
+    correct_expression: 'For',
+    choices: ['For', 'With', 'By', 'From'],
+    passage_excerpt: 'For the reasons outlined above, the committee rejected the proposal.',
+    meta: {
+      explanation: '"For" here introduces the reason (for these reasons, they rejected).',
+      usage_note: 'Common in formal writing: "For these/this reason(s), ..."',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'Species loss is _____ habitat destruction and climate change.',
+    correct_expression: 'brought about by',
+    choices: ['brought about by', 'taken over by', 'made up of', 'dealt with by'],
+    passage_excerpt: 'Species loss is largely brought about by habitat destruction and climate change.',
+    meta: {
+      explanation: '"Brought about by" means "caused by".',
+      paraphrase_tip: 'brought about by = caused by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The increase _____ a rise in demand.',
+    correct_expression: 'stems from',
+    choices: ['stems from', 'results in', 'leads to', 'refers to'],
+    passage_excerpt: 'The increase in production stems from a rise in demand over the past year.',
+    meta: {
+      explanation: '"Stems from" means "has its cause in" (the cause is the rise in demand).',
+      distractor_note: '"Results in" and "leads to" introduce the effect, not the cause.',
+      paraphrase_tip: 'stems from = comes from, is caused by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the growing concern, the government announced new measures.',
+    correct_expression: 'In response to',
+    choices: ['In response to', 'In relation to', 'In addition to', 'In contrast to'],
+    passage_excerpt: 'In response to growing concern, the government announced new measures.',
+    meta: {
+      explanation: '"In response to" means "as a reaction to" (the concern was the trigger).',
+      paraphrase_tip: 'in response to = because of, as a reaction to',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The failure can be _____ poor planning.',
+    correct_expression: 'put down to',
+    choices: ['put down to', 'put up with', 'put forward for', 'put aside for'],
+    passage_excerpt: 'The failure can be put down to poor planning in the early stages.',
+    meta: {
+      explanation: '"Put down to" means "attributed to" or "explained by" (cause).',
+      paraphrase_tip: 'put down to = attributed to, caused by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the shortage of staff, opening hours were reduced.',
+    correct_expression: 'As a consequence of',
+    choices: ['As a consequence of', 'In the event of', 'With regard to', 'For the sake of'],
+    passage_excerpt: 'As a consequence of the shortage of staff, opening hours were reduced.',
+    meta: {
+      explanation: '"As a consequence of" introduces the cause (shortage led to the reduction).',
+      paraphrase_tip: 'as a consequence of = because of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The effect is _____ the way the drug interacts with the enzyme.',
+    correct_expression: 'linked to',
+    choices: ['linked to', 'limited to', 'likely to', 'liable to'],
+    passage_excerpt: 'The side effect is linked to the way the drug interacts with the enzyme.',
+    meta: {
+      explanation: '"Linked to" means "connected with as a cause or factor".',
+      paraphrase_tip: 'linked to = connected with, related to (causally)',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the findings of the study, the authors recommend further research.',
+    correct_expression: 'In the light of',
+    choices: ['In the light of', 'In the form of', 'In the course of', 'In the face of'],
+    passage_excerpt: 'In the light of the findings of the study, the authors recommend further research.',
+    meta: {
+      explanation: '"In the light of" means "considering" or "because of" (the findings are the reason).',
+      paraphrase_tip: 'in the light of = considering, because of',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The decision was _____ the need to cut costs.',
+    correct_expression: 'driven by',
+    choices: ['driven by', 'divided by', 'deprived of', 'devoted to'],
+    passage_excerpt: 'The decision was largely driven by the need to cut costs.',
+    meta: {
+      explanation: '"Driven by" means "caused or motivated by".',
+      paraphrase_tip: 'driven by = caused by, motivated by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the reasons given, the application was approved.',
+    correct_expression: 'On the strength of',
+    choices: ['On the strength of', 'On the point of', 'On the grounds of', 'On the part of'],
+    passage_excerpt: 'On the strength of the reasons given, the application was approved.',
+    meta: {
+      explanation: '"On the strength of" means "because of" or "relying on" (the reasons supported the approval).',
+      distractor_note: '"On the grounds of" is also cause/reason; both fit. "On the strength of" emphasises the reasons as support.',
+      paraphrase_tip: 'on the strength of = because of, based on',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The collapse was _____ a combination of factors.',
+    correct_expression: 'brought on by',
+    choices: ['brought on by', 'brought in by', 'brought up by', 'brought out by'],
+    passage_excerpt: 'The collapse was brought on by a combination of factors including drought and overuse.',
+    meta: {
+      explanation: '"Brought on by" means "caused by".',
+      paraphrase_tip: 'brought on by = caused by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the above, we conclude that the method is effective.',
+    correct_expression: 'From',
+    choices: ['From', 'At', 'Over', 'Under'],
+    passage_excerpt: 'From the above, we conclude that the method is effective.',
+    meta: {
+      explanation: '"From the above" means "based on what was stated above" (reason for conclusion).',
+      usage_note: 'Common in academic writing to refer back to evidence or arguments.',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The phenomenon can be _____ a number of factors.',
+    correct_expression: 'explained by',
+    choices: ['explained by', 'replaced by', 'followed by', 'accompanied by'],
+    passage_excerpt: 'The phenomenon can be explained by a number of factors.',
+    meta: {
+      explanation: '"Explained by" introduces the causes or reasons that account for the phenomenon.',
+      paraphrase_tip: 'explained by = caused by, accounted for by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the high cost, many could not participate.',
+    correct_expression: 'Given',
+    choices: ['Given', 'Granted', 'Provided', 'Supposed'],
+    passage_excerpt: 'Given the high cost, many could not participate in the programme.',
+    meta: {
+      explanation: '"Given" means "considering" or "because of" (the high cost is the reason).',
+      paraphrase_tip: 'given = considering, because of',
+    },
+  },
+];

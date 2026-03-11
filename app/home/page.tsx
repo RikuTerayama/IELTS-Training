@@ -48,7 +48,7 @@ const INPUT_CATEGORIES = [
     title: '熟語練習',
     description: 'イディオムを覚えましょう',
     skills: [
-      { skill: 'reading' as const, label: 'Reading', href: '', disabled: true },
+      { skill: 'reading' as const, label: 'Reading', href: '/training/idiom?skill=reading', disabled: false },
       { skill: 'listening' as const, label: 'Listening', href: '/training/idiom?skill=listening', disabled: false },
       { skill: 'speaking' as const, label: 'Speaking', href: '/training/idiom', disabled: false },
       { skill: 'writing' as const, label: 'Writing', href: '/training/idiom', disabled: false },

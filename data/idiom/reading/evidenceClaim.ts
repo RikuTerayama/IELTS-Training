@@ -1,0 +1,275 @@
+/**
+ * Evidence / claim phrases – IELTS Reading
+ */
+
+import type { ReadingIdiomSeed } from './types';
+
+const C = 'idiom_reading_evidence_claim' as const;
+
+export const EVIDENCE_CLAIM_SEED: ReadingIdiomSeed[] = [
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the data, there was a significant increase in 2020.',
+    correct_expression: 'According to',
+    choices: ['According to', 'Instead of', 'Regardless of', 'Apart from'],
+    passage_excerpt: 'According to the data, there was a significant increase in 2020.',
+    meta: {
+      explanation: '"According to" introduces a claim based on a source (the data).',
+      paraphrase_tip: 'according to = based on, as shown by',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The report _____ that the policy has been effective.',
+    correct_expression: 'claims',
+    choices: ['claims', 'denies', 'avoids', 'delays'],
+    passage_excerpt: 'The report claims that the policy has been effective.',
+    meta: {
+      explanation: '"Claims" introduces an assertion (may or may not be proven).',
+      distractor_note: '"States" is similar; "claims" often implies the claim could be disputed.',
+      paraphrase_tip: 'claims = asserts, argues',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the evidence so far, the hypothesis is supported.',
+    correct_expression: 'On the basis of',
+    choices: ['On the basis of', 'In spite of', 'In place of', 'In front of'],
+    passage_excerpt: 'On the basis of the evidence so far, the hypothesis is supported.',
+    meta: {
+      explanation: '"On the basis of" links a conclusion to the evidence supporting it.',
+      paraphrase_tip: 'on the basis of = based on',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'Studies _____ that the treatment reduces symptoms.',
+    correct_expression: 'suggest',
+    choices: ['suggest', 'prevent', 'require', 'refuse'],
+    passage_excerpt: 'Studies suggest that the treatment reduces symptoms.',
+    meta: {
+      explanation: '"Suggest" introduces a finding or claim supported by evidence (not definitive).',
+      paraphrase_tip: 'suggest = indicate, show (tentatively)',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ research, the effect is small but significant.',
+    correct_expression: 'Research shows',
+    choices: ['Research shows', 'Research avoids', 'Research denies', 'Research delays'],
+    passage_excerpt: 'Research shows that the effect is small but significant.',
+    meta: {
+      explanation: '"Research shows" introduces a claim backed by evidence.',
+      paraphrase_tip: 'research shows = studies indicate, evidence suggests',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'It is _____ that the trend will continue.',
+    correct_expression: 'argued',
+    choices: ['argued', 'avoided', 'achieved', 'assumed'],
+    passage_excerpt: 'It is argued that the trend will continue.',
+    meta: {
+      explanation: '"It is argued that" introduces a claim or position (often with supporting reasoning).',
+      paraphrase_tip: 'it is argued that = some argue that, the argument is that',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The authors _____ that further work is needed.',
+    correct_expression: 'conclude',
+    choices: ['conclude', 'consider', 'confirm', 'cancel'],
+    passage_excerpt: 'The authors conclude that further work is needed.',
+    meta: {
+      explanation: '"Conclude" introduces the final claim or finding based on evidence.',
+      paraphrase_tip: 'conclude = state as a conclusion, find',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the survey, most respondents agreed.',
+    correct_expression: 'In the survey',
+    choices: ['In the survey', 'Without the survey', 'Beyond the survey', 'Against the survey'],
+    passage_excerpt: 'In the survey, most respondents agreed.',
+    meta: {
+      explanation: '"In the survey" refers to evidence from a specific source.',
+      paraphrase_tip: 'in the survey = according to the survey',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'Evidence _____ that the intervention works.',
+    correct_expression: 'indicates',
+    choices: ['indicates', 'ignores', 'includes', 'insists'],
+    passage_excerpt: 'Evidence indicates that the intervention works.',
+    meta: {
+      explanation: '"Indicates" introduces a claim supported by evidence.',
+      paraphrase_tip: 'indicates = suggests, shows',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The paper _____ that the method is reliable.',
+    correct_expression: 'demonstrates',
+    choices: ['demonstrates', 'doubts', 'denies', 'delays'],
+    passage_excerpt: 'The paper demonstrates that the method is reliable.',
+    meta: {
+      explanation: '"Demonstrates" means "shows by evidence" (stronger than "suggests").',
+      paraphrase_tip: 'demonstrates = shows, proves',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the findings, we can say that the effect is real.',
+    correct_expression: 'Given',
+    choices: ['Given', 'Unless', 'Whether', 'Until'],
+    passage_excerpt: 'Given the findings, we can say that the effect is real.',
+    meta: {
+      explanation: '"Given" means "considering" (the findings support the claim).',
+      paraphrase_tip: 'given = based on, considering',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'It has been _____ that the two factors are linked.',
+    correct_expression: 'shown',
+    choices: ['shown', 'hidden', 'taken', 'broken'],
+    passage_excerpt: 'It has been shown that the two factors are linked.',
+    meta: {
+      explanation: '"It has been shown" introduces an evidence-based claim.',
+      paraphrase_tip: 'it has been shown = evidence shows, studies demonstrate',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The report _____ that costs have risen.',
+    correct_expression: 'states',
+    choices: ['states', 'stops', 'starts', 'stays'],
+    passage_excerpt: 'The report states that costs have risen.',
+    meta: {
+      explanation: '"States" introduces a claim or fact as presented in a source.',
+      paraphrase_tip: 'states = says, reports',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the results, the hypothesis cannot be rejected.',
+    correct_expression: 'In the light of',
+    choices: ['In the light of', 'In the form of', 'In the middle of', 'In the event of'],
+    passage_excerpt: 'In the light of the results, the hypothesis cannot be rejected.',
+    meta: {
+      explanation: '"In the light of" means "considering" (the results support the conclusion).',
+      paraphrase_tip: 'in the light of = considering, given',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The study _____ a clear link between the variables.',
+    correct_expression: 'establishes',
+    choices: ['establishes', 'eliminates', 'excludes', 'explains'],
+    passage_excerpt: 'The study establishes a clear link between the variables.',
+    meta: {
+      explanation: '"Establishes" means "shows or proves" (strong evidence).',
+      paraphrase_tip: 'establishes = proves, demonstrates',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the authors, the effect is negligible.',
+    correct_expression: 'For',
+    choices: ['For', 'Against', 'Without', 'Beyond'],
+    passage_excerpt: 'For the authors, the effect is negligible.',
+    meta: {
+      explanation: '"For the authors" attributes a claim to the authors.',
+      paraphrase_tip: 'for the authors = in the authors\' view',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'Data _____ that the trend is reversing.',
+    correct_expression: 'reveal',
+    choices: ['reveal', 'reduce', 'refuse', 'remove'],
+    passage_excerpt: 'Data reveal that the trend is reversing.',
+    meta: {
+      explanation: '"Reveal" introduces what the evidence shows.',
+      paraphrase_tip: 'reveal = show, indicate',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The article _____ that the policy failed.',
+    correct_expression: 'argues',
+    choices: ['argues', 'avoids', 'admits', 'allows'],
+    passage_excerpt: 'The article argues that the policy failed.',
+    meta: {
+      explanation: '"Argues" introduces a claim with reasoning.',
+      paraphrase_tip: 'argues = claims, contends',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the figures, growth has slowed.',
+    correct_expression: 'The figures show',
+    choices: ['The figures show', 'The figures hide', 'The figures avoid', 'The figures deny'],
+    passage_excerpt: 'The figures show that growth has slowed.',
+    meta: {
+      explanation: '"The figures show" links evidence (figures) to a claim.',
+      paraphrase_tip: 'the figures show = the data indicate',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'It is _____ that the sample was representative.',
+    correct_expression: 'claimed',
+    choices: ['claimed', 'cancelled', 'covered', 'changed'],
+    passage_excerpt: 'It is claimed that the sample was representative.',
+    meta: {
+      explanation: '"It is claimed that" introduces an assertion (may need verification).',
+      paraphrase_tip: 'it is claimed that = the claim is that',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: 'The evidence _____ the theory.',
+    correct_expression: 'supports',
+    choices: ['supports', 'suppresses', 'surprises', 'suspends'],
+    passage_excerpt: 'The evidence supports the theory.',
+    meta: {
+      explanation: '"Supports" links evidence to a claim or theory (evidence backs it).',
+      paraphrase_tip: 'supports = backs, confirms',
+    },
+  },
+  {
+    category: C,
+    mode: 'click',
+    prompt: '_____ the experiment, the two groups performed equally.',
+    correct_expression: 'In',
+    choices: ['In', 'On', 'At', 'To'],
+    passage_excerpt: 'In the experiment, the two groups performed equally.',
+    meta: {
+      explanation: '"In the experiment" refers to evidence from a specific study.',
+      paraphrase_tip: 'in the experiment = in this study/trial',
+    },
+  },
+];
