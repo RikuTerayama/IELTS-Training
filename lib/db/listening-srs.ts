@@ -77,3 +77,28 @@ export async function countListeningIdiomDueToday(
     .lte('next_review_on', today);
   return data?.length ?? 0;
 }
+
+/**
+ * ユーザーの「今日 Due の Listening Lexicon 件数」を集計する
+ * skill=listening, module=lexicon の question_id のみ対象
+ */
+export async function countListeningLexiconDueToday(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<number> {
+  const today = getListeningDueDate();
+  const { data: questions } = await supabase
+    .from('lexicon_questions')
+    .select('id')
+    .eq('skill', 'listening')
+    .eq('module', 'lexicon');
+  const questionIds = (questions ?? []).map((q) => q.id);
+  if (questionIds.length === 0) return 0;
+  const { data } = await supabase
+    .from('listening_srs_state')
+    .select('id')
+    .eq('user_id', userId)
+    .in('question_id', questionIds)
+    .lte('next_review_on', today);
+  return data?.length ?? 0;
+}
