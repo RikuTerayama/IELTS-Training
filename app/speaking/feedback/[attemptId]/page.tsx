@@ -167,12 +167,18 @@ export default function SpeakingFeedbackPage() {
             {/* Section 3: Evaluation */}
             {data.feedback && (() => {
               const feedback = data.feedback;
+              const criterionLabels: Record<string, string> = {
+                fluency: 'Fluency and Coherence',
+                lexical: 'Lexical Resource',
+                grammar: 'Grammatical Range and Accuracy',
+                pronunciation: 'Pronunciation',
+              };
               return (
               <div className={cn('p-6', cardBase)}>
-                <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Evaluation</h2>
+                <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>評価</h2>
                 {feedback.overall_band != null && (
                   <div className="mb-4">
-                    <span className="text-sm font-semibold text-text-muted">Overall Band: </span>
+                    <span className="text-sm font-semibold text-text-muted">総合 Band: </span>
                     <span className="text-xl font-bold text-text">{feedback.overall_band}</span>
                   </div>
                 )}
@@ -180,16 +186,21 @@ export default function SpeakingFeedbackPage() {
                   {(['fluency_band', 'lexical_band', 'grammar_band', 'pronunciation_band'] as const).map((key) => {
                     const val = feedback[key];
                     if (val == null) return null;
-                    const label = key.replace('_band', '').replace(/^./, (c) => c.toUpperCase());
+                    const name = key.replace('_band', '');
+                    const label = criterionLabels[name] ?? name;
+                    const isPronunciation = key === 'pronunciation_band';
                     return (
                       <div key={key} className="rounded-lg border border-border bg-surface-2 p-3">
                         <div className="text-xs font-semibold text-text-muted uppercase">{label}</div>
+                        {isPronunciation && (
+                          <p className="text-xs text-amber-700 mt-0.5">（音声未実装のため参考値です）</p>
+                        )}
                         <div className="font-semibold text-text">{val}</div>
                         {typeof feedback.evidence === 'object' &&
                           feedback.evidence !== null &&
-                          (feedback.evidence as Record<string, unknown>)[key.replace('_band', '')] != null && (
+                          (feedback.evidence as Record<string, unknown>)[name] != null && (
                           <p className="mt-1 text-sm text-text-muted">
-                            {String((feedback.evidence as Record<string, unknown>)[key.replace('_band', '')])}
+                            {String((feedback.evidence as Record<string, unknown>)[name])}
                           </p>
                         )}
                       </div>
@@ -198,7 +209,7 @@ export default function SpeakingFeedbackPage() {
                 </div>
                 {Array.isArray(feedback.top_fixes) && feedback.top_fixes.length > 0 && (
                   <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-text mb-2">Top fixes</h3>
+                    <h3 className="text-sm font-semibold text-text mb-2">改善ポイント</h3>
                     <ul className="list-disc list-inside space-y-1 text-sm text-text-muted">
                       {(feedback.top_fixes as Array<{ issue?: string; suggestion?: string }>)
                         .slice(0, 3)
@@ -232,10 +243,10 @@ export default function SpeakingFeedbackPage() {
 
             <div className="flex flex-wrap gap-3">
               <Link href="/progress" className={cn(buttonSecondary, 'inline-flex items-center')}>
-                Back to Progress
+                履歴に戻る
               </Link>
               <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex items-center')}>
-                Try another interview
+                もう一度面接する
               </Link>
             </div>
           </div>

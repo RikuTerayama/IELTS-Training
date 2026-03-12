@@ -316,25 +316,25 @@ export default function ExamSpeakingPage() {
                       ? 'text-amber-700'
                       : 'text-gray-500'
               )}>
-                <span className="font-medium text-inherit">Remaining today:</span>
+                <span className="font-medium text-inherit">本日の残り:</span>
                 {usageToday.is_pro ? (
-                  <span>Unlimited (Pro)</span>
+                  <span>無制限（Pro）</span>
                 ) : (
                   <>
                     <span>
-                      Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} • Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
+                      Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} · Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
                     </span>
                     {usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0 ? (
                       <>
-                        <span>No free attempts left today.</span>
+                        <span>本日の無料枠を使い切りました。</span>
                         <Link href="/#pricing" className="underline hover:no-underline">
-                          View pricing
+                          料金を見る
                         </Link>
                       </>
                     ) : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1) ? (
-                      <span>Last free attempt today.</span>
+                      <span>本日あと1回です。</span>
                     ) : (
-                      <span className="text-xs text-text-subtle">(Resets at 00:00 JST)</span>
+                      <span className="text-xs text-text-subtle">（0:00 JSTでリセット）</span>
                     )}
                   </>
                 )}
