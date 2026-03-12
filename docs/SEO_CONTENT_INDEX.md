@@ -57,7 +57,21 @@ slug の定義は `app/speaking/topics/[slug]/page.tsx` 先頭の `speakingTopic
 
 ---
 
-## 4. 運用メモ
+## 4. ホーム・ランディングからの導線（どこから見られるか）
+
+SEO 記事へは次の入口から辿れます。ユーザーにも開発者にも「どこから見られるか」を明確にするため、ランディングとフッターに導線を設置しています。
+
+| 入口 | 場所 | リンク先 |
+|------|------|----------|
+| ランディング「学習リソース・記事」セクション | `/`（トップ）中ほど | Speaking ハブ (`/speaking`)、Writing ハブ (`/writing`)、Work & Study（`/speaking/topics/work-study`）、Education（`/writing/task2/topics/education`） |
+| フッター「サービス」 | `/` ページ最下部 | Speaking 記事 (`/speaking`)、Writing 記事 (`/writing`) |
+
+- **ランディング**: `app/page.tsx` の「学習リソース・記事」セクション（Features と Pricing の間）。
+- **フッター**: 同ファイルの `<footer>` 内「サービス」列に「Speaking 記事」「Writing 記事」リンク。
+
+---
+
+## 5. 運用メモ
 
 - **slug の追加・変更**: 上記 `page.tsx` / `layout.tsx` 内の `speakingTopics` または `task2Topics` を編集し、`generateStaticParams` がその配列を参照しているため再ビルドで反映されます。
 - **canonical**: 各 `layout.tsx` で `canonical` を設定しているため、SEO 用 URL は上記ルートパターンと一致します。
