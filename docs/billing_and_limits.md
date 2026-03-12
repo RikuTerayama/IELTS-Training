@@ -61,6 +61,9 @@ Existing limits env (still used):
 - Checkout API: `POST /api/billing/checkout`
   - Starts subscription for `monthly` or `annual`
   - Returns Stripe Checkout URL
+- **Prices API: `GET /api/billing/prices`**
+  - Returns Pro Monthly / Pro Annual display prices (formatted amount and currency) for the Pricing page.
+  - Uses the same `STRIPE_PRICE_ID_PRO_MONTHLY` and `STRIPE_PRICE_ID_PRO_ANNUAL` (or `STRIPE_PRICE_ID_PRO`) as checkout. Fetches each price from Stripe and returns `{ monthly: { amount, currency, formatted } | null, annual: ... }`. No auth required. If env or Stripe fetch fails, returns `null` for that interval; the UI shows "—" and "価格はStripeで設定されています".
 - Webhook API: `POST /api/billing/webhook`
   - Verifies Stripe signature
   - Syncs `profiles.plan` using subscription status
