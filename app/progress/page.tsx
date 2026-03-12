@@ -321,10 +321,10 @@ export default function ProgressPage() {
             </div>
           )}
 
-          {/* Speaking History（直近5件） */}
+          {/* Speaking 面接履歴 */}
           <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
-            <h2 className="mb-1 text-lg font-semibold">Speaking History</h2>
-            <p className="mb-4 text-sm text-text-muted">Recent speaking interview attempts (Part 1 beta).</p>
+            <h2 className="mb-1 text-lg font-semibold">スピーキング面接履歴</h2>
+            <p className="mb-4 text-sm text-text-muted">直近の面接記録（Part 1 ベータ）。日付・Band・トピックで確認できます。</p>
             {speakingHistoryLoading ? (
               <p className="text-sm text-text-muted">読み込み中...</p>
             ) : speakingHistoryError ? (
@@ -356,7 +356,7 @@ export default function ProgressPage() {
                       href={`/speaking/feedback/${item.id}`}
                       className="shrink-0 text-sm text-indigo-600 hover:underline"
                     >
-                      View details
+                      詳細
                     </Link>
                   </div>
                 ))}
@@ -367,7 +367,7 @@ export default function ProgressPage() {
                 href="/exam/speaking"
                 className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
               >
-                Try another interview
+                もう一度面接する
               </Link>
             </div>
           </div>
