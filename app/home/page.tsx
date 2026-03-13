@@ -2,504 +2,141 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
-import type { TodayMenu } from '@/lib/api/schemas/menuToday';
-import type { ApiResponse } from '@/lib/api/response';
-import { BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
-import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
-
-/** AC-O1: Output は API 失敗時も消えないようフォールバックを常時利用 */
-const OUTPUT_FALLBACK: { module: string; title: string; description: string; cta: { label: string; href: string } }[] = [
-  {
-    module: 'speaking',
-    title: 'Speaking',
-    description: 'Task1〜3の瞬間英作文（カテゴリ×Taskで練習）',
-    cta: { label: '練習する', href: '/training/speaking' },
-  },
-  {
-    module: 'writing_task2',
-    title: 'Writing Task 2',
-    description: 'エッセイを書く練習（穴埋め→Reasoning→自由作成）',
-    cta: { label: 'タスクを選ぶ', href: '/task/select?task_type=Task%202' },
-  },
-];
-
-/** Exam Mode の Writing 入口（PREPスキップで本番導線。将来 exam 固定に差し替え可能） */
-const EXAM_WRITING_HREF = '/task/select?task_type=Task%202&mode=exam';
-/** Exam Mode Speaking 入口（現状は /exam/speaking プレースホルダ） */
-const EXAM_SPEAKING_HREF = '/exam/speaking';
-
-/** AC-1: Input カテゴリは API に依存せず常に表示。4技能固定順: Reading→Listening→Speaking→Writing */
-const INPUT_CATEGORIES = [
-  {
-    module: 'vocab' as const,
-    title: '単語練習',
-    description: '4技能の必須単語を覚えましょう',
-    skills: [
-      { skill: 'reading' as const, label: 'Reading', href: '/training/vocab?skill=reading', disabled: false },
-      { skill: 'listening' as const, label: 'Listening', href: '/training/vocab?skill=listening', disabled: false },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/vocab?skill=speaking', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/vocab?skill=writing', disabled: false },
-    ],
-  },
-  {
-    module: 'idiom' as const,
-    title: '熟語練習',
-    description: '4技能の必須熟語を覚えましょう',
-    skills: [
-      { skill: 'reading' as const, label: 'Reading', href: '/training/idiom?skill=reading', disabled: false },
-      { skill: 'listening' as const, label: 'Listening', href: '/training/idiom?skill=listening', disabled: false },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/idiom?skill=speaking', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/idiom?skill=writing', disabled: false },
-    ],
-  },
-  {
-    module: 'lexicon' as const,
-    title: '表現バンク',
-    description: '4技能の必須表現を覚えましょう',
-    skills: [
-      { skill: 'reading' as const, label: 'Reading', href: '/training/lexicon?skill=reading', disabled: false },
-      { skill: 'listening' as const, label: 'Listening', href: '/training/lexicon?skill=listening', disabled: false },
-      { skill: 'speaking' as const, label: 'Speaking', href: '/training/lexicon?skill=speaking', disabled: false },
-      { skill: 'writing' as const, label: 'Writing', href: '/training/lexicon?skill=writing', disabled: false },
-    ],
-  },
-];
-
-// アイコン（SVG）
-const Icons = {
-  Book: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>,
-  Sparkles: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>,
-  Pencil: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>,
-  Mic: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>,
-  TrendingUp: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>,
-  FileText: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>,
-  ArrowRight: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>,
-};
-
-type UsageTodayData = {
-  is_pro: boolean;
-  writing_limit: number;
-  speaking_limit: number;
-  writing_remaining: number;
-  speaking_remaining: number;
-  reset_at: string;
-};
+import type { ProgressSummary } from '@/lib/domain/types';
 
 export default function HomePage() {
-  const [menu, setMenu] = useState<TodayMenu | null>(null);
-  const [usageToday, setUsageToday] = useState<UsageTodayData | null>(null);
+  const [summary, setSummary] = useState<ProgressSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/usage/today')
+    // 進捗サマリー取得
+    fetch('/api/progress/summary')
       .then((res) => res.json())
-      .then((data: ApiResponse<UsageTodayData>) => {
-        if (data.ok && data.data) setUsageToday(data.data);
+      .then((data) => {
+        if (data.ok) {
+          setSummary(data.data);
+        }
       })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/menu/today')
-      .then((res) => res.json())
-      .then((data: ApiResponse<TodayMenu>) => {
-        if (data.data) setMenu(data.data);
-      })
-      .catch(() => {
-        // API失敗時は menu を null のまま。Output は OUTPUT_FALLBACK で常時表示
-      })
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
       <Layout>
-        <div className="container mx-auto px-6 py-12">
+        <div className="container mx-auto px-4 py-8">
           <div className="text-center text-text-muted">読み込み中...</div>
         </div>
       </Layout>
     );
   }
 
-  // モジュールアイコンマッピング
-  const getModuleIcon = (module: string) => {
-    const iconMap: Record<string, any> = {
-      vocab: <Icons.Book className="w-6 h-6" />,
-      idiom: <Icons.Sparkles className="w-6 h-6" />,
-      lexicon: <Icons.FileText className="w-6 h-6" />,
-      writing_task1: <Icons.TrendingUp className="w-6 h-6" />,
-      writing_task2: <Icons.Pencil className="w-6 h-6" />,
-      speaking: <Icons.Mic className="w-6 h-6" />,
-    };
-    return iconMap[module] || <Icons.Book className="w-6 h-6" />;
-  };
-
-  // Output 2レーン用: menu.output の href を優先、なければフォールバック
-  const outputSource = menu?.output?.length ? menu.output : OUTPUT_FALLBACK;
-  const hrefSpeaking = outputSource.find((o) => o.module === 'speaking')?.cta.href ?? '/training/speaking';
-  const hrefWritingTask2 = outputSource.find((o) => o.module === 'writing_task2')?.cta.href ?? '/task/select?task_type=Task%202';
-  const practiceCards = [
-    { module: 'speaking' as const, title: 'Speaking Drill', subtitle: 'IELTS のタスク別で瞬間英作文ドリル', ctaLabel: '練習する', href: hrefSpeaking },
-    { module: 'writing_task2' as const, title: 'Writing PREP', subtitle: 'Task 2 のアイデアを整理してから書く', ctaLabel: 'PREPを始める', href: hrefWritingTask2 },
-  ];
-  const examCards = [
-    { module: 'writing_task2' as const, title: 'Writing AI Essay Checker', subtitle: 'エッセイを提出してバンド式のAIフィードバックを受け取る', ctaLabel: '試験モード', href: EXAM_WRITING_HREF, comingSoon: false },
-    { module: 'speaking' as const, title: 'Speaking AI Interviewer', subtitle: '本番形式のスピーキング面接シミュレーション（Part 1 テキスト版ベータ）', ctaLabel: 'ベータを試す', href: EXAM_SPEAKING_HREF, comingSoon: false, badge: 'Beta' as const },
-  ];
-  const outputCardClasses = cn(
-    'p-6 rounded-2xl border border-border bg-surface text-left transition-all duration-200',
-    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
-  );
-  const outputCardInteractive = 'group hover:shadow-md hover:-translate-y-1 hover:border-border-strong';
-
-  // モジュールカラー
-  const getModuleColor = (module: string, isInput: boolean) => {
-    if (isInput) {
-      const colorMap: Record<string, string> = {
-        vocab: 'amber',
-        idiom: 'purple',
-        lexicon: 'blue',
-      };
-      return colorMap[module] || 'indigo';
-    } else {
-      const colorMap: Record<string, string> = {
-        writing_task1: 'emerald',
-        writing_task2: 'indigo',
-        speaking: 'pink',
-      };
-      return colorMap[module] || 'indigo';
-    }
-  };
-
   return (
     <Layout>
-      <div className="container mx-auto px-6 py-12">
-        <div className="space-y-8">
-          {/* ヒーローセクション */}
-          <div className="text-center mb-12">
-            <h1 className="text-heading-1 font-bold tracking-tight text-text mb-3">
-              Today&apos;s Menu
-            </h1>
-            <p className="text-body-lg text-text-muted">
-              今日の学習メニューを確認して、効率的にスキルアップしましょう
-            </p>
-          </div>
-
-          {/* Lv/Exp表示（洗練されたデザイン） */}
-          {menu && (
-            <div className={cn('p-6', cardBase)}>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Input Level</span>
-                    <span className="text-xs text-text-subtle">{menu.xp.input.exp} / {menu.xp.input.nextLevelExp} exp</span>
-                  </div>
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-3xl font-bold text-indigo-600">Lv.{menu.xp.input.level}</span>
-                  </div>
-                  <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (menu.xp.input.exp / menu.xp.input.nextLevelExp) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Output Level</span>
-                    <span className="text-xs text-text-subtle">{menu.xp.output.exp} / {menu.xp.output.nextLevelExp} exp</span>
-                  </div>
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-3xl font-bold text-emerald-600">Lv.{menu.xp.output.level}</span>
-                  </div>
-                  <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (menu.xp.output.exp / menu.xp.output.nextLevelExp) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          {/* カード2: 弱点タグ */}
+          {summary && summary.weakness_tags.length > 0 && (
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-theme-lg backdrop-blur-sm">
+              <h2 className="mb-4 text-lg font-semibold text-text">弱点タグ</h2>
+              <p className="text-text-muted">
+                最近は{summary.weakness_tags.join(', ')}が弱め
+              </p>
             </div>
           )}
 
-          {/* Inputセクション - AC-1: 常に表示。4技能固定順: Reading→Listening→Speaking→Writing */}
-          <div>
-            <div className="mb-6">
-              <h2 className="text-heading-2 font-bold tracking-tight text-text mb-2">Input</h2>
-              <p className="text-body text-text-muted">語彙・熟語・表現を覚えましょう</p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6 min-w-0">
-              {INPUT_CATEGORIES.map((cat) => {
-                const color = getModuleColor(cat.module, true);
-                const colorClasses: Record<string, string> = {
-                  amber: 'bg-amber-50 border-amber-200 text-amber-600',
-                  purple: 'bg-purple-50 border-purple-200 text-purple-600',
-                  blue: 'bg-blue-50 border-blue-200 text-blue-600',
-                  indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
-                };
-                const iconBg = colorClasses[color] || colorClasses.indigo;
-                return (
-                  <div
-                    key={cat.module}
-                    className={cn(
-                      'p-6 rounded-2xl border border-border bg-surface min-w-0',
-                      'focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2'
-                    )}
+          {/* Trainingセクション */}
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-theme-lg backdrop-blur-sm">
+            <h2 className="mb-4 text-lg font-semibold text-text">📚 Training</h2>
+            <div className="space-y-4">
+              {/* Writing */}
+              <div>
+                <h3 className="mb-3 text-md font-semibold text-text">Writing</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => router.push('/training/writing/task1')}
+                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-indigo hover:bg-accent-indigo/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                   >
-                    <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
-                      {getModuleIcon(cat.module)}
-                    </div>
-                    <h3 className="text-lg font-bold text-text mb-2">{cat.title}</h3>
-                    <p className="text-sm text-text-muted mb-4 leading-relaxed">{cat.description}</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {cat.skills.map((s) =>
-                        s.disabled ? (
-                          <span
-                            key={s.skill}
-                            className={cn(
-                              'inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg text-sm min-w-0',
-                              'bg-surface-2 text-text-subtle cursor-not-allowed opacity-70',
-                              'border border-border'
-                            )}
-                          >
-                            {s.label}
-                            <span className="text-xs">Coming soon</span>
-                          </span>
-                        ) : (
-                          <Link
-                            key={s.skill}
-                            href={s.href}
-                            className={cn(
-                              'inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-lg text-sm font-semibold min-w-0',
-                              'bg-indigo-50 text-indigo-600 border border-indigo-200',
-                              'hover:bg-indigo-100 hover:border-indigo-300 transition-all',
-                              'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-indigo-500'
-                            )}
-                          >
-                            <span className="truncate">{s.label}</span>
-                            <Icons.ArrowRight className="w-4 h-4 shrink-0" />
-                          </Link>
-                        )
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Outputセクション - 2レーン: Practice / Exam Mode（AC-O1: 常時表示） */}
-          <div>
-            <div className="mb-6">
-              <h2 className="text-heading-2 font-bold tracking-tight text-text mb-2">Output</h2>
-              <p className="text-body text-text-muted">覚えた語彙・表現を実際に使いましょう</p>
-            </div>
-
-            {/* Practice */}
-            <div className="mb-10">
-              <h3 className="text-lg font-bold text-text mb-1">Practice</h3>
-              <p className="text-sm text-text-muted mb-4">ドリルと構成されたライティング練習で流暢さを高めます。</p>
-              <div className="grid md:grid-cols-2 gap-6">
-                {practiceCards.map((item) => {
-                  const color = getModuleColor(item.module, false);
-                  const colorClasses: Record<string, string> = {
-                    emerald: 'bg-emerald-50 border-emerald-200 text-emerald-600',
-                    indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
-                    pink: 'bg-pink-50 border-pink-200 text-pink-600',
-                  };
-                  const iconBg = colorClasses[color] || colorClasses.indigo;
-                  return (
-                    <Link
-                      key={item.module + item.title}
-                      href={item.href}
-                      className={cn(outputCardClasses, outputCardInteractive)}
-                    >
-                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
-                        {getModuleIcon(item.module)}
-                      </div>
-                      <h4 className="text-lg font-bold text-text mb-2">{item.title}</h4>
-                      <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.subtitle}</p>
-                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-                        {item.ctaLabel}
-                        <Icons.ArrowRight className="w-4 h-4" />
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Exam Mode */}
-            <div>
-              <h3 className="text-lg font-bold text-text mb-1">Exam Mode</h3>
-              <p className="text-sm text-text-muted mb-4">AI面接官・エッセイ採点で本番に近いパフォーマンスをシミュレートします。</p>
-              {usageToday && (
-                <div className="mb-4 space-y-2">
-                  <p className={cn(
-                    'text-sm flex flex-wrap items-baseline gap-x-2',
-                    usageToday.is_pro
-                      ? 'text-gray-500'
-                      : (usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0)
-                        ? 'text-red-700'
-                        : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1)
-                          ? 'text-amber-700'
-                          : 'text-gray-500'
-                  )}>
-                    <span className="font-medium text-inherit">Remaining today:</span>
-                    {usageToday.is_pro ? (
-                      <span>Unlimited (Pro)</span>
-                    ) : (
-                      <>
-                        <span>
-                          Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} • Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
-                        </span>
-                        {usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0 ? (
-                          <>
-                            <span>No free attempts left today.</span>
-                            <Link href="/#pricing" className="underline hover:no-underline">
-                              View pricing
-                            </Link>
-                          </>
-                        ) : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1) ? (
-                          <span>Last free attempt today.</span>
-                        ) : (
-                          <span className="text-xs text-text-subtle">(Resets at 00:00 JST)</span>
-                        )}
-                      </>
-                    )}
-                  </p>
-                  {usageToday.is_pro && (
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span className="inline-flex rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800">
-                        Pro Active
-                      </span>
-                      <Link href="/billing/manage" className={cn(buttonSecondary, 'inline-flex text-sm')}>
-                        Manage billing
-                      </Link>
-                    </div>
-                  )}
+                    <div className="font-semibold text-lg mb-1 text-text">Task 1</div>
+                    <div className="text-sm text-text-muted">グラフ・図表・地図の説明</div>
+                  </button>
+                  <button
+                    onClick={() => router.push('/training/writing/task2')}
+                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-indigo hover:bg-accent-indigo/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                  >
+                    <div className="font-semibold text-lg mb-1 text-text">Task 2</div>
+                    <div className="text-sm text-text-muted">エッセイライティング</div>
+                  </button>
                 </div>
-              )}
-              <div className="grid md:grid-cols-2 gap-6">
-                {examCards.map((item) => {
-                  const color = getModuleColor(item.module, false);
-                  const colorClasses: Record<string, string> = {
-                    emerald: 'bg-emerald-50 border-emerald-200 text-emerald-600',
-                    indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
-                    pink: 'bg-pink-50 border-pink-200 text-pink-600',
-                  };
-                  const iconBg = colorClasses[color] || colorClasses.indigo;
-                  if (item.comingSoon) {
-                    return (
-                      <div
-                        key={item.title}
-                        className={cn(outputCardClasses, 'opacity-90 cursor-default')}
-                        aria-disabled="true"
-                      >
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center shrink-0', iconBg)}>
-                            {getModuleIcon(item.module)}
-                          </div>
-                          <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
-                            Coming soon
-                          </span>
-                        </div>
-                        <h4 className="text-lg font-bold text-text mb-2">{item.title}</h4>
-                        <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.subtitle}</p>
-                        <span className="inline-flex items-center gap-1 text-sm font-medium text-text-muted cursor-not-allowed">
-                          {item.ctaLabel}
-                        </span>
-                      </div>
-                    );
-                  }
-                  return (
-                    <Link
-                      key={item.title}
-                      href={item.href}
-                      className={cn(outputCardClasses, outputCardInteractive)}
-                    >
-                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-4', iconBg)}>
-                        {getModuleIcon(item.module)}
-                      </div>
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <h4 className="text-lg font-bold text-text">{item.title}</h4>
-                        {'badge' in item && item.badge && (
-                          <span className="inline-flex shrink-0 items-center rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.subtitle}</p>
-                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:gap-2 transition-all">
-                        {item.ctaLabel}
-                        <Icons.ArrowRight className="w-4 h-4" />
-                      </span>
-                    </Link>
-                  );
-                })}
+              </div>
+
+              {/* Speaking */}
+              <div>
+                <h3 className="mb-3 text-md font-semibold text-text">Speaking（瞬間英作文）</h3>
+                <div className="grid md:grid-cols-3 gap-3">
+                  <button
+                    onClick={() => router.push('/training/speaking/task1')}
+                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                  >
+                    <div className="font-semibold text-lg mb-1 text-text">Task 1</div>
+                    <div className="text-sm text-text-muted">基本的な質問・自己紹介</div>
+                  </button>
+                  <button
+                    onClick={() => router.push('/training/speaking/task2')}
+                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                  >
+                    <div className="font-semibold text-lg mb-1 text-text">Task 2</div>
+                    <div className="text-sm text-text-muted">スピーチ・説明</div>
+                  </button>
+                  <button
+                    onClick={() => router.push('/training/speaking/task3')}
+                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-violet hover:bg-accent-violet/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                  >
+                    <div className="font-semibold text-lg mb-1 text-text">Task 3</div>
+                    <div className="text-sm text-text-muted">抽象的議論・意見</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Vocabulary */}
+              <div>
+                <h3 className="mb-3 text-md font-semibold text-text">Vocabulary</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => router.push('/training/vocabulary')}
+                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-emerald hover:bg-accent-emerald/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                  >
+                    <div className="font-semibold text-lg mb-1 text-text">単語練習</div>
+                    <div className="text-sm text-text-muted">語彙力を向上させましょう</div>
+                  </button>
+                  <button
+                    onClick={() => router.push('/training/vocabulary/review')}
+                    className="p-4 rounded-lg border-2 border-border bg-surface-2 hover:border-accent-emerald hover:bg-accent-emerald/10 transition-all duration-200 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                  >
+                    <div className="font-semibold text-lg mb-1 text-text">復習</div>
+                    <div className="text-sm text-text-muted">間違えた問題を復習</div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* 通知（あれば表示） */}
-          {menu && menu.notices && menu.notices.length > 0 && (
-            <div className={cn('p-6', cardBase)}>
-              <h3 className="text-lg font-bold text-text mb-4">お知らせ</h3>
-              <div className="space-y-3">
-                {menu.notices.map((notice, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      'p-4 rounded-xl text-sm border',
-                      notice.type === 'warning'
-                        ? 'bg-amber-50 border-amber-200 text-amber-900'
-                        : 'bg-indigo-50 border-indigo-200 text-indigo-900'
-                    )}
-                  >
-                    {notice.message}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Blogセクション */}
-          <div className={cn('p-6', cardBase)}>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
-                <Icons.FileText className="w-6 h-6" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-lg font-bold text-text mb-2">Blog</h2>
-                <p className="text-sm text-text-muted mb-4 leading-relaxed">
-                  IELTS学習に役立つ記事や最新情報をお届けします
-                </p>
-                <div className="flex flex-wrap items-center gap-3">
-                  <a
-                    href={BLOG_OFFICIAL_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn('inline-flex items-center gap-2', buttonPrimary)}
-                  >
-                    Blogを読む
-                    <Icons.ArrowRight className="w-4 h-4" />
-                  </a>
-                  <a
-                    href={BLOG_NOTE_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn('inline-flex items-center gap-2', buttonPrimary)}
-                  >
-                    Noteを読む
-                    <Icons.ArrowRight className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-            </div>
+          <div className="rounded-lg border border-border bg-surface p-6 shadow-theme-lg backdrop-blur-sm">
+            <h2 className="mb-4 text-lg font-semibold text-text">📝 Blog</h2>
+            <p className="mb-4 text-text-muted">
+              IELTS学習に役立つ記事や最新情報をお届けします
+            </p>
+            <a
+              href="https://ieltsconsult.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-md bg-accent-emerald px-4 py-2 text-accent-emerald-foreground hover:bg-accent-emerald-hover transition-colors duration-200"
+            >
+              Blogを読む →
+            </a>
           </div>
         </div>
       </div>

@@ -180,7 +180,7 @@ export interface Task1Checklist {
   has_paragraphs?: boolean; // 段落があるか
   word_count_ok?: boolean; // 語数が適切か（150-200語）
   tense_consistent?: boolean; // 時制が一貫しているか
-  [key: string]: boolean | undefined; // その他のチェック項目
+  [key: string]: boolean | undefined;
 }
 
 export interface Task1Timers {
@@ -560,4 +560,3 @@ export interface SpeakingPromptGenerationResponse extends LLMResponse {
   follow_up_questions: FollowUpQuestion[];
   required_vocab: RequiredVocab[];
 }
-

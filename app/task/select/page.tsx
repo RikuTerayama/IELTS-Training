@@ -1,16 +1,8 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
-import {
-  buttonPrimary,
-  cardDesc,
-  cardTitle,
-  cn,
-  selectableSelected,
-  selectableUnselected,
-} from '@/lib/ui/theme';
 
 type TaskType = 'Task 1' | 'Task 2';
 type Level = 'beginner' | 'intermediate' | 'advanced';
@@ -32,50 +24,48 @@ type Task2Genre =
   | 'advantage_disadvantage';
 
 const task1Genres: { value: Task1Genre; label: string; description: string }[] = [
-  { value: 'line_chart', label: 'Line Chart', description: 'Describe trends over time.' },
-  { value: 'bar_chart', label: 'Bar Chart', description: 'Compare categories by amount.' },
-  { value: 'pie_chart', label: 'Pie Chart', description: 'Explain percentage distributions.' },
-  { value: 'table', label: 'Table', description: 'Summarize tabular data.' },
-  { value: 'multiple_charts', label: 'Multiple Charts', description: 'Compare two or more visuals.' },
-  { value: 'diagram', label: 'Diagram', description: 'Explain process or system flows.' },
-  { value: 'map', label: 'Map', description: 'Describe location and changes.' },
+  { value: 'line_chart', label: 'ラインチャート', description: '時系列データの変化を表す線グラフ' },
+  { value: 'bar_chart', label: '棒グラフ', description: 'カテゴリー間の比較を表す棒グラフ' },
+  { value: 'pie_chart', label: '円グラフ', description: '割合や構成比を表す円グラフ' },
+  { value: 'table', label: '表（テーブル）', description: 'データを表形式で表示' },
+  { value: 'multiple_charts', label: '複数の図表', description: '複数のグラフや表の組み合わせ' },
+  { value: 'diagram', label: 'ダイアグラム', description: 'プロセスや構造を表す図' },
+  { value: 'map', label: '地図', description: '地理的な情報を表す地図' },
 ];
 
 const task2Genres: { value: Task2Genre; label: string; description: string }[] = [
   {
     value: 'discussion',
-    label: 'Discussion',
-    description: 'Discuss both views and provide your opinion when asked.',
+    label: 'Discussionエッセー',
+    description: 'Discuss both these views. / Discuss both these views and give your own opinion.',
   },
   {
     value: 'opinion',
-    label: 'Opinion',
-    description: 'Do you agree or disagree? Explain your position clearly.',
+    label: 'Opinionエッセー',
+    description: 'What is your opinion? / Do you agree or disagree? / To what extent do you agree or disagree?',
   },
   {
     value: 'cause_solution',
-    label: 'Cause & Solution',
-    description: 'Explain causes and suggest practical solutions.',
+    label: 'Cause & Solutionエッセー',
+    description: 'Why is this the case? What can be done about this problem?',
   },
   {
     value: 'direct_question',
-    label: 'Direct Question',
-    description: 'Answer each question part directly and logically.',
+    label: 'Direct Questionエッセー',
+    description: 'What factors contribute to...? How realistic is...?',
   },
   {
     value: 'advantage_disadvantage',
-    label: 'Advantage & Disadvantage',
-    description: 'Compare pros and cons with clear reasoning.',
+    label: 'Advantage & Disadvantageエッセー',
+    description: 'What are the advantages and disadvantages? / Do the advantages outweigh the disadvantages?',
   },
 ];
 
 const levels: { value: Level; label: string }[] = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
+  { value: 'beginner', label: '初級' },
+  { value: 'intermediate', label: '中級' },
+  { value: 'advanced', label: '上級' },
 ];
-
-const task1AllowedLevels: Level[] = ['intermediate', 'advanced'];
 
 function TaskSelectContent() {
   const router = useRouter();
@@ -84,26 +74,15 @@ function TaskSelectContent() {
   const [level, setLevel] = useState<Level>('beginner');
   const [task1Genre, setTask1Genre] = useState<Task1Genre | 'random' | null>(null);
   const [task2Genre, setTask2Genre] = useState<Task2Genre | 'random' | null>(null);
-  const [selectedMode, setSelectedMode] = useState<'training' | 'exam'>('training');
   const [loading, setLoading] = useState(false);
 
+  // クエリパラメータからtask_typeを読み取る
   useEffect(() => {
     const taskTypeParam = searchParams.get('task_type');
     if (taskTypeParam === 'Task 1' || taskTypeParam === 'Task 2') {
       setTaskType(taskTypeParam as TaskType);
-      if (taskTypeParam === 'Task 1' && level === 'beginner') {
-        setLevel('intermediate');
-      }
     }
-  }, [searchParams, level]);
-
-  useEffect(() => {
-    if (taskType === 'Task 1' && level === 'beginner') {
-      setLevel('intermediate');
-    }
-  }, [taskType, level]);
-
-  const modeFromUrl = searchParams.get('mode');
+  }, [searchParams]);
 
   const handleStart = async () => {
     if (!taskType) return;
@@ -114,6 +93,7 @@ function TaskSelectContent() {
       const genre = taskType === 'Task 1' ? task1Genre : task2Genre;
       if (!genre) return;
 
+      // タスク生成APIを呼び出し
       const response = await fetch('/api/tasks/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -125,27 +105,23 @@ function TaskSelectContent() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate task');
+        throw new Error('タスクの生成に失敗しました');
       }
 
       const data = await response.json();
       if (data.ok && data.data?.id) {
-        if (taskType === 'Task 1') {
-          const modeQuery = selectedMode === 'exam' ? '?mode=exam' : '';
-          router.push(`/task/${data.data.id}${modeQuery}`);
-        } else if (taskType === 'Task 2' && modeFromUrl === 'exam') {
-          router.push(`/task/${data.data.id}?mode=exam`);
-        } else if (level === 'beginner' || level === 'intermediate') {
+        // 初級・中級の場合はPREPモードに直接遷移
+        if (level === 'beginner' || level === 'intermediate') {
           router.push(`/task/${data.data.id}/prep`);
         } else {
           router.push(`/task/${data.data.id}`);
         }
       } else {
-        throw new Error(data.error?.message || 'Failed to generate task');
+        throw new Error(data.error?.message || 'タスクの生成に失敗しました');
       }
     } catch (error) {
       console.error('Task generation error:', error);
-      alert(error instanceof Error ? error.message : 'An error occurred');
+      alert(error instanceof Error ? error.message : 'エラーが発生しました');
     } finally {
       setLoading(false);
     }
@@ -153,49 +129,58 @@ function TaskSelectContent() {
 
   return (
     <Layout>
-      <div className="container mx-auto max-w-4xl px-4 py-8">
-        <h1 className={cn('mb-6 text-2xl font-bold', cardTitle)}>Select Task</h1>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 className="text-2xl font-bold mb-6">タスクを選択</h1>
 
+        {/* タスクタイプ選択 */}
         <div className="mb-8">
-          <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Task Type</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+          <h2 className="text-lg font-semibold mb-4">タスクタイプ</h2>
+          <div className="grid md:grid-cols-2 gap-4">
             <button
               onClick={() => {
                 setTaskType('Task 1');
-                setLevel('intermediate');
                 setTask1Genre(null);
               }}
-              className={cn('p-6', taskType === 'Task 1' ? selectableSelected : selectableUnselected)}
+              className={`p-6 rounded-lg border-2 transition-all text-left ${
+                taskType === 'Task 1'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+              }`}
             >
-              <div className={cn('mb-2 text-lg font-semibold', cardTitle)}>Task 1</div>
-              <div className={cardDesc}>Graph / chart / diagram / map description</div>
+              <div className="font-semibold text-lg mb-2">Task 1</div>
+              <div className="text-sm text-gray-600">グラフ・図表・地図の説明</div>
             </button>
             <button
               onClick={() => {
                 setTaskType('Task 2');
-                setLevel('beginner');
                 setTask2Genre(null);
               }}
-              className={cn('p-6', taskType === 'Task 2' ? selectableSelected : selectableUnselected)}
+              className={`p-6 rounded-lg border-2 transition-all text-left ${
+                taskType === 'Task 2'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+              }`}
             >
-              <div className={cn('mb-2 text-lg font-semibold', cardTitle)}>Task 2</div>
-              <div className={cardDesc}>Essay writing</div>
+              <div className="font-semibold text-lg mb-2">Task 2</div>
+              <div className="text-sm text-gray-600">エッセイライティング</div>
             </button>
           </div>
         </div>
 
+        {/* レベル選択 */}
         {taskType && (
           <div className="mb-8">
-            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Level</h2>
+            <h2 className="text-lg font-semibold mb-4">レベル</h2>
             <div className="flex gap-4">
-              {(taskType === 'Task 1'
-                ? levels.filter((l) => task1AllowedLevels.includes(l.value))
-                : levels
-              ).map((l) => (
+              {levels.map((l) => (
                 <button
                   key={l.value}
                   onClick={() => setLevel(l.value)}
-                  className={cn('px-6 py-2', level === l.value ? selectableSelected : selectableUnselected)}
+                  className={`px-6 py-2 rounded-md border-2 transition-all ${
+                    level === l.value
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 >
                   {l.label}
                 </button>
@@ -204,84 +189,83 @@ function TaskSelectContent() {
           </div>
         )}
 
+        {/* Task1 ジャンル選択 */}
         {taskType === 'Task 1' && (
           <div className="mb-8">
-            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Mode</h2>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setSelectedMode('training')}
-                className={cn('px-6 py-2', selectedMode === 'training' ? selectableSelected : selectableUnselected)}
-              >
-                Training
-              </button>
-              <button
-                onClick={() => setSelectedMode('exam')}
-                className={cn('px-6 py-2', selectedMode === 'exam' ? selectableSelected : selectableUnselected)}
-              >
-                Exam
-              </button>
-            </div>
-          </div>
-        )}
-
-        {taskType === 'Task 1' && (
-          <div className="mb-8">
-            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Genre</h2>
-            <div className="grid gap-4 md:grid-cols-2">
+            <h2 className="text-lg font-semibold mb-4">形式を選択</h2>
+            <div className="grid md:grid-cols-2 gap-4">
               {task1Genres.map((genre) => (
                 <button
                   key={genre.value}
                   onClick={() => setTask1Genre(genre.value)}
-                  className={cn('p-4', task1Genre === genre.value ? selectableSelected : selectableUnselected)}
+                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    task1Genre === genre.value
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  }`}
                 >
-                  <div className={cn('mb-1 font-semibold', cardTitle)}>{genre.label}</div>
-                  <div className={cardDesc}>{genre.description}</div>
+                  <div className="font-semibold mb-1">{genre.label}</div>
+                  <div className="text-sm text-gray-600">{genre.description}</div>
                 </button>
               ))}
               <button
                 onClick={() => setTask1Genre('random')}
-                className={cn('p-4', task1Genre === 'random' ? selectableSelected : selectableUnselected)}
+                className={`p-4 rounded-lg border-2 transition-all text-left ${
+                  task1Genre === 'random'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                }`}
               >
-                <div className={cn('mb-1 font-semibold', cardTitle)}>Random</div>
-                <div className={cardDesc}>Pick a random Task 1 genre</div>
+                <div className="font-semibold mb-1">🎲 ランダム</div>
+                <div className="text-sm text-gray-600">ランダムな形式を選択</div>
               </button>
             </div>
           </div>
         )}
 
-        {taskType === 'Task 2' && modeFromUrl === 'exam' && (
-          <p className="mb-4 text-sm text-text-muted">Exam Mode: PREP will be skipped.</p>
-        )}
-
+        {/* Task2 ジャンル選択 */}
         {taskType === 'Task 2' && (
           <div className="mb-8">
-            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Essay Type</h2>
+            <h2 className="text-lg font-semibold mb-4">エッセータイプを選択</h2>
             <div className="space-y-3">
               {task2Genres.map((genre) => (
                 <button
                   key={genre.value}
                   onClick={() => setTask2Genre(genre.value)}
-                  className={cn('w-full p-4', task2Genre === genre.value ? selectableSelected : selectableUnselected)}
+                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                    task2Genre === genre.value
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  }`}
                 >
-                  <div className={cn('mb-1 font-semibold', cardTitle)}>{genre.label}</div>
-                  <div className={cardDesc}>{genre.description}</div>
+                  <div className="font-semibold mb-1">{genre.label}</div>
+                  <div className="text-sm text-gray-600">{genre.description}</div>
                 </button>
               ))}
               <button
                 onClick={() => setTask2Genre('random')}
-                className={cn('w-full p-4', task2Genre === 'random' ? selectableSelected : selectableUnselected)}
+                className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                  task2Genre === 'random'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                }`}
               >
-                <div className={cn('mb-1 font-semibold', cardTitle)}>Random</div>
-                <div className={cardDesc}>Pick a random Task 2 essay type</div>
+                <div className="font-semibold mb-1">🎲 ランダム</div>
+                <div className="text-sm text-gray-600">ランダムなエッセータイプを選択</div>
               </button>
             </div>
           </div>
         )}
 
+        {/* 開始ボタン */}
         {taskType && (taskType === 'Task 1' ? task1Genre : task2Genre) && (
           <div className="flex justify-end">
-            <button onClick={handleStart} disabled={loading} className={cn('px-8 py-3', buttonPrimary)}>
-              {loading ? 'Generating...' : 'Start Task'}
+            <button
+              onClick={handleStart}
+              disabled={loading}
+              className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-semibold"
+            >
+              {loading ? '生成中...' : 'タスクを開始'}
             </button>
           </div>
         )}
@@ -292,16 +276,15 @@ function TaskSelectContent() {
 
 export default function TaskSelectPage() {
   return (
-    <Suspense
-      fallback={
-        <Layout>
-          <div className="container mx-auto max-w-4xl px-4 py-8">
-            <div className="text-center">Loading...</div>
-          </div>
-        </Layout>
-      }
-    >
+    <Suspense fallback={
+      <Layout>
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="text-center">読み込み中...</div>
+        </div>
+      </Layout>
+    }>
       <TaskSelectContent />
     </Suspense>
   );
 }
+
