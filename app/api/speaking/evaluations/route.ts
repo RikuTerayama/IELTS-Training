@@ -8,11 +8,6 @@ import { buildSpeakingEvaluationPrompt } from '@/lib/llm/prompts/speaking_evalua
 import { callLLM } from '@/lib/llm/client';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { SpeakingEvaluationResponse } from '@/lib/domain/types';
-import {
-  consumeOrThrow429,
-  isUsageRateLimitError,
-  toUsageRateLimitResponse,
-} from '@/lib/server/usageLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,15 +40,6 @@ export async function POST(request: Request): Promise<Response> {
         word_count: user_response.split(/\s+/).length,
       }
     );
-    await consumeOrThrow429({
-      supabase,
-      userId: user.id,
-      scope: 'speaking',
-      writingDelta: 0,
-      speakingDelta: 1,
-      llmUsed: true,
-      upgradeUrl: process.env.UPGRADE_URL ?? '/#pricing',
-    });
 
     let evaluationData: SpeakingEvaluationResponse;
     try {
@@ -104,10 +90,6 @@ export async function POST(request: Request): Promise<Response> {
 
     return Response.json(successResponse(savedFeedback));
   } catch (error) {
-    if (isUsageRateLimitError(error)) {
-      const rateLimitResponse = toUsageRateLimitResponse(error);
-      if (rateLimitResponse) return rateLimitResponse;
-    }
     console.error('[Speaking Evaluation API] Unexpected error:', error);
     return Response.json(
       errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'An unexpected error occurred'),

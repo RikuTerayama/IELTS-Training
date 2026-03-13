@@ -1,37 +1,11 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
-import { cn, cardBase, cardTitle, cardDesc, textareaBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 import type { Task } from '@/lib/domain/types';
-import { WRITING_RECOMMENDED_FALLBACK } from '@/lib/data/writing_recommended_fallback';
-
-/** W2-FR-3: Task2 実施時の40分タイマー（Start/Pause/Reset） */
-function Task2TimerBlock() {
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const [running, setRunning] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  useEffect(() => {
-    if (!running) return;
-    intervalRef.current = setInterval(() => setElapsedSec((s) => s + 1), 1000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [running]);
-  const display = `${String(Math.floor(elapsedSec / 60)).padStart(2, '0')}:${String(elapsedSec % 60).padStart(2, '0')}`;
-  return (
-    <div className={cn('mb-6 p-4 rounded-xl', cardBase, 'flex flex-wrap items-center gap-4')}>
-      <span className="text-2xl font-mono font-bold text-text">{display}</span>
-      <span className="text-sm text-text-muted">（目安 40分）</span>
-      <div className="flex gap-2">
-        <button type="button" onClick={() => setRunning((r) => !r)} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>{running ? 'Pause' : 'Start'}</button>
-        <button type="button" onClick={() => { setRunning(false); setElapsedSec(0); }} className={cn('px-3 py-1.5 rounded-lg text-sm', buttonSecondary)}>Reset</button>
-      </div>
-    </div>
-  );
-}
 
 type PrepStep = 'point' | 'reason' | 'example' | 'point_again' | 'japanese_evaluation' | 'english_generation' | 'ielts_feedback';
 
@@ -56,7 +30,6 @@ interface EnglishEssay {
 
 export default function PrepTaskPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const taskId = params.taskId as string;
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
@@ -73,26 +46,6 @@ export default function PrepTaskPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isRateLimit, setIsRateLimit] = useState(false);
-  const [upgradeUrl, setUpgradeUrl] = useState('/#pricing');
-  const [requiredItems, setRequiredItems] = useState<Array<{ module: string; expression: string; ja_hint?: string }>>([]);
-
-  const handleRateLimit = (data: { error?: { code?: string; message?: string; details?: unknown } }, res: Response) => {
-    if (data?.error?.code === 'RATE_LIMIT' || res.status === 429) {
-      setIsRateLimit(true);
-      const details = data?.error?.details;
-      setUpgradeUrl(details && typeof details === 'object' && 'upgrade_url' in details && typeof (details as { upgrade_url?: string }).upgrade_url === 'string'
-        ? (details as { upgrade_url: string }).upgrade_url
-        : '/#pricing');
-    }
-  };
-
-  useEffect(() => {
-    if (searchParams.get('mode') === 'exam') {
-      router.replace(`/task/${taskId}?mode=exam`);
-      return;
-    }
-  }, [taskId, searchParams, router]);
 
   useEffect(() => {
     if (taskId === 'new') {
@@ -115,7 +68,6 @@ export default function PrepTaskPage() {
         },
         created_at: new Date().toISOString(),
       });
-      setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f) => ({ module: f.module, expression: f.expression, ja_hint: f.ja_hint })));
       setLoading(false);
       return;
     }
@@ -124,28 +76,13 @@ export default function PrepTaskPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.ok) {
-          if (data.data.question_type === 'Task 1') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const modeParam = urlParams.get('mode');
-            const modeQuery = modeParam === 'exam' ? '?mode=exam' : '';
-            router.replace(`/task/${taskId}${modeQuery}`);
-            return;
-          }
           setTask(data.data);
           setLevel(data.data.level);
-          // AC-X1: Task2 で推奨表現を取得
-          fetch('/api/input/items?skill=writing&modules=vocab,idiom,lexicon&limit=8')
-            .then((r) => r.json())
-            .then((d) => {
-              if (d.ok && d.data?.items?.length) setRequiredItems(d.data.items.map((i: { module?: string; expression: string; ja_hint?: string }) => ({ module: i.module || 'vocab', expression: i.expression, ja_hint: i.ja_hint })));
-              else setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f) => ({ module: f.module, expression: f.expression, ja_hint: f.ja_hint })));
-            })
-            .catch(() => setRequiredItems(WRITING_RECOMMENDED_FALLBACK.map((f) => ({ module: f.module, expression: f.expression, ja_hint: f.ja_hint }))));
         }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [taskId, router]);
+  }, [taskId]);
 
   const handleAnswerChange = (step: PrepStep, value: string) => {
     if (step === 'point') setAnswers({ ...answers, point: value });
@@ -173,7 +110,6 @@ export default function PrepTaskPage() {
   const handleJapaneseEvaluation = async () => {
     setProcessing(true);
     setError(null);
-    setIsRateLimit(false);
 
     try {
       const response = await fetch('/api/llm/prep-evaluation', {
@@ -187,13 +123,16 @@ export default function PrepTaskPage() {
         }),
       });
 
-      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error('評価の生成に失敗しました');
+      }
+
+      const data = await response.json();
       if (data.ok) {
         setJapaneseEvaluation(data.data);
         setCurrentStep('japanese_evaluation');
       } else {
-        handleRateLimit(data, response);
-        setError(data.error?.message || '評価の生成に失敗しました');
+        throw new Error(data.error?.message || '評価の生成に失敗しました');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -205,7 +144,6 @@ export default function PrepTaskPage() {
   const handleEnglishGeneration = async () => {
     setProcessing(true);
     setError(null);
-    setIsRateLimit(false);
 
     try {
       const response = await fetch('/api/llm/prep-to-essay', {
@@ -221,13 +159,16 @@ export default function PrepTaskPage() {
         }),
       });
 
-      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error('英語エッセイの生成に失敗しました');
+      }
+
+      const data = await response.json();
       if (data.ok) {
         setEnglishEssay(data.data);
         setCurrentStep('english_generation');
       } else {
-        handleRateLimit(data, response);
-        setError(data.error?.message || '英語エッセイの生成に失敗しました');
+        throw new Error(data.error?.message || '英語エッセイの生成に失敗しました');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -241,7 +182,6 @@ export default function PrepTaskPage() {
 
     setProcessing(true);
     setError(null);
-    setIsRateLimit(false);
 
     try {
       // まずタスクを生成または取得
@@ -253,12 +193,13 @@ export default function PrepTaskPage() {
           body: JSON.stringify({ level }),
         });
 
-        const generateData = await generateResponse.json().catch(() => ({}));
+        if (!generateResponse.ok) {
+          throw new Error('タスクの生成に失敗しました');
+        }
+
+        const generateData = await generateResponse.json();
         if (!generateData.ok || !generateData.data?.id) {
-          handleRateLimit(generateData, generateResponse);
-          setError(generateData.error?.message || 'タスクの生成に失敗しました');
-          setProcessing(false);
-          return;
+          throw new Error('タスクの生成に失敗しました');
         }
 
         actualTaskId = generateData.data.id;
@@ -280,17 +221,19 @@ export default function PrepTaskPage() {
         }),
       });
 
-      const submitData = await submitResponse.json().catch(() => ({}));
+      if (!submitResponse.ok) {
+        throw new Error('回答の送信に失敗しました');
+      }
+
+      const submitData = await submitResponse.json();
       if (submitData.ok) {
         // フィードバックページにリダイレクト
         router.push(`/feedback/${submitData.data.attempt_id}`);
       } else {
-        handleRateLimit(submitData, submitResponse);
-        setError(submitData.error?.message || '回答の送信に失敗しました');
+        throw new Error(submitData.error?.message || '回答の送信に失敗しました');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
-    } finally {
       setProcessing(false);
     }
   };
@@ -403,13 +346,10 @@ export default function PrepTaskPage() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* W2-FR-3: Task2 の40分タイマー */}
-        {task.question_type === 'Task 2' && <Task2TimerBlock />}
-
         {/* プログレスバー */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className={cn('text-sm font-medium', cardDesc)}>
+            <span className="text-sm font-medium text-gray-600">
               {(() => {
                 const isTask1 = task?.question_type === 'Task 1';
                 const totalSteps = isTask1 ? 5 : 7;
@@ -420,9 +360,9 @@ export default function PrepTaskPage() {
               })()}
             </span>
           </div>
-          <div className={cn('w-full rounded-full h-2', 'bg-surface-2')}>
+          <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className={cn('h-2 rounded-full transition-all duration-300', 'bg-primary')}
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
               style={{
                 width: (() => {
                   const isTask1 = task?.question_type === 'Task 1';
@@ -454,8 +394,8 @@ export default function PrepTaskPage() {
         </div>
 
         {/* お題表示 */}
-        <div className={cn('p-6 mb-6', cardBase)}>
-          <h2 className={cn('mb-2 text-lg font-semibold', cardTitle)}>お題</h2>
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm mb-6">
+          <h2 className="mb-2 text-lg font-semibold">お題</h2>
           
           {/* Task1の場合は画像を表示 */}
           {task.question_type === 'Task 1' && (
@@ -463,22 +403,21 @@ export default function PrepTaskPage() {
               <Task1Image
                 question={task.question}
                 level={level}
-                imagePath={(task as any).image_path}
                 alt="Task 1 Chart or Diagram"
                 className="w-full"
               />
             </div>
           )}
           
-          <p className={cardDesc}>{task.question}</p>
+          <p className="text-gray-700">{task.question}</p>
           <div className="mt-4 space-y-2">
-            <p className={cardDesc}>
-              目標: Band <span className={cn('font-medium', 'text-text')}>6.0-6.5</span>
+            <p>
+              目標: Band <span className="font-medium">6.0-6.5</span>
             </p>
-            <p className={cardDesc}>
+            <p>
               必須語彙:{' '}
               {task.required_vocab.map((v) => (
-                <span key={v.word} className={cn('mr-2 rounded border border-primary/20 bg-accent-indigo/10 px-2 py-1 text-sm', 'text-text')}>
+                <span key={v.word} className="mr-2 rounded bg-blue-100 px-2 py-1 text-sm">
                   {v.word}
                 </span>
               ))}
@@ -486,86 +425,62 @@ export default function PrepTaskPage() {
           </div>
         </div>
 
-        {/* AC-X1: 使う表現を常時表示。PREP回答・エッセイとの文字列一致で Used 表示 */}
-        {task?.question_type === 'Task 2' && (() => {
-          const displayItems = requiredItems.length > 0 ? requiredItems : WRITING_RECOMMENDED_FALLBACK.map((f) => ({ module: f.module, expression: f.expression, ja_hint: f.ja_hint }));
-          const combinedText = (answers.point + ' ' + answers.reason + ' ' + answers.example + ' ' + answers.point_again + ' ' + (englishEssay?.essay || '')).toLowerCase();
-          return (
-            <div className={cn('p-6 mb-6', cardBase, 'bg-indigo-50/50 border-indigo-200')}>
-              <h3 className="text-sm font-semibold text-text-muted mb-3 uppercase tracking-wider">使う表現（{displayItems.length}個）</h3>
-              <div className="flex flex-wrap gap-2">
-                {displayItems.map((item, idx) => {
-                  const used = combinedText.includes(item.expression.toLowerCase());
-                  return (
-                    <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-indigo-200 text-sm shadow-sm">
-                      <span className="font-semibold text-indigo-900">{item.expression}</span>
-                      {item.ja_hint && <span className="text-xs text-text-muted">（{item.ja_hint}）</span>}
-                      <span className="text-xs text-indigo-600 font-medium">[{item.module}]</span>
-                      {used && <span className="text-xs font-semibold text-emerald-600 ml-1">Used</span>}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
-
         {/* ステップ別コンテンツ */}
         {currentStep === 'japanese_evaluation' && japaneseEvaluation ? (
-          <div className={cn('p-6 mb-6', cardBase)}>
-            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>日本語PREP評価</h2>
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm mb-6">
+            <h2 className="mb-4 text-lg font-semibold">日本語PREP評価</h2>
             <div className="space-y-4">
               <div>
-                <div className={cn('text-sm font-medium mb-1', cardDesc)}>PREPとして成り立っているか</div>
-                <div className={cn('text-lg font-semibold', japaneseEvaluation.is_valid_prep ? 'text-success' : 'text-danger')}>
+                <div className="text-sm font-medium text-gray-600 mb-1">PREPとして成り立っているか</div>
+                <div className={`text-lg font-semibold ${japaneseEvaluation.is_valid_prep ? 'text-green-600' : 'text-red-600'}`}>
                   {japaneseEvaluation.is_valid_prep ? '✓ 成り立っています' : '✗ 改善が必要です'}
                 </div>
               </div>
               <div>
-                <div className={cn('text-sm font-medium mb-1', cardDesc)}>スコア予測</div>
-                <div className={cn('text-lg font-semibold', 'text-primary')}>{japaneseEvaluation.score_estimate}</div>
+                <div className="text-sm font-medium text-gray-600 mb-1">スコア予測</div>
+                <div className="text-lg font-semibold text-blue-600">{japaneseEvaluation.score_estimate}</div>
               </div>
               {japaneseEvaluation.missing_points.length > 0 && (
                 <div>
-                  <div className={cn('text-sm font-medium mb-1', cardDesc)}>足りない点</div>
+                  <div className="text-sm font-medium text-gray-600 mb-1">足りない点</div>
                   <ul className="list-disc list-inside space-y-1">
                     {japaneseEvaluation.missing_points.map((point, idx) => (
-                      <li key={idx} className="text-text">{point}</li>
+                      <li key={idx} className="text-gray-700">{point}</li>
                     ))}
                   </ul>
                 </div>
               )}
               <div>
-                <div className={cn('text-sm font-medium mb-1', cardDesc)}>フィードバック</div>
-                <div className={cn('whitespace-pre-wrap', 'text-text')}>{japaneseEvaluation.feedback}</div>
+                <div className="text-sm font-medium text-gray-600 mb-1">フィードバック</div>
+                <div className="text-gray-700 whitespace-pre-wrap">{japaneseEvaluation.feedback}</div>
               </div>
             </div>
           </div>
         ) : currentStep === 'english_generation' && englishEssay ? (
-          <div className={cn('p-6 mb-6', cardBase)}>
-            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>英語エッセイ</h2>
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm mb-6">
+            <h2 className="mb-4 text-lg font-semibold">英語エッセイ</h2>
             <div className="space-y-4">
               <div>
-                <div className={cn('text-sm font-medium mb-1', cardDesc)}>語数</div>
-                <div className={cn('text-lg font-semibold', 'text-primary')}>{englishEssay.word_count} words</div>
+                <div className="text-sm font-medium text-gray-600 mb-1">語数</div>
+                <div className="text-lg font-semibold text-blue-600">{englishEssay.word_count} words</div>
               </div>
               <div>
-                <div className={cn('text-sm font-medium mb-2', cardDesc)}>エッセイ</div>
-                <div className={cn('rounded border border-border bg-surface-2 p-4 whitespace-pre-wrap', 'text-text')}>
+                <div className="text-sm font-medium text-gray-600 mb-2">エッセイ</div>
+                <div className="rounded border border-gray-300 bg-gray-50 p-4 whitespace-pre-wrap text-gray-700">
                   {englishEssay.essay}
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className={cn('p-6 mb-6', cardBase)}>
-            <h2 className={cn('mb-2 text-xl font-semibold', cardTitle)}>{question.title}</h2>
-            <p className={cn('mb-4', cardDesc)}>{question.description}</p>
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm mb-6">
+            <h2 className="mb-2 text-xl font-semibold">{question.title}</h2>
+            <p className="mb-4 text-gray-600">{question.description}</p>
             <textarea
               value={getCurrentAnswer()}
               onChange={(e) => handleAnswerChange(currentStep, e.target.value)}
               rows={8}
-              className={cn(textareaBase, 'px-3 py-2')}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
               placeholder={question.placeholder}
             />
           </div>
@@ -573,20 +488,8 @@ export default function PrepTaskPage() {
 
         {/* エラー表示 */}
         {error && (
-          <div className="mb-6 space-y-4">
-            <div className={cn('rounded-lg border border-danger bg-danger/10 p-4', 'text-danger')}>
-              {error}
-            </div>
-            {isRateLimit && (
-              <div className={cn('rounded-lg border border-border bg-surface p-4')}>
-                <h3 className="font-semibold text-text mb-1">You&apos;ve reached today&apos;s free limit.</h3>
-                <p className="text-sm text-text-muted mb-4">Upgrade to Pro to continue, or try again tomorrow.</p>
-                <div className="flex flex-wrap gap-3">
-                  <Link href={upgradeUrl} className={cn(buttonPrimary)}>View pricing</Link>
-                  <Link href="/home" className={cn(buttonSecondary, 'inline-flex')}>Back to Home</Link>
-                </div>
-              </div>
-            )}
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 mb-6 text-red-800">
+            {error}
           </div>
         )}
 
@@ -610,14 +513,14 @@ export default function PrepTaskPage() {
               }
             }}
             disabled={currentStep === 'point' || processing}
-            className={cn('px-6 py-2', buttonSecondary)}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
           >
             戻る
           </button>
           <button
             onClick={handleNext}
             disabled={!canProceed() || processing}
-            className={cn('px-6 py-2', buttonPrimary)}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
           >
             {processing
               ? '処理中...'

@@ -8,11 +8,6 @@ import { buildSpeakingPromptGeneratePrompt } from '@/lib/llm/prompts/speaking_pr
 import { callLLM } from '@/lib/llm/client';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { InstantSpeakingPromptResponse } from '@/lib/domain/types';
-import {
-  consumeOrThrow429,
-  isUsageRateLimitError,
-  toUsageRateLimitResponse,
-} from '@/lib/server/usageLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,15 +88,6 @@ export async function POST(request: Request): Promise<Response> {
 
     // 2. プリセットがない、またはuse_preset=falseの場合はLLMで生成
     console.log('[Speaking Prompt Generate API] Generating with LLM');
-    await consumeOrThrow429({
-      supabase,
-      userId: user.id,
-      scope: 'speaking',
-      writingDelta: 0,
-      speakingDelta: 1,
-      llmUsed: true,
-      upgradeUrl: process.env.UPGRADE_URL ?? '/#pricing',
-    });
     const prompt = buildSpeakingPromptGeneratePrompt(
       topic,
       finalPart,
@@ -161,10 +147,6 @@ export async function POST(request: Request): Promise<Response> {
 
     return Response.json(successResponse(savedPrompt));
   } catch (error) {
-    if (isUsageRateLimitError(error)) {
-      const rateLimitResponse = toUsageRateLimitResponse(error);
-      if (rateLimitResponse) return rateLimitResponse;
-    }
     console.error('[Speaking Prompt Generate API] Unexpected error:', error);
     return Response.json(
       errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'An unexpected error occurred'),

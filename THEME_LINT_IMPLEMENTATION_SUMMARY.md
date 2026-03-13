@@ -322,7 +322,7 @@ npm run lint
 
 ## 🔗 関連ドキュメント
 
-- **`THEME_RULES.md`**: 詳細なルールと使用方法
+- **`THEME_RULES.md`**: 詳細なルールと使用方法（直書き色禁止・3状態テーマ・FOUC対策の記載あり）
 - **`app/globals.css`**: デザイントークンの定義
 - **`tailwind.config.ts`**: Tailwind設定
 
@@ -330,4 +330,6 @@ npm run lint
 
 **実装日**: 2025-01-05  
 **優先度**: B（再発防止ルール）
+
+**追記**: 優先度C（FOUC対策・3状態テーマ）の仕様は `THEME_RULES.md` の「テーマモード（3状態）とFOUC対策」を参照。
 

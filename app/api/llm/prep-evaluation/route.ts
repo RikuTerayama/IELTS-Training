@@ -8,11 +8,6 @@ import { buildPrepEvaluationPrompt } from '@/lib/llm/prompts/prep_evaluation';
 import { callLLM } from '@/lib/llm/client';
 import { parseLLMResponseWithRetry } from '@/lib/llm/parse';
 import { successResponse, errorResponse } from '@/lib/api/response';
-import {
-  consumeOrThrow429,
-  isUsageRateLimitError,
-  toUsageRateLimitResponse,
-} from '@/lib/server/usageLimit';
 
 interface PrepEvaluationResponse {
   schema_version: string;
@@ -65,15 +60,6 @@ export async function POST(request: Request): Promise<Response> {
     const taskType = task_type || 'Task 2';
 
     console.log('[PREP Evaluation API] Calling LLM to evaluate structure...', { taskType });
-    await consumeOrThrow429({
-      supabase,
-      userId: user.id,
-      scope: 'writing',
-      writingDelta: 1,
-      speakingDelta: 0,
-      llmUsed: true,
-      upgradeUrl: process.env.UPGRADE_URL ?? '/#pricing',
-    });
     const prompt = buildPrepEvaluationPrompt(task_question, taskType, prep_answers, level);
     
     let evaluationData: PrepEvaluationResponse;
@@ -101,10 +87,6 @@ export async function POST(request: Request): Promise<Response> {
       successResponse(evaluationData)
     );
   } catch (error) {
-    if (isUsageRateLimitError(error)) {
-      const rateLimitResponse = toUsageRateLimitResponse(error);
-      if (rateLimitResponse) return rateLimitResponse;
-    }
     console.error('[PREP Evaluation API] Unexpected error:', error);
     return Response.json(
       errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'An unexpected error occurred'),

@@ -7,31 +7,14 @@
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
     "lint": "npm run lint:theme && next lint",
-    "lint:theme": "node scripts/lint-theme-colors.mjs",
-    "seed:lexicon": "tsx scripts/seed-lexicon.ts",
-    "seed:lexicon:v2": "tsx scripts/seed-lexicon-v2.ts",
-    "seed:lexicon:reading": "tsx scripts/seed-lexicon-reading.ts",
-    "seed:lexicon:listening": "tsx scripts/seed-lexicon-listening.ts",
-    "seed:idiom": "tsx scripts/seed-idiom.ts",
-    "seed:idiom:listening": "tsx scripts/seed-idiom-listening.ts",
-    "seed:idiom:reading": "tsx scripts/seed-idiom-reading.ts",
-    "seed:vocab": "tsx scripts/seed-vocab.ts",
-    "seed:vocab:reading": "tsx scripts/seed-vocab-reading.ts",
-    "seed:vocab:listening": "tsx scripts/seed-vocab-listening.ts",
-    "seed:vocab:all": "tsx scripts/seed-vocab.ts && tsx scripts/seed-vocab-reading.ts && tsx scripts/seed-vocab-listening.ts",
-    "seed:public-input": "npm run seed:vocab:all && npm run seed:idiom && npm run seed:idiom:listening && npm run seed:idiom:reading && npm run seed:lexicon && npm run seed:lexicon:listening && npm run seed:lexicon:reading",
-    "check:public-input": "tsx scripts/check-public-input.ts"
+    "lint:theme": "node scripts/lint-theme-colors.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.39.0",
-    "clsx": "^2.1.1",
-    "framer-motion": "^12.29.2",
     "next": "14.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "stripe": "^16.12.0",
-    "tailwind-merge": "^3.4.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -43,7 +26,7 @@
     "eslint-config-next": "14.1.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
-    "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
 }
+
