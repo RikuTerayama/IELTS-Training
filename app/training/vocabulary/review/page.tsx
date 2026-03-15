@@ -74,7 +74,7 @@ export default function VocabularyReviewPage() {
 
   if (loading) {
     return (
-      <Layout>
+      <Layout variant="public">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">読み込み中...</div>
         </div>
@@ -84,13 +84,13 @@ export default function VocabularyReviewPage() {
 
   if (incorrectQuestions.length === 0) {
     return (
-      <Layout>
+      <Layout variant="public">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <h1 className="text-2xl font-bold mb-6">復習 - 間違えた問題</h1>
           <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
             <p className="text-gray-600 mb-4">間違えた問題がまだありません。</p>
             <button
-              onClick={() => router.push('/training/vocabulary')}
+              onClick={() => router.push('/vocab')}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               単語練習を開始
@@ -115,7 +115,7 @@ export default function VocabularyReviewPage() {
     : null;
 
   return (
-    <Layout>
+    <Layout variant="public">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-2xl font-bold mb-6">復習 - 間違えた問題</h1>
         <div className="mb-4 text-sm text-gray-600">
@@ -218,4 +218,3 @@ export default function VocabularyReviewPage() {
     </Layout>
   );
 }
-

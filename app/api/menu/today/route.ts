@@ -119,7 +119,7 @@ export async function GET(): Promise<Response> {
           : "単語の意味を覚えましょう",
         cta: {
           label: "開始",
-          href: "/training/vocab",
+          href: "/vocab",
         },
       },
       {

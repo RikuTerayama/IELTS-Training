@@ -7,7 +7,7 @@ import { cn, cardTitle, cardDesc } from '@/lib/ui/theme';
 
 export default function VocabPage() {
   return (
-    <Layout>
+    <Layout variant="public">
       <Suspense
         fallback={
           <div className="container mx-auto px-4 py-8">

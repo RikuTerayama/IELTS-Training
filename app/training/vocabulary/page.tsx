@@ -7,7 +7,7 @@ export default function VocabularyPage() {
   const router = useRouter();
 
   return (
-    <Layout>
+    <Layout variant="public">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-2xl font-bold mb-6">単語練習</h1>
         <p className="text-gray-600 mb-8">
@@ -25,4 +25,3 @@ export default function VocabularyPage() {
     </Layout>
   );
 }
-
