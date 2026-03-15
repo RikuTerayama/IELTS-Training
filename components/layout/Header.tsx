@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { APP_NAV } from '@/lib/config/nav';
 
 export function Header() {
   const [user, setUser] = useState<any>(null);
@@ -38,23 +39,27 @@ export function Header() {
             </Link>
             {/* デスクトップナビゲーション */}
             <nav className="hidden md:flex gap-4">
-              <Link href="/home" className="text-text-muted hover:text-text transition-colors duration-200">
-                Home
-              </Link>
-              <Link href="/progress" className="text-text-muted hover:text-text transition-colors duration-200">
-                Progress
-              </Link>
-              <Link href="/vocab" className="text-text-muted hover:text-text transition-colors duration-200">
-                Vocab
-              </Link>
-              <Link 
-                href="https://ieltsconsult.netlify.app/" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-text-muted hover:text-text transition-colors duration-200"
-              >
-                Blog
-              </Link>
+              {APP_NAV.map(({ href, label, external }) =>
+                external ? (
+                  <Link
+                    key={href}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-text-muted hover:text-text transition-colors duration-200"
+                  >
+                    {label}
+                  </Link>
+                ) : (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="text-text-muted hover:text-text transition-colors duration-200"
+                  >
+                    {label}
+                  </Link>
+                )
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-4">
@@ -66,10 +71,10 @@ export function Header() {
             <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <>
-                  <span className="text-sm text-slate-400">{user.email}</span>
+                  <span className="text-sm text-text-muted">{user.email}</span>
                   <button
                     onClick={handleLogout}
-                    className="rounded bg-slate-700/50 px-3 py-1 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+                    className="rounded bg-surface-2 border border-border px-3 py-1 text-sm text-text hover:bg-surface transition-colors duration-200"
                   >
                     Logout
                   </button>
@@ -77,7 +82,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-500 transition-colors"
+                  className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground hover:bg-primary-hover transition-colors duration-200"
                 >
                   Login
                 </Link>
@@ -114,36 +119,29 @@ export function Header() {
         {menuOpen && (
           <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4">
             <div className="flex flex-col gap-3">
-              <Link
-                href="/home"
-                onClick={() => setMenuOpen(false)}
-                className="text-text-muted hover:text-text py-2 transition-colors duration-200"
-              >
-                Home
-              </Link>
-              <Link
-                href="/progress"
-                onClick={() => setMenuOpen(false)}
-                className="text-text-muted hover:text-text py-2 transition-colors duration-200"
-              >
-                Progress
-              </Link>
-              <Link
-                href="/vocab"
-                onClick={() => setMenuOpen(false)}
-                className="text-text-muted hover:text-text py-2 transition-colors duration-200"
-              >
-                Vocab
-              </Link>
-              <Link
-                href="https://ieltsconsult.netlify.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMenuOpen(false)}
-                className="text-text-muted hover:text-text py-2 transition-colors duration-200"
-              >
-                Blog
-              </Link>
+              {APP_NAV.map(({ href, label, external }) =>
+                external ? (
+                  <Link
+                    key={href}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-text-muted hover:text-text py-2 transition-colors duration-200"
+                  >
+                    {label}
+                  </Link>
+                ) : (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    className="text-text-muted hover:text-text py-2 transition-colors duration-200"
+                  >
+                    {label}
+                  </Link>
+                )
+              )}
               {user ? (
                 <>
                   <div className="pt-2 border-t border-border mt-2">

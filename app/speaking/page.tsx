@@ -32,7 +32,7 @@ const SPEAKING_FAQ = [
 
 export default function SpeakingPage() {
   return (
-    <Layout>
+    <Layout variant="public">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         {/* Hero */}
         <section className="mb-16 text-center">
@@ -49,6 +49,9 @@ export default function SpeakingPage() {
             <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
               View pricing
             </Link>
+            <Link href="/login" className="text-sm font-medium text-primary hover:underline">
+              Log in to dashboard
+            </Link>
           </div>
         </section>
 
@@ -64,7 +67,7 @@ export default function SpeakingPage() {
                 Personal questions about familiar topics. Short answers to warm up.
               </p>
             </div>
-            <div className={cn('p-6 rounded-2xl', cardBase, 'border-indigo-200')}>
+            <div className={cn('p-6 rounded-2xl', cardBase, 'border-primary/30')}>
               <h3 className="font-semibold text-text">Part 2 — Cue Card</h3>
               <p className="mt-2 text-sm text-text-muted">
                 1–2 minute long turn. You get a cue card with a topic and points to cover. Plan and speak.
@@ -86,7 +89,7 @@ export default function SpeakingPage() {
           </h2>
           <ol className="grid gap-4 md:grid-cols-3">
             <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 1
               </span>
               <h3 className="mt-3 font-semibold text-text">Choose topic & part</h3>
@@ -95,7 +98,7 @@ export default function SpeakingPage() {
               </p>
             </li>
             <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 2
               </span>
               <h3 className="mt-3 font-semibold text-text">Answer the question</h3>
@@ -104,7 +107,7 @@ export default function SpeakingPage() {
               </p>
             </li>
             <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 3
               </span>
               <h3 className="mt-3 font-semibold text-text">Get feedback</h3>
@@ -113,6 +116,24 @@ export default function SpeakingPage() {
               </p>
             </li>
           </ol>
+        </section>
+
+        {/* Related hubs */}
+        <section className="mb-16" aria-labelledby="related-heading">
+          <h2 id="related-heading" className="mb-6 text-xl font-bold text-text">
+            Related
+          </h2>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/reading" className={cn('inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-surface-2 text-text font-medium hover:bg-surface hover:border-primary/50 transition-colors')}>
+              Reading hub
+            </Link>
+            <Link href="/writing" className={cn('inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-surface-2 text-text font-medium hover:bg-surface hover:border-primary/50 transition-colors')}>
+              Writing hub
+            </Link>
+            <Link href="/vocab" className={cn('inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-surface-2 text-text font-medium hover:bg-surface hover:border-primary/50 transition-colors')}>
+              Vocab
+            </Link>
+          </div>
         </section>
 
         {/* Topics */}
@@ -127,12 +148,12 @@ export default function SpeakingPage() {
                 href={`/speaking/topics/${t.slug}`}
                 className={cn(
                   'p-6 rounded-2xl border border-border bg-surface text-left transition-all',
-                  'hover:shadow-md hover:border-indigo-200 hover:-translate-y-0.5',
+                  'hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5',
                   cardBase
                 )}
               >
                 <h3 className="font-semibold text-text">{t.label}</h3>
-                <p className="mt-2 text-sm text-indigo-600">View topic →</p>
+                <p className="mt-2 text-sm text-primary">View topic →</p>
               </Link>
             ))}
           </div>

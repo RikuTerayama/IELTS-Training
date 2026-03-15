@@ -83,11 +83,11 @@ export async function middleware(request: NextRequest) {
   console.log('[Middleware] Cookies:', cookieNames);
   console.log('[Middleware] Has auth cookies:', cookieNames.some(name => name.includes('auth-token')));
 
-  // AC-4: /vocab は恒久リダイレクトで /training/vocab へ（308）。?skill= ありなら維持、無ければクエリ無し
-  if (request.nextUrl.pathname === '/vocab') {
-    const skill = request.nextUrl.searchParams.get('skill');
-    const path = (skill === 'writing' || skill === 'speaking') ? `/training/vocab?skill=${skill}` : '/training/vocab';
-    return NextResponse.redirect(new URL(path, request.url), 308);
+  // Canonical public entry: /vocab. Legacy /training/vocab → /vocab (308), preserve query
+  if (request.nextUrl.pathname === '/training/vocab') {
+    const to = new URL('/vocab', request.url);
+    request.nextUrl.searchParams.forEach((v, k) => to.searchParams.set(k, v));
+    return NextResponse.redirect(to, 308);
   }
 
   // W2-FR-2: /training/writing/task2 は廃止。308 で /task/select?task_type=Task%202 へ
@@ -95,9 +95,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/task/select?task_type=Task%202', request.url), 308);
   }
 
-  // 認証が必要なパス（/vocab は廃止のためリストから削除）
-  const protectedPaths = ['/home', '/task', '/feedback', '/progress', '/rewrite', '/speak', '/fillin', '/exam', '/speaking', '/pro', '/admin'];
-  const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
+  // Auth boundary: protected paths (public /speaking and /speaking/topics/* are NOT protected)
+  const pathname = request.nextUrl.pathname;
+  const pathProtected =
+    pathname.startsWith('/home') ||
+    pathname.startsWith('/task') ||
+    pathname.startsWith('/feedback') ||
+    pathname.startsWith('/progress') ||
+    pathname.startsWith('/rewrite') ||
+    pathname.startsWith('/speak') ||
+    pathname.startsWith('/fillin') ||
+    pathname.startsWith('/exam') ||
+    pathname.startsWith('/speaking/feedback') ||
+    pathname.startsWith('/pro') ||
+    pathname.startsWith('/admin');
+  const isProtectedPath = pathProtected;
   
   // ログインページは認証済みならリダイレクト
   if (request.nextUrl.pathname === '/login' && user) {
@@ -136,10 +148,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 保護されたパスで未認証の場合はログインページへ
+  // 保護されたパスで未認証の場合はログインページへ（return-path を保持）
   if (isProtectedPath && !user) {
-    console.log('[Middleware] Redirecting unauthenticated user to /login');
-    return NextResponse.redirect(new URL('/login', request.url));
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('next', pathname + request.nextUrl.search);
+    console.log('[Middleware] Redirecting unauthenticated user to /login with next=', loginUrl.searchParams.get('next'));
+    return NextResponse.redirect(loginUrl);
   }
 
   // 保護されたパスで認証済みの場合、目的ヒアリング完了状況を確認

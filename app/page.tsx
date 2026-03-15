@@ -106,13 +106,6 @@ const Icons = {
 };
 
 export default function LandingPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [signUpSuccess, setSignUpSuccess] = useState(false);
-  const [resendingEmail, setResendingEmail] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -133,115 +126,6 @@ export default function LandingPage() {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    try {
-      if (isSignUp) {
-        const redirectUrl = typeof window !== 'undefined' 
-          ? `${window.location.origin}/home`
-          : '/home';
-        
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: redirectUrl,
-          },
-        });
-
-        if (signUpError) throw signUpError;
-
-        if (data.user && !data.session) {
-          setSignUpSuccess(true);
-          setLoading(false);
-          return;
-        }
-
-        if (data.session) {
-          setLoading(false);
-          await new Promise(resolve => setTimeout(resolve, 300));
-          window.location.href = '/onboarding';
-          return;
-        }
-      } else {
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) throw signInError;
-
-        if (!signInData.session) {
-          throw new Error('ログインに失敗しました。セッションが作成されませんでした。');
-        }
-
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        if (!currentSession) {
-          throw new Error('ログインに失敗しました。セッションが保存されませんでした。');
-        }
-        
-        setLoading(false);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('id', signInData.user.id)
-          .single();
-
-        if (profile && !profile.onboarding_completed) {
-          window.location.href = '/onboarding';
-        } else {
-          window.location.href = '/home';
-        }
-        return;
-      }
-    } catch (err) {
-      let errorMessage = 'An error occurred';
-      if (err instanceof Error) {
-        errorMessage = err.message;
-        if (err.message.includes('Invalid login credentials')) {
-          errorMessage = 'メールアドレスまたはパスワードが正しくありません。';
-        } else if (err.message.includes('Email not confirmed')) {
-          errorMessage = 'メールアドレスが確認されていません。確認メールを確認してください。';
-        } else if (err.message.includes('User not found')) {
-          errorMessage = 'ユーザーが見つかりません。サインアップしてください。';
-        }
-      }
-      setError(errorMessage);
-      setLoading(false);
-    }
-  };
-
-  const handleResendConfirmation = async () => {
-    setResendingEmail(true);
-    setError(null);
-    try {
-      const redirectUrl = typeof window !== 'undefined' 
-        ? `${window.location.origin}/home`
-        : '/home';
-      
-      const { error: resendError } = await supabase.auth.resend({
-        type: 'signup',
-        email,
-        options: {
-          emailRedirectTo: redirectUrl,
-        },
-      });
-
-      if (resendError) throw resendError;
-      setError(null);
-      alert('確認メールを再送信しました。メールボックス（スパムフォルダも含む）を確認してください。');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'メールの再送信に失敗しました');
-    } finally {
-      setResendingEmail(false);
     }
   };
 
@@ -269,28 +153,33 @@ export default function LandingPage() {
           </Link>
           <nav className="flex items-center gap-4">
             <ThemeToggle />
+            <Link href="/reading" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
+              Reading
+            </Link>
+            <Link href="/writing" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
+              Writing
+            </Link>
+            <Link href="/speaking" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
+              Speaking
+            </Link>
+            <Link href="/vocab" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
+              Vocab
+            </Link>
+            <Link href="/pricing" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
+              Pricing
+            </Link>
             <button
               type="button"
               onClick={() => scrollToSection('contact')}
-              className="text-sm font-medium text-text-muted hover:text-indigo-600 transition-colors"
+              className="text-sm font-medium text-text-muted hover:text-primary transition-colors"
             >
               Contact
             </button>
-            <Link 
-              href={BLOG_OFFICIAL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-text-muted hover:text-indigo-600 transition-colors"
+            <Link
+              href="/login"
+              className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
             >
-              Blog
-            </Link>
-            <Link 
-              href={BLOG_NOTE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-text-muted hover:text-indigo-600 transition-colors"
-            >
-              Note
+              Login
             </Link>
           </nav>
         </div>
@@ -356,97 +245,70 @@ export default function LandingPage() {
               </FadeIn>
             </div>
 
-            {/* 右側: フォーム */}
+            {/* 右側: メインアクション（Writing, Speaking, Vocab, Pricing, Login） */}
             <FadeIn delay={0.5} className="lg:col-span-5 w-full max-w-md mx-auto">
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative bg-surface/80 backdrop-blur-xl rounded-2xl shadow-xl ring-1 ring-border p-8">
-                  
-                  <div className="mb-6">
-                    <h2 className="text-xl font-bold text-text">
-                      {isSignUp ? '無料で始める' : 'おかえりなさい'}
-                    </h2>
-                    <p className="text-sm text-text-muted mt-1">
-                      {isSignUp ? 'クレジットカードは不要です' : 'アカウントにアクセス'}
-                    </p>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider">Email</label>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        autoComplete="username"
-                        required
-                        placeholder="hello@example.com"
-                        className="w-full px-4 py-3 rounded-lg border border-border bg-surface text-text placeholder:text-placeholder focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider">Password</label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoComplete="current-password"
-                        required
-                        placeholder="••••••••"
-                        className="w-full px-4 py-3 rounded-lg border border-border bg-surface text-text placeholder:text-placeholder focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
-                      />
-                    </div>
-
-                    {error && (
-                      <div className="p-3 rounded-lg bg-red-50 text-xs text-red-600 flex items-start gap-2 animate-fadeIn">
-                        <Icons.Alert className="w-4 h-4 shrink-0 mt-0.5" />
-                        {error}
-                      </div>
-                    )}
-
-                    {signUpSuccess && (
-                      <div className="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 text-sm text-indigo-900 dark:text-indigo-100">
-                        <p className="font-bold mb-1">メールを確認してください</p>
-                        <p className="opacity-80 text-xs mb-2">確認メールを送信しました。リンクをクリックして完了してください。</p>
-                        <button
-                          type="button"
-                          onClick={handleResendConfirmation}
-                          disabled={resendingEmail}
-                          className="text-xs font-semibold underline hover:text-indigo-700"
-                        >
-                          {resendingEmail ? '送信中...' : 'メールが届かない場合'}
-                        </button>
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={loading || signUpSuccess}
-                      className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg shadow-indigo-500/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 group-hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                      {loading ? (
-                        <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          {isSignUp ? 'アカウント作成' : 'ログイン'}
-                          <Icons.ArrowRight className="w-4 h-4 opacity-80" />
-                        </>
-                      )}
-                    </button>
-                  </form>
-
-                  <div className="mt-6 text-center">
-                    <button
-                      onClick={() => {
-                        setIsSignUp(!isSignUp);
-                        setError(null);
-                        setSignUpSuccess(false);
-                      }}
-                      className="text-sm text-text-muted hover:text-indigo-600 transition-colors font-medium"
-                    >
-                      {isSignUp ? 'すでにアカウントをお持ちですか？ ログイン' : 'アカウントをお持ちでないですか？ 新規登録'}
-                    </button>
-                  </div>
+              <div className="relative bg-surface/80 backdrop-blur-xl rounded-2xl shadow-theme-lg ring-1 ring-border p-8">
+                <h2 className="text-xl font-bold text-text mb-2">始める</h2>
+                <p className="text-sm text-text-muted mb-6">
+                  Reading・Writing・Speaking・語彙の練習と料金はこちらから。
+                </p>
+                <div className="flex flex-col gap-3">
+                  <Link
+                    href="/reading"
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface-2 px-4 py-3 text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icons.Book className="w-5 h-5 text-primary" />
+                      Reading
+                    </span>
+                    <Icons.ArrowRight className="w-4 h-4 text-text-muted" />
+                  </Link>
+                  <Link
+                    href="/writing"
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface-2 px-4 py-3 text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icons.Pencil className="w-5 h-5 text-primary" />
+                      Writing
+                    </span>
+                    <Icons.ArrowRight className="w-4 h-4 text-text-muted" />
+                  </Link>
+                  <Link
+                    href="/speaking"
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface-2 px-4 py-3 text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icons.Mic className="w-5 h-5 text-primary" />
+                      Speaking
+                    </span>
+                    <Icons.ArrowRight className="w-4 h-4 text-text-muted" />
+                  </Link>
+                  <Link
+                    href="/vocab"
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface-2 px-4 py-3 text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icons.Book className="w-5 h-5 text-primary" />
+                      Vocab
+                    </span>
+                    <Icons.ArrowRight className="w-4 h-4 text-text-muted" />
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface-2 px-4 py-3 text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icons.Target className="w-5 h-5 text-primary" />
+                      Pricing
+                    </span>
+                    <Icons.ArrowRight className="w-4 h-4 text-text-muted" />
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="mt-2 w-full py-3.5 px-4 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold rounded-lg transition-colors text-center"
+                  >
+                    Login
+                  </Link>
                 </div>
               </div>
             </FadeIn>
@@ -572,22 +434,29 @@ export default function LandingPage() {
                 学習リソース・記事
               </h2>
               <p className="text-text-muted text-lg">
-                Speaking / Writing のトピック解説や対策記事はこちらから
+                Reading / Speaking / Writing のトピック解説や対策記事はこちらから
               </p>
             </FadeIn>
             <FadeIn delay={0.1} className="flex flex-wrap justify-center gap-4 md:gap-6">
               <Link
-                href="/speaking"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors"
+                href="/reading"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
               >
-                <Icons.Mic className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <Icons.Book className="w-5 h-5 text-primary" />
+                Reading ハブ
+              </Link>
+              <Link
+                href="/speaking"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
+              >
+                <Icons.Mic className="w-5 h-5 text-primary" />
                 Speaking ハブ
               </Link>
               <Link
                 href="/writing"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
               >
-                <Icons.Pencil className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <Icons.Pencil className="w-5 h-5 text-primary" />
                 Writing ハブ
               </Link>
               <Link
