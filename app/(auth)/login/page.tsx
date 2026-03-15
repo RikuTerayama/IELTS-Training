@@ -1,10 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
+/** Returns a safe redirect path: same-origin path starting with /, or null */
+function getSafeNext(nextParam: string | null): string | null {
+  if (!nextParam || typeof nextParam !== 'string') return null;
+  const decoded = decodeURIComponent(nextParam).trim();
+  if (!decoded.startsWith('/') || decoded.startsWith('//')) return null;
+  return decoded;
+}
+
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const nextParam = getSafeNext(searchParams.get('next'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -153,13 +163,14 @@ export default function LoginPage() {
           .single();
 
         console.log('Profile onboarding status:', profile?.onboarding_completed);
-        
-        // 目的ヒアリング未完了の場合は目的ヒアリングページへ
-        if (profile && !profile.onboarding_completed) {
-          console.log('Redirecting to /onboarding...');
+
+        // Return-path: redirect to ?next= if valid and onboarding completed; else onboarding or /home
+        const toOnboarding = profile && !profile.onboarding_completed;
+        if (toOnboarding) {
           window.location.href = '/onboarding';
+        } else if (nextParam) {
+          window.location.href = nextParam;
         } else {
-          console.log('Redirecting to /home...');
           window.location.href = '/home';
         }
         

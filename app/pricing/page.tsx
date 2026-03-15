@@ -131,7 +131,7 @@ export default function PricingPage() {
   };
 
   return (
-    <Layout>
+    <Layout variant="public">
       <FaqJsonLd />
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="mb-2 text-2xl font-bold text-text">料金</h1>
