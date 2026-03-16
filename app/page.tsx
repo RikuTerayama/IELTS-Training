@@ -841,7 +841,7 @@ export default function LandingPage() {
           
           <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-text-subtle">
-              郢晢ｽｻ郢ｧ謇假ｽｽ・ｽ繝ｻ・ｩ {new Date().getFullYear()} Meridian. All rights reserved.
+              © {new Date().getFullYear()} Meridian. All rights reserved.
             </p>
             <div className="flex gap-6 text-xs text-text-subtle">
               <button onClick={() => setShowPrivacyPolicy(true)} className="hover:text-text transition-colors text-text-muted">
