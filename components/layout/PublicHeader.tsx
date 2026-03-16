@@ -49,7 +49,7 @@ export function PublicHeader() {
                 type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 text-text-muted hover:text-text transition-colors duration-200"
-                aria-label="メニューを開く"
+                aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               >
                 <svg
                   className="h-6 w-6"

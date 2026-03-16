@@ -43,7 +43,7 @@ const SAMPLE_QUESTIONS: Record<Slug, { part1: string; part2: string; part3: stri
 
 const QUICK_TIPS = [
   'Use topic-specific vocabulary to show range.',
-  'Structure answers with a short intro, 1–2 main points, and a brief conclusion.',
+  'Structure answers with a short intro, 1-2 main points, and a brief conclusion.',
   'Give concrete examples from your experience where relevant.',
   'In Part 2, use the cue card points to plan your talk before speaking.',
   'Keep answers clear and relevant; avoid going off-topic.',
@@ -53,7 +53,7 @@ const SPEAKING_TOPIC_FAQ = [
   {
     question: 'How do I practice Part 2 cue cards for this topic?',
     answer:
-      'Spend 1 minute planning 2–3 ideas, then speak for 1–2 minutes with examples.',
+      'Spend 1 minute planning 2-3 ideas, then speak for 1-2 minutes with examples.',
   },
   {
     question: 'Do I need a microphone?',
@@ -103,13 +103,12 @@ export default async function SpeakingTopicPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        {/* Hero */}
         <section className="mb-12 text-center">
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
             IELTS Speaking Topic: {topic.title}
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-text-muted">
-            Practice Part 1–3 questions and cue cards for &quot;{topic.title}&quot; with AI feedback.
+            Practice Part 1-3 questions and cue cards for &quot;{topic.title}&quot; with AI feedback.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
@@ -124,7 +123,6 @@ export default async function SpeakingTopicPage({ params }: Props) {
           </div>
         </section>
 
-        {/* Part guide */}
         <section className="mb-12" aria-labelledby="part-guide-heading">
           <h2 id="part-guide-heading" className="mb-6 text-xl font-bold text-text">
             Part guide
@@ -133,13 +131,13 @@ export default async function SpeakingTopicPage({ params }: Props) {
             <div className={cn('p-6 rounded-2xl', cardBase)}>
               <h3 className="font-semibold text-text">Part 1</h3>
               <p className="mt-2 text-sm text-text-muted">
-                Short personal questions about {topic.title.toLowerCase()}. Warm up with 2–3 sentence answers.
+                Short personal questions about {topic.title.toLowerCase()}. Warm up with 2-3 sentence answers.
               </p>
             </div>
             <div className={cn('p-6 rounded-2xl', cardBase, 'border-indigo-200')}>
-              <h3 className="font-semibold text-text">Part 2 — Cue Card</h3>
+              <h3 className="font-semibold text-text">Part 2 - Cue Card</h3>
               <p className="mt-2 text-sm text-text-muted">
-                1–2 minute talk on a {topic.title.toLowerCase()}-related topic. Use the cue card points to plan.
+                A 1-2 minute talk on a {topic.title.toLowerCase()}-related topic. Use the cue card points to plan.
               </p>
             </div>
             <div className={cn('p-6 rounded-2xl', cardBase)}>
@@ -151,7 +149,6 @@ export default async function SpeakingTopicPage({ params }: Props) {
           </div>
         </section>
 
-        {/* Sample questions */}
         <section className="mb-12" aria-labelledby="samples-heading">
           <h2 id="samples-heading" className="mb-6 text-xl font-bold text-text">
             Sample questions
@@ -172,7 +169,6 @@ export default async function SpeakingTopicPage({ params }: Props) {
           </ul>
         </section>
 
-        {/* Quick tips */}
         <section className="mb-12" aria-labelledby="tips-heading">
           <h2 id="tips-heading" className="mb-6 text-xl font-bold text-text">
             Quick tips
@@ -184,14 +180,12 @@ export default async function SpeakingTopicPage({ params }: Props) {
           </ul>
         </section>
 
-        {/* Bottom CTA */}
         <section className="border-t border-border pt-8 text-center">
           <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
             Practice this topic in Exam Mode
           </Link>
         </section>
 
-        {/* FAQ */}
         <section className="mt-12 border-t border-border pt-8" aria-labelledby="faq-heading">
           <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
             FAQ

@@ -30,17 +30,20 @@ const SPEAKING_FAQ = [
   },
 ];
 
+function buildLoginUrl(next: string): string {
+  return `/login?next=${encodeURIComponent(next)}`;
+}
+
 export default function SpeakingPage() {
   return (
     <Layout variant="public">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        {/* Hero */}
         <section className="mb-16 text-center">
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
             IELTS Speaking Practice
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-text-muted">
-            AI interviewer for Part 1–3 with cue cards and instant feedback.
+            AI interviewer for Parts 1-3, with cue cards and instant feedback.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
@@ -49,13 +52,12 @@ export default function SpeakingPage() {
             <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
               View pricing
             </Link>
-            <Link href="/login" className="text-sm font-medium text-primary hover:underline">
+            <Link href={buildLoginUrl('/home')} className="text-sm font-medium text-primary hover:underline">
               Log in to dashboard
             </Link>
           </div>
         </section>
 
-        {/* What you can practice */}
         <section className="mb-16" aria-labelledby="practice-heading">
           <h2 id="practice-heading" className="mb-6 text-xl font-bold text-text">
             What you can practice
@@ -68,9 +70,9 @@ export default function SpeakingPage() {
               </p>
             </div>
             <div className={cn('p-6 rounded-2xl', cardBase, 'border-primary/30')}>
-              <h3 className="font-semibold text-text">Part 2 — Cue Card</h3>
+              <h3 className="font-semibold text-text">Part 2 - Cue Card</h3>
               <p className="mt-2 text-sm text-text-muted">
-                1–2 minute long turn. You get a cue card with a topic and points to cover. Plan and speak.
+                A 1-2 minute long turn. You get a cue card with a topic and points to cover. Plan and speak.
               </p>
             </div>
             <div className={cn('p-6 rounded-2xl', cardBase)}>
@@ -82,7 +84,6 @@ export default function SpeakingPage() {
           </div>
         </section>
 
-        {/* How it works */}
         <section className="mb-16" aria-labelledby="how-heading">
           <h2 id="how-heading" className="mb-6 text-xl font-bold text-text">
             How it works
@@ -103,7 +104,7 @@ export default function SpeakingPage() {
               </span>
               <h3 className="mt-3 font-semibold text-text">Answer the question</h3>
               <p className="mt-2 text-sm text-text-muted">
-                Type your answer (current beta). For Part 2, you’ll see a cue card with points to cover.
+                Type your answer (current beta). For Part 2, you will see a cue card with points to cover.
               </p>
             </li>
             <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
@@ -118,7 +119,6 @@ export default function SpeakingPage() {
           </ol>
         </section>
 
-        {/* Related hubs */}
         <section className="mb-16" aria-labelledby="related-heading">
           <h2 id="related-heading" className="mb-6 text-xl font-bold text-text">
             Related
@@ -136,7 +136,6 @@ export default function SpeakingPage() {
           </div>
         </section>
 
-        {/* Topics */}
         <section className="mb-16" aria-labelledby="topics-heading">
           <h2 id="topics-heading" className="mb-6 text-xl font-bold text-text">
             Topics
@@ -159,7 +158,6 @@ export default function SpeakingPage() {
           </div>
         </section>
 
-        {/* FAQ */}
         <section className="border-t border-border pt-12" aria-labelledby="faq-heading">
           <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
             FAQ

@@ -45,13 +45,12 @@ export default function ReadingPage() {
   return (
     <Layout variant="public">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        {/* Hero */}
         <section className="mb-16 text-center">
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
             IELTS Reading Practice
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-text-muted">
-            Build Academic Reading vocabulary and question-type skills. Full passage practice coming next.
+            Build Academic Reading vocabulary and question-type skills. Full passage practice is coming next.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
@@ -72,7 +71,6 @@ export default function ReadingPage() {
           </div>
         </section>
 
-        {/* What you can practice */}
         <section className="mb-16" aria-labelledby="practice-heading">
           <h2 id="practice-heading" className="mb-6 text-xl font-bold text-text">
             What you can practice
@@ -90,7 +88,6 @@ export default function ReadingPage() {
           </p>
         </section>
 
-        {/* How it works */}
         <section className="mb-16" aria-labelledby="how-heading">
           <h2 id="how-heading" className="mb-6 text-xl font-bold text-text">
             How it works
@@ -118,7 +115,7 @@ export default function ReadingPage() {
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 3
               </span>
-              <h3 className="mt-3 font-semibold text-text">Full passages — coming next</h3>
+              <h3 className="mt-3 font-semibold text-text">Full passages coming next</h3>
               <p className="mt-2 text-sm text-text-muted">
                 Full Academic Reading passages with timed practice and band-style feedback are in development.
               </p>
@@ -126,7 +123,6 @@ export default function ReadingPage() {
           </ol>
         </section>
 
-        {/* Related: Vocab + other hubs */}
         <section className="mb-16" aria-labelledby="related-heading">
           <h2 id="related-heading" className="mb-6 text-xl font-bold text-text">
             Related
@@ -139,7 +135,7 @@ export default function ReadingPage() {
                 'hover:bg-primary/20 hover:border-primary/70 transition-colors'
               )}
             >
-              Vocab → Reading
+              Reading vocab
             </Link>
             {HUB_LINKS.map(({ href, label }) => (
               <Link
@@ -156,7 +152,6 @@ export default function ReadingPage() {
           </div>
         </section>
 
-        {/* FAQ */}
         <section className="border-t border-border pt-12" aria-labelledby="faq-heading">
           <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
             FAQ
