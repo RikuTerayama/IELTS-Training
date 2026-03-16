@@ -2,6 +2,11 @@
  * Lexicon API クライアント
  */
 
+import {
+  getUserFacingSubmissionError,
+  isUnauthorizedApiResponse,
+  redirectToLoginWithNext,
+} from './clientError';
 import type { ApiResponse } from './response';
 
 export interface LexiconSetsResponse {
@@ -119,5 +124,33 @@ export async function submitLexiconAnswer(
       time_ms,
     }),
   });
-  return response.json();
+  const body = (await response.json().catch(() => null)) as ApiResponse<LexiconSubmitResponse> | null;
+
+  if (isUnauthorizedApiResponse(response, body)) {
+    redirectToLoginWithNext();
+    return {
+      ok: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'ログインが必要です。再ログイン後に続きから再開してください。',
+      },
+    };
+  }
+
+  if (!response.ok || !body?.ok) {
+    return {
+      ok: false,
+      error: {
+        code: body?.error?.code ?? 'REQUEST_FAILED',
+        message: getUserFacingSubmissionError(
+          response,
+          body,
+          '回答の送信に失敗しました。入力内容を確認して、もう一度お試しください。'
+        ),
+        details: body?.error?.details,
+      },
+    };
+  }
+
+  return body;
 }

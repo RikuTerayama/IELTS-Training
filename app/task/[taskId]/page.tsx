@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
+import {
+  getUserFacingSubmissionError,
+  isUnauthorizedApiResponse,
+  redirectToLoginWithNext,
+} from '@/lib/api/clientError';
 import type { Task, DraftContent } from '@/lib/domain/types';
 
 export default function TaskPage() {
@@ -62,41 +67,48 @@ export default function TaskPage() {
     try {
       let actualTaskId = task.id;
 
-      // taskIdが'new'の場合は、まずタスクを生成する
       if (taskId === 'new' || task.id === 'new') {
         console.log('[TaskPage] Generating new task for level:', level);
-        
+
         const generateResponse = await fetch('/api/tasks/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ level }),
         });
 
-        if (!generateResponse.ok) {
-          let errorMessage = `タスクの生成に失敗しました (HTTP ${generateResponse.status})`;
-          try {
-            const errorData = await generateResponse.json();
-            console.error('[TaskPage] Generate API error response:', errorData);
-            errorMessage = errorData.error?.message || errorData.message || errorMessage;
-          } catch (parseError) {
-            const errorText = await generateResponse.text().catch(() => '');
-            console.error('[TaskPage] Generate API error (non-JSON):', errorText);
-            errorMessage = errorText || errorMessage;
-          }
-          throw new Error(errorMessage);
+        const generateData = await generateResponse.json().catch(() => null);
+
+        if (isUnauthorizedApiResponse(generateResponse, generateData)) {
+          redirectToLoginWithNext();
+          return;
         }
 
-        const generateData = await generateResponse.json();
+        if (!generateResponse.ok) {
+          console.error('[TaskPage] Generate API error response:', generateData);
+          throw new Error(
+            getUserFacingSubmissionError(
+              generateResponse,
+              generateData,
+              'タスクの準備に失敗しました。少し時間を置いて、もう一度お試しください。'
+            )
+          );
+        }
+
         console.log('[TaskPage] Task generation response:', generateData);
 
-        if (!generateData.ok) {
-          const errorMessage = generateData.error?.message || generateData.error?.code || 'タスクの生成に失敗しました';
-          console.error('[TaskPage] Generate API returned error:', generateData.error);
-          throw new Error(errorMessage);
+        if (!generateData?.ok) {
+          console.error('[TaskPage] Generate API returned error:', generateData?.error);
+          throw new Error(
+            getUserFacingSubmissionError(
+              generateResponse,
+              generateData,
+              'タスクの準備に失敗しました。少し時間を置いて、もう一度お試しください。'
+            )
+          );
         }
 
         if (!generateData.data?.id) {
-          throw new Error('生成されたタスクにIDがありません');
+          throw new Error('提出先のタスクIDを確認できませんでした。');
         }
 
         actualTaskId = generateData.data.id;
@@ -104,11 +116,11 @@ export default function TaskPage() {
       }
 
       if (!actualTaskId || actualTaskId === 'new') {
-        throw new Error('有効なタスクIDが取得できませんでした');
+        throw new Error('提出先のタスクIDを確認できませんでした。');
       }
 
       console.log('[TaskPage] Submitting to:', `/api/tasks/${actualTaskId}/submit`);
-      
+
       const response = await fetch(`/api/tasks/${actualTaskId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -121,48 +133,53 @@ export default function TaskPage() {
         }),
       });
 
-      if (!response.ok) {
-        let errorMessage = `送信に失敗しました (HTTP ${response.status})`;
-        try {
-          const errorData = await response.json();
-          console.error('[TaskPage] Submit API error response:', JSON.stringify(errorData, null, 2));
-          if (errorData.error) {
-            errorMessage = errorData.error.message || errorData.error.code || errorMessage;
-            if (errorData.error.details) {
-              console.error('[TaskPage] Error details:', errorData.error.details);
-            }
-          } else {
-            errorMessage = errorData.message || errorMessage;
-          }
-        } catch (parseError) {
-          const errorText = await response.text().catch(() => '');
-          console.error('[TaskPage] Submit API error (non-JSON):', errorText);
-          errorMessage = errorText || errorMessage;
-        }
-        throw new Error(errorMessage);
+      const data = await response.json().catch(() => null);
+
+      if (isUnauthorizedApiResponse(response, data)) {
+        redirectToLoginWithNext();
+        return;
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        console.error('[TaskPage] Submit API error response:', JSON.stringify(data, null, 2));
+        if (data?.error?.details) {
+          console.error('[TaskPage] Error details:', data.error.details);
+        }
+
+        throw new Error(
+          getUserFacingSubmissionError(
+            response,
+            data,
+            '回答の送信に失敗しました。入力内容を確認して、もう一度お試しください。'
+          )
+        );
+      }
+
       console.log('[TaskPage] Submit response:', data);
 
-      if (data.ok) {
+      if (data?.ok) {
         if (data.data.next_step === 'fill_in') {
           router.push(`/fillin/${data.data.attempt_id}`);
         } else {
           router.push(`/feedback/${data.data.attempt_id}`);
         }
       } else {
-        const errorMessage = data.error?.message || data.error?.code || '送信に失敗しました';
-        console.error('[TaskPage] Submit API returned error:', data.error);
+        const errorMessage = getUserFacingSubmissionError(
+          response,
+          data,
+          '回答の送信に失敗しました。入力内容を確認して、もう一度お試しください。'
+        );
+        console.error('[TaskPage] Submit API returned error:', data?.error);
         alert(errorMessage);
       }
     } catch (error) {
       console.error('[TaskPage] Submit error:', error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : typeof error === 'string' 
-        ? error 
-        : 'エラーが発生しました';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : '送信中にエラーが発生しました。';
       alert(errorMessage);
     } finally {
       setSubmitting(false);

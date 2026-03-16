@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
+import {
+  getUserFacingSubmissionError,
+  isUnauthorizedApiResponse,
+  redirectToLoginWithNext,
+} from '@/lib/api/clientError';
 import type { Attempt, Feedback, RewriteTarget } from '@/lib/domain/types';
 import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
@@ -76,13 +81,12 @@ export default function RewritePage() {
 
     try {
       if (!attempt?.task_id) {
-        alert('エラー: タスクIDが見つかりません');
+        alert('提出先のタスクIDを確認できませんでした。');
         return;
       }
 
-      // すべての書き直し対象が入力されているか確認
       if (!feedback || !feedback.rewrite_targets) {
-        alert('エラー: フィードバックが見つかりません');
+        alert('再提出用のフィードバックを確認できませんでした。');
         return;
       }
 
@@ -91,12 +95,11 @@ export default function RewritePage() {
       );
 
       if (missingTargets.length > 0) {
-        alert(`すべての修正対象を入力してください（未入力: ${missingTargets.length}箇所）`);
+        alert(`未入力の修正箇所があります。残り ${missingTargets.length} 箇所を入力してください。`);
         setSubmitting(false);
         return;
       }
 
-      // 書き直し内容を送信
       const revisedContent = feedback.rewrite_targets.map((target) => ({
         target_id: target.target_id,
         revised_text: revisedTexts[target.target_id],
@@ -113,39 +116,55 @@ export default function RewritePage() {
         }),
       });
 
-      const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+      const data = await response.json().catch(() => null);
+
+      if (isUnauthorizedApiResponse(response, data)) {
+        redirectToLoginWithNext();
+        return;
+      }
 
       if (!response.ok) {
-        console.error('[RewritePage] Submit error:', errorData);
-        if (errorData.error?.code === 'RATE_LIMIT' || response.status === 429) {
+        console.error('[RewritePage] Submit error:', data);
+        if (data?.error?.code === 'RATE_LIMIT' || response.status === 429) {
           setIsRateLimit(true);
-          const details = errorData.error?.details;
+          const details = data?.error?.details;
           setUpgradeUrl(details && typeof details === 'object' && 'upgrade_url' in details && typeof (details as { upgrade_url?: string }).upgrade_url === 'string'
             ? (details as { upgrade_url: string }).upgrade_url
             : '/#pricing');
         }
-        setSubmitError(errorData.error?.message || `Failed to submit rewrite: ${response.status}`);
+        setSubmitError(
+          getUserFacingSubmissionError(
+            response,
+            data,
+            '修正版の送信に失敗しました。内容を確認して、もう一度お試しください。'
+          )
+        );
         return;
       }
 
-      const data = errorData;
       console.log('[RewritePage] Submit response:', data);
 
-      if (data.ok) {
+      if (data?.ok) {
         router.push(`/feedback/${attemptId}`);
       } else {
-        if (data.error?.code === 'RATE_LIMIT') {
+        if (data?.error?.code === 'RATE_LIMIT') {
           setIsRateLimit(true);
           const details = data.error?.details;
           setUpgradeUrl(details && typeof details === 'object' && 'upgrade_url' in details && typeof (details as { upgrade_url?: string }).upgrade_url === 'string'
             ? (details as { upgrade_url: string }).upgrade_url
             : '/#pricing');
         }
-        setSubmitError(data.error?.message || '書き直しの送信に失敗しました');
+        setSubmitError(
+          getUserFacingSubmissionError(
+            response,
+            data,
+            '修正版の送信に失敗しました。内容を確認して、もう一度お試しください。'
+          )
+        );
       }
     } catch (error) {
       console.error('[RewritePage] Submit error:', error);
-      setSubmitError(error instanceof Error ? error.message : 'Unknown error');
+      setSubmitError(error instanceof Error ? error.message : '送信中にエラーが発生しました。');
     } finally {
       setSubmitting(false);
     }

@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'Meridian',
-  description: 'Meridian | IELTS Reading / Writing / Speaking 学習アプリ',
+  description: 'Meridian | IELTS Reading / Writing / Speaking を一つの学習ループで進める学習アプリ',
   icons: {
     icon: '/branding/meridian.png',
     shortcut: '/branding/meridian.png',
@@ -31,13 +31,14 @@ export default function RootLayout({
     if (themeMode === 'light' || themeMode === 'dark') {
       resolvedTheme = themeMode;
     } else {
-      // system 縺ｾ縺溘・ 譛ｪ險ｭ螳壹・蝣ｴ蜷・      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // Follow the system preference when no explicit theme is saved
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       resolvedTheme = prefersDark ? 'dark' : 'light';
     }
     
     document.documentElement.setAttribute('data-theme', resolvedTheme);
   } catch (e) {
-    // 繧ｨ繝ｩ繝ｼ譎ゅ・繝・ヵ繧ｩ繝ｫ繝医〒dark
+    // Fallback to dark if theme resolution fails
     document.documentElement.setAttribute('data-theme', 'dark');
   }
 })();

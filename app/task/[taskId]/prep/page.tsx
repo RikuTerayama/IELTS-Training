@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { Task1Image } from '@/components/task/Task1Image';
+import {
+  getUserFacingSubmissionError,
+  isUnauthorizedApiResponse,
+  redirectToLoginWithNext,
+} from '@/lib/api/clientError';
 import { getTask1GenreName, getTask1GenreNameEnglish } from '@/lib/utils/task1Helpers';
 import type { Task } from '@/lib/domain/types';
 
@@ -184,7 +189,6 @@ export default function PrepTaskPage() {
     setError(null);
 
     try {
-      // まずタスクを生成または取得
       let actualTaskId = task.id;
       if (taskId === 'new' || task.id === 'new') {
         const generateResponse = await fetch('/api/tasks/generate', {
@@ -193,19 +197,26 @@ export default function PrepTaskPage() {
           body: JSON.stringify({ level }),
         });
 
-        if (!generateResponse.ok) {
-          throw new Error('タスクの生成に失敗しました');
+        const generateData = await generateResponse.json().catch(() => null);
+
+        if (isUnauthorizedApiResponse(generateResponse, generateData)) {
+          redirectToLoginWithNext();
+          return;
         }
 
-        const generateData = await generateResponse.json();
-        if (!generateData.ok || !generateData.data?.id) {
-          throw new Error('タスクの生成に失敗しました');
+        if (!generateResponse.ok || !generateData?.ok || !generateData.data?.id) {
+          throw new Error(
+            getUserFacingSubmissionError(
+              generateResponse,
+              generateData,
+              'タスクの準備に失敗しました。少し時間を置いて、もう一度お試しください。'
+            )
+          );
         }
 
         actualTaskId = generateData.data.id;
       }
 
-      // 回答を送信
       const submitResponse = await fetch(`/api/tasks/${actualTaskId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -221,19 +232,27 @@ export default function PrepTaskPage() {
         }),
       });
 
-      if (!submitResponse.ok) {
-        throw new Error('回答の送信に失敗しました');
+      const submitData = await submitResponse.json().catch(() => null);
+
+      if (isUnauthorizedApiResponse(submitResponse, submitData)) {
+        redirectToLoginWithNext();
+        return;
       }
 
-      const submitData = await submitResponse.json();
-      if (submitData.ok) {
-        // フィードバックページにリダイレクト
-        router.push(`/feedback/${submitData.data.attempt_id}`);
-      } else {
-        throw new Error(submitData.error?.message || '回答の送信に失敗しました');
+      if (!submitResponse.ok || !submitData?.ok) {
+        throw new Error(
+          getUserFacingSubmissionError(
+            submitResponse,
+            submitData,
+            '回答の送信に失敗しました。入力内容を確認して、もう一度お試しください。'
+          )
+        );
       }
+
+      router.push(`/feedback/${submitData.data.attempt_id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setError(err instanceof Error ? err.message : '送信中にエラーが発生しました。');
+    } finally {
       setProcessing(false);
     }
   };

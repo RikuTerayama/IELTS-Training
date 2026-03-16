@@ -59,6 +59,8 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const pathProtected =
     pathname.startsWith('/home') ||
+    pathname.startsWith('/vocab') ||
+    pathname.startsWith('/training') ||
     pathname.startsWith('/task') ||
     pathname.startsWith('/feedback') ||
     pathname.startsWith('/progress') ||
@@ -67,6 +69,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/fillin') ||
     pathname.startsWith('/exam') ||
     pathname.startsWith('/speaking/feedback') ||
+    pathname.startsWith('/billing/manage') ||
     pathname.startsWith('/pro') ||
     pathname.startsWith('/admin');
   const isProtectedPath = pathProtected;

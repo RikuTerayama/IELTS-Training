@@ -13,10 +13,10 @@ export const PUBLIC_NAV = [
 
 export const APP_NAV: Array<{ href: string; label: string; external?: boolean }> = [
   { href: '/home', label: 'ホーム' },
-  { href: '/home#input', label: 'Input' },
-  { href: '/home#output', label: 'Output' },
-  { href: '/progress', label: 'Progress' },
-  { href: '/home#blog', label: 'Blog / Note' },
+  { href: '/home#input', label: 'インプット' },
+  { href: '/home#output', label: 'アウトプット' },
+  { href: '/progress', label: '進捗' },
+  { href: '/home#blog', label: '記事 / Note' },
 ];
 
 export const BLOG_URL = 'https://ieltsconsult.netlify.app/';

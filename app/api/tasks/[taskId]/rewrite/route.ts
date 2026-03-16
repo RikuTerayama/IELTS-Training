@@ -12,6 +12,17 @@ import {
   isUsageRateLimitError,
   toUsageRateLimitResponse,
 } from '@/lib/server/usageLimit';
+import { z } from 'zod';
+
+const RewriteSubmitRequestSchema = z.object({
+  attempt_id: z.string().uuid(),
+  revised_content: z.array(
+    z.object({
+      target_id: z.string().min(1),
+      revised_text: z.string().min(1),
+    })
+  ).min(1),
+});
 
 export async function POST(
   request: Request,
@@ -37,19 +48,27 @@ export async function POST(
 
     console.log('[Rewrite API] User authenticated:', user.email);
 
-    const requestBody = await request.json();
-    const { attempt_id, revised_content }: {
-      attempt_id: string;
-      revised_content: Array<{ target_id: string; revised_text: string }>;
-    } = requestBody;
-
-    if (!attempt_id || !revised_content || !Array.isArray(revised_content)) {
-      console.error('[Rewrite API] Invalid request body');
+    let requestBody: unknown;
+    try {
+      requestBody = await request.json();
+    } catch (parseError) {
+      console.error('[Rewrite API] Failed to parse request body:', parseError);
       return Response.json(
-        errorResponse('BAD_REQUEST', 'attempt_id and revised_content are required'),
+        errorResponse('BAD_REQUEST', 'Submission payload is not valid JSON'),
         { status: 400 }
       );
     }
+
+    const validationResult = RewriteSubmitRequestSchema.safeParse(requestBody);
+    if (!validationResult.success) {
+      console.error('[Rewrite API] Invalid request body');
+      return Response.json(
+        errorResponse('BAD_REQUEST', 'Submission payload is invalid', validationResult.error.flatten()),
+        { status: 400 }
+      );
+    }
+
+    const { attempt_id, revised_content } = validationResult.data;
 
     console.log('[Rewrite API] Attempt ID:', attempt_id, 'Revised content count:', revised_content.length);
 

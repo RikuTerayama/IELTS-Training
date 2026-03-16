@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
 import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
@@ -47,11 +47,11 @@ const SAMPLE_QUESTIONS: Record<Slug, { part1: string; part2: string; part3: stri
 };
 
 const QUICK_TIPS = [
-  'トピックに合った語彙を 2〜3 個入れて、語彙の幅を見せます。',
-  '答えは「結論 → 理由 → 具体例」の順で短くまとめると安定します。',
+  'トピックに入ったら、答えの軸を 2〜3 個だけ決めてから話し始めます。',
+  '短すぎる答えは避け、理由や例を 1 つ添えるとまとまりやすくなります。',
   'Part 2 は Cue Card のポイントを 1 分で整理してから話し始めます。',
-  '抽象的な質問でも、自分の経験や身近な例に引き寄せると答えやすくなります。',
-  '長く話すよりも、質問に対して明確に答えることを優先します。',
+  '難しい表現を無理に使うよりも、自然な語順で最後まで言い切る方が評価につながります。',
+  '話したあとも、改善点を次の回答にすぐ反映することを意識します。',
 ] as const;
 
 const SPEAKING_TOPIC_FAQ = [
@@ -61,14 +61,14 @@ const SPEAKING_TOPIC_FAQ = [
       '1 分で 2〜3 個の軸を決め、Cue Card のポイントに沿って 1〜2 分で話せる流れを作るのがおすすめです。',
   },
   {
-    question: 'テキスト入力でも効果はありますか？',
+    question: 'テキスト中心でも練習できますか？',
     answer:
       'はい。まずはテキストで構成と語彙を安定させ、その後に音声練習へ広げると Speaking の型が崩れにくくなります。',
   },
   {
-    question: 'スコアはどう見ればいいですか？',
+    question: 'スコアはどの程度参考になりますか？',
     answer:
-      'Fluency、Lexical Resource、Grammar、Pronunciation の観点を見て、特に低い項目を次回の面接で優先的に直すのが効果的です。',
+      'Fluency、Lexical Resource、Grammar、Pronunciation の観点で見ています。音声をもとに評価されるため、学習の目安として活用してください。',
   },
 ] as const;
 
@@ -117,17 +117,17 @@ export default async function SpeakingTopicPage({ params }: Props) {
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-8 text-text-muted">
             「{topic.title}」に関連する Part 1-3 の質問例と、答え方の考え方をまとめています。
-            そのまま AI 面接に入り、実践しながらフィードバックを確認できます。
+            そのまま AI 面接に入り、改善点まで確認できます。
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
-              このトピックで面接を始める
+              このトピックで AI 面接を始める
             </Link>
             <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
               料金を見る
             </Link>
             <Link href="/speaking" className="text-sm font-medium text-indigo-600 hover:underline">
-              Speaking hub に戻る
+              Speaking に戻る
             </Link>
           </div>
         </section>
@@ -160,7 +160,7 @@ export default async function SpeakingTopicPage({ params }: Props) {
 
         <section className="mb-12" aria-labelledby="samples-heading">
           <h2 id="samples-heading" className="mb-6 text-xl font-bold text-text">
-            サンプル問題
+            サンプル質問
           </h2>
           <ul className="space-y-4">
             <li className={cn('rounded-xl p-4', cardBase)}>
@@ -209,9 +209,9 @@ export default async function SpeakingTopicPage({ params }: Props) {
           </ul>
           <p className="mt-4 text-sm text-text-muted">
             <Link href="/exam/speaking" className="text-indigo-600 hover:underline">
-              面接を始める
+              AI 面接を始める
             </Link>
-            {' · '}
+            {' ・ '}
             <Link href="/pricing" className="text-indigo-600 hover:underline">
               料金を見る
             </Link>
