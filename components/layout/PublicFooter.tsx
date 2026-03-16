@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { BrandLink } from '@/components/branding/Brand';
 import { PUBLIC_NAV } from '@/lib/config/nav';
 
 /**
@@ -27,9 +28,12 @@ export function PublicFooter() {
             </Link>
           </div>
           <div>
-            <Link href="/" className="font-semibold text-text hover:text-primary transition-colors duration-200">
-              IELTS Training
-            </Link>
+            <BrandLink
+              href="/"
+              size={30}
+              textClassName="text-base"
+              linkClassName="transition-opacity duration-200 hover:opacity-90"
+            />
           </div>
         </div>
       </div>

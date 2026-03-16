@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { BrandLink } from '@/components/branding/Brand';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { APP_NAV } from '@/lib/config/nav';
 
@@ -34,9 +35,12 @@ export function Header() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/home" className="text-xl font-bold text-primary hover:text-primary-hover transition-colors duration-200">
-              IELTS Training
-            </Link>
+            <BrandLink
+              href="/home"
+              size={38}
+              textClassName="text-lg text-primary"
+              linkClassName="transition-opacity duration-200 hover:opacity-90"
+            />
             <nav className="hidden md:flex gap-3 lg:gap-4">
               {APP_NAV.map(({ href, label, external }) =>
                 external ? (

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { BrandLink } from '@/components/branding/Brand';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { PUBLIC_NAV } from '@/lib/config/nav';
 
@@ -33,12 +34,13 @@ export function PublicHeader({
       <div className={`container mx-auto relative z-10 ${isFloating ? 'px-6' : 'px-4 py-3'}`}>
         <div className={`flex items-center justify-between ${isFloating ? 'h-16' : ''}`}>
           <div className="flex items-center gap-6">
-            <Link
+            <BrandLink
               href="/"
-              className="text-xl font-bold text-primary hover:text-primary-hover transition-colors duration-200"
-            >
-              IELTS Training
-            </Link>
+              size={40}
+              priority={isFloating}
+              textClassName="text-lg text-primary"
+              linkClassName="transition-opacity duration-200 hover:opacity-90"
+            />
             <nav className="hidden md:flex gap-4">
               {PUBLIC_NAV.map(({ href, label }) => (
                 <Link
