@@ -37,8 +37,7 @@ export function Header() {
             <Link href="/home" className="text-xl font-bold text-primary hover:text-primary-hover transition-colors duration-200">
               IELTS Training
             </Link>
-            {/* デスクトップナビゲーション */}
-            <nav className="hidden md:flex gap-4">
+            <nav className="hidden md:flex gap-3 lg:gap-4">
               {APP_NAV.map(({ href, label, external }) =>
                 external ? (
                   <Link
@@ -63,15 +62,13 @@ export function Header() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            {/* デスクトップテーマトグル */}
             <div className="hidden md:block">
               <ThemeToggle />
             </div>
-            {/* デスクトップユーザー情報 */}
             <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <>
-                  <span className="text-sm text-text-muted">{user.email}</span>
+                  <span className="hidden xl:block text-sm text-text-muted">{user.email}</span>
                   <button
                     onClick={handleLogout}
                     className="rounded bg-surface-2 border border-border px-3 py-1 text-sm text-text hover:bg-surface transition-colors duration-200"
@@ -88,34 +85,32 @@ export function Header() {
                 </Link>
               )}
             </div>
-            {/* ハンバーガーメニューボタン（モバイル） */}
             <div className="md:hidden flex items-center gap-2">
               <ThemeToggle />
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 text-text-muted hover:text-text focus:outline-none transition-colors duration-200"
-                aria-label="メニューを開く"
+                aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {menuOpen ? (
-                  <path d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  {menuOpen ? (
+                    <path d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
               </button>
             </div>
           </div>
         </div>
-        {/* モバイルメニュー */}
         {menuOpen && (
           <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4">
             <div className="flex flex-col gap-3">
@@ -143,17 +138,15 @@ export function Header() {
                 )
               )}
               {user ? (
-                <>
-                  <div className="pt-2 border-t border-border mt-2">
-                    <div className="text-sm text-text-muted py-2">{user.email}</div>
-                    <button
-                      onClick={handleLogout}
-                      className="rounded bg-surface-2 border border-border px-3 py-2 text-sm text-text hover:bg-surface w-full text-left transition-all duration-200"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </>
+                <div className="pt-2 border-t border-border mt-2">
+                  <div className="text-sm text-text-muted py-2">{user.email}</div>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded bg-surface-2 border border-border px-3 py-2 text-sm text-text hover:bg-surface w-full text-left transition-all duration-200"
+                  >
+                    Logout
+                  </button>
+                </div>
               ) : (
                 <div className="pt-2 border-t border-border mt-2">
                   <Link
@@ -172,4 +165,3 @@ export function Header() {
     </header>
   );
 }
-

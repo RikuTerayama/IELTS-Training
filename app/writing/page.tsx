@@ -59,9 +59,9 @@ const TASK2_TOPICS = [
 
 const WRITING_FAQ = [
   {
-    question: 'What’s the difference between practice and exam mode?',
+    question: 'What is the difference between practice and exam mode?',
     answer:
-      'Practice mode lets you use PREP: plan and structure ideas before writing. Exam mode simulates test conditions—you write in one go and get band-style feedback. Both give you targeted suggestions. See the dashboard for more.',
+      'Practice mode lets you use PREP to plan and structure ideas before writing. Exam mode simulates test conditions, so you write in one go and get band-style feedback. Both give you targeted suggestions. See the dashboard for more.',
   },
   {
     question: 'Does it support Task 1?',
@@ -75,11 +75,14 @@ const WRITING_FAQ = [
   },
 ];
 
+function buildLoginUrl(next: string): string {
+  return `/login?next=${encodeURIComponent(next)}`;
+}
+
 export default function WritingPage() {
   return (
     <Layout variant="public">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        {/* Hero */}
         <section className="mb-16 text-center">
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
             IELTS Writing Practice
@@ -100,7 +103,7 @@ export default function WritingPage() {
             >
               Start practice
             </Link>
-            <Link href="/login" className="text-sm font-medium text-primary hover:underline">
+            <Link href={buildLoginUrl('/home')} className="text-sm font-medium text-primary hover:underline">
               Log in to dashboard
             </Link>
             <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
@@ -109,7 +112,6 @@ export default function WritingPage() {
           </div>
         </section>
 
-        {/* What you can practice */}
         <section className="mb-16" aria-labelledby="practice-heading">
           <h2 id="practice-heading" className="mb-6 text-xl font-bold text-text">
             What you can practice
@@ -136,7 +138,6 @@ export default function WritingPage() {
           </div>
         </section>
 
-        {/* How it works */}
         <section className="mb-16" aria-labelledby="how-heading">
           <h2 id="how-heading" className="mb-6 text-xl font-bold text-text">
             How it works
@@ -172,7 +173,6 @@ export default function WritingPage() {
           </ol>
         </section>
 
-        {/* Related hubs */}
         <section className="mb-16" aria-labelledby="related-heading">
           <h2 id="related-heading" className="mb-6 text-xl font-bold text-text">
             Related
@@ -190,7 +190,6 @@ export default function WritingPage() {
           </div>
         </section>
 
-        {/* Task 2 Topics */}
         <section className="mb-16" aria-labelledby="topics-heading">
           <h2 id="topics-heading" className="mb-6 text-xl font-bold text-text">
             Task 2 topics
@@ -213,7 +212,6 @@ export default function WritingPage() {
           </div>
         </section>
 
-        {/* FAQ */}
         <section className="border-t border-border pt-12" aria-labelledby="faq-heading">
           <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
             FAQ

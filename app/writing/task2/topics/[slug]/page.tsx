@@ -388,7 +388,7 @@ export default async function Task2TopicPage({ params }: Props) {
   const faqJsonLd = buildFaqPageJsonLd();
 
   return (
-    <Layout>
+    <Layout variant="public">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}

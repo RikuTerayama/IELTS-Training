@@ -5,13 +5,33 @@ import { useState } from 'react';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { PUBLIC_NAV } from '@/lib/config/nav';
 
-export function PublicHeader() {
+type PublicHeaderProps = {
+  contactHref?: string;
+  loginHref?: string;
+  variant?: 'sticky' | 'floating';
+};
+
+export function PublicHeader({
+  contactHref,
+  loginHref = '/login',
+  variant = 'sticky',
+}: PublicHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const isFloating = variant === 'floating';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-sm">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
+    <header
+      className={
+        isFloating
+          ? 'fixed top-0 z-50 w-full transition-all duration-300'
+          : 'sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-sm'
+      }
+    >
+      {isFloating ? (
+        <div className="absolute inset-0 border-b border-border/50 bg-bg/80 backdrop-blur-xl" />
+      ) : null}
+      <div className={`container mx-auto relative z-10 ${isFloating ? 'px-6' : 'px-4 py-3'}`}>
+        <div className={`flex items-center justify-between ${isFloating ? 'h-16' : ''}`}>
           <div className="flex items-center gap-6">
             <Link
               href="/"
@@ -29,6 +49,14 @@ export function PublicHeader() {
                   {label}
                 </Link>
               ))}
+              {contactHref ? (
+                <Link
+                  href={contactHref}
+                  className="text-text-muted hover:text-text transition-colors duration-200"
+                >
+                  Contact
+                </Link>
+              ) : null}
             </nav>
           </div>
           <div className="flex items-center gap-4">
@@ -37,7 +65,7 @@ export function PublicHeader() {
             </div>
             <div className="hidden md:block">
               <Link
-                href="/login"
+                href={loginHref}
                 className="rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary-hover transition-colors duration-200"
               >
                 Login
@@ -49,7 +77,7 @@ export function PublicHeader() {
                 type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 text-text-muted hover:text-text transition-colors duration-200"
-                aria-label="メニューを開く"
+                aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               >
                 <svg
                   className="h-6 w-6"
@@ -83,9 +111,18 @@ export function PublicHeader() {
                   {label}
                 </Link>
               ))}
+              {contactHref ? (
+                <Link
+                  href={contactHref}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-text-muted hover:text-text py-2 transition-colors duration-200"
+                >
+                  Contact
+                </Link>
+              ) : null}
               <div className="pt-2 border-t border-border mt-2">
                 <Link
-                  href="/login"
+                  href={loginHref}
                   onClick={() => setMenuOpen(false)}
                   className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary-hover block text-center transition-colors duration-200"
                 >

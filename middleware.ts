@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
+﻿import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
@@ -14,21 +14,7 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          const cookies = request.cookies.getAll();
-          // デバッグ: すべてのCookieの内容を確認
-          console.log('[Middleware] getAll() called, cookies count:', cookies.length);
-          const authCookies = cookies.filter(c => c.name.includes('auth-token'));
-          if (authCookies.length > 0) {
-            console.log('[Middleware] Auth cookie details:', authCookies.map(c => ({
-              name: c.name,
-              valueLength: c.value?.length || 0,
-              valuePreview: c.value ? c.value.substring(0, 100) : 'EMPTY',
-              hasValue: !!c.value
-            })));
-          } else {
-            console.log('[Middleware] No auth cookies found in getAll()');
-          }
-          return cookies;
+          return request.cookies.getAll();
         },
         setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
           cookiesToSet.forEach(({ name, value, options }) =>
@@ -45,52 +31,26 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Cookieの詳細を確認（getAll()の前に）
-  const allCookies = request.cookies.getAll();
-  const authCookie = allCookies.find(c => c.name.includes('auth-token'));
-  if (authCookie) {
-    console.log('[Middleware] Found auth cookie:', {
-      name: authCookie.name,
-      valueLength: authCookie.value?.length || 0,
-      hasValue: !!authCookie.value,
-      valuePreview: authCookie.value ? authCookie.value.substring(0, 50) : 'EMPTY'
-    });
-  }
-
-  // まずセッションを取得（getSession()はCookieから直接読み取る）
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError) {
-    console.log('[Middleware] getSession() error:', sessionError);
-  }
+  // 縺ｾ縺壹そ繝・す繝ｧ繝ｳ繧貞叙蠕暦ｼ・etSession()縺ｯCookie縺九ｉ逶ｴ謗･隱ｭ縺ｿ蜿悶ｋ・・
+  const { data: { session } } = await supabase.auth.getSession();
   
-  // セッションからユーザーを取得
+  // 繧ｻ繝・す繝ｧ繝ｳ縺九ｉ繝ｦ繝ｼ繧ｶ繝ｼ繧貞叙蠕・
   let user = session?.user ?? null;
   
-  // getUser()も試してみる（セッションが取得できない場合）
+  // getUser()繧りｩｦ縺励※縺ｿ繧具ｼ医そ繝・す繝ｧ繝ｳ縺悟叙蠕励〒縺阪↑縺・ｴ蜷茨ｼ・
   if (!user) {
-    const { data: { user: getUserResult }, error: authError } = await supabase.auth.getUser();
+    const { data: { user: getUserResult } } = await supabase.auth.getUser();
     user = getUserResult;
-    if (authError) {
-      console.log('[Middleware] getUser() error:', authError);
-    }
   }
 
-  // デバッグ用ログ（本番環境でも出力）
-  const cookieNames = request.cookies.getAll().map(c => c.name);
-  console.log('[Middleware] Path:', request.nextUrl.pathname);
-  console.log('[Middleware] User:', user ? user.email : 'null');
-  console.log('[Middleware] Session exists:', !!session);
-  console.log('[Middleware] Cookies:', cookieNames);
-  console.log('[Middleware] Has auth cookies:', cookieNames.some(name => name.includes('auth-token')));
-
-  // Canonical public entry: /vocab. Legacy /training/vocab → /vocab (308), preserve query
+  // Canonical public entry: /vocab. Legacy /training/vocab 竊・/vocab (308), preserve query
   if (request.nextUrl.pathname === '/training/vocab') {
     const to = new URL('/vocab', request.url);
     request.nextUrl.searchParams.forEach((v, k) => to.searchParams.set(k, v));
     return NextResponse.redirect(to, 308);
   }
 
-  // W2-FR-2: /training/writing/task2 は廃止。308 で /task/select?task_type=Task%202 へ
+  // W2-FR-2: /training/writing/task2 縺ｯ蟒・ｭ｢縲・08 縺ｧ /task/select?task_type=Task%202 縺ｸ
   if (request.nextUrl.pathname === '/training/writing/task2') {
     return NextResponse.redirect(new URL('/task/select?task_type=Task%202', request.url), 308);
   }
@@ -111,9 +71,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/admin');
   const isProtectedPath = pathProtected;
   
-  // ログインページは認証済みならリダイレクト
+  // 繝ｭ繧ｰ繧､繝ｳ繝壹・繧ｸ縺ｯ隱崎ｨｼ貂医∩縺ｪ繧峨Μ繝繧､繝ｬ繧ｯ繝・
   if (request.nextUrl.pathname === '/login' && user) {
-    // 目的ヒアリング完了状況を確認
+    // 逶ｮ逧・ヲ繧｢繝ｪ繝ｳ繧ｰ螳御ｺ・憾豕√ｒ遒ｺ隱・
     const { data: profile } = await supabase
       .from('profiles')
       .select('onboarding_completed')
@@ -121,20 +81,17 @@ export async function middleware(request: NextRequest) {
       .single();
 
     if (profile && !profile.onboarding_completed) {
-      console.log('[Middleware] Redirecting authenticated user from /login to /onboarding');
       return NextResponse.redirect(new URL('/onboarding', request.url));
     }
-    console.log('[Middleware] Redirecting authenticated user from /login to /home');
     return NextResponse.redirect(new URL('/home', request.url));
   }
 
-  // 目的ヒアリングページは認証が必要
+  // 逶ｮ逧・ヲ繧｢繝ｪ繝ｳ繧ｰ繝壹・繧ｸ縺ｯ隱崎ｨｼ縺悟ｿ・ｦ・
   if (request.nextUrl.pathname === '/onboarding' && !user) {
-    console.log('[Middleware] Redirecting unauthenticated user from /onboarding to /login');
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // 目的ヒアリングページで認証済みの場合、完了状況を確認
+  // 逶ｮ逧・ヲ繧｢繝ｪ繝ｳ繧ｰ繝壹・繧ｸ縺ｧ隱崎ｨｼ貂医∩縺ｮ蝣ｴ蜷医∝ｮ御ｺ・憾豕√ｒ遒ｺ隱・
   if (request.nextUrl.pathname === '/onboarding' && user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -143,20 +100,18 @@ export async function middleware(request: NextRequest) {
       .single();
 
     if (profile?.onboarding_completed) {
-      console.log('[Middleware] Redirecting user with completed onboarding to /home');
       return NextResponse.redirect(new URL('/home', request.url));
     }
   }
 
-  // 保護されたパスで未認証の場合はログインページへ（return-path を保持）
+  // 菫晁ｭｷ縺輔ｌ縺溘ヱ繧ｹ縺ｧ譛ｪ隱崎ｨｼ縺ｮ蝣ｴ蜷医・繝ｭ繧ｰ繧､繝ｳ繝壹・繧ｸ縺ｸ・・eturn-path 繧剃ｿ晄戟・・
   if (isProtectedPath && !user) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('next', pathname + request.nextUrl.search);
-    console.log('[Middleware] Redirecting unauthenticated user to /login with next=', loginUrl.searchParams.get('next'));
     return NextResponse.redirect(loginUrl);
   }
 
-  // 保護されたパスで認証済みの場合、目的ヒアリング完了状況を確認
+  // 菫晁ｭｷ縺輔ｌ縺溘ヱ繧ｹ縺ｧ隱崎ｨｼ貂医∩縺ｮ蝣ｴ蜷医∫岼逧・ヲ繧｢繝ｪ繝ｳ繧ｰ螳御ｺ・憾豕√ｒ遒ｺ隱・
   if (isProtectedPath && user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -165,7 +120,6 @@ export async function middleware(request: NextRequest) {
       .single();
 
     if (profile && !profile.onboarding_completed) {
-      console.log('[Middleware] Redirecting user with incomplete onboarding to /onboarding');
       return NextResponse.redirect(new URL('/onboarding', request.url));
     }
   }
@@ -185,4 +139,5 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|api).*)',
   ],
 };
+
 

@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { buildContactGoogleFormUrl, CONTACT_EMAIL, CONTACT_MAILTO, BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { PublicHeader } from '@/components/layout/PublicHeader';
 
-// --- アニメーションコンポーネント ---
+// --- 郢ｧ・｢郢昜ｹ斟鍋ｹ晢ｽｼ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ郢ｧ・ｳ郢晢ｽｳ郢晄亢繝ｻ郢晞亂ﾎｦ郢昴・---
 interface FadeInProps {
   children: React.ReactNode;
   delay?: number;
@@ -91,7 +91,7 @@ function StaggerItem({ children, className = '' }: StaggerItemProps) {
   );
 }
 
-// --- アイコンコンポーネント ---
+// --- 郢ｧ・｢郢ｧ・､郢ｧ・ｳ郢晢ｽｳ郢ｧ・ｳ郢晢ｽｳ郢晄亢繝ｻ郢晞亂ﾎｦ郢昴・---
 const Icons = {
   Check: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>,
   Chart: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
@@ -104,6 +104,108 @@ const Icons = {
   Layers: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
   Mic: (props: any) => <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>
 };
+
+const PRIVACY_SECTIONS = [
+  {
+    title: '1. Information we collect',
+    paragraphs: [
+      'IELTS Training stores the minimum account and learning data needed to run the service. This may include your email address, product usage history, submitted answers, and billing-related identifiers.',
+    ],
+    bullets: [
+      'Account details needed for sign-in and support',
+      'Learning progress such as attempts, feedback, and review history',
+      'Operational logs needed to keep the service stable and secure',
+      'Billing identifiers from payment providers when you upgrade',
+    ],
+  },
+  {
+    title: '2. How we use the information',
+    paragraphs: [
+      'We use this information to provide learning features, improve product quality, prevent abuse, and support billing or account recovery when needed.',
+    ],
+    bullets: [
+      'Deliver practice, feedback, and progress tracking',
+      'Improve reliability and diagnose service issues',
+      'Operate billing, access control, and upgrade flows',
+      'Respond to support or contact requests',
+    ],
+  },
+  {
+    title: '3. Storage and third parties',
+    paragraphs: [
+      'Data is processed using infrastructure such as Supabase for application data and Stripe for billing. AI-related requests may be sent to model providers to generate feedback or evaluation results.',
+      'We only share the data required to perform those functions and do not sell personal information.',
+    ],
+  },
+  {
+    title: '4. Security',
+    paragraphs: [
+      'We take reasonable technical and operational measures to protect account and learning data. However, no internet service can guarantee perfect security.',
+    ],
+  },
+  {
+    title: '5. Your choices',
+    paragraphs: [
+      'You can contact us if you need help with account access, billing questions, or deletion requests. We may need to verify ownership before making account-level changes.',
+    ],
+  },
+  {
+    title: '6. Updates',
+    paragraphs: [
+      'We may update this Privacy Policy as the product evolves. Material changes will be reflected on this page with an updated revision date.',
+    ],
+  },
+] as const;
+
+const TERMS_SECTIONS = [
+  {
+    title: '1. Service overview',
+    paragraphs: [
+      'IELTS Training provides IELTS-focused learning tools, AI-assisted feedback, progress tracking, and related educational content. Feature availability may change over time.',
+    ],
+  },
+  {
+    title: '2. Accounts and access',
+    paragraphs: [
+      'You are responsible for maintaining the security of your account and for activity performed through it. Do not share credentials or attempt to access another user account.',
+    ],
+    bullets: [
+      'Use accurate account information',
+      'Keep your sign-in credentials private',
+      'Do not misuse trial, quota, or billing systems',
+    ],
+  },
+  {
+    title: '3. AI output and learning guidance',
+    paragraphs: [
+      'AI-generated scores, rewrites, and recommendations are learning aids. They are not official IELTS scores and should be treated as guidance rather than guarantees.',
+    ],
+  },
+  {
+    title: '4. Acceptable use',
+    paragraphs: [
+      'Do not use the service to abuse infrastructure, scrape content, interfere with other users, or submit unlawful or harmful material.',
+    ],
+  },
+  {
+    title: '5. Billing and upgrades',
+    paragraphs: [
+      'Paid features may be offered through recurring or one-time billing. Pricing, limits, and billing terms are shown at checkout or on the Pricing page.',
+    ],
+  },
+  {
+    title: '6. Availability and changes',
+    paragraphs: [
+      'We may update, suspend, or discontinue features when needed for security, maintenance, or product changes. We aim to do this responsibly but cannot guarantee uninterrupted availability.',
+    ],
+  },
+  {
+    title: '7. Contact',
+    paragraphs: [
+      'If you have questions about these terms, contact us through the contact section on this page or by email.',
+    ],
+  },
+] as const;
 
 export default function LandingPage() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -121,7 +223,7 @@ export default function LandingPage() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // --- スムーズスクロール機能 ---
+  // --- 郢ｧ・ｹ郢晢｣ｰ郢晢ｽｼ郢ｧ・ｺ郢ｧ・ｹ郢ｧ・ｯ郢晢ｽｭ郢晢ｽｼ郢晢ｽｫ隶匁ｺｯ繝ｻ ---
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -132,66 +234,23 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-bg-secondary text-text font-sans selection:bg-indigo-100 selection:text-indigo-900">
       
-      {/* 背景装飾 */}
+      {/* 髢ｭ譴ｧ蜍ｹ髯ｬ繝ｻ・｣・ｾ */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-50/60 rounded-[100%] blur-3xl opacity-70" />
         <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-blue-50/40 rounded-[100%] blur-3xl opacity-60" />
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
       </div>
 
-      {/* ヘッダー */}
-      <header className="fixed top-0 w-full z-50 transition-all duration-300">
-        <div className="absolute inset-0 bg-bg/80 backdrop-blur-xl border-b border-border/50" />
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between relative z-10">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-text">
-              IELTS Training
-            </span>
-          </Link>
-          <nav className="flex items-center gap-4">
-            <ThemeToggle />
-            <Link href="/reading" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
-              Reading
-            </Link>
-            <Link href="/writing" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
-              Writing
-            </Link>
-            <Link href="/speaking" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
-              Speaking
-            </Link>
-            <Link href="/vocab" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
-              Vocab
-            </Link>
-            <Link href="/pricing" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
-              Pricing
-            </Link>
-            <button
-              type="button"
-              onClick={() => scrollToSection('contact')}
-              className="text-sm font-medium text-text-muted hover:text-primary transition-colors"
-            >
-              Contact
-            </button>
-            <Link
-              href="/login"
-              className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
-            >
-              Login
-            </Link>
-          </nav>
-        </div>
-      </header>
+      {/* 郢晏･繝｣郢敖郢晢ｽｼ */}
+      <PublicHeader variant="floating" contactHref="/#contact" />
 
       <main className="relative z-10 pt-32 pb-0">
         
-        {/* ヒーローセクション */}
+        {/* 郢晏・繝ｻ郢晢ｽｭ郢晢ｽｼ郢ｧ・ｻ郢ｧ・ｯ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ */}
         <div className="container mx-auto px-6 mb-32">
           <div className="grid lg:grid-cols-12 gap-16 lg:gap-8 items-center">
             
-            {/* 左側: コピー */}
+            {/* 陝ｾ・ｦ陋幢ｽｴ: 郢ｧ・ｳ郢晄鱒繝ｻ */}
             <div className="lg:col-span-7 space-y-8 text-center lg:text-left pt-8">
               <FadeIn delay={0.1}>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold tracking-wide uppercase shadow-sm">
@@ -204,7 +263,7 @@ export default function LandingPage() {
               </FadeIn>
               
               <FadeIn delay={0.2}>
-                {/* 例外: ヒーロー強調のため text-display より大きい text-5xl/lg:text-7xl を維持 */}
+                {/* 關灘唱・､繝ｻ 郢晏・繝ｻ郢晢ｽｭ郢晢ｽｼ陟托ｽｷ髫ｱ・ｿ邵ｺ・ｮ邵ｺ貅假ｽ・text-display 郢ｧ蛹ｻ・願棔・ｧ邵ｺ髦ｪ・・text-5xl/lg:text-7xl 郢ｧ蝣､・ｶ・ｭ隰悶・*/}
                 <h1 className="text-5xl lg:text-7xl font-bold tracking-tighter text-text leading-[1.1]">
                   Score Higher with <br />
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">Intelligent</span> Feedback.
@@ -213,8 +272,8 @@ export default function LandingPage() {
               
               <FadeIn delay={0.3}>
                 <p className="text-body-lg text-text-muted leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium">
-                  データ駆動型アプローチで、IELTSスコアの伸び悩みを打破する。<br className="hidden lg:block"/>
-                  最新のAIがあなたのライティングを瞬時に分析し、合格への最短ルートを提示します。
+                  データ駆動のアプローチで、IELTSスコアの伸び悩みを最短距離で改善。<br className="hidden lg:block" />
+                  最新のAIがあなたのライティングを数秒で分析し、次に取るべき学習ルートを提示します。
                 </p>
               </FadeIn>
               
@@ -222,11 +281,11 @@ export default function LandingPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 text-sm font-semibold text-text">
                   <div className="flex items-center gap-2">
                     <div className="bg-green-100 p-1 rounded-full text-green-600"><Icons.Check className="w-3 h-3" /></div>
-                    即時スコア判定
+                    即時スコア分析
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="bg-green-100 p-1 rounded-full text-green-600"><Icons.Check className="w-3 h-3" /></div>
-                    論理構成アドバイス
+                    弱点別アドバイス
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="bg-green-100 p-1 rounded-full text-green-600"><Icons.Check className="w-3 h-3" /></div>
@@ -245,10 +304,10 @@ export default function LandingPage() {
               </FadeIn>
             </div>
 
-            {/* 右側: メインアクション（Writing, Speaking, Vocab, Pricing, Login） */}
+            {/* 陷ｿ・ｳ陋幢ｽｴ: 郢晢ｽ｡郢ｧ・､郢晢ｽｳ郢ｧ・｢郢ｧ・ｯ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ繝ｻ繝ｻriting, Speaking, Vocab, Pricing, Login繝ｻ繝ｻ*/}
             <FadeIn delay={0.5} className="lg:col-span-5 w-full max-w-md mx-auto">
               <div className="relative bg-surface/80 backdrop-blur-xl rounded-2xl shadow-theme-lg ring-1 ring-border p-8">
-                <h2 className="text-xl font-bold text-text mb-2">始める</h2>
+                <h2 className="text-xl font-bold text-text mb-2">今すぐ始める</h2>
                 <p className="text-sm text-text-muted mb-6">
                   Reading・Writing・Speaking・語彙の練習と料金はこちらから。
                 </p>
@@ -315,7 +374,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* 課題解決セクション */}
+        {/* 髫ｱ・ｲ鬯倡霜・ｧ・｣雎趣ｽｺ郢ｧ・ｻ郢ｧ・ｯ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ */}
         <section className="py-24 bg-surface border-y border-border">
           <div className="container mx-auto px-6">
             <FadeIn className="max-w-3xl mx-auto text-center mb-16">
@@ -333,9 +392,9 @@ export default function LandingPage() {
                   <div className="w-12 h-12 shrink-0 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Alert className="w-6 h-6" />
                   </div>
-                  <h3 className="text-heading-3 font-bold text-text mb-3">フィードバックの欠如</h3>
+                  <h3 className="text-heading-3 font-bold text-text mb-3">フィードバックの不足</h3>
                   <p className="text-text-muted leading-relaxed text-sm">
-                    自分のライティングやスピーキングのどこが間違っているのか、どう改善すべきかが客観的に分からない。
+                    自己採点だけでは、何が足りないのか、どこを直すべきかが見えにくく、改善が止まりがちです。
                   </p>
                 </div>
               </StaggerItem>
@@ -344,9 +403,9 @@ export default function LandingPage() {
                   <div className="w-12 h-12 shrink-0 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Chart className="w-6 h-6" />
                   </div>
-                  <h3 className="text-heading-3 font-bold text-text mb-3">成長の停滞</h3>
+                  <h3 className="text-heading-3 font-bold text-text mb-3">勉強の方向性</h3>
                   <p className="text-text-muted leading-relaxed text-sm">
-                    同じような表現ばかり使ってしまい、バンドスコア5.5〜6.0の壁をなかなか超えられない。
+                    どの順番で取り組めばよいか分からないまま続けても、Band 5.5 から 7.0 への壁を越えにくくなります。
                   </p>
                 </div>
               </StaggerItem>
@@ -355,9 +414,9 @@ export default function LandingPage() {
                   <div className="w-12 h-12 shrink-0 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Layers className="w-6 h-6" />
                   </div>
-                  <h3 className="text-heading-3 font-bold text-text mb-3">非効率な学習戦略</h3>
+                  <h3 className="text-heading-3 font-bold text-text mb-3">継続しにくい学習</h3>
                   <p className="text-text-muted leading-relaxed text-sm">
-                    闇雲に問題を解くだけで、体系的な語彙強化や論理構成のトレーニングができていない。
+                    復習の優先度が見えないと、重要な練習や弱点対策が後回しになりやすくなります。
                   </p>
                 </div>
               </StaggerItem>
@@ -365,7 +424,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Features セクション (Bento Grid) */}
+        {/* Features 郢ｧ・ｻ郢ｧ・ｯ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ (Bento Grid) */}
         <section id="features" className="py-24 bg-bg-secondary">
           <div className="container mx-auto px-6">
             <FadeIn className="max-w-3xl mx-auto text-center mb-16">
@@ -373,7 +432,7 @@ export default function LandingPage() {
                 スコアアップに必要なすべて
               </h2>
               <p className="text-text-muted text-lg">
-                AI技術と学習科学を組み合わせた、オールインワンの学習プラットフォーム
+                AI分析と学習導線を組み合わせた、オールインワンのIELTS学習プラットフォーム
               </p>
             </FadeIn>
 
@@ -385,7 +444,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">AI 即時フィードバック</h3>
                   <p className="text-text-muted text-sm leading-relaxed">
-                    提出から数秒で、試験官レベルの詳細なフィードバックを受け取れます。文法ミスだけでなく、語彙の多様性や論理構成まで分析します。
+                    数秒でIELTS基準に沿ったフィードバックを返し、何を直すべきかを具体的に示します。
                   </p>
                 </div>
               </StaggerItem>
@@ -394,9 +453,9 @@ export default function LandingPage() {
                   <div className="w-12 h-12 shrink-0 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-xl flex items-center justify-center mb-6">
                     <Icons.Book className="w-6 h-6" />
                   </div>
-                  <h3 className="text-heading-3 font-bold text-text mb-3">スマート語彙</h3>
+                  <h3 className="text-heading-3 font-bold text-text mb-3">スマート復習</h3>
                   <p className="text-text-muted text-sm leading-relaxed">
-                    文脈に基づいた語彙学習。忘却曲線に基づくSRSシステムで、効率的に定着させます。
+                    重要な語彙や表現をSRSで定着させ、忘れやすい項目を効率よく復習できます。
                   </p>
                 </div>
               </StaggerItem>
@@ -407,7 +466,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">進捗の可視化</h3>
                   <p className="text-text-muted text-sm leading-relaxed">
-                    日々の学習進捗と弱点を可視化。自分の成長を実感しながら学習を継続できます。
+                    日々の学習記録と成果を可視化し、次にやるべきことを迷わず選べるようにします。
                   </p>
                 </div>
               </StaggerItem>
@@ -418,7 +477,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-heading-3 font-bold text-text mb-3">レベル別カリキュラム</h3>
                   <p className="text-text-muted text-sm leading-relaxed">
-                    現在のレベル（初級 / 中級 / 上級）に合わせて、最適な学習コンテンツを自動で提供します。
+                    現在のレベルに合わせて、無理なく続けられる学習コンテンツを段階的に提供します。
                   </p>
                 </div>
               </StaggerItem>
@@ -426,7 +485,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SEO記事・学習リソース導線（ホームから記事への内部リンク） */}
+        {/* SEO髫ｪ蛟・ｽｺ荵昴・陝・ｽｦ驗吝・ﾎ懃ｹｧ・ｽ郢晢ｽｼ郢ｧ・ｹ陝・ｮ茨ｽｷ螟ｲ・ｼ蛹ｻ繝ｻ郢晢ｽｼ郢晢｣ｰ邵ｺ荵晢ｽ蛾坎蛟・ｽｺ荵昶・邵ｺ・ｮ陷繝ｻﾎ夂ｹ晢ｽｪ郢晢ｽｳ郢ｧ・ｯ繝ｻ繝ｻ*/}
         <section className="py-20 bg-surface border-y border-border">
           <div className="container mx-auto px-6">
             <FadeIn className="max-w-3xl mx-auto text-center mb-10">
@@ -434,7 +493,7 @@ export default function LandingPage() {
                 学習リソース・記事
               </h2>
               <p className="text-text-muted text-lg">
-                Reading / Speaking / Writing のトピック解説や対策記事はこちらから
+                Reading / Speaking / Writing のトピック解説や対策記事はこちらから。
               </p>
             </FadeIn>
             <FadeIn delay={0.1} className="flex flex-wrap justify-center gap-4 md:gap-6">
@@ -443,39 +502,39 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
               >
                 <Icons.Book className="w-5 h-5 text-primary" />
-                Reading ハブ
+                Reading hub
               </Link>
               <Link
                 href="/speaking"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
               >
                 <Icons.Mic className="w-5 h-5 text-primary" />
-                Speaking ハブ
+                Speaking hub
               </Link>
               <Link
                 href="/writing"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-primary/40 transition-colors"
               >
                 <Icons.Pencil className="w-5 h-5 text-primary" />
-                Writing ハブ
+                Writing hub
               </Link>
               <Link
                 href="/speaking/topics/work-study"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors"
               >
-                Work &amp; Study（Speaking）
+                Work &amp; Study (Speaking)
               </Link>
               <Link
                 href="/writing/task2/topics/education"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-2 border border-border text-text font-medium hover:bg-surface hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors"
               >
-                Education（Writing Task 2）
+                Education (Writing Task 2)
               </Link>
             </FadeIn>
           </div>
         </section>
 
-        {/* Pricing セクション - #pricing で飛んできたユーザーがProの価値を即理解できる */}
+        {/* Pricing 郢ｧ・ｻ郢ｧ・ｯ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ - #pricing 邵ｺ・ｧ鬯溷ｸ呻ｽ鍋ｸｺ・ｧ邵ｺ髦ｪ笳・ｹ晢ｽｦ郢晢ｽｼ郢ｧ・ｶ郢晢ｽｼ邵ｺ險途o邵ｺ・ｮ關難ｽ｡陋滂ｽ､郢ｧ雋槫初騾・・・ｧ・｣邵ｺ・ｧ邵ｺ髦ｪ・・*/}
         <section
           id="pricing"
           className="py-24 bg-surface border-y border-border scroll-mt-24"
@@ -483,10 +542,10 @@ export default function LandingPage() {
           <div className="container mx-auto px-6 max-w-5xl">
             <FadeIn className="text-center mb-12">
               <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
-                料金
+                Pricing
               </h2>
               <p className="text-text-muted text-lg max-w-xl mx-auto">
-                無料で開始。1日の上限に達したらアップグレードを。
+                無料ではじめて、必要になったらAIフィードバックを拡張できます。
               </p>
             </FadeIn>
 
@@ -495,27 +554,27 @@ export default function LandingPage() {
               <div className="rounded-2xl border-2 border-border bg-surface-2 p-8 flex flex-col">
                 <div className="mb-6">
                   <div className="inline-block px-3 py-1 mb-3 rounded-full bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 text-xs font-bold">
-                    無料
+                    Free
                   </div>
                   <div className="text-3xl font-bold text-text mb-1">¥0</div>
-                  <div className="text-sm text-text-muted">/ 月</div>
+                  <div className="text-sm text-text-muted">/ month</div>
                 </div>
                 <div className="mb-6 space-y-4">
                   <div>
                     <h4 className="text-sm font-semibold text-text mb-2 uppercase tracking-wider">
-                      1日の上限
+                      Daily limits
                     </h4>
                     <ul className="space-y-1 text-sm text-text-muted">
-                      <li>• Writing AI: 1日10回まで</li>
-                      <li>• Speaking AI: 1日5回まで</li>
+                      <li>• Writing AI: up to 10/day</li>
+                      <li>• Speaking AI: up to 5/day</li>
                     </ul>
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-text mb-2 uppercase tracking-wider">
-                      含まれるもの
+                      Included
                     </h4>
                     <ul className="space-y-2">
-                      {['練習（PREP・ドリル）', '試験モード（基本）', '進捗履歴（直近）'].map(
+                      {['Practice (PREP / drills)', 'Exam mode (basic)', 'Recent progress history'].map(
                         (item, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <Icons.Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
@@ -530,33 +589,33 @@ export default function LandingPage() {
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="mt-auto w-full py-3 px-4 border-2 border-border bg-surface text-text font-semibold rounded-lg hover:bg-surface-2 transition-colors"
                 >
-                  無料で始める
+                  Start free
                 </button>
               </div>
 
-              {/* Pro - ダークモードでもコントラスト確保 */}
+              {/* Pro - 郢敖郢晢ｽｼ郢ｧ・ｯ郢晢ｽ｢郢晢ｽｼ郢晏ｳｨ縲堤ｹｧ繧・＆郢晢ｽｳ郢晏現ﾎ帷ｹｧ・ｹ郢晁ご・｢・ｺ闖ｫ繝ｻ*/}
               <div className="rounded-2xl border-2 border-indigo-300 dark:border-indigo-600 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/70 dark:to-blue-950/60 p-8 flex flex-col relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                  アーリーアクセス
+                  Recommended
                 </div>
                 <div className="mb-6">
                   <div className="inline-block px-3 py-1 mb-3 rounded-full bg-indigo-600/15 text-indigo-700 dark:bg-indigo-500/25 dark:text-indigo-300 text-xs font-bold">
                     PRO
                   </div>
                   <div className="text-3xl font-bold text-text mb-1">
-                    アーリーアクセス価格
+                    Pro pricing
                   </div>
                   <div className="text-sm text-text-muted">
-                    （限定枠）
+                    Monthly / annual billing
                   </div>
                 </div>
                 <div className="mb-6 space-y-4">
                   <ul className="space-y-2">
                     {[
-                      'Writing / Speaking AI 無制限（または上限引き上げ）',
-                      '待ち時間なしで練習',
-                      'フィードバック履歴の全件閲覧',
-                      '優先演算（今後対応予定）',
+                      'Writing / Speaking AI with expanded access,',
+                      'More room for repeated practice,',
+                      'Full feedback review access',
+                      'Priority for deeper practice loops',
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <Icons.Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
@@ -569,14 +628,14 @@ export default function LandingPage() {
                   href="/pricing"
                   className="mt-auto w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 text-center"
                 >
-                  Pro にアップグレード
+                  Upgrade to Pro
                 </Link>
                 <p className="mt-3 text-center">
                   <Link
                     href="/pro/request"
                     className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline"
                   >
-                    請求書払いなどは Request Pro へ
+                    Need manual approval? Request Pro
                   </Link>
                 </p>
               </div>
@@ -584,22 +643,22 @@ export default function LandingPage() {
 
             <FadeIn delay={0.2} className="mt-8 text-center text-sm text-text-muted">
               <p>
-                Stripe による安全な決済
+                Secure checkout powered by Stripe.
               </p>
             </FadeIn>
           </div>
         </section>
 
-        {/* About セクション */}
+        {/* About 郢ｧ・ｻ郢ｧ・ｯ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ */}
         <section id="about" className="py-24 bg-surface border-y border-border">
           <div className="container mx-auto px-6">
             <div className="max-w-4xl mx-auto">
               <FadeIn className="text-center mb-16">
                 <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
-                  IELTS Trainingについて
+                  About IELTS Training
                 </h2>
                 <p className="text-text-muted text-lg">
-                  データ駆動型アプローチで、IELTSスコアアップをサポートします
+                  データ駆動のアプローチで、IELTSスコア改善をサポートします。
                 </p>
               </FadeIn>
               
@@ -608,11 +667,11 @@ export default function LandingPage() {
                   <div>
                     <h3 className="text-xl font-bold text-text mb-4 flex items-center gap-2">
                       <span className="w-1 h-6 bg-indigo-600 rounded-full"></span>
-                      ミッション
+                      Mission
                     </h3>
                     <p className="text-text-muted leading-relaxed bg-surface-2 p-6 rounded-xl border border-border">
-                      IELTS Trainingは、AI技術を活用して、すべての学習者が効率的にIELTSスコアを向上させられるプラットフォームを目指しています。
-                      独学では難しい「客観的なフィードバック」と「データに基づく学習戦略」を提供することで、目標スコア達成をサポートします。
+                      IELTS Training は、AIを活用して IELTS 学習をより具体的で続けやすいものにするためのプラットフォームです。
+                      単なる採点ではなく、フィードバックとデータにもとづく学習導線をセットで提供し、実際のスコア改善につなげます。
                     </p>
                   </div>
                 </FadeIn>
@@ -621,18 +680,18 @@ export default function LandingPage() {
                   <div>
                     <h3 className="text-xl font-bold text-text mb-4 flex items-center gap-2">
                       <span className="w-1 h-6 bg-indigo-600 rounded-full"></span>
-                      技術スタック
+                      Tech stack
                     </h3>
                     <StaggerContainer className="grid md:grid-cols-2 gap-4" staggerDelay={0.1}>
                       <StaggerItem>
                         <div className="bg-surface-2 rounded-xl p-5 border border-border">
-                          <div className="font-semibold text-text mb-2">フロントエンド</div>
+                          <div className="font-semibold text-text mb-2">Frontend</div>
                           <div className="text-sm text-text-muted">Next.js 14, React, TypeScript, Tailwind CSS</div>
                         </div>
                       </StaggerItem>
                       <StaggerItem>
                         <div className="bg-surface-2 rounded-xl p-5 border border-border">
-                          <div className="font-semibold text-text mb-2">バックエンド</div>
+                          <div className="font-semibold text-text mb-2">Backend</div>
                           <div className="text-sm text-text-muted">Supabase (PostgreSQL), Next.js API Routes</div>
                         </div>
                       </StaggerItem>
@@ -644,8 +703,8 @@ export default function LandingPage() {
                       </StaggerItem>
                       <StaggerItem>
                         <div className="bg-surface-2 rounded-xl p-5 border border-border">
-                          <div className="font-semibold text-text mb-2">その他</div>
-                          <div className="text-sm text-text-muted">Zod (バリデーション), SRSアルゴリズム</div>
+                          <div className="font-semibold text-text mb-2">Other</div>
+                          <div className="text-sm text-text-muted">Zod (validation), SRS algorithms</div>
                         </div>
                       </StaggerItem>
                     </StaggerContainer>
@@ -656,20 +715,20 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Contact セクション（Google Forms 埋め込み + 別タブリンク + mailto） */}
+        {/* Contact 郢ｧ・ｻ郢ｧ・ｯ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ繝ｻ繝ｻoogle Forms 陜謎ｹ晢ｽ・恷・ｼ邵ｺ・ｿ + 陋ｻ・･郢ｧ・ｿ郢晄じﾎ懃ｹ晢ｽｳ郢ｧ・ｯ + mailto繝ｻ繝ｻ*/}
         <section id="contact" className="py-24 bg-bg-secondary scroll-mt-24">
           <div className="container mx-auto px-6">
             <div className="max-w-3xl mx-auto">
               <FadeIn className="text-center mb-12">
                 <h2 className="text-heading-2 font-bold tracking-tight text-text mb-4">
-                  お問い合わせ
+                  Contact
                 </h2>
                 <p className="text-text-muted text-lg">
-                  ご質問やフィードバックをお待ちしています
+                  ご質問やフィードバックがあればご連絡ください。
                 </p>
                 {userId && (
                   <p className="mt-2 text-sm text-text-muted">
-                    承認をスムーズにするため、ユーザーIDが自動で入力されます。
+                    申し込みをスムーズにするため、ユーザーIDを自動でフォームに含めています。
                   </p>
                 )}
               </FadeIn>
@@ -677,7 +736,7 @@ export default function LandingPage() {
                 <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden">
                   <iframe
                     src={buildContactGoogleFormUrl({ userId, embedded: true })}
-                    title="お問い合わせフォーム"
+                    title="Contact form"
                     className="w-full border-0"
                     style={{ height: 'min(1000px, 90vh)' }}
                   />
@@ -689,11 +748,11 @@ export default function LandingPage() {
                     rel="noopener noreferrer"
                     className="text-indigo-600 hover:text-indigo-700 font-medium underline"
                   >
-                    別タブで開く
+                    Open in a new tab
                   </a>
                   {CONTACT_EMAIL && CONTACT_EMAIL !== 'support@example.com' && (
                     <a href={CONTACT_MAILTO} className="text-text-muted hover:text-text transition-colors">
-                      メールで問い合わせ
+                      Contact by email
                     </a>
                   )}
                 </div>
@@ -704,7 +763,7 @@ export default function LandingPage() {
 
       </main>
 
-      {/* フッター */}
+      {/* 郢晁ｼ斐Ε郢ｧ・ｿ郢晢ｽｼ */}
       <footer className="bg-surface border-t border-border py-12">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
@@ -716,42 +775,42 @@ export default function LandingPage() {
                 <span className="font-bold text-text">IELTS Training</span>
                </Link>
                <p className="text-sm text-text-muted leading-relaxed">
-                 AIで目標スコア達成をサポートするIELTS対策プラットフォーム
+                 AIで学習導線をサポートする IELTS 対策プラットフォーム
                </p>
             </div>
             
             <div className="md:col-start-3">
-              <h4 className="font-bold text-text mb-4 text-sm">サービス</h4>
+              <h4 className="font-bold text-text mb-4 text-sm">Service</h4>
               <ul className="space-y-2 text-sm text-text-muted">
                 <li>
                   <button onClick={() => scrollToSection('features')} className="hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors text-left">
-                    機能
+                    Features
                   </button>
                 </li>
                 <li>
                   <button onClick={() => scrollToSection('pricing')} className="hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors text-left">
-                    料金
+                    Pricing
                   </button>
                 </li>
                 <li>
                   <Link href="/speaking" className="hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors">
-                    Speaking 記事
+                    Speaking hub
                   </Link>
                 </li>
                 <li>
                   <Link href="/writing" className="hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors">
-                    Writing 記事
+                    Writing hub
                   </Link>
                 </li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-bold text-text mb-4 text-sm">その他</h4>
+              <h4 className="font-bold text-text mb-4 text-sm">Other</h4>
               <ul className="space-y-2 text-sm text-text-muted">
                 <li>
                   <button onClick={() => scrollToSection('about')} className="hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors text-left">
-                    運営方針
+                    About
                   </button>
                 </li>
                 <li>
@@ -766,7 +825,7 @@ export default function LandingPage() {
                 </li>
                 <li>
                   <button onClick={() => scrollToSection('contact')} className="hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors text-left">
-                    お問い合わせ
+                    Contact
                   </button>
                 </li>
               </ul>
@@ -789,84 +848,55 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Privacy Policy モーダル */}
+      {/* Privacy Policy modal */}
       {showPrivacyPolicy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowPrivacyPolicy(false)}>
-          <div className="bg-surface rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={() => setShowPrivacyPolicy(false)}
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-surface shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 flex items-center justify-between border-b border-border bg-surface px-6 py-4">
               <h2 className="text-2xl font-bold text-text">Privacy Policy</h2>
               <button
+                type="button"
                 onClick={() => setShowPrivacyPolicy(false)}
-                className="text-text-muted hover:text-text transition-colors"
+                className="text-text-muted transition-colors hover:text-text"
+                aria-label="Close Privacy Policy"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="px-6 py-8 space-y-6 text-text">
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">1. 個人情報の収集</h3>
-                <p className="leading-relaxed">
-                  IELTS Training（以下「当サービス」）は、サービス提供のために以下の個人情報を収集します：
-                </p>
-                <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
-                  <li>メールアドレス（アカウント作成時）</li>
-                  <li>パスワード（暗号化して保存）</li>
-                  <li>学習レベル（初級・中級・上級）</li>
-                  <li>学習履歴（回答内容、フィードバック、進捗データ）</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">2. 個人情報の利用目的</h3>
-                <p className="leading-relaxed">
-                  収集した個人情報は、以下の目的でのみ利用します：
-                </p>
-                <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
-                  <li>サービスの提供・運営</li>
-                  <li>学習進捗の可視化と分析</li>
-                  <li>AIによるフィードバック生成</li>
-                  <li>サービス改善のための統計データ作成</li>
-                  <li>重要なお知らせの配信</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">3. 個人情報の管理</h3>
-                <p className="leading-relaxed">
-                  当サービスは、Supabase（PostgreSQL）を使用して個人情報を安全に管理しています。
-                  パスワードは暗号化され、学習データは認証済みユーザーのみがアクセス可能です。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">4. 第三者への提供</h3>
-                <p className="leading-relaxed">
-                  当サービスは、法令に基づく場合を除き、個人情報を第三者に提供することはありません。
-                  AIフィードバック生成のため、OpenAIやGroqなどのLLMサービスに回答内容を送信しますが、
-                  これらはサービス提供に必要な最小限の情報のみです。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">5. 個人情報の削除</h3>
-                <p className="leading-relaxed">
-                  アカウント削除により、すべての個人情報と学習データが削除されます。
-                  アカウント削除は、設定画面から行うことができます。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">6. お問い合わせ</h3>
-                <p className="leading-relaxed">
-                  個人情報に関するお問い合わせは、Contactセクションからご連絡ください。
-                </p>
-              </div>
-              
-              <div className="pt-4 border-t border-border">
+            <div className="space-y-6 px-6 py-8 text-text">
+              {PRIVACY_SECTIONS.map((section) => (
+                <section key={section.title}>
+                  <h3 className="mb-3 text-lg font-bold text-text">{section.title}</h3>
+                  {section.paragraphs.map((paragraph) => (
+                    <p key={paragraph} className="leading-relaxed text-text-muted">
+                      {paragraph}
+                    </p>
+                  ))}
+                  {'bullets' in section && section.bullets ? (
+                    <ul className="ml-4 mt-3 list-disc list-inside space-y-1 text-text-muted">
+                      {section.bullets.map((bullet) => (
+                        <li key={bullet}>{bullet}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </section>
+              ))}
+              <div className="border-t border-border pt-4">
                 <p className="text-sm text-text-muted">
-                  最終更新日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  Last updated:{' '}
+                  {new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                 </p>
               </div>
             </div>
@@ -874,104 +904,55 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* Terms of Service モーダル */}
+      {/* Terms of Service modal */}
       {showTermsOfService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowTermsOfService(false)}>
-          <div className="bg-surface rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={() => setShowTermsOfService(false)}
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-surface shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 flex items-center justify-between border-b border-border bg-surface px-6 py-4">
               <h2 className="text-2xl font-bold text-text">Terms of Service</h2>
               <button
+                type="button"
                 onClick={() => setShowTermsOfService(false)}
-                className="text-text-muted hover:text-text transition-colors"
+                className="text-text-muted transition-colors hover:text-text"
+                aria-label="Close Terms of Service"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="px-6 py-8 space-y-6 text-text">
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">1. サービスの利用</h3>
-                <p className="leading-relaxed">
-                  IELTS Training（以下「当サービス」）は、IELTS学習をサポートするためのプラットフォームです。
-                  当サービスを利用することにより、本利用規約に同意したものとみなされます。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">2. アカウント</h3>
-                <p className="leading-relaxed mb-2">
-                  アカウント作成には、有効なメールアドレスとパスワードが必要です。
-                </p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>アカウント情報は正確に登録してください</li>
-                  <li>アカウントの管理責任はユーザーにあります</li>
-                  <li>不正アクセスが疑われる場合は、すぐにパスワードを変更してください</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">3. 利用規約の遵守</h3>
-                <p className="leading-relaxed mb-2">
-                  ユーザーは、以下の行為を禁止します：
-                </p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>法令または公序良俗に違反する行為</li>
-                  <li>他のユーザーに迷惑をかける行為</li>
-                  <li>当サービスの運営を妨害する行為</li>
-                  <li>AIフィードバックを不正に利用する行為</li>
-                  <li>その他、当サービスが不適切と判断する行為</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">4. サービスの内容</h3>
-                <p className="leading-relaxed">
-                  当サービスは、AI技術を活用したIELTS学習サポートを提供します。
-                  AIによるフィードバックは参考情報であり、実際のIELTS試験の結果を保証するものではありません。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">5. サービスの変更・終了</h3>
-                <p className="leading-relaxed">
-                  当サービスは、事前の通知なく、サービスの内容を変更または終了する場合があります。
-                  現在は無料で提供していますが、将来的に有料プランを導入する可能性があります。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">6. 免責事項</h3>
-                <p className="leading-relaxed">
-                  当サービスは、以下の事項について責任を負いません：
-                </p>
-                <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
-                  <li>AIフィードバックの正確性</li>
-                  <li>IELTS試験の結果</li>
-                  <li>サービス利用による損害</li>
-                  <li>システムの不具合やメンテナンスによる利用不可</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">7. 知的財産権</h3>
-                <p className="leading-relaxed">
-                  当サービスのコンテンツ（テキスト、デザイン、ロゴ等）の知的財産権は、
-                  当サービスまたはその提供者に帰属します。
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-bold text-text mb-3">8. 規約の変更</h3>
-                <p className="leading-relaxed">
-                  当サービスは、本利用規約を変更する場合があります。
-                  変更後の規約は、当サービス上に掲載した時点から効力を生じます。
-                </p>
-              </div>
-              
-              <div className="pt-4 border-t border-border">
+            <div className="space-y-6 px-6 py-8 text-text">
+              {TERMS_SECTIONS.map((section) => (
+                <section key={section.title}>
+                  <h3 className="mb-3 text-lg font-bold text-text">{section.title}</h3>
+                  {section.paragraphs.map((paragraph) => (
+                    <p key={paragraph} className="leading-relaxed text-text-muted">
+                      {paragraph}
+                    </p>
+                  ))}
+                  {'bullets' in section && section.bullets ? (
+                    <ul className="ml-4 mt-3 list-disc list-inside space-y-1 text-text-muted">
+                      {section.bullets.map((bullet) => (
+                        <li key={bullet}>{bullet}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </section>
+              ))}
+              <div className="border-t border-border pt-4">
                 <p className="text-sm text-text-muted">
-                  最終更新日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  Last updated:{' '}
+                  {new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                 </p>
               </div>
             </div>

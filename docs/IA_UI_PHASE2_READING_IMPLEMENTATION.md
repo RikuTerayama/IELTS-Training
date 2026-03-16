@@ -75,4 +75,6 @@
   - [ ] Writing task flows (`/task/select`, `/task/[taskId]`, etc.) unchanged.
   - [ ] Speaking exam and feedback flows unchanged.
   - [ ] Vocab (`/vocab`, `/vocab?skill=reading`) unchanged.
+  - [ ] Writing public topic pages (`/writing/task2/topics/[slug]`) use the public shell (logo -> `/`, public footer, no progress fetch).
+  - [ ] Internal Reading / Listening vocab CTAs from `/home`, `/progress`, and `/api/menu/today` point to canonical `/vocab` URLs rather than legacy `/training/vocab`.
   - [ ] Mobile: Reading hub and nav are usable and consistent with other hubs.
