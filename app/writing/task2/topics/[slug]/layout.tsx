@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 
 const task2Topics = [
   { slug: 'education', title: 'Education' },
@@ -11,7 +11,7 @@ const task2Topics = [
   { slug: 'crime-punishment', title: 'Crime & Punishment' },
   { slug: 'culture-traditions', title: 'Culture & Traditions' },
   { slug: 'transport-urban', title: 'Transport & Urban Life' },
-  { slug: 'work-life-balance', title: 'Work–Life Balance' },
+  { slug: 'work-life-balance', title: 'Work-life Balance' },
   { slug: 'climate-change', title: 'Climate Change' },
   { slug: 'globalisation', title: 'Globalisation' },
   { slug: 'youth-age', title: 'Youth & Age' },
@@ -59,10 +59,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = params;
   const topic = task2Topics.find((t) => t.slug === slug);
   if (!topic) {
-    return { title: 'Topic Not Found' };
+    return { title: 'トピックが見つかりません' };
   }
-  const title = `IELTS Writing Task 2: ${topic.title} | Examples, Outline & AI Feedback`;
-  const description = `Practice IELTS Writing Task 2 on "${topic.title}" with example questions, a clear outline template, and AI feedback in practice or exam mode.`;
+  const title = `IELTS Writing Task 2 トピック: ${topic.title} | 例題・構成・AI フィードバック`;
+  const description = `IELTS Writing Task 2 の「${topic.title}」で、例題、構成テンプレート、AI フィードバックを使った Practice / Exam Mode に進めます。`;
   const canonical = `/writing/task2/topics/${slug}`;
   return {
     title,

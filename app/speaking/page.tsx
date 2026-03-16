@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
@@ -14,19 +14,19 @@ const TOPICS = [
 
 const SPEAKING_FAQ = [
   {
-    question: '無料で使えますか？',
+    question: '無料プランでも使えますか？',
     answer:
-      'Free プランでも Speaking AI は試せますが、日次上限があります。繰り返し練習したい場合は Pro を確認してください。',
+      '無料プランでも Speaking AI は試せます。毎日の残り回数を確認しながら進め、継続的に使いたい場合は Pro を検討してください。',
   },
   {
-    question: 'マイクは必要ですか？',
+    question: 'マイクは必須ですか？',
     answer:
-      '現在の β はテキスト入力ベースです。まずは英文の組み立てと語彙を安定させ、その後に音声練習へ広げる使い方ができます。',
+      '現在の AI 面接は音声ベースです。まずは質問例と構成を確認して、その後に音声練習へ進む使い方がおすすめです。',
   },
   {
-    question: 'スコアはどう決まりますか？',
+    question: 'スコアはどの程度参考になりますか？',
     answer:
-      'Fluency、Lexical Resource、Grammar、Pronunciation の観点で band-style feedback を返し、全体の目安も表示します。',
+      'Fluency、Lexical Resource、Grammar、Pronunciation の観点で band-style feedback を返します。学習の目安として使い、公式スコアとは分けて考えてください。',
   },
 ] as const;
 
@@ -43,12 +43,12 @@ export default function SpeakingPage() {
             IELTS Speaking 対策
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-8 text-text-muted">
-            AI interviewer で Part 1-3 を練習できます。Cue Card と band-style feedback を使って、
-            本番に近い流れで Speaking を整えます。
+            AI interviewer と Part 1-3 の構成で Speaking を練習できます。Cue Card と band-style feedback を使って、
+            本番に近い流れで感覚を整えるページです。
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
-              面接を始める
+              AI 面接を始める
             </Link>
             <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
               料金を見る
@@ -61,25 +61,25 @@ export default function SpeakingPage() {
 
         <section className="mb-16" aria-labelledby="practice-heading">
           <h2 id="practice-heading" className="mb-6 text-xl font-bold text-text">
-            今できること
+            練習できること
           </h2>
           <div className="grid gap-4 md:grid-cols-3">
             <div className={cn('rounded-2xl p-6', cardBase)}>
               <h3 className="font-semibold text-text">Part 1</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                身近なテーマについて短く答えるウォームアップです。答えの型を安定させるのに向いています。
+                身近な質問に対して短く明確に答えるウォームアップです。答えの型を安定させるのに向いています。
               </p>
             </div>
             <div className={cn('rounded-2xl border-primary/30 p-6', cardBase)}>
               <h3 className="font-semibold text-text">Part 2 / Cue Card</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                1〜2 分で話す長めのパートです。Cue Card のポイントを使いながら構成を作れます。
+                1〜2 分で話すパートです。Cue Card のポイントを整理して、話の流れを組み立てます。
               </p>
             </div>
             <div className={cn('rounded-2xl p-6', cardBase)}>
               <h3 className="font-semibold text-text">Part 3</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                Part 2 に関連する抽象度の高い質問に答えます。意見と理由を組み立てる練習です。
+                Part 2 を広げた抽象度の高い質問に答えます。意見だけでなく理由まで言う練習に向いています。
               </p>
             </div>
           </div>
@@ -96,16 +96,16 @@ export default function SpeakingPage() {
               </span>
               <h3 className="mt-3 font-semibold text-text">トピックと Part を選ぶ</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                Work / Travel などのトピックと、Part 1 / 2 / 3 を選んで面接を開始します。
+                Work / Travel などのトピックと、Part 1 / 2 / 3 を選んで AI 面接を開始します。
               </p>
             </li>
             <li className={cn('list-none rounded-2xl p-6', cardBase)}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 2
               </span>
-              <h3 className="mt-3 font-semibold text-text">答える</h3>
+              <h3 className="mt-3 font-semibold text-text">話す</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                現在の β ではテキスト入力で回答します。Part 2 は Cue Card を見ながら構成を組み立てられます。
+                現在の AI 面接では音声で回答します。Part 2 は Cue Card を見ながら構成を立ててから話せます。
               </p>
             </li>
             <li className={cn('list-none rounded-2xl p-6', cardBase)}>
@@ -114,7 +114,7 @@ export default function SpeakingPage() {
               </span>
               <h3 className="mt-3 font-semibold text-text">フィードバックを確認する</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                band-style feedback と改善ポイントを確認し、次の面接で言い直しを試します。
+                band-style feedback と改善ポイントを見返し、次の面接で試すべき表現を確認します。
               </p>
             </li>
           </ol>
@@ -162,7 +162,7 @@ export default function SpeakingPage() {
                 トピック
               </h2>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                Part 1-3 でよく使うトピック別に、サンプル質問と考え方の入口を確認できます。
+                Part 1-3 でよく使うトピック別に、サンプル質問と答え方の導線を確認できます。
               </p>
             </div>
           </div>

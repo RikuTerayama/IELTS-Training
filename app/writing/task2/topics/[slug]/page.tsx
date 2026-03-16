@@ -14,7 +14,7 @@ const task2Topics = [
   { slug: 'crime-punishment', title: 'Crime & Punishment' },
   { slug: 'culture-traditions', title: 'Culture & Traditions' },
   { slug: 'transport-urban', title: 'Transport & Urban Life' },
-  { slug: 'work-life-balance', title: 'Work–Life Balance' },
+  { slug: 'work-life-balance', title: 'Work-life Balance' },
   { slug: 'climate-change', title: 'Climate Change' },
   { slug: 'globalisation', title: 'Globalisation' },
   { slug: 'youth-age', title: 'Youth & Age' },
@@ -312,10 +312,10 @@ const EXAMPLE_QUESTIONS: Record<Slug, string[]> = {
 };
 
 const OUTLINE_TEMPLATE = [
-  'Intro: Paraphrase the question and state your position (agree / disagree / both).',
-  'Body 1: First main idea with explanation and example.',
-  'Body 2: Second main idea (or the other side) with explanation and example.',
-  'Conclusion: Summarise your view in one or two sentences.',
+  '導入: 問題文を言い換え、自分の立場を示す。',
+  '本文1: 1つ目の主張を理由と具体例で広げる。',
+  '本文2: 2つ目の主張、または反対側の視点を理由と具体例で広げる。',
+  '結論: 立場を1〜2文で簡潔にまとめる。',
 ];
 
 const HIGH_SCORING_PHRASES = [
@@ -330,28 +330,28 @@ const HIGH_SCORING_PHRASES = [
 ];
 
 const COMMON_MISTAKES = [
-  'Not addressing all parts of the question (e.g. “discuss both views” but only giving one).',
-  'Writing too little (aim for at least 250 words) or going off-topic.',
-  'Using informal language or contractions (e.g. “don’t” instead of “do not”).',
-  'Repeating the same ideas or vocabulary; vary your expressions.',
-  'Forgetting a clear conclusion that restates your position.',
+  '問題文の指示をすべて拾えていない（例: Discuss both views なのに片方しか書いていない）。',
+  '250語に届かない、または話題から逸れてしまう。',
+  '口語的すぎる表現や短縮形を使ってしまう。',
+  '同じ語彙や主張の繰り返しが多い。',
+  '結論で自分の立場を言い直していない。',
 ];
 
 const TASK2_TOPIC_FAQ = [
   {
-    question: 'How should I structure a Task 2 essay on this topic?',
+    question: 'このトピックの Task 2 はどう構成すればよいですか？',
     answer:
-      'Use a clear 4-paragraph structure: introduction, two body paragraphs, and conclusion. Focus each body paragraph on one main reason or example.',
+      '導入で論点を言い換え、本文 2 段落で理由と具体例を広げ、結論で立場を簡潔にまとめる構成が基本です。',
   },
   {
-    question: 'What vocabulary should I use?',
+    question: 'どんな語彙を入れるべきですか？',
     answer:
-      'Use topic-specific nouns and verbs, plus linking phrases (however, moreover, as a result). Avoid memorized templates; keep it natural.',
+      'topic 固有の語彙に加えて、cause / effect / solution / comparison をつなぐ表現を入れると展開が安定します。',
   },
   {
-    question: 'Can I practice this in exam mode?',
+    question: 'Exam Mode でも練習できますか？',
     answer:
-      'Yes. Use Exam Mode to write under test-like conditions and get band-style feedback.',
+      'はい。このページから Exam Mode に入り、本番に近い流れで書いてから AI フィードバックを確認できます。',
   },
 ] as const;
 
@@ -397,23 +397,24 @@ export default async function Task2TopicPage({ params }: Props) {
         {/* Hero */}
         <section className="mb-12 text-center">
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-            IELTS Writing Task 2 Topic: {topic.title}
+            IELTS Writing Task 2 トピック: {topic.title}
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-text-muted">
-            Example questions, outline template, and tips for &quot;{topic.title}&quot;. Practice with AI feedback in exam or practice mode.
+            「{topic.title}」の例題、構成テンプレート、高得点表現をまとめています。
+            Practice / Exam Mode からそのまま AI フィードバックに進めます。
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href={examUrl} className={cn(buttonPrimary, 'inline-flex')}>
-              Start exam mode
+              Exam Mode を始める
             </Link>
             <Link href={practiceUrl} className={cn(buttonSecondary, 'inline-flex')}>
-              Start practice
+              Practice を始める
             </Link>
             <Link href="/pricing" className="text-sm text-indigo-600 hover:underline">
-              View pricing
+              料金を見る
             </Link>
             <Link href="/writing" className="text-sm text-indigo-600 hover:underline">
-              Back to Writing hub
+              Writing に戻る
             </Link>
           </div>
         </section>
@@ -421,7 +422,7 @@ export default async function Task2TopicPage({ params }: Props) {
         {/* Example questions */}
         <section className="mb-12" aria-labelledby="examples-heading">
           <h2 id="examples-heading" className="mb-6 text-xl font-bold text-text">
-            Example questions
+            例題
           </h2>
           <ul className="space-y-4">
             {questions.map((q, i) => (
@@ -435,7 +436,7 @@ export default async function Task2TopicPage({ params }: Props) {
         {/* Outline template */}
         <section className="mb-12" aria-labelledby="outline-heading">
           <h2 id="outline-heading" className="mb-6 text-xl font-bold text-text">
-            Outline template
+            構成テンプレート
           </h2>
           <ul className="list-disc list-inside space-y-2 rounded-2xl border border-border bg-surface p-6 text-sm text-text-muted">
             {OUTLINE_TEMPLATE.map((item, i) => (
@@ -447,7 +448,7 @@ export default async function Task2TopicPage({ params }: Props) {
         {/* High-scoring phrases */}
         <section className="mb-12" aria-labelledby="phrases-heading">
           <h2 id="phrases-heading" className="mb-6 text-xl font-bold text-text">
-            High-scoring phrases
+            高得点につながる表現
           </h2>
           <ul className="flex flex-wrap gap-2">
             {HIGH_SCORING_PHRASES.map((phrase, i) => (
@@ -464,7 +465,7 @@ export default async function Task2TopicPage({ params }: Props) {
         {/* Common mistakes */}
         <section className="mb-12" aria-labelledby="mistakes-heading">
           <h2 id="mistakes-heading" className="mb-6 text-xl font-bold text-text">
-            Common mistakes
+            よくあるミス
           </h2>
           <ul className="list-disc list-inside space-y-2 text-sm text-text-muted">
             {COMMON_MISTAKES.map((mistake, i) => (
@@ -475,16 +476,16 @@ export default async function Task2TopicPage({ params }: Props) {
 
         {/* Bottom CTA */}
         <section className="border-t border-border pt-8 text-center">
-          <p className="mb-4 text-sm text-text-muted">Ready to write? Choose a mode and get AI feedback.</p>
+          <p className="mb-4 text-sm text-text-muted">このままモードを選び、AI フィードバックまで一気に進めます。</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href={examUrl} className={cn(buttonPrimary, 'inline-flex')}>
-              Start exam mode
+              Exam Mode を始める
             </Link>
             <Link href={practiceUrl} className={cn(buttonSecondary, 'inline-flex')}>
-              Start practice
+              Practice を始める
             </Link>
             <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
-              View pricing
+              料金を見る
             </Link>
           </div>
         </section>
@@ -492,7 +493,7 @@ export default async function Task2TopicPage({ params }: Props) {
         {/* FAQ */}
         <section className="mt-12 border-t border-border pt-8" aria-labelledby="faq-heading">
           <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
-            FAQ
+            よくある質問
           </h2>
           <ul className="space-y-4">
             {TASK2_TOPIC_FAQ.map((item, i) => (
@@ -503,9 +504,9 @@ export default async function Task2TopicPage({ params }: Props) {
             ))}
           </ul>
           <p className="mt-4 text-sm text-text-muted">
-            <Link href={examUrl} className="text-indigo-600 hover:underline">Try exam mode</Link>
-            {' · '}
-            <Link href="/pricing" className="text-indigo-600 hover:underline">View pricing</Link>
+            <Link href={examUrl} className="text-indigo-600 hover:underline">Exam Mode を試す</Link>
+            {' ・ '}
+            <Link href="/pricing" className="text-indigo-600 hover:underline">料金を見る</Link>
           </p>
         </section>
       </div>

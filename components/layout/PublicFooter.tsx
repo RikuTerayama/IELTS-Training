@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { BrandLink } from '@/components/branding/Brand';
@@ -24,7 +24,7 @@ export function PublicFooter() {
               </Link>
             ))}
             <Link href="/#contact" className="hover:text-text transition-colors duration-200">
-              Contact
+              お問い合わせ
             </Link>
           </div>
           <div>

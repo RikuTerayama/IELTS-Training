@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 
 const speakingTopics = [
   { slug: 'work-study', title: 'Work & Study', apiTopic: 'work_study' },
@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!topic) {
     return { title: 'トピックが見つかりません' };
   }
-  const title = `IELTS Speaking ${topic.title}対策 | Part 1-3練習とAIフィードバック`;
-  const description = `IELTS Speaking の「${topic.title}」トピックに特化した Part 1-3 練習ページ。Cue Card と AI feedback を使って本番に近い対策ができます。`;
+  const title = `IELTS Speakingトピック: ${topic.title} | Part 1-3 の質問例と練習`;
+  const description = `IELTS Speaking の「${topic.title}」トピックで、Part 1-3 の質問例、Cue Card、AI フィードバックの使い方を確認できます。`;
   const canonical = `/speaking/topics/${slug}`;
   return {
     title,

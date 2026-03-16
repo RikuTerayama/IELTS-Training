@@ -258,7 +258,7 @@ export default function LoginPage() {
             disabled={loading || signUpSuccess}
             className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary-hover disabled:bg-text-muted disabled:cursor-not-allowed transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
-            {loading ? '処理中...' : isSignUp ? 'Sign Up' : 'Login'}
+            {loading ? '処理中...' : isSignUp ? '新規登録' : 'ログイン'}
           </button>
           <button
             type="button"

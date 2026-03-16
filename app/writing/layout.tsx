@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 
-const TITLE = 'IELTS Writing対策 | Task 2 AI添削・Practice・Exam Mode';
+const TITLE = 'IELTS Writing対策 | Task 2 練習と AI フィードバック';
 const DESCRIPTION =
-  'IELTS Writing Task 2 の Practice、Exam Mode、AI添削をまとめて使える Writing hub。PREP で整理してから書く練習と、本番想定の演習を切り替えられます。';
+  'IELTS Writing Task 2 の Practice / Exam Mode と AI フィードバックを使える Meridian の Writing 対策ページです。';
 
 export const metadata: Metadata = {
   title: TITLE,

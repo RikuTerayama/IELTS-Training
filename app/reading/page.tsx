@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
@@ -8,50 +8,50 @@ const QUESTION_TYPES = [
   {
     id: 'paraphrase',
     label: '言い換え / 語彙',
-    desc: '言い換えと Academic 語彙を、文脈の中で素早く見抜く練習です。',
+    desc: '言い換えと Academic 語彙をまとめて確認し、本文の中で意味を取りにいく力を整えます。',
   },
   {
     id: 'matching-headings',
     label: '見出し対応',
-    desc: '段落ごとの要点をつかみ、最適な見出しを選ぶ力を鍛えます。',
+    desc: '各段落の要点をつかみ、似た選択肢を見分ける練習を短いセットで行います。',
   },
   {
     id: 'tfng',
     label: 'TFNG',
-    desc: '本文と設問の関係を整理し、根拠の有無まで判断します。',
+    desc: '本文と設問の関係を判定し、根拠の有無まで丁寧に見分ける感覚を固めます。',
   },
   {
     id: 'summary',
     label: '要約穴埋め',
-    desc: '要約の空欄補充を通して、本文の流れとキーワードを確認します。',
+    desc: '要約の流れを追いながら、必要な語句とキーワードを拾う練習です。',
   },
   {
     id: 'matching-info',
     label: '情報対応',
-    desc: '指定された情報がどの段落にあるかを素早く探す練習です。',
+    desc: '複数段落にまたがる情報を照合し、どこに根拠があるかを見抜く練習です。',
   },
   {
     id: 'sentence',
     label: '文完成',
-    desc: '本文の表現を使って文を完成させる設問に対応します。',
+    desc: '本文の表現を手掛かりに、文を自然に完成させる設問へ対応します。',
   },
 ] as const;
 
 const READING_FAQ = [
   {
-    question: '今できる Reading 学習は何ですか？',
+    question: 'どこから Reading を始めればよいですか？',
     answer:
-      '現在は単語練習の Reading スキルで、言い換え / 語彙、見出し対応、TFNG、要約穴埋め などを練習できます。長文通しの演習は次フェーズで対応予定です。',
+      'まずは Reading 単語の短いセットから始めるのがおすすめです。言い換え・見出し対応・TFNG などを少しずつ回すと、本文理解の土台が整います。',
   },
   {
-    question: 'Reading 語彙は無料で使えますか？',
+    question: 'Reading は無料プランでも使えますか？',
     answer:
-      'Reading 語彙の練習は他スキルと同じ Free プランで始められます。AI 機能には日次上限がある場合があります。詳しくは料金ページを確認してください。',
+      'はい。Reading の単語練習と復習は無料プランでも始められます。より広い学習導線や AI 機能を使いたい場合は料金ページを確認してください。',
   },
   {
-    question: 'Writing や Speaking にも役立ちますか？',
+    question: 'Writing や Speaking にもつながりますか？',
     answer:
-      'Reading で身につく言い換え、Academic 語彙、論理の追い方は Writing と Speaking にもそのまま効きます。Reading を土台にするとアウトプットの質も上がりやすくなります。',
+      'Reading で身につけた言い換え、Academic 語彙、要点把握は Writing と Speaking にもそのまま効きます。先に Reading を回すとアウトプットの質が安定しやすくなります。',
   },
 ] as const;
 
@@ -74,17 +74,14 @@ export default function ReadingPage() {
             IELTS Reading 対策
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-8 text-text-muted">
-            Academic Reading で必要な語彙、言い換え、設問タイプ別の考え方をまとめて練習できます。
-            長文通しの演習は次のフェーズで対応予定です。
+            Academic Reading で頻出の設問タイプ、言い換え、語彙を日本語ガイド付きで練習できます。
+            短いセットから始めて、復習を回しながら精度を上げていく構成です。
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/vocab?skill=reading" className={cn(buttonPrimary, 'inline-flex')}>
-              Reading 語彙を始める
+              Reading 練習を始める
             </Link>
-            <Link
-              href={buildLoginUrl('/home')}
-              className={cn(buttonSecondary, 'inline-flex')}
-            >
+            <Link href={buildLoginUrl('/home')} className={cn(buttonSecondary, 'inline-flex')}>
               学習ホームにログイン
             </Link>
             <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
@@ -95,7 +92,7 @@ export default function ReadingPage() {
 
         <section className="mb-16" aria-labelledby="practice-heading">
           <h2 id="practice-heading" className="mb-6 text-xl font-bold text-text">
-            今できること
+            練習できること
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {QUESTION_TYPES.map((item) => (
@@ -108,14 +105,11 @@ export default function ReadingPage() {
           <p className="mt-4 text-sm leading-6 text-text-muted">
             これらの設問タイプは
             {' '}
-            <Link
-              href="/vocab?skill=reading"
-              className="font-medium text-primary hover:underline"
-            >
-              Reading 語彙
+            <Link href="/vocab?skill=reading" className="font-medium text-primary hover:underline">
+              Reading 練習
             </Link>
             {' '}
-            で今すぐ練習できます。長文読解のフル演習は開発中です。
+            で順番に確認できます。短い反復で基礎を固める設計です。
           </p>
         </section>
 
@@ -134,7 +128,7 @@ export default function ReadingPage() {
                   単語練習
                 </Link>
                 {' '}
-                で Reading スキルを選び、設問タイプごとの練習に入ります。
+                から Reading スキルを選び、設問タイプごとの練習に入ります。
               </p>
             </li>
             <li className={cn('list-none rounded-2xl p-6', cardBase)}>
@@ -143,7 +137,7 @@ export default function ReadingPage() {
               </span>
               <h3 className="mt-3 font-semibold text-text">復習を回す</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                苦手な設問は SRS で再提示されます。短く何度も回すほど Reading の精度が安定します。
+                間違えた設問は SRS で再表示されます。短いセットでも続けるほど Reading の精度が上がります。
               </p>
             </li>
             <li className={cn('list-none rounded-2xl p-6', cardBase)}>
@@ -152,7 +146,7 @@ export default function ReadingPage() {
               </span>
               <h3 className="mt-3 font-semibold text-text">アウトプットにつなげる</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                Reading で拾った言い換えや語彙は、そのまま Writing と Speaking の表現力強化につながります。
+                Reading で拾った言い換えや語彙は、そのまま Writing と Speaking の表現補強にもつながります。
               </p>
             </li>
           </ol>
@@ -170,7 +164,7 @@ export default function ReadingPage() {
                 'hover:border-primary/70 hover:bg-primary/20 transition-colors'
               )}
             >
-              Reading 語彙
+              Reading 練習
             </Link>
             {HUB_LINKS.map(({ href, label }) => (
               <Link
