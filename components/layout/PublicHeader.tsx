@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { BrandLink } from '@/components/branding/Brand';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { PUBLIC_NAV } from '@/lib/config/nav';
 
@@ -33,12 +34,13 @@ export function PublicHeader({
       <div className={`container mx-auto relative z-10 ${isFloating ? 'px-6' : 'px-4 py-3'}`}>
         <div className={`flex items-center justify-between ${isFloating ? 'h-16' : ''}`}>
           <div className="flex items-center gap-6">
-            <Link
+            <BrandLink
               href="/"
-              className="text-xl font-bold text-primary hover:text-primary-hover transition-colors duration-200"
-            >
-              IELTS Training
-            </Link>
+              size={40}
+              priority={isFloating}
+              textClassName="text-lg text-primary"
+              linkClassName="transition-opacity duration-200 hover:opacity-90"
+            />
             <nav className="hidden md:flex gap-4">
               {PUBLIC_NAV.map(({ href, label }) => (
                 <Link
@@ -54,7 +56,7 @@ export function PublicHeader({
                   href={contactHref}
                   className="text-text-muted hover:text-text transition-colors duration-200"
                 >
-                  Contact
+                  お問い合わせ
                 </Link>
               ) : null}
             </nav>
@@ -68,7 +70,7 @@ export function PublicHeader({
                 href={loginHref}
                 className="rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary-hover transition-colors duration-200"
               >
-                Login
+                ログイン
               </Link>
             </div>
             <div className="md:hidden flex items-center gap-2">
@@ -77,7 +79,7 @@ export function PublicHeader({
                 type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 text-text-muted hover:text-text transition-colors duration-200"
-                aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-label={menuOpen ? 'ナビゲーションメニューを閉じる' : 'ナビゲーションメニューを開く'}
               >
                 <svg
                   className="h-6 w-6"
@@ -117,7 +119,7 @@ export function PublicHeader({
                   onClick={() => setMenuOpen(false)}
                   className="text-text-muted hover:text-text py-2 transition-colors duration-200"
                 >
-                  Contact
+                  お問い合わせ
                 </Link>
               ) : null}
               <div className="pt-2 border-t border-border mt-2">
@@ -126,7 +128,7 @@ export function PublicHeader({
                   onClick={() => setMenuOpen(false)}
                   className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary-hover block text-center transition-colors duration-200"
                 >
-                  Login
+                  ログイン
                 </Link>
               </div>
             </div>

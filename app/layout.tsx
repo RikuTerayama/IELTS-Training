@@ -3,8 +3,13 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'IELTS Writing Training',
-  description: 'IELTS Writing/Speaking向け学習アプリ',
+  title: 'Meridian',
+  description: 'Meridian | IELTS Reading / Writing / Speaking 学習アプリ',
+  icons: {
+    icon: '/branding/meridian.png',
+    shortcut: '/branding/meridian.png',
+    apple: '/branding/meridian.png',
+  },
 };
 
 export default function RootLayout({
@@ -26,14 +31,13 @@ export default function RootLayout({
     if (themeMode === 'light' || themeMode === 'dark') {
       resolvedTheme = themeMode;
     } else {
-      // system または 未設定の場合
-      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // system 縺ｾ縺溘・ 譛ｪ險ｭ螳壹・蝣ｴ蜷・      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       resolvedTheme = prefersDark ? 'dark' : 'light';
     }
     
     document.documentElement.setAttribute('data-theme', resolvedTheme);
   } catch (e) {
-    // エラー時はデフォルトでdark
+    // 繧ｨ繝ｩ繝ｼ譎ゅ・繝・ヵ繧ｩ繝ｫ繝医〒dark
     document.documentElement.setAttribute('data-theme', 'dark');
   }
 })();
@@ -47,4 +51,3 @@ export default function RootLayout({
     </html>
   );
 }
-

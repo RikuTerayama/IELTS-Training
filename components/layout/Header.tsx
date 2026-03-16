@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { BrandLink } from '@/components/branding/Brand';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { APP_NAV } from '@/lib/config/nav';
 
@@ -34,9 +35,12 @@ export function Header() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/home" className="text-xl font-bold text-primary hover:text-primary-hover transition-colors duration-200">
-              IELTS Training
-            </Link>
+            <BrandLink
+              href="/home"
+              size={38}
+              textClassName="text-lg text-primary"
+              linkClassName="transition-opacity duration-200 hover:opacity-90"
+            />
             <nav className="hidden md:flex gap-3 lg:gap-4">
               {APP_NAV.map(({ href, label, external }) =>
                 external ? (
@@ -73,7 +77,7 @@ export function Header() {
                     onClick={handleLogout}
                     className="rounded bg-surface-2 border border-border px-3 py-1 text-sm text-text hover:bg-surface transition-colors duration-200"
                   >
-                    Logout
+                    ログアウト
                   </button>
                 </>
               ) : (
@@ -81,7 +85,7 @@ export function Header() {
                   href="/login"
                   className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground hover:bg-primary-hover transition-colors duration-200"
                 >
-                  Login
+                  ログイン
                 </Link>
               )}
             </div>
@@ -90,7 +94,7 @@ export function Header() {
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 text-text-muted hover:text-text focus:outline-none transition-colors duration-200"
-                aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-label={menuOpen ? 'ナビゲーションメニューを閉じる' : 'ナビゲーションメニューを開く'}
               >
                 <svg
                   className="h-6 w-6"
@@ -144,7 +148,7 @@ export function Header() {
                     onClick={handleLogout}
                     className="rounded bg-surface-2 border border-border px-3 py-2 text-sm text-text hover:bg-surface w-full text-left transition-all duration-200"
                   >
-                    Logout
+                    ログアウト
                   </button>
                 </div>
               ) : (
@@ -154,7 +158,7 @@ export function Header() {
                     onClick={() => setMenuOpen(false)}
                     className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary-hover block text-center transition-colors duration-200"
                   >
-                    Login
+                    ログイン
                   </Link>
                 </div>
               )}

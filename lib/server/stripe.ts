@@ -44,7 +44,7 @@ export function getStripeClient(): Stripe {
 
   stripeClient = new Stripe(secretKey, {
     appInfo: {
-      name: 'IELTS Training',
+      name: 'Meridian',
     },
   });
 

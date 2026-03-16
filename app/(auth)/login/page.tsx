@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { BrandMark } from '@/components/branding/Brand';
 import { createClient } from '@/lib/supabase/client';
 
 /** Returns a safe redirect path: same-origin path starting with /, or null */
@@ -199,9 +200,9 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg">
       <div className="w-full max-w-md rounded-lg bg-surface border border-border p-8 shadow-theme-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold text-text">
-          IELTS Training
-        </h1>
+        <div className="mb-6 flex justify-center">
+          <BrandMark size={64} textClassName="text-2xl text-primary" priority />
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-text">

@@ -5,37 +5,61 @@ import { Layout } from '@/components/layout/Layout';
 import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
 const QUESTION_TYPES = [
-  { id: 'paraphrase', label: 'Paraphrase & vocabulary', desc: 'Match meanings and academic vocabulary in context.' },
-  { id: 'matching-headings', label: 'Matching headings', desc: 'Choose the best heading for paragraphs.' },
-  { id: 'tfng', label: 'True / False / Not Given', desc: 'Identify if statements agree with the text.' },
-  { id: 'summary', label: 'Summary completion', desc: 'Fill gaps in a summary of the passage.' },
-  { id: 'matching-info', label: 'Matching information', desc: 'Locate which paragraph contains given information.' },
-  { id: 'sentence', label: 'Sentence completion', desc: 'Complete sentences with words from the text.' },
+  {
+    id: 'paraphrase',
+    label: 'Paraphrase / Vocabulary',
+    desc: '言い換えと Academic 語彙を、文脈の中で素早く見抜く練習です。',
+  },
+  {
+    id: 'matching-headings',
+    label: 'Matching headings',
+    desc: '段落ごとの要点をつかみ、最適な見出しを選ぶ力を鍛えます。',
+  },
+  {
+    id: 'tfng',
+    label: 'True / False / Not Given',
+    desc: '本文と設問の関係を整理し、根拠の有無まで判断します。',
+  },
+  {
+    id: 'summary',
+    label: 'Summary completion',
+    desc: '要約の空欄補充を通して、本文の流れとキーワードを確認します。',
+  },
+  {
+    id: 'matching-info',
+    label: 'Matching information',
+    desc: '指定された情報がどの段落にあるかを素早く探す練習です。',
+  },
+  {
+    id: 'sentence',
+    label: 'Sentence completion',
+    desc: '本文の表現を使って文を完成させる設問に対応します。',
+  },
 ] as const;
 
 const READING_FAQ = [
   {
-    question: 'What can I practice now?',
+    question: '今できる Reading 学習は何ですか？',
     answer:
-      'You can build Academic Reading vocabulary and question-type skills in Vocab: choose the Reading skill and practice paraphrase drill, matching headings, True/False/Not Given, summary completion, and more. Full passage-based reading practice is coming next.',
+      '現在は Vocab の Reading スキルで、paraphrase drill、matching headings、True / False / Not Given、summary completion などを練習できます。長文通しの演習は次フェーズで対応予定です。',
   },
   {
-    question: 'Is Reading vocab free?',
+    question: 'Reading 語彙は無料で使えますか？',
     answer:
-      'Reading vocabulary practice is available on the same free tier as other skills. Daily limits may apply for AI features. See Pricing for details.',
+      'Reading 語彙の練習は他スキルと同じ Free プランで始められます。AI 機能には日次上限がある場合があります。詳しくは料金ページを確認してください。',
   },
   {
-    question: 'How does this fit with Writing and Speaking?',
+    question: 'Writing や Speaking にも役立ちますか？',
     answer:
-      'Reading vocabulary and skills transfer to Writing (academic style) and Speaking (topic vocabulary). We recommend combining Reading vocab with Writing and Speaking practice for a full score boost.',
+      'Reading で身につく言い換え、Academic 語彙、論理の追い方は Writing と Speaking にもそのまま効きます。Reading を土台にすると Output の質も上がりやすくなります。',
   },
-];
+] as const;
 
 const HUB_LINKS = [
-  { href: '/writing', label: 'Writing' },
-  { href: '/speaking', label: 'Speaking' },
+  { href: '/writing', label: 'Writing hub' },
+  { href: '/speaking', label: 'Speaking hub' },
   { href: '/vocab', label: 'Vocab' },
-];
+] as const;
 
 function buildLoginUrl(next: string): string {
   return `/login?next=${encodeURIComponent(next)}`;
@@ -44,80 +68,91 @@ function buildLoginUrl(next: string): string {
 export default function ReadingPage() {
   return (
     <Layout variant="public">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-12">
         <section className="mb-16 text-center">
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-            IELTS Reading Practice
+            IELTS Reading 対策
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-text-muted">
-            Build Academic Reading vocabulary and question-type skills. Full passage practice is coming next.
+          <p className="mx-auto max-w-2xl text-lg leading-8 text-text-muted">
+            Academic Reading で必要な語彙、言い換え、設問タイプ別の考え方をまとめて練習できます。
+            長文通しの演習は次のフェーズで対応予定です。
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link
-              href="/vocab?skill=reading"
-              className={cn(buttonPrimary, 'inline-flex')}
-            >
-              Start with Reading vocab
+            <Link href="/vocab?skill=reading" className={cn(buttonPrimary, 'inline-flex')}>
+              Reading 語彙を始める
             </Link>
             <Link
               href={buildLoginUrl('/home')}
               className={cn(buttonSecondary, 'inline-flex')}
             >
-              Log in to dashboard
+              学習ホームにログイン
             </Link>
-            <Link href="/pricing" className="text-sm text-primary hover:underline font-medium">
-              View pricing
+            <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
+              料金を見る
             </Link>
           </div>
         </section>
 
         <section className="mb-16" aria-labelledby="practice-heading">
           <h2 id="practice-heading" className="mb-6 text-xl font-bold text-text">
-            What you can practice
+            今できること
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {QUESTION_TYPES.map((t) => (
-              <div key={t.id} className={cn('p-6 rounded-2xl', cardBase)}>
-                <h3 className="font-semibold text-text">{t.label}</h3>
-                <p className="mt-2 text-sm text-text-muted">{t.desc}</p>
+            {QUESTION_TYPES.map((item) => (
+              <div key={item.id} className={cn('rounded-2xl p-6', cardBase)}>
+                <h3 className="font-semibold text-text">{item.label}</h3>
+                <p className="mt-2 text-sm leading-6 text-text-muted">{item.desc}</p>
               </div>
             ))}
           </div>
-          <p className="mt-4 text-sm text-text-muted">
-            These question types are available in <Link href="/vocab?skill=reading" className="text-primary hover:underline font-medium">Reading vocab</Link> now. Full passage-based practice is in development.
+          <p className="mt-4 text-sm leading-6 text-text-muted">
+            これらの設問タイプは
+            {' '}
+            <Link
+              href="/vocab?skill=reading"
+              className="font-medium text-primary hover:underline"
+            >
+              Reading 語彙
+            </Link>
+            {' '}
+            で今すぐ練習できます。長文読解のフル演習は開発中です。
           </p>
         </section>
 
         <section className="mb-16" aria-labelledby="how-heading">
           <h2 id="how-heading" className="mb-6 text-xl font-bold text-text">
-            How it works
+            使い方
           </h2>
           <ol className="grid gap-4 md:grid-cols-3">
-            <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
+            <li className={cn('list-none rounded-2xl p-6', cardBase)}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 1
               </span>
-              <h3 className="mt-3 font-semibold text-text">Start with vocab</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Go to <Link href="/vocab?skill=reading" className="text-primary hover:underline">Vocab</Link> and choose Reading. Practice by question type (paraphrase, matching headings, T/F/NG, etc.).
+              <h3 className="mt-3 font-semibold text-text">Reading を選ぶ</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                <Link href="/vocab?skill=reading" className="text-primary hover:underline">
+                  Vocab
+                </Link>
+                {' '}
+                で Reading スキルを選び、設問タイプごとの練習に入ります。
               </p>
             </li>
-            <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
+            <li className={cn('list-none rounded-2xl p-6', cardBase)}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 2
               </span>
-              <h3 className="mt-3 font-semibold text-text">Review and repeat</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                SRS-style review keeps difficult items in rotation. Track progress from your dashboard when logged in.
+              <h3 className="mt-3 font-semibold text-text">復習を回す</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                苦手な設問は SRS で再提示されます。短く何度も回すほど Reading の精度が安定します。
               </p>
             </li>
-            <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
+            <li className={cn('list-none rounded-2xl p-6', cardBase)}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 3
               </span>
-              <h3 className="mt-3 font-semibold text-text">Full passages coming next</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Full Academic Reading passages with timed practice and band-style feedback are in development.
+              <h3 className="mt-3 font-semibold text-text">Output に接続する</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                Reading で拾った言い換えや語彙は、そのまま Writing と Speaking の表現力強化につながります。
               </p>
             </li>
           </ol>
@@ -125,28 +160,28 @@ export default function ReadingPage() {
 
         <section className="mb-16" aria-labelledby="related-heading">
           <h2 id="related-heading" className="mb-6 text-xl font-bold text-text">
-            Related
+            関連リンク
           </h2>
           <div className="flex flex-wrap gap-4">
             <Link
               href="/vocab?skill=reading"
               className={cn(
-                'inline-flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-primary/50 bg-primary/10 text-primary font-medium',
-                'hover:bg-primary/20 hover:border-primary/70 transition-colors'
+                'inline-flex items-center gap-2 rounded-xl border-2 border-primary/50 bg-primary/10 px-5 py-3 font-medium text-primary',
+                'hover:border-primary/70 hover:bg-primary/20 transition-colors'
               )}
             >
-              Reading vocab
+              Reading 語彙
             </Link>
             {HUB_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 className={cn(
-                  'inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-surface-2 text-text font-medium',
-                  'hover:bg-surface hover:border-border-strong transition-colors'
+                  'inline-flex items-center gap-2 rounded-xl border border-border bg-surface-2 px-5 py-3 font-medium text-text',
+                  'hover:border-border-strong hover:bg-surface transition-colors'
                 )}
               >
-                {label} hub
+                {label}
               </Link>
             ))}
           </div>
@@ -154,13 +189,13 @@ export default function ReadingPage() {
 
         <section className="border-t border-border pt-12" aria-labelledby="faq-heading">
           <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
-            FAQ
+            よくある質問
           </h2>
           <ul className="space-y-4">
-            {READING_FAQ.map((item, i) => (
-              <li key={i} className={cn('rounded-lg border border-border bg-surface p-4', cardBase)}>
+            {READING_FAQ.map((item) => (
+              <li key={item.question} className={cn('rounded-lg bg-surface p-4', cardBase)}>
                 <h3 className="font-semibold text-text">{item.question}</h3>
-                <p className="mt-2 text-sm text-text-muted leading-relaxed">{item.answer}</p>
+                <p className="mt-2 text-sm leading-7 text-text-muted">{item.answer}</p>
               </li>
             ))}
           </ul>

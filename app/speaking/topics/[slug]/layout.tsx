@@ -14,10 +14,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = params;
   const topic = speakingTopics.find((t) => t.slug === slug);
   if (!topic) {
-    return { title: 'Topic Not Found' };
+    return { title: 'トピックが見つかりません' };
   }
-  const title = `IELTS Speaking ${topic.title} Questions | AI Practice (Part 1–3)`;
-  const description = `Practice IELTS Speaking "${topic.title}" with Part 1–3 questions, cue cards, and AI feedback.`;
+  const title = `IELTS Speaking ${topic.title}対策 | Part 1-3練習とAIフィードバック`;
+  const description = `IELTS Speaking の「${topic.title}」トピックに特化した Part 1-3 練習ページ。Cue Card と AI feedback を使って本番に近い対策ができます。`;
   const canonical = `/speaking/topics/${slug}`;
   return {
     title,
