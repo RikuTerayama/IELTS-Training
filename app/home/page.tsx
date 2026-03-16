@@ -103,18 +103,18 @@ const WEAKNESS_LABELS: Record<string, string> = {
 };
 
 const READING_TYPE_LABELS: Record<string, string> = {
-  'Paraphrase Drill': 'Paraphrase Drill',
-  'Matching Headings': 'Matching Headings',
-  'True / False / Not Given': 'True / False / Not Given',
-  'Summary Completion': 'Summary Completion',
-  'Matching Information': 'Matching Information',
-  'Sentence Completion': 'Sentence Completion',
+  'Paraphrase Drill': '言い換え / 語彙',
+  'Matching Headings': '見出し対応',
+  'True / False / Not Given': 'TFNG',
+  'Summary Completion': '要約穴埋め',
+  'Matching Information': '情報対応',
+  'Sentence Completion': '文完成',
 };
 
 const ACTIVITY_KIND_LABELS: Record<DashboardActivity['kind'], string> = {
-  writing: 'Output',
-  speaking: 'Output',
-  reading: 'Input',
+  writing: 'アウトプット',
+  speaking: 'アウトプット',
+  reading: 'インプット',
 };
 
 async function fetchApi<T>(url: string): Promise<T | null> {
@@ -165,7 +165,7 @@ function toTimestamp(value: string): number {
 }
 
 function localizeReadingType(value: string | null | undefined): string {
-  if (!value) return 'Reading vocab';
+  if (!value) return 'Reading 単語';
   return READING_TYPE_LABELS[value] ?? value;
 }
 
@@ -273,7 +273,7 @@ export default function HomePage() {
     const writingActivities: DashboardActivity[] = writingHistory.map((item) => ({
       id: item.id,
       kind: 'writing',
-      title: `Writing feedback / Band ${item.band_estimate}`,
+      title: `Writing フィードバック / Band ${item.band_estimate}`,
       detail:
         item.weakness_tags.length > 0
           ? `弱点: ${getWeaknessText(item.weakness_tags) ?? '最新のフィードバックを確認'}`
@@ -299,7 +299,7 @@ export default function HomePage() {
     const readingActivities: DashboardActivity[] = (readingHistory?.history ?? []).map((item) => ({
       id: item.id,
       kind: 'reading',
-      title: 'Reading vocab',
+      title: 'Reading 単語',
       detail: buildReadingDetail(item),
       occurredAt: item.created_at,
       href: '/vocab?skill=reading',
@@ -336,13 +336,13 @@ export default function HomePage() {
     if (allAiUsageSpent) {
       return {
         eyebrow: '今日のおすすめ',
-        title: '今日は Input で積み上げる',
+        title: '今日はインプットで積み上げる',
         description:
-          'AI 枠を使い切っているので、Reading や vocab review を進めるのが最短です。Output は明日また再開できます。',
+          'AI 枠を使い切っているので、Reading や単語の復習を進めるのが最短です。アウトプットは明日また再開できます。',
         href: '/vocab?skill=reading',
-        label: 'Reading review に進む',
+        label: 'Reading 復習に進む',
         secondaryHref: '/vocab',
-        secondaryLabel: 'Vocab を開く',
+        secondaryLabel: '単語を開く',
       };
     }
 
@@ -353,9 +353,9 @@ export default function HomePage() {
         description:
           '忘れかけた問題を先に回収すると、その後の Writing / Speaking の理解も安定します。短いセットで進めて問題ありません。',
         href: '/vocab?skill=reading',
-        label: 'Reading review を始める',
+        label: 'Reading 復習を始める',
         secondaryHref: '/progress',
-        secondaryLabel: 'Progress を見る',
+        secondaryLabel: '進捗を見る',
       };
     }
 
@@ -368,7 +368,7 @@ export default function HomePage() {
         href: '/task/select?task_type=Task%202',
         label: 'Writing Practice を始める',
         secondaryHref: '/progress',
-        secondaryLabel: 'Progress を見返す',
+        secondaryLabel: '進捗を見返す',
       };
     }
 
@@ -387,7 +387,7 @@ export default function HomePage() {
 
     return {
       eyebrow: '今日のおすすめ',
-      title: 'Output を1本進める',
+      title: 'アウトプットを1本進める',
       description:
         '今日は Writing か Speaking のどちらかを1本だけ完了させるのがおすすめです。短時間で前進を感じやすいタイミングです。',
       href: '/task/select?task_type=Task%202&mode=exam',
@@ -401,35 +401,35 @@ export default function HomePage() {
     () => [
       {
         title: 'Reading',
-        eyebrow: 'Input',
+        eyebrow: 'インプット',
         description:
           readingDueCount > 0
-            ? `今日は ${readingDueCount} 件の review が残っています。まずは Reading vocab から回収するのが最短です。`
+            ? `今日は ${readingDueCount} 件の復習が残っています。まずは Reading 単語から回収するのが最短です。`
             : 'Academic Reading の語彙・設問タイプ練習に入ります。短いセットで始められます。',
         href: '/vocab?skill=reading',
-        ctaLabel: readingDueCount > 0 ? 'Reading review を始める' : 'Reading を始める',
-        badge: readingDueCount > 0 ? `Due ${readingDueCount}` : undefined,
+        ctaLabel: readingDueCount > 0 ? 'Reading 復習を始める' : 'Reading を始める',
+        badge: readingDueCount > 0 ? `復習 ${readingDueCount}` : undefined,
       },
       {
-        title: 'Vocab',
-        eyebrow: 'Input',
-        description: '語彙の反復学習と skill 別の review をまとめて進めます。',
+        title: '単語',
+        eyebrow: 'インプット',
+        description: '語彙の反復学習と種類別の復習をまとめて進めます。',
         href: '/vocab',
-        ctaLabel: 'Vocab を開く',
+        ctaLabel: '単語を開く',
       },
       {
-        title: 'Idiom',
-        eyebrow: 'Input',
+        title: '熟語',
+        eyebrow: 'インプット',
         description: '熟語や言い換え表現を確認して、Reading / Listening の理解を底上げします。',
         href: '/training/idiom',
-        ctaLabel: 'Idiom を開く',
+        ctaLabel: '熟語を開く',
       },
       {
-        title: 'Lexicon',
-        eyebrow: 'Input',
+        title: '表現',
+        eyebrow: 'インプット',
         description: '表現バンクを回して、Writing / Speaking に使う言い回しを補強します。',
         href: '/training/lexicon',
-        ctaLabel: 'Lexicon を開く',
+        ctaLabel: '表現バンクを開く',
       },
     ],
     [readingDueCount]
@@ -439,32 +439,32 @@ export default function HomePage() {
     () => [
       {
         title: 'Writing Practice',
-        eyebrow: 'Output',
+        eyebrow: 'アウトプット',
         description: 'PREP や整理しながら練習する導線です。弱点を潰しながら書きたいときに向いています。',
         href: '/task/select?task_type=Task%202',
         ctaLabel: 'Practice を始める',
-        badge: weaknessText ? `Focus: ${weaknessText}` : undefined,
+        badge: weaknessText ? `重点: ${weaknessText}` : undefined,
       },
       {
         title: 'Writing Exam Mode',
-        eyebrow: 'Output',
+        eyebrow: 'アウトプット',
         description: 'PREP を挟まずにそのまま本番想定で書く導線です。時間感覚を確認したい日に使います。',
         href: '/task/select?task_type=Task%202&mode=exam',
         ctaLabel: 'Exam Mode を開く',
       },
       {
         title: 'Speaking',
-        eyebrow: 'Output',
+        eyebrow: 'アウトプット',
         description: 'AI interviewer で Part 1-3 を回します。直近の感覚を維持したい日に向いています。',
         href: '/exam/speaking',
         ctaLabel: 'Speaking を始める',
       },
       {
-        title: 'Results / Feedback',
-        eyebrow: 'Output',
-        description: 'Writing と Speaking の履歴や feedback を見返して、次の1本を決めます。',
+        title: '結果 / フィードバック',
+        eyebrow: 'アウトプット',
+        description: 'Writing と Speaking の履歴やフィードバックを見返して、次の1本を決めます。',
         href: '/progress',
-        ctaLabel: 'Progress を開く',
+        ctaLabel: '進捗を開く',
       },
     ],
     [weaknessText]
@@ -474,7 +474,7 @@ export default function HomePage() {
     () => [
       {
         title: 'Blog',
-        eyebrow: 'Blog / Note',
+        eyebrow: '記事 / Note',
         description: 'IELTS 学習の考え方や実践ノートを外部 blog で確認できます。',
         href: BLOG_OFFICIAL_URL,
         ctaLabel: 'Blog を開く',
@@ -482,15 +482,15 @@ export default function HomePage() {
       },
       {
         title: 'Note',
-        eyebrow: 'Blog / Note',
+        eyebrow: '記事 / Note',
         description: '短い気づきや学習メモを Note 側で追えます。軽く読む入り口として使えます。',
         href: BLOG_NOTE_URL,
         ctaLabel: 'Note を開く',
         external: true,
       },
       {
-        title: 'Guides',
-        eyebrow: 'Blog / Note',
+        title: '公開ガイド',
+        eyebrow: '記事 / Note',
         description: 'まず全体像を見たいときは、Reading / Writing / Speaking の公開ガイドへ戻れます。',
         href: '/reading',
         ctaLabel: '公開ガイドを見る',
@@ -533,7 +533,7 @@ export default function HomePage() {
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]">
           <div className={cn(cardBase, 'space-y-6 p-6 md:p-8')}>
             <div className="space-y-3">
-              <span className={badgeBase}>Learning hub</span>
+              <span className={badgeBase}>学習ハブ</span>
               <div className="space-y-3">
                 <h1 className="text-3xl font-bold tracking-tight text-text md:text-4xl">
                   学習ホーム
@@ -589,7 +589,7 @@ export default function HomePage() {
                     </Link>
                   )}
                   <Link href="/progress" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200">
-                    Progress を開く
+                    進捗を開く
                   </Link>
                 </div>
               </div>
@@ -598,7 +598,7 @@ export default function HomePage() {
 
           <div className={cn(cardBase, 'space-y-5 p-6')}>
             <div className="space-y-2">
-                    <span className={badgeBase}>Progress snapshot</span>
+                    <span className={badgeBase}>進捗サマリー</span>
               <h2 className="text-xl font-semibold text-text">今の学習状況</h2>
               <p className={cardDesc}>
                 直近の結果と残り枠を見て、今日はどのレーンを回すべきか判断できます。
@@ -607,13 +607,13 @@ export default function HomePage() {
             <dl className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
               <div className={cn(cardBase, 'space-y-1 p-4')}>
                 <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                        Writing attempts
+                        Writing 提出数
                 </dt>
                 <dd className="text-2xl font-bold text-text">{summary?.total_attempts ?? 0}</dd>
               </div>
               <div className={cn(cardBase, 'space-y-1 p-4')}>
                 <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                  Latest band estimate
+                  最新 Band 推定
                 </dt>
                 <dd className="text-2xl font-bold text-text">
                   {summary?.latest_band_estimate ?? '-'}
@@ -621,7 +621,7 @@ export default function HomePage() {
               </div>
               <div className={cn(cardBase, 'space-y-1 p-4')}>
                 <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                  Current focus
+                  今の重点
                 </dt>
                 <dd className="text-sm font-medium text-text">
                   {weaknessText
@@ -637,7 +637,7 @@ export default function HomePage() {
 
         <section id="input" className="space-y-4">
           <div className="space-y-2">
-            <span className={badgeBase}>Input</span>
+            <span className={badgeBase}>インプット</span>
             <h2 className="text-2xl font-bold text-text">読みながら積むレーン</h2>
             <p className="max-w-3xl text-sm leading-relaxed text-text-muted md:text-base">
               Reading / 語彙 / 熟語 / 表現バンクをまとめて扱うゾーンです。短く反復したい日はここから入るのが最も安定します。
@@ -652,10 +652,10 @@ export default function HomePage() {
 
         <section id="output" className="space-y-4">
           <div className="space-y-2">
-            <span className={badgeBase}>Output</span>
+            <span className={badgeBase}>アウトプット</span>
             <h2 className="text-2xl font-bold text-text">書く・話すレーン</h2>
             <p className="max-w-3xl text-sm leading-relaxed text-text-muted md:text-base">
-              Writing と Speaking の Practice / Exam / feedback をまとめたゾーンです。今日1本やるならここから選びます。
+              Writing と Speaking の Practice / Exam / フィードバックをまとめたゾーンです。今日1本やるならここから選びます。
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -667,10 +667,10 @@ export default function HomePage() {
 
         <section id="blog" className="space-y-4">
           <div className="space-y-2">
-            <span className={badgeBase}>Blog / Note</span>
+            <span className={badgeBase}>記事 / Note</span>
             <h2 className="text-2xl font-bold text-text">知識を補うレーン</h2>
             <p className="max-w-3xl text-sm leading-relaxed text-text-muted md:text-base">
-              すぐ演習に入らない日でも、Blog / Note と公開ガイドで方針を整えられます。学習の解像度を上げたいときに使います。
+              すぐ演習に入らない日でも、記事 / Note と公開ガイドで方針を整えられます。学習の解像度を上げたいときに使います。
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -683,7 +683,7 @@ export default function HomePage() {
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.9fr)]">
           <div className={cn(cardBase, 'space-y-5 p-6')}>
             <div className="space-y-2">
-                  <span className={badgeBase}>Recent activity</span>
+                  <span className={badgeBase}>最近の学習</span>
               <h2 className="text-xl font-semibold text-text">最近の学習</h2>
               <p className={cardDesc}>
                 直近で触った項目をまとめています。続きから再開したいときはここを見るのが最短です。
@@ -717,7 +717,7 @@ export default function HomePage() {
               <div className={cn(cardBase, 'space-y-4 p-5')}>
                 <h3 className="text-lg font-semibold text-text">まだ履歴がありません</h3>
                 <p className={cardDesc}>
-                  まずは Input から1セット進めるのがおすすめです。短時間で完了でき、次の Output にもつながります。
+                  まずはインプットから1セット進めるのがおすすめです。短時間で完了でき、次のアウトプットにもつながります。
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Link href="/vocab?skill=reading" className={cn(buttonPrimary, 'inline-flex items-center justify-center')}>
@@ -734,7 +734,7 @@ export default function HomePage() {
           <div className="space-y-6">
             <div className={cn(cardBase, 'space-y-4 p-6')}>
               <div className="space-y-2">
-                <span className={badgeBase}>Progress snapshot</span>
+                <span className={badgeBase}>進捗サマリー</span>
                 <h2 className="text-xl font-semibold text-text">今の焦点</h2>
               </div>
               <ul className="space-y-3 text-sm leading-relaxed text-text-muted">
@@ -745,20 +745,20 @@ export default function HomePage() {
                 </li>
                 <li>
                   {weakestReadingSkill
-                    ? `Reading は ${weakestReadingSkill.skill} の正答率が ${weakestReadingSkill.accuracy_percent}% です。Input の最初にここを回す価値があります。`
-                    : 'Reading の skill 別統計はまだ少ないため、まずは数セット解いて傾向を作る段階です。'}
+                    ? `Reading は ${weakestReadingSkill.skill} の正答率が ${weakestReadingSkill.accuracy_percent}% です。インプットの最初にここを回す価値があります。`
+                    : 'Reading の種類別統計はまだ少ないため、まずは数セット解いて傾向を作る段階です。'}
                 </li>
                 <li>
                   {summary?.latest_band_estimate
-                    ? `直近の band estimate は ${summary.latest_band_estimate}。次に 1 本積むと変化を追いやすいタイミングです。`
-                    : 'まだ band estimate は出ていません。Writing を1本提出すると Output の基準線ができます。'}
+                    ? `直近の Band 推定は ${summary.latest_band_estimate}。次に 1 本積むと変化を追いやすいタイミングです。`
+                    : 'まだ Band 推定は出ていません。Writing を1本提出するとアウトプットの基準線ができます。'}
                 </li>
               </ul>
             </div>
 
             <div className={cn(cardBase, 'space-y-4 p-6')}>
               <div className="space-y-2">
-                <span className={badgeBase}>Plan / limits</span>
+                <span className={badgeBase}>プランと残り枠</span>
                 <h2 className="text-xl font-semibold text-text">プランと残り枠</h2>
               </div>
 
@@ -773,7 +773,7 @@ export default function HomePage() {
                           : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200'
                       )}
                     >
-                      {usageToday.is_pro ? 'Pro Active' : 'Free'}
+                      {usageToday.is_pro ? 'Pro 利用中' : '無料プラン'}
                     </span>
                     <span className="text-sm text-text-muted">
                       リセット: {formatResetAt(usageToday.reset_at)}
@@ -783,21 +783,21 @@ export default function HomePage() {
                   <dl className="grid gap-3 sm:grid-cols-2">
                     <div className={cn(cardBase, 'space-y-1 p-4')}>
                       <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                        Writing AI
+                        Writing AI 残り回数
                       </dt>
                       <dd className="text-xl font-bold text-text">
                         {usageToday.is_pro
-                          ? 'Unlimited'
+                          ? '上限なし'
                           : `${usageToday.writing_remaining} / ${usageToday.writing_limit}`}
                       </dd>
                     </div>
                     <div className={cn(cardBase, 'space-y-1 p-4')}>
                       <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                        Speaking AI
+                        Speaking AI 残り回数
                       </dt>
                       <dd className="text-xl font-bold text-text">
                         {usageToday.is_pro
-                          ? 'Unlimited'
+                          ? '上限なし'
                           : `${usageToday.speaking_remaining} / ${usageToday.speaking_limit}`}
                       </dd>
                     </div>
@@ -828,7 +828,7 @@ export default function HomePage() {
               ) : (
                 <div className="space-y-4">
                   <p className={cardDesc}>
-                    現在の利用枠を取得できませんでした。Pricing からプランの違いを確認できます。
+                    現在の利用枠を取得できませんでした。料金ページからプランの違いを確認できます。
                   </p>
                   <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex items-center justify-center')}>
                     料金を見る
