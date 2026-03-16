@@ -15,7 +15,7 @@ const TASK2_TOPICS = [
   { slug: 'crime-punishment', title: 'Crime & Punishment' },
   { slug: 'culture-traditions', title: 'Culture & Traditions' },
   { slug: 'transport-urban', title: 'Transport & Urban Life' },
-  { slug: 'work-life-balance', title: 'Work–Life Balance' },
+  { slug: 'work-life-balance', title: 'Work-life Balance' },
   { slug: 'climate-change', title: 'Climate Change' },
   { slug: 'globalisation', title: 'Globalisation' },
   { slug: 'youth-age', title: 'Youth & Age' },
@@ -59,21 +59,21 @@ const TASK2_TOPICS = [
 
 const WRITING_FAQ = [
   {
-    question: 'What is the difference between practice and exam mode?',
+    question: 'Practice と Exam Mode の違いは何ですか？',
     answer:
-      'Practice mode lets you use PREP to plan and structure ideas before writing. Exam mode simulates test conditions, so you write in one go and get band-style feedback. Both give you targeted suggestions. See the dashboard for more.',
+      'Practice は PREP を使って考えを整理してから書けるモードです。Exam Mode は本番に近い流れで、PREP なしで書き切ってから band-style feedback を受けます。',
   },
   {
-    question: 'Does it support Task 1?',
+    question: 'Task 1 も使えますか？',
     answer:
-      'This hub focuses on Task 2. Task 1 support is currently limited. Check the app dashboard and pricing for the latest features.',
+      'この公開 hub では主に Task 2 を案内しています。Task 1 の対応状況は学習ホームや料金ページで最新の状態を確認してください。',
   },
   {
-    question: 'How accurate is the band score?',
+    question: '表示される band はどのくらい信頼できますか？',
     answer:
-      'Scores are band-style estimates from an AI trained on IELTS criteria. Use them as a guide for improvement; for official results you need a real IELTS test.',
+      '表示される band は IELTS の観点に沿った AI 推定です。改善の方向をつかむには十分役立ちますが、公式スコアの代わりではありません。',
   },
-];
+] as const;
 
 function buildLoginUrl(next: string): string {
   return `/login?next=${encodeURIComponent(next)}`;
@@ -82,57 +82,58 @@ function buildLoginUrl(next: string): string {
 export default function WritingPage() {
   return (
     <Layout variant="public">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-12">
         <section className="mb-16 text-center">
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-            IELTS Writing Practice
+            IELTS Writing 対策
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-text-muted">
-            Task 2 AI feedback with practice (PREP) and exam-style writing.
+          <p className="mx-auto max-w-2xl text-lg leading-8 text-text-muted">
+            Task 2 の添削、Practice、Exam Mode を 1 つの流れで使える Writing hub です。
+            初稿の方向性確認から、band-style feedback を使った改善まで進められます。
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
               href="/task/select?task_type=Task%202&mode=exam"
               className={cn(buttonPrimary, 'inline-flex')}
             >
-              Start exam mode
+              Exam Mode を始める
             </Link>
             <Link
               href="/task/select?task_type=Task%202"
               className={cn(buttonSecondary, 'inline-flex')}
             >
-              Start practice
+              Practice を始める
             </Link>
             <Link href={buildLoginUrl('/home')} className="text-sm font-medium text-primary hover:underline">
-              Log in to dashboard
+              学習ホームにログイン
             </Link>
             <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
-              View pricing
+              料金を見る
             </Link>
           </div>
         </section>
 
         <section className="mb-16" aria-labelledby="practice-heading">
           <h2 id="practice-heading" className="mb-6 text-xl font-bold text-text">
-            What you can practice
+            今できること
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            <div className={cn('p-6 rounded-2xl', cardBase)}>
+            <div className={cn('rounded-2xl p-6', cardBase)}>
               <h3 className="font-semibold text-text">Practice (PREP)</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Plan and structure ideas before writing.
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                PREP を使って論点整理をしてから書く練習です。初級〜中級の立ち上がりに向いています。
               </p>
             </div>
-            <div className={cn('p-6 rounded-2xl', cardBase, 'border-primary/30')}>
-              <h3 className="font-semibold text-text">Exam mode</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Write under test-like conditions and get band-style feedback.
+            <div className={cn('rounded-2xl border-primary/30 p-6', cardBase)}>
+              <h3 className="font-semibold text-text">Exam Mode</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                本番に近い流れで一気に書き、提出後に band-style feedback を確認します。
               </p>
             </div>
-            <div className={cn('p-6 rounded-2xl', cardBase)}>
+            <div className={cn('rounded-2xl p-6', cardBase)}>
               <h3 className="font-semibold text-text">Rewrite</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Iterate based on targeted suggestions.
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                返ってきた指摘をもとに書き直し、改善点を定着させます。
               </p>
             </div>
           </div>
@@ -140,34 +141,44 @@ export default function WritingPage() {
 
         <section className="mb-16" aria-labelledby="how-heading">
           <h2 id="how-heading" className="mb-6 text-xl font-bold text-text">
-            How it works
+            使い方
           </h2>
           <ol className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
+            <li className={cn('list-none rounded-2xl p-6', cardBase)}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 1
               </span>
-              <h3 className="mt-3 font-semibold text-text">Choose mode</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Pick practice (with PREP) or exam mode from the <Link href="/task/select" className="text-primary hover:underline font-medium">task selector</Link> or your <Link href="/home" className="text-primary hover:underline font-medium">dashboard</Link>.
+              <h3 className="mt-3 font-semibold text-text">モードを選ぶ</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                <Link href="/task/select" className="font-medium text-primary hover:underline">
+                  task selector
+                </Link>
+                {' '}
+                または
+                {' '}
+                <Link href="/home" className="font-medium text-primary hover:underline">
+                  学習ホーム
+                </Link>
+                {' '}
+                から Practice / Exam Mode を選びます。
               </p>
             </li>
-            <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
+            <li className={cn('list-none rounded-2xl p-6', cardBase)}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 2
               </span>
-              <h3 className="mt-3 font-semibold text-text">Write</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                In practice you can plan first; in exam mode you write under time pressure. Submit when ready.
+              <h3 className="mt-3 font-semibold text-text">書いて提出する</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                Practice では PREP で考えを固めてから、Exam Mode では本番想定で一気に書きます。
               </p>
             </li>
-            <li className={cn('p-6 rounded-2xl', cardBase, 'list-none')}>
+            <li className={cn('list-none rounded-2xl p-6', cardBase)}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 3
               </span>
-              <h3 className="mt-3 font-semibold text-text">Get feedback</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Receive band-style scores and weak-point suggestions. Use <Link href="/pricing" className="text-primary hover:underline font-medium">Pro</Link> for more attempts and rewrites.
+              <h3 className="mt-3 font-semibold text-text">弱点を直す</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                band-style feedback と rewrite を使い、Task Response・構成・語彙・文法の改善に繋げます。
               </p>
             </li>
           </ol>
@@ -175,38 +186,66 @@ export default function WritingPage() {
 
         <section className="mb-16" aria-labelledby="related-heading">
           <h2 id="related-heading" className="mb-6 text-xl font-bold text-text">
-            Related
+            関連リンク
           </h2>
           <div className="flex flex-wrap gap-4">
-            <Link href="/reading" className={cn('inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-surface-2 text-text font-medium hover:bg-surface hover:border-primary/50 transition-colors')}>
+            <Link
+              href="/reading"
+              className={cn(
+                'inline-flex items-center gap-2 rounded-xl border border-border bg-surface-2 px-5 py-3 font-medium text-text',
+                'hover:bg-surface hover:border-primary/50 transition-colors'
+              )}
+            >
               Reading hub
             </Link>
-            <Link href="/speaking" className={cn('inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-surface-2 text-text font-medium hover:bg-surface hover:border-primary/50 transition-colors')}>
+            <Link
+              href="/speaking"
+              className={cn(
+                'inline-flex items-center gap-2 rounded-xl border border-border bg-surface-2 px-5 py-3 font-medium text-text',
+                'hover:bg-surface hover:border-primary/50 transition-colors'
+              )}
+            >
               Speaking hub
             </Link>
-            <Link href="/vocab" className={cn('inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-surface-2 text-text font-medium hover:bg-surface hover:border-primary/50 transition-colors')}>
+            <Link
+              href="/vocab"
+              className={cn(
+                'inline-flex items-center gap-2 rounded-xl border border-border bg-surface-2 px-5 py-3 font-medium text-text',
+                'hover:bg-surface hover:border-primary/50 transition-colors'
+              )}
+            >
               Vocab
             </Link>
           </div>
         </section>
 
         <section className="mb-16" aria-labelledby="topics-heading">
-          <h2 id="topics-heading" className="mb-6 text-xl font-bold text-text">
-            Task 2 topics
-          </h2>
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <h2 id="topics-heading" className="text-xl font-bold text-text">
+                Task 2 topics
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                IELTS Task 2 で頻出のテーマを topic page から確認できます。
+              </p>
+            </div>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {TASK2_TOPICS.map((t) => (
+            {TASK2_TOPICS.map((topic) => (
               <Link
-                key={t.slug}
-                href={`/writing/task2/topics/${t.slug}`}
+                key={topic.slug}
+                href={`/writing/task2/topics/${topic.slug}`}
                 className={cn(
-                  'p-6 rounded-2xl border border-border bg-surface text-left transition-all',
-                  'hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5',
+                  'rounded-2xl border border-border bg-surface p-6 text-left transition-all',
+                  'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md',
                   cardBase
                 )}
               >
-                <h3 className="font-semibold text-text">{t.title}</h3>
-                <p className="mt-2 text-sm text-primary">View topic →</p>
+                <h3 className="font-semibold text-text">{topic.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-text-muted">
+                  トピックの考え方や関連表現の入口を確認できます。
+                </p>
+                <p className="mt-4 text-sm font-medium text-primary">トピックを見る</p>
               </Link>
             ))}
           </div>
@@ -214,13 +253,13 @@ export default function WritingPage() {
 
         <section className="border-t border-border pt-12" aria-labelledby="faq-heading">
           <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
-            FAQ
+            よくある質問
           </h2>
           <ul className="space-y-4">
-            {WRITING_FAQ.map((item, i) => (
-              <li key={i} className={cn('rounded-lg border border-border bg-surface p-4', cardBase)}>
+            {WRITING_FAQ.map((item) => (
+              <li key={item.question} className={cn('rounded-lg bg-surface p-4', cardBase)}>
                 <h3 className="font-semibold text-text">{item.question}</h3>
-                <p className="mt-2 text-sm text-text-muted leading-relaxed">{item.answer}</p>
+                <p className="mt-2 text-sm leading-7 text-text-muted">{item.answer}</p>
               </li>
             ))}
           </ul>

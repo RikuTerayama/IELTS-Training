@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
-const TITLE = 'IELTS Speaking Practice | AI Interviewer (Part 1–3)';
+const TITLE = 'IELTS Speaking対策 | AI面接でPart 1-3を練習';
 const DESCRIPTION =
-  'Practice IELTS Speaking with an AI interviewer: Part 1, Part 2 cue cards, and Part 3 discussion. Get instant feedback and band-style scores.';
+  'IELTS Speaking の Part 1-3 を AI interviewer で練習できる Speaking hub。Cue Card と band-style feedback を使って、本番に近い準備ができます。';
 
 export const metadata: Metadata = {
   title: TITLE,

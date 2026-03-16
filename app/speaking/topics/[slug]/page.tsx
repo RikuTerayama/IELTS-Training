@@ -16,54 +16,59 @@ type Slug = (typeof speakingTopics)[number]['slug'];
 const SAMPLE_QUESTIONS: Record<Slug, { part1: string; part2: string; part3: string }> = {
   'work-study': {
     part1: 'Do you work or are you a student?',
-    part2: 'Describe a job or course you found rewarding. You should say what it was, why you chose it, and what you learned.',
+    part2:
+      'Describe a job or course you found rewarding. You should say what it was, why you chose it, and what you learned.',
     part3: 'How has technology changed the way people work or study?',
   },
   hometown: {
     part1: 'Where is your hometown?',
-    part2: 'Describe a place in your hometown you like. You should say where it is, what you do there, and why you like it.',
+    part2:
+      'Describe a place in your hometown you like. You should say where it is, what you do there, and why you like it.',
     part3: 'Why do some people choose to leave their hometown?',
   },
   'free-time': {
     part1: 'What do you like to do in your free time?',
-    part2: 'Describe a hobby you enjoy. You should say when you started it, how often you do it, and why you like it.',
+    part2:
+      'Describe a hobby you enjoy. You should say when you started it, how often you do it, and why you like it.',
     part3: 'Do you think people have enough free time today?',
   },
   travel: {
     part1: 'Do you like travelling?',
-    part2: 'Describe a trip you remember well. You should say where you went, who you were with, and what you did.',
+    part2:
+      'Describe a trip you remember well. You should say where you went, who you were with, and what you did.',
     part3: 'How can tourism affect local communities?',
   },
   technology: {
     part1: 'How often do you use technology?',
-    part2: 'Describe a piece of technology you use every day. You should say what it is, how you use it, and why it is useful.',
+    part2:
+      'Describe a piece of technology you use every day. You should say what it is, how you use it, and why it is useful.',
     part3: 'Will technology replace some jobs in the future?',
   },
 };
 
 const QUICK_TIPS = [
-  'Use topic-specific vocabulary to show range.',
-  'Structure answers with a short intro, 1-2 main points, and a brief conclusion.',
-  'Give concrete examples from your experience where relevant.',
-  'In Part 2, use the cue card points to plan your talk before speaking.',
-  'Keep answers clear and relevant; avoid going off-topic.',
-];
+  'トピックに合った語彙を 2〜3 個入れて、語彙の幅を見せます。',
+  '答えは「結論 → 理由 → 具体例」の順で短くまとめると安定します。',
+  'Part 2 は Cue Card のポイントを 1 分で整理してから話し始めます。',
+  '抽象的な質問でも、自分の経験や身近な例に引き寄せると答えやすくなります。',
+  '長く話すよりも、質問に対して明確に答えることを優先します。',
+] as const;
 
 const SPEAKING_TOPIC_FAQ = [
   {
-    question: 'How do I practice Part 2 cue cards for this topic?',
+    question: 'このトピックで Part 2 を練習するときのコツは？',
     answer:
-      'Spend 1 minute planning 2-3 ideas, then speak for 1-2 minutes with examples.',
+      '1 分で 2〜3 個の軸を決め、Cue Card のポイントに沿って 1〜2 分で話せる流れを作るのがおすすめです。',
   },
   {
-    question: 'Do I need a microphone?',
+    question: 'テキスト入力でも効果はありますか？',
     answer:
-      'Not necessarily. You can practice in text mode first, then move to voice later.',
+      'はい。まずはテキストで構成と語彙を安定させ、その後に音声練習へ広げると Speaking の型が崩れにくくなります。',
   },
   {
-    question: 'How is my score calculated?',
+    question: 'スコアはどう見ればいいですか？',
     answer:
-      'We provide band-style feedback across Fluency, Lexical Resource, Grammar, and Pronunciation.',
+      'Fluency、Lexical Resource、Grammar、Pronunciation の観点を見て、特に低い項目を次回の面接で優先的に直すのが効果的です。',
   },
 ] as const;
 
@@ -83,15 +88,18 @@ function buildFaqPageJsonLd() {
 }
 
 export async function generateStaticParams() {
-  return speakingTopics.map((t) => ({ slug: t.slug }));
+  return speakingTopics.map((topic) => ({ slug: topic.slug }));
 }
 
 type Props = { params: { slug: string } };
 
 export default async function SpeakingTopicPage({ params }: Props) {
   const { slug } = params;
-  const topic = speakingTopics.find((t) => t.slug === slug);
-  if (!topic) notFound();
+  const topic = speakingTopics.find((item) => item.slug === slug);
+
+  if (!topic) {
+    notFound();
+  }
 
   const samples = SAMPLE_QUESTIONS[topic.slug];
   const faqJsonLd = buildFaqPageJsonLd();
@@ -102,48 +110,49 @@ export default async function SpeakingTopicPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-12">
         <section className="mb-12 text-center">
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-            IELTS Speaking Topic: {topic.title}
+            IELTS Speaking トピック: {topic.title}
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-text-muted">
-            Practice Part 1-3 questions and cue cards for &quot;{topic.title}&quot; with AI feedback.
+          <p className="mx-auto max-w-2xl text-lg leading-8 text-text-muted">
+            「{topic.title}」に関連する Part 1-3 の質問例と、答え方の考え方をまとめています。
+            そのまま AI 面接に入り、実践しながらフィードバックを確認できます。
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
-              Start interview
+              このトピックで面接を始める
             </Link>
             <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
-              View pricing
+              料金を見る
             </Link>
-            <Link href="/speaking" className="text-sm text-indigo-600 hover:underline">
-              Back to Speaking hub
+            <Link href="/speaking" className="text-sm font-medium text-indigo-600 hover:underline">
+              Speaking hub に戻る
             </Link>
           </div>
         </section>
 
         <section className="mb-12" aria-labelledby="part-guide-heading">
           <h2 id="part-guide-heading" className="mb-6 text-xl font-bold text-text">
-            Part guide
+            Part 別の見方
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            <div className={cn('p-6 rounded-2xl', cardBase)}>
+            <div className={cn('rounded-2xl p-6', cardBase)}>
               <h3 className="font-semibold text-text">Part 1</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Short personal questions about {topic.title.toLowerCase()}. Warm up with 2-3 sentence answers.
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                「{topic.title}」に関する身近な質問に短く答えるパートです。2〜3 文でまずは明確に返します。
               </p>
             </div>
-            <div className={cn('p-6 rounded-2xl', cardBase, 'border-indigo-200')}>
-              <h3 className="font-semibold text-text">Part 2 - Cue Card</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                A 1-2 minute talk on a {topic.title.toLowerCase()}-related topic. Use the cue card points to plan.
+            <div className={cn('rounded-2xl border-indigo-200 p-6', cardBase)}>
+              <h3 className="font-semibold text-text">Part 2 / Cue Card</h3>
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                {topic.title} に関連するテーマで 1〜2 分話します。Cue Card のポイントを軸に話を組み立てます。
               </p>
             </div>
-            <div className={cn('p-6 rounded-2xl', cardBase)}>
+            <div className={cn('rounded-2xl p-6', cardBase)}>
               <h3 className="font-semibold text-text">Part 3</h3>
-              <p className="mt-2 text-sm text-text-muted">
-                Deeper discussion questions linked to Part 2. Give opinions and reasons.
+              <p className="mt-2 text-sm leading-6 text-text-muted">
+                Part 2 を広げた抽象的な議論です。意見だけでなく理由まで言うのがポイントです。
               </p>
             </div>
           </div>
@@ -151,18 +160,18 @@ export default async function SpeakingTopicPage({ params }: Props) {
 
         <section className="mb-12" aria-labelledby="samples-heading">
           <h2 id="samples-heading" className="mb-6 text-xl font-bold text-text">
-            Sample questions
+            サンプル問題
           </h2>
           <ul className="space-y-4">
-            <li className={cn('p-4 rounded-xl', cardBase)}>
+            <li className={cn('rounded-xl p-4', cardBase)}>
               <span className="text-xs font-medium text-indigo-600">Part 1</span>
               <p className="mt-1 text-text">{samples.part1}</p>
             </li>
-            <li className={cn('p-4 rounded-xl', cardBase)}>
+            <li className={cn('rounded-xl p-4', cardBase)}>
               <span className="text-xs font-medium text-indigo-600">Part 2</span>
               <p className="mt-1 text-text">{samples.part2}</p>
             </li>
-            <li className={cn('p-4 rounded-xl', cardBase)}>
+            <li className={cn('rounded-xl p-4', cardBase)}>
               <span className="text-xs font-medium text-indigo-600">Part 3</span>
               <p className="mt-1 text-text">{samples.part3}</p>
             </li>
@@ -171,37 +180,41 @@ export default async function SpeakingTopicPage({ params }: Props) {
 
         <section className="mb-12" aria-labelledby="tips-heading">
           <h2 id="tips-heading" className="mb-6 text-xl font-bold text-text">
-            Quick tips
+            すぐ使えるコツ
           </h2>
-          <ul className="list-disc list-inside space-y-2 text-sm text-text-muted">
-            {QUICK_TIPS.map((tip, i) => (
-              <li key={i}>{tip}</li>
+          <ul className="list-inside list-disc space-y-2 text-sm leading-7 text-text-muted">
+            {QUICK_TIPS.map((tip) => (
+              <li key={tip}>{tip}</li>
             ))}
           </ul>
         </section>
 
         <section className="border-t border-border pt-8 text-center">
           <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
-            Practice this topic in Exam Mode
+            Exam Mode でこのトピックを練習する
           </Link>
         </section>
 
         <section className="mt-12 border-t border-border pt-8" aria-labelledby="faq-heading">
           <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
-            FAQ
+            よくある質問
           </h2>
           <ul className="space-y-4">
-            {SPEAKING_TOPIC_FAQ.map((item, i) => (
-              <li key={i} className={cn('rounded-lg border border-border bg-surface p-4', cardBase)}>
+            {SPEAKING_TOPIC_FAQ.map((item) => (
+              <li key={item.question} className={cn('rounded-lg bg-surface p-4', cardBase)}>
                 <h3 className="font-semibold text-text">{item.question}</h3>
-                <p className="mt-2 text-sm text-text-muted leading-relaxed">{item.answer}</p>
+                <p className="mt-2 text-sm leading-7 text-text-muted">{item.answer}</p>
               </li>
             ))}
           </ul>
           <p className="mt-4 text-sm text-text-muted">
-            <Link href="/exam/speaking" className="text-indigo-600 hover:underline">Start interview</Link>
+            <Link href="/exam/speaking" className="text-indigo-600 hover:underline">
+              面接を始める
+            </Link>
             {' · '}
-            <Link href="/pricing" className="text-indigo-600 hover:underline">View pricing</Link>
+            <Link href="/pricing" className="text-indigo-600 hover:underline">
+              料金を見る
+            </Link>
           </p>
         </section>
       </div>

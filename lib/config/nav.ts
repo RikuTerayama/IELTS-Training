@@ -7,17 +7,16 @@ export const PUBLIC_NAV = [
   { href: '/reading', label: 'Reading' },
   { href: '/writing', label: 'Writing' },
   { href: '/speaking', label: 'Speaking' },
-  { href: '/vocab', label: 'Vocab' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/vocab', label: '単語' },
+  { href: '/pricing', label: '料金' },
 ] as const;
 
 export const APP_NAV: Array<{ href: string; label: string; external?: boolean }> = [
-  { href: '/home', label: 'Home' },
-  { href: '/vocab?skill=reading', label: 'Reading' },
-  { href: '/task/select?task_type=Task%202', label: 'Writing' },
-  { href: '/exam/speaking', label: 'Speaking' },
+  { href: '/home', label: 'ホーム' },
+  { href: '/home#input', label: 'Input' },
+  { href: '/home#output', label: 'Output' },
   { href: '/progress', label: 'Progress' },
-  { href: 'https://ieltsconsult.netlify.app/', label: 'Blog', external: true },
+  { href: '/home#blog', label: 'Blog / Note' },
 ];
 
 export const BLOG_URL = 'https://ieltsconsult.netlify.app/';

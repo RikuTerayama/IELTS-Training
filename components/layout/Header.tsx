@@ -73,7 +73,7 @@ export function Header() {
                     onClick={handleLogout}
                     className="rounded bg-surface-2 border border-border px-3 py-1 text-sm text-text hover:bg-surface transition-colors duration-200"
                   >
-                    Logout
+                    ログアウト
                   </button>
                 </>
               ) : (
@@ -81,7 +81,7 @@ export function Header() {
                   href="/login"
                   className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground hover:bg-primary-hover transition-colors duration-200"
                 >
-                  Login
+                  ログイン
                 </Link>
               )}
             </div>
@@ -90,7 +90,7 @@ export function Header() {
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 text-text-muted hover:text-text focus:outline-none transition-colors duration-200"
-                aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-label={menuOpen ? 'ナビゲーションメニューを閉じる' : 'ナビゲーションメニューを開く'}
               >
                 <svg
                   className="h-6 w-6"
@@ -144,7 +144,7 @@ export function Header() {
                     onClick={handleLogout}
                     className="rounded bg-surface-2 border border-border px-3 py-2 text-sm text-text hover:bg-surface w-full text-left transition-all duration-200"
                   >
-                    Logout
+                    ログアウト
                   </button>
                 </div>
               ) : (
@@ -154,7 +154,7 @@ export function Header() {
                     onClick={() => setMenuOpen(false)}
                     className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary-hover block text-center transition-colors duration-200"
                   >
-                    Login
+                    ログイン
                   </Link>
                 </div>
               )}
