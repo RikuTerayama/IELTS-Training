@@ -66,7 +66,7 @@ const WRITING_FAQ = [
   {
     question: 'Task 1 も使えますか？',
     answer:
-      'この公開 hub では主に Task 2 を案内しています。Task 1 の対応状況は学習ホームや料金ページで最新の状態を確認してください。',
+      'この公開ページでは主に Task 2 を案内しています。Task 1 の対応状況は学習ホームや料金ページで最新の状態を確認してください。',
   },
   {
     question: '表示される band はどのくらい信頼できますか？',
@@ -88,7 +88,7 @@ export default function WritingPage() {
             IELTS Writing 対策
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-8 text-text-muted">
-            Task 2 の添削、Practice、Exam Mode を 1 つの流れで使える Writing hub です。
+            Task 2 の添削、Practice、Exam Mode を 1 つの流れで使える Writing 対策ページです。
             初稿の方向性確認から、band-style feedback を使った改善まで進められます。
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -150,8 +150,11 @@ export default function WritingPage() {
               </span>
               <h3 className="mt-3 font-semibold text-text">モードを選ぶ</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
-                <Link href="/task/select" className="font-medium text-primary hover:underline">
-                  task selector
+                <Link
+                  href="/task/select?task_type=Task%202"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Task 2 を開く
                 </Link>
                 {' '}
                 または
@@ -196,7 +199,7 @@ export default function WritingPage() {
                 'hover:bg-surface hover:border-primary/50 transition-colors'
               )}
             >
-              Reading hub
+              Reading
             </Link>
             <Link
               href="/speaking"
@@ -205,7 +208,7 @@ export default function WritingPage() {
                 'hover:bg-surface hover:border-primary/50 transition-colors'
               )}
             >
-              Speaking hub
+              Speaking
             </Link>
             <Link
               href="/vocab"
@@ -214,7 +217,7 @@ export default function WritingPage() {
                 'hover:bg-surface hover:border-primary/50 transition-colors'
               )}
             >
-              Vocab
+              単語
             </Link>
           </div>
         </section>
@@ -223,7 +226,7 @@ export default function WritingPage() {
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
               <h2 id="topics-heading" className="text-xl font-bold text-text">
-                Task 2 topics
+                Task 2 のトピック
               </h2>
               <p className="mt-2 text-sm leading-6 text-text-muted">
                 IELTS Task 2 で頻出のテーマを topic page から確認できます。

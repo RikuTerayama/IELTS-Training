@@ -132,7 +132,7 @@ export default function SpeakingPage() {
                 'hover:bg-surface hover:border-primary/50 transition-colors'
               )}
             >
-              Reading hub
+              Reading
             </Link>
             <Link
               href="/writing"
@@ -141,7 +141,7 @@ export default function SpeakingPage() {
                 'hover:bg-surface hover:border-primary/50 transition-colors'
               )}
             >
-              Writing hub
+              Writing
             </Link>
             <Link
               href="/vocab"
@@ -150,7 +150,7 @@ export default function SpeakingPage() {
                 'hover:bg-surface hover:border-primary/50 transition-colors'
               )}
             >
-              Vocab
+              単語
             </Link>
           </div>
         </section>
@@ -159,7 +159,7 @@ export default function SpeakingPage() {
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
               <h2 id="topics-heading" className="text-xl font-bold text-text">
-                Topics
+                トピック
               </h2>
               <p className="mt-2 text-sm leading-6 text-text-muted">
                 Part 1-3 でよく使うトピック別に、サンプル質問と考え方の入口を確認できます。

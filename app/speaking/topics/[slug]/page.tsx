@@ -127,7 +127,7 @@ export default async function SpeakingTopicPage({ params }: Props) {
               料金を見る
             </Link>
             <Link href="/speaking" className="text-sm font-medium text-indigo-600 hover:underline">
-              Speaking hub に戻る
+              Speaking に戻る
             </Link>
           </div>
         </section>

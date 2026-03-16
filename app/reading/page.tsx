@@ -7,32 +7,32 @@ import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 const QUESTION_TYPES = [
   {
     id: 'paraphrase',
-    label: 'Paraphrase / Vocabulary',
+    label: '言い換え / 語彙',
     desc: '言い換えと Academic 語彙を、文脈の中で素早く見抜く練習です。',
   },
   {
     id: 'matching-headings',
-    label: 'Matching headings',
+    label: '見出し対応',
     desc: '段落ごとの要点をつかみ、最適な見出しを選ぶ力を鍛えます。',
   },
   {
     id: 'tfng',
-    label: 'True / False / Not Given',
+    label: 'TFNG',
     desc: '本文と設問の関係を整理し、根拠の有無まで判断します。',
   },
   {
     id: 'summary',
-    label: 'Summary completion',
+    label: '要約穴埋め',
     desc: '要約の空欄補充を通して、本文の流れとキーワードを確認します。',
   },
   {
     id: 'matching-info',
-    label: 'Matching information',
+    label: '情報対応',
     desc: '指定された情報がどの段落にあるかを素早く探す練習です。',
   },
   {
     id: 'sentence',
-    label: 'Sentence completion',
+    label: '文完成',
     desc: '本文の表現を使って文を完成させる設問に対応します。',
   },
 ] as const;
@@ -41,7 +41,7 @@ const READING_FAQ = [
   {
     question: '今できる Reading 学習は何ですか？',
     answer:
-      '現在は Vocab の Reading スキルで、paraphrase drill、matching headings、True / False / Not Given、summary completion などを練習できます。長文通しの演習は次フェーズで対応予定です。',
+      '現在は単語練習の Reading スキルで、言い換え / 語彙、見出し対応、TFNG、要約穴埋め などを練習できます。長文通しの演習は次フェーズで対応予定です。',
   },
   {
     question: 'Reading 語彙は無料で使えますか？',
@@ -51,14 +51,14 @@ const READING_FAQ = [
   {
     question: 'Writing や Speaking にも役立ちますか？',
     answer:
-      'Reading で身につく言い換え、Academic 語彙、論理の追い方は Writing と Speaking にもそのまま効きます。Reading を土台にすると Output の質も上がりやすくなります。',
+      'Reading で身につく言い換え、Academic 語彙、論理の追い方は Writing と Speaking にもそのまま効きます。Reading を土台にするとアウトプットの質も上がりやすくなります。',
   },
 ] as const;
 
 const HUB_LINKS = [
-  { href: '/writing', label: 'Writing hub' },
-  { href: '/speaking', label: 'Speaking hub' },
-  { href: '/vocab', label: 'Vocab' },
+  { href: '/writing', label: 'Writing' },
+  { href: '/speaking', label: 'Speaking' },
+  { href: '/vocab', label: '単語' },
 ] as const;
 
 function buildLoginUrl(next: string): string {
@@ -131,7 +131,7 @@ export default function ReadingPage() {
               <h3 className="mt-3 font-semibold text-text">Reading を選ぶ</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
                 <Link href="/vocab?skill=reading" className="text-primary hover:underline">
-                  Vocab
+                  単語練習
                 </Link>
                 {' '}
                 で Reading スキルを選び、設問タイプごとの練習に入ります。
@@ -150,7 +150,7 @@ export default function ReadingPage() {
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 3
               </span>
-              <h3 className="mt-3 font-semibold text-text">Output に接続する</h3>
+              <h3 className="mt-3 font-semibold text-text">アウトプットにつなげる</h3>
               <p className="mt-2 text-sm leading-6 text-text-muted">
                 Reading で拾った言い換えや語彙は、そのまま Writing と Speaking の表現力強化につながります。
               </p>
