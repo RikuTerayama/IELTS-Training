@@ -13,8 +13,10 @@ export const PUBLIC_NAV = [
 
 export const APP_NAV: Array<{ href: string; label: string; external?: boolean }> = [
   { href: '/home', label: 'Home' },
+  { href: '/vocab?skill=reading', label: 'Reading' },
+  { href: '/task/select?task_type=Task%202', label: 'Writing' },
+  { href: '/exam/speaking', label: 'Speaking' },
   { href: '/progress', label: 'Progress' },
-  { href: '/vocab', label: 'Vocab' },
   { href: 'https://ieltsconsult.netlify.app/', label: 'Blog', external: true },
 ];
 

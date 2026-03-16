@@ -37,7 +37,7 @@ export function Header() {
             <Link href="/home" className="text-xl font-bold text-primary hover:text-primary-hover transition-colors duration-200">
               IELTS Training
             </Link>
-            <nav className="hidden md:flex gap-4">
+            <nav className="hidden md:flex gap-3 lg:gap-4">
               {APP_NAV.map(({ href, label, external }) =>
                 external ? (
                   <Link
@@ -68,7 +68,7 @@ export function Header() {
             <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <>
-                  <span className="text-sm text-text-muted">{user.email}</span>
+                  <span className="hidden xl:block text-sm text-text-muted">{user.email}</span>
                   <button
                     onClick={handleLogout}
                     className="rounded bg-surface-2 border border-border px-3 py-1 text-sm text-text hover:bg-surface transition-colors duration-200"

@@ -254,8 +254,8 @@ export default function HomePage() {
           'Keep learning with Reading vocab or review your previous feedback while you wait for the daily reset.',
         href: '/vocab?skill=reading',
         label: 'Open Reading',
-        secondaryHref: '/pricing',
-        secondaryLabel: 'View pricing',
+        secondaryHref: '/progress',
+        secondaryLabel: 'Review progress',
       };
     }
 
@@ -306,8 +306,8 @@ export default function HomePage() {
           'You already have speaking history. Another short interview is the fastest way to keep feedback fresh and compare progress.',
         href: '/exam/speaking',
         label: 'Start Speaking',
-        secondaryHref: '/speaking',
-        secondaryLabel: 'Open Speaking hub',
+        secondaryHref: '/progress',
+        secondaryLabel: 'Review history',
       };
     }
 
@@ -696,33 +696,48 @@ export default function HomePage() {
               </section>
 
               <section className={cn(cardBase, 'p-6')}>
-                <h2 className={cardTitle}>Go next</h2>
+                <h2 className={cardTitle}>Practice lanes</h2>
                 <p className={cn(cardDesc, 'mt-2')}>
-                  Use the hub pages when you want context before you practice.
+                  Stay inside the app for your next session. Open the public hubs only when you need broader context or examples.
                 </p>
                 <div className="mt-5 space-y-3">
                   <Link
-                    href="/reading"
+                    href="/vocab?skill=reading"
                     className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm font-medium text-text hover:bg-surface"
                   >
-                    <span>Reading hub</span>
-                    <span className="text-text-muted">/reading</span>
+                    <span>Reading practice</span>
+                    <span className="text-text-muted">/vocab?skill=reading</span>
                   </Link>
                   <Link
-                    href="/writing"
+                    href="/task/select?task_type=Task%202"
                     className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm font-medium text-text hover:bg-surface"
                   >
-                    <span>Writing hub</span>
-                    <span className="text-text-muted">/writing</span>
+                    <span>Writing practice</span>
+                    <span className="text-text-muted">/task/select</span>
                   </Link>
                   <Link
-                    href="/speaking"
+                    href="/exam/speaking"
                     className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm font-medium text-text hover:bg-surface"
                   >
-                    <span>Speaking hub</span>
-                    <span className="text-text-muted">/speaking</span>
+                    <span>Speaking practice</span>
+                    <span className="text-text-muted">/exam/speaking</span>
                   </Link>
                 </div>
+                <p className="mt-4 text-xs leading-6 text-text-muted">
+                  Need broader guidance first? Visit the{' '}
+                  <Link href="/reading" className="font-medium text-indigo-600 hover:underline">
+                    Reading hub
+                  </Link>
+                  ,{' '}
+                  <Link href="/writing" className="font-medium text-indigo-600 hover:underline">
+                    Writing hub
+                  </Link>
+                  , or{' '}
+                  <Link href="/speaking" className="font-medium text-indigo-600 hover:underline">
+                    Speaking hub
+                  </Link>
+                  .
+                </p>
               </section>
             </div>
           </section>
@@ -731,4 +746,3 @@ export default function HomePage() {
     </Layout>
   );
 }
-

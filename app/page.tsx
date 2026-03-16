@@ -6,8 +6,7 @@ import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { buildContactGoogleFormUrl, CONTACT_EMAIL, CONTACT_MAILTO, BLOG_OFFICIAL_URL, BLOG_NOTE_URL } from '@/lib/constants/contact';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import { PUBLIC_NAV } from '@/lib/config/nav';
+import { PublicHeader } from '@/components/layout/PublicHeader';
 
 // --- 郢ｧ・｢郢昜ｹ斟鍋ｹ晢ｽｼ郢ｧ・ｷ郢晢ｽｧ郢晢ｽｳ郢ｧ・ｳ郢晢ｽｳ郢晄亢繝ｻ郢晞亂ﾎｦ郢昴・---
 interface FadeInProps {
@@ -211,7 +210,6 @@ const TERMS_SECTIONS = [
 export default function LandingPage() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
-  const [landingMenuOpen, setLandingMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const supabase = createClient();
 
@@ -244,103 +242,7 @@ export default function LandingPage() {
       </div>
 
       {/* 郢晏･繝｣郢敖郢晢ｽｼ */}
-      <header className="fixed top-0 w-full z-50 transition-all duration-300">
-        <div className="absolute inset-0 bg-bg/80 backdrop-blur-xl border-b border-border/50" />
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="h-16 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-              </div>
-              <span className="text-xl font-bold tracking-tight text-text">
-                IELTS Training
-              </span>
-            </Link>
-
-            <nav className="hidden md:flex items-center gap-4">
-              <ThemeToggle />
-              {PUBLIC_NAV.map(({ href, label }) => (
-                <Link key={href} href={href} className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
-                  {label}
-                </Link>
-              ))}
-              <button
-                type="button"
-                onClick={() => scrollToSection('contact')}
-                className="text-sm font-medium text-text-muted hover:text-primary transition-colors"
-              >
-                Contact
-              </button>
-              <Link
-                href="/login"
-                className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
-              >
-                Login
-              </Link>
-            </nav>
-
-            <div className="md:hidden flex items-center gap-2">
-              <ThemeToggle />
-              <button
-                type="button"
-                onClick={() => setLandingMenuOpen((open) => !open)}
-                className="p-2 text-text-muted hover:text-text transition-colors duration-200"
-                aria-label={landingMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  {landingMenuOpen ? (
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {landingMenuOpen && (
-            <nav className="md:hidden pb-4 border-t border-border/50 pt-4">
-              <div className="flex flex-col gap-3">
-                {PUBLIC_NAV.map(({ href, label }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setLandingMenuOpen(false)}
-                    className="text-sm font-medium text-text-muted hover:text-text py-2 transition-colors"
-                  >
-                    {label}
-                  </Link>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLandingMenuOpen(false);
-                    scrollToSection('contact');
-                  }}
-                  className="text-left text-sm font-medium text-text-muted hover:text-text py-2 transition-colors"
-                >
-                  Contact
-                </button>
-                <Link
-                  href="/login"
-                  onClick={() => setLandingMenuOpen(false)}
-                  className="mt-2 rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors text-center"
-                >
-                  Login
-                </Link>
-              </div>
-            </nav>
-          )}
-        </div>
-      </header>
+      <PublicHeader variant="floating" contactHref="/#contact" />
 
       <main className="relative z-10 pt-32 pb-0">
         
