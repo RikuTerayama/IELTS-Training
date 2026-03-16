@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
+import {
+  getUserFacingSubmissionError,
+  isUnauthorizedApiResponse,
+  redirectToLoginWithNext,
+} from '@/lib/api/clientError';
 import type { Attempt, FillInQuestion } from '@/lib/domain/types';
 
 export default function FillInPage() {
@@ -121,27 +126,25 @@ export default function FillInPage() {
       const attemptId = getAttemptId();
       if (!attemptId) {
         console.error('[FillInPage] Cannot submit: attemptId not found');
-        alert('エラー: 回答IDが見つかりません');
+        alert('提出先の回答IDを確認できませんでした。');
         return;
       }
 
       if (!attempt?.task_id) {
         console.error('[FillInPage] Cannot submit: task_id not found');
-        alert('エラー: タスクIDが見つかりません');
+        alert('提出先のタスクIDを確認できませんでした。');
         return;
       }
 
-      // すべての問題に回答があるか確認
       const unansweredQuestions = questions.filter(q => !answers[q.id]);
       if (unansweredQuestions.length > 0) {
-        alert(`すべての問題に回答してください（未回答: ${unansweredQuestions.length}問）`);
+        alert(`未回答の問題があります。残り ${unansweredQuestions.length} 問に回答してください。`);
         setSubmitting(false);
         return;
       }
 
-      // 穴埋め回答を送信
       console.log('[FillInPage] Submitting answers:', answers);
-      
+
       const submitAnswers = questions.map(q => ({
         question_id: q.id,
         user_answer: answers[q.id],
@@ -156,24 +159,40 @@ export default function FillInPage() {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-        console.error('[FillInPage] Submit error:', errorData);
-        throw new Error(errorData.error?.message || `Failed to submit answers: ${response.status}`);
+      const data = await response.json().catch(() => null);
+
+      if (isUnauthorizedApiResponse(response, data)) {
+        redirectToLoginWithNext();
+        return;
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        console.error('[FillInPage] Submit error:', data);
+        throw new Error(
+          getUserFacingSubmissionError(
+            response,
+            data,
+            '回答の送信に失敗しました。少し時間を置いて、もう一度お試しください。'
+          )
+        );
+      }
+
       console.log('[FillInPage] Submit response:', data);
 
-      if (data.ok) {
-        // フィードバック画面に遷移
+      if (data?.ok) {
         router.push(`/feedback/${attemptId}`);
       } else {
-        alert(data.error?.message || '回答の送信に失敗しました');
+        alert(
+          getUserFacingSubmissionError(
+            response,
+            data,
+            '回答の送信に失敗しました。少し時間を置いて、もう一度お試しください。'
+          )
+        );
       }
     } catch (error) {
       console.error('[FillInPage] Submit error:', error);
-      alert(`エラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(error instanceof Error ? error.message : '送信中にエラーが発生しました。');
     } finally {
       setSubmitting(false);
     }

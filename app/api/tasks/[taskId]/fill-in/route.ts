@@ -5,6 +5,17 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
+import { z } from 'zod';
+
+const FillInSubmitRequestSchema = z.object({
+  attempt_id: z.string().uuid(),
+  answers: z.array(
+    z.object({
+      question_id: z.string().min(1),
+      user_answer: z.string().min(1),
+    })
+  ).min(1),
+});
 
 export async function POST(
   request: Request,
@@ -30,19 +41,27 @@ export async function POST(
 
     console.log('[Fill-in Submit API] User authenticated:', user.email);
 
-    const requestBody = await request.json();
-    const { attempt_id, answers }: {
-      attempt_id: string;
-      answers: Array<{ question_id: string; user_answer: string }>;
-    } = requestBody;
-
-    if (!attempt_id || !answers || !Array.isArray(answers)) {
-      console.error('[Fill-in Submit API] Invalid request body');
+    let requestBody: unknown;
+    try {
+      requestBody = await request.json();
+    } catch (parseError) {
+      console.error('[Fill-in Submit API] Failed to parse request body:', parseError);
       return Response.json(
-        errorResponse('BAD_REQUEST', 'attempt_id and answers are required'),
+        errorResponse('BAD_REQUEST', 'Submission payload is not valid JSON'),
         { status: 400 }
       );
     }
+
+    const validationResult = FillInSubmitRequestSchema.safeParse(requestBody);
+    if (!validationResult.success) {
+      console.error('[Fill-in Submit API] Invalid request body');
+      return Response.json(
+        errorResponse('BAD_REQUEST', 'Submission payload is invalid', validationResult.error.flatten()),
+        { status: 400 }
+      );
+    }
+
+    const { attempt_id, answers } = validationResult.data;
 
     console.log('[Fill-in Submit API] Attempt ID:', attempt_id, 'Answers count:', answers.length);
 

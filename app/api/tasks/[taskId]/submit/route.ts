@@ -7,13 +7,25 @@ import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { DraftContent } from '@/lib/domain/types';
 import { isRetiredTask1Beginner } from '@/lib/task1/retired';
+import { z } from 'zod';
+
+const SubmitAttemptRequestSchema = z.object({
+  level: z.enum(['beginner', 'intermediate', 'advanced']),
+  draft_content: z.object({
+    japanese: z.string().optional(),
+    skeleton: z.string().optional(),
+    fill_in: z.string().optional(),
+    final: z.string().optional(),
+  }).passthrough(),
+});
 
 export async function POST(
   request: Request,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> | { taskId: string } }
 ): Promise<Response> {
   try {
-    console.log('[Submit API] Starting submission for taskId:', params.taskId);
+    const resolvedParams = params instanceof Promise ? await params : params;
+    console.log('[Submit API] Starting submission for taskId:', resolvedParams.taskId);
     
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -28,51 +40,61 @@ export async function POST(
 
     console.log('[Submit API] User authenticated:', user.email);
 
-    let requestBody;
+    let requestBody: unknown;
     try {
       requestBody = await request.json();
-      console.log('[Submit API] Request body received:', {
-        level: requestBody.level,
-        hasDraftContent: !!requestBody.draft_content,
-      });
     } catch (parseError) {
       console.error('[Submit API] Failed to parse request body:', parseError);
       return Response.json(
-        errorResponse('BAD_REQUEST', 'Invalid request body'),
+        errorResponse('BAD_REQUEST', 'Submission payload is not valid JSON'),
         { status: 400 }
       );
     }
 
-    const { level, draft_content }: { level: string; draft_content: DraftContent } = requestBody;
-
-    if (!level || !['beginner', 'intermediate', 'advanced'].includes(level)) {
-      console.log('[Submit API] Invalid level:', level);
+    const validationResult = SubmitAttemptRequestSchema.safeParse(requestBody);
+    if (!validationResult.success) {
+      console.log('[Submit API] Invalid submission payload');
       return Response.json(
-        errorResponse('BAD_REQUEST', 'Invalid level'),
+        errorResponse('BAD_REQUEST', 'Submission payload is invalid', validationResult.error.flatten()),
         { status: 400 }
       );
     }
+
+    const { level, draft_content } = validationResult.data as { level: string; draft_content: DraftContent };
+    const finalText = draft_content.final || draft_content.fill_in || draft_content.skeleton || '';
+    if (!finalText.trim()) {
+      return Response.json(
+        errorResponse('BAD_REQUEST', 'Answer text is required'),
+        { status: 400 }
+      );
+    }
+
+    console.log('[Submit API] Request body received:', {
+      level,
+      hasDraftContent: true,
+      finalLength: finalText.length,
+    });
 
     // タスクが存在するか確認
-    console.log('[Submit API] Checking if task exists:', params.taskId);
+    console.log('[Submit API] Checking if task exists:', resolvedParams.taskId);
     const { data: taskExists, error: taskError } = await supabase
       .from('tasks')
       .select('id, question_type, level, asset_id, image_path')
-      .eq('id', params.taskId)
+      .eq('id', resolvedParams.taskId)
       .single();
 
     if (taskError) {
       console.error('[Submit API] Task check error:', taskError);
       return Response.json(
-        errorResponse('NOT_FOUND', `Task with id ${params.taskId} not found: ${taskError.message}`),
+        errorResponse('NOT_FOUND', `Task with id ${resolvedParams.taskId} not found: ${taskError.message}`),
         { status: 404 }
       );
     }
 
     if (!taskExists) {
-      console.error('[Submit API] Task not found:', params.taskId);
+      console.error('[Submit API] Task not found:', resolvedParams.taskId);
       return Response.json(
-        errorResponse('NOT_FOUND', `Task with id ${params.taskId} not found`),
+        errorResponse('NOT_FOUND', `Task with id ${resolvedParams.taskId} not found`),
         { status: 404 }
       );
     }
@@ -91,9 +113,12 @@ export async function POST(
       .from('attempts')
       .insert({
         user_id: user.id,
-        task_id: params.taskId,
+        task_id: resolvedParams.taskId,
         level,
-        draft_content,
+        draft_content: {
+          ...draft_content,
+          final: finalText,
+        },
         submitted_at: new Date().toISOString(),
         status: 'submitted',
       })
