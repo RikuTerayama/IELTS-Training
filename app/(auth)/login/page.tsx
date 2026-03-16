@@ -1,13 +1,18 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 /** Returns a safe redirect path: same-origin path starting with /, or null */
 function getSafeNext(nextParam: string | null): string | null {
   if (!nextParam || typeof nextParam !== 'string') return null;
-  const decoded = decodeURIComponent(nextParam).trim();
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(nextParam).trim();
+  } catch {
+    return null;
+  }
   if (!decoded.startsWith('/') || decoded.startsWith('//')) return null;
   return decoded;
 }
@@ -22,22 +27,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [signUpSuccess, setSignUpSuccess] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
-
-  // ローカルストレージからメールアドレスとパスワードを読み込む
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedEmail = localStorage.getItem('ielts_training_email');
-      const savedPassword = localStorage.getItem('ielts_training_password');
-      if (savedEmail) {
-        setEmail(savedEmail);
-      }
-      if (savedPassword) {
-        setPassword(savedPassword);
-      }
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +62,6 @@ export default function LoginPage() {
 
         // サインアップ成功でセッションがある場合（メール確認をスキップしている場合）
         if (data.session) {
-          console.log('Sign up successful with session, redirecting...');
           setLoading(false);
           // セッションが確実にCookieに保存されるまで待つ
           await new Promise(resolve => setTimeout(resolve, 300));
@@ -104,23 +93,13 @@ export default function LoginPage() {
           throw new Error('ログインに失敗しました。セッションが保存されませんでした。');
         }
 
-        console.log('Login successful, session:', currentSession.user.email);
-        
-        // ログイン成功時にメールアドレスとパスワードをローカルストレージに保存
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('ielts_training_email', email);
-          localStorage.setItem('ielts_training_password', password);
-        }
-        
         // リダイレクト前にloadingをfalseに設定
         setLoading(false);
         
         // セッションを明示的に保存（@supabase/ssrが自動的にCookieに保存）
         // セッションが確実に保存されるまで待つ
-        console.log('Waiting for session to be saved to cookies...');
         
         // セッションが確実にCookieに保存されるまで待つ（最大5秒）
-        let sessionSaved = false;
         const maxAttempts = 50;
         for (let i = 0; i < maxAttempts; i++) {
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -133,23 +112,15 @@ export default function LoginPage() {
               const cookieString = document.cookie || '';
               const hasAuthCookie = cookieString.includes('sb-') && cookieString.includes('auth-token');
               if (hasAuthCookie || i >= 10) { // 10回試行後は強制的に続行
-                sessionSaved = true;
-                console.log(`Session confirmed (attempt ${i + 1}), redirecting...`);
                 break;
               }
             } catch (error) {
               // Cookie確認でエラーが発生しても、セッションがあれば続行
               if (i >= 10) {
-                sessionSaved = true;
-                console.log(`Session exists, proceeding with redirect (attempt ${i + 1})...`);
                 break;
               }
             }
           }
-        }
-        
-        if (!sessionSaved) {
-          console.warn('Session confirmation timeout, but redirecting anyway...');
         }
         
         // 追加の待機時間（Cookieが確実に保存されるまで）
@@ -162,7 +133,6 @@ export default function LoginPage() {
           .eq('id', signInData.user.id)
           .single();
 
-        console.log('Profile onboarding status:', profile?.onboarding_completed);
 
         // Return-path: redirect to ?next= if valid and onboarding completed; else onboarding or /home
         const toOnboarding = profile && !profile.onboarding_completed;
@@ -301,4 +271,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
 
