@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
@@ -27,18 +27,16 @@ export default function RootLayout({
   try {
     var themeMode = localStorage.getItem('themeMode');
     var resolvedTheme;
-    
+
     if (themeMode === 'light' || themeMode === 'dark') {
       resolvedTheme = themeMode;
     } else {
-      // Follow the system preference when no explicit theme is saved
       var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       resolvedTheme = prefersDark ? 'dark' : 'light';
     }
-    
+
     document.documentElement.setAttribute('data-theme', resolvedTheme);
   } catch (e) {
-    // Fallback to dark if theme resolution fails
     document.documentElement.setAttribute('data-theme', 'dark');
   }
 })();

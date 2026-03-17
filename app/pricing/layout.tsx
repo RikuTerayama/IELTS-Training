@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 
-const TITLE = 'Meridian Pro Pricing | Monthly & Annual Plans';
+const TITLE = 'Meridian 料金 | Pro プランと支払い設定';
 const DESCRIPTION =
-  'Upgrade to Meridian Pro for unlimited Writing/Speaking AI feedback, faster practice, and full history.';
+  'Meridian Pro の料金、支払い間隔、利用できる機能を確認できる料金ページです。';
 
 export const metadata: Metadata = {
   title: TITLE,

@@ -23,11 +23,27 @@ export const cardBase = cn(
 );
 
 /**
+ * 明るいサーフェスを dark mode でも可読に保つ強調カード。
+ * 背景が明るいので、foreground は theme 全体ではなくサーフェス専用色を使う。
+ */
+export const surfaceSoftCard = cn(
+  'rounded-2xl border border-surface-soft-border bg-surface-soft text-surface-soft-foreground shadow-sm'
+);
+
+export const surfaceSoftTitle = cn('text-surface-soft-foreground');
+export const surfaceSoftBody = cn('text-surface-soft-muted');
+export const surfaceSoftBadge = cn(
+  'inline-flex items-center rounded-full border border-surface-soft-border',
+  'bg-white/80 px-2 py-0.5 text-xs font-medium text-surface-soft-foreground',
+  'dark:bg-white/70'
+);
+
+/**
  * カードタイトルクラス
  * ダークモード対応: text-text
  */
 export const cardTitle = cn(
-  'text-heading-3 font-bold text-text tracking-tight'
+  'text-card-title font-bold text-text tracking-tight'
 );
 
 /**
@@ -35,7 +51,27 @@ export const cardTitle = cn(
  * ダークモード対応: text-text-muted。タイポ: text-small
  */
 export const cardDesc = cn(
-  'text-small text-text-muted leading-relaxed'
+  'text-helper text-text-muted leading-relaxed'
+);
+
+export const pageTitle = cn(
+  'text-page-title font-bold tracking-tight text-text'
+);
+
+export const sectionTitle = cn(
+  'text-section-title font-bold tracking-tight text-text'
+);
+
+export const subsectionTitle = cn(
+  'text-subsection-title font-bold tracking-tight text-text'
+);
+
+export const bodyText = cn(
+  'text-body-base leading-relaxed text-text-muted'
+);
+
+export const helperText = cn(
+  'text-helper leading-relaxed text-text-muted'
 );
 
 /**

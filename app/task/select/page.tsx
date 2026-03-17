@@ -1,8 +1,24 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
+import {
+  buttonPrimary,
+  cardBase,
+  cn,
+  pageTitle,
+  sectionTitle,
+  helperText,
+  bodyText,
+  buttonSecondary,
+} from '@/lib/ui/theme';
+import type { ApiResponse } from '@/lib/api/response';
+import {
+  getUserFacingSubmissionError,
+  isUnauthorizedApiResponse,
+  redirectToLoginWithNext,
+} from '@/lib/api/clientError';
 
 type TaskType = 'Task 1' | 'Task 2';
 type Level = 'beginner' | 'intermediate' | 'advanced';
@@ -23,49 +39,62 @@ type Task2Genre =
   | 'direct_question'
   | 'advantage_disadvantage';
 
+type GenerateTaskResponse = { id: string };
+
 const task1Genres: { value: Task1Genre; label: string; description: string }[] = [
-  { value: 'line_chart', label: 'ラインチャート', description: '時系列データの変化を表す線グラフ' },
-  { value: 'bar_chart', label: '棒グラフ', description: 'カテゴリー間の比較を表す棒グラフ' },
-  { value: 'pie_chart', label: '円グラフ', description: '割合や構成比を表す円グラフ' },
-  { value: 'table', label: '表（テーブル）', description: 'データを表形式で表示' },
-  { value: 'multiple_charts', label: '複数の図表', description: '複数のグラフや表の組み合わせ' },
-  { value: 'diagram', label: 'ダイアグラム', description: 'プロセスや構造を表す図' },
-  { value: 'map', label: '地図', description: '地理的な情報を表す地図' },
+  { value: 'line_chart', label: 'ラインチャート', description: '変化の推移を比較するときに使う典型パターンです。' },
+  { value: 'bar_chart', label: '棒グラフ', description: '項目ごとの差を整理して書く練習に向いています。' },
+  { value: 'pie_chart', label: '円グラフ', description: '割合や内訳を説明するときの定番形式です。' },
+  { value: 'table', label: '表', description: '数値の比較を表形式で整理するタイプです。' },
+  { value: 'multiple_charts', label: '複数チャート', description: '複数の図表をまとめて比較する形式です。' },
+  { value: 'diagram', label: 'プロセス図', description: '工程や流れを順番に説明するタイプです。' },
+  { value: 'map', label: '地図', description: '場所の変化や配置を説明するタイプです。' },
 ];
 
 const task2Genres: { value: Task2Genre; label: string; description: string }[] = [
   {
     value: 'discussion',
-    label: 'Discussionエッセー',
-    description: 'Discuss both these views. / Discuss both these views and give your own opinion.',
+    label: '両論比較',
+    description: '両方の立場を比較し、自分の意見をまとめるタイプです。',
   },
   {
     value: 'opinion',
-    label: 'Opinionエッセー',
-    description: 'What is your opinion? / Do you agree or disagree? / To what extent do you agree or disagree?',
+    label: '意見',
+    description: '賛成・反対や程度を明確に出すタイプです。',
   },
   {
     value: 'cause_solution',
-    label: 'Cause & Solutionエッセー',
-    description: 'Why is this the case? What can be done about this problem?',
+    label: '原因と解決策',
+    description: '原因と解決策を整理して書くタイプです。',
   },
   {
     value: 'direct_question',
-    label: 'Direct Questionエッセー',
-    description: 'What factors contribute to...? How realistic is...?',
+    label: '直接質問',
+    description: '設問に直接答えながら論点を整理するタイプです。',
   },
   {
     value: 'advantage_disadvantage',
-    label: 'Advantage & Disadvantageエッセー',
-    description: 'What are the advantages and disadvantages? / Do the advantages outweigh the disadvantages?',
+    label: '利点と欠点',
+    description: 'メリットとデメリットを比較するタイプです。',
   },
 ];
 
-const levels: { value: Level; label: string }[] = [
-  { value: 'beginner', label: '初級' },
-  { value: 'intermediate', label: '中級' },
-  { value: 'advanced', label: '上級' },
+const levels: { value: Level; label: string; description: string }[] = [
+  { value: 'beginner', label: '初級', description: 'PREP ありで構成を整えながら進めます。' },
+  { value: 'intermediate', label: '中級', description: 'PREP ありで論点整理をしながら進めます。' },
+  { value: 'advanced', label: '上級', description: '本番寄りの流れでそのまま書き始めます。' },
 ];
+
+function getSelectedGenreLabel(
+  taskType: TaskType | null,
+  selectedGenre: Task1Genre | Task2Genre | 'random' | null
+): string {
+  if (!selectedGenre) return '';
+  if (selectedGenre === 'random') return 'ランダム';
+
+  const source = taskType === 'Task 1' ? task1Genres : task2Genres;
+  return source.find((item) => item.value === selectedGenre)?.label ?? selectedGenre;
+}
 
 function TaskSelectContent() {
   const router = useRouter();
@@ -75,8 +104,8 @@ function TaskSelectContent() {
   const [task1Genre, setTask1Genre] = useState<Task1Genre | 'random' | null>(null);
   const [task2Genre, setTask2Genre] = useState<Task2Genre | 'random' | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // クエリパラメータからtask_typeを読み取る
   useEffect(() => {
     const taskTypeParam = searchParams.get('task_type');
     if (taskTypeParam === 'Task 1' || taskTypeParam === 'Task 2') {
@@ -87,13 +116,13 @@ function TaskSelectContent() {
   const handleStart = async () => {
     if (!taskType) return;
 
+    const genre = taskType === 'Task 1' ? task1Genre : task2Genre;
+    if (!genre) return;
+
     setLoading(true);
+    setError(null);
 
     try {
-      const genre = taskType === 'Task 1' ? task1Genre : task2Genre;
-      if (!genre) return;
-
-      // タスク生成APIを呼び出し
       const response = await fetch('/api/tasks/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -104,171 +133,225 @@ function TaskSelectContent() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('タスクの生成に失敗しました');
+      const data = (await response.json()) as ApiResponse<GenerateTaskResponse>;
+
+      if (isUnauthorizedApiResponse(response, data)) {
+        redirectToLoginWithNext(`${window.location.pathname}${window.location.search}`);
+        return;
       }
 
-      const data = await response.json();
-      if (data.ok && data.data?.id) {
-        // 初級・中級の場合はPREPモードに直接遷移
-        if (level === 'beginner' || level === 'intermediate') {
-          router.push(`/task/${data.data.id}/prep`);
-        } else {
-          router.push(`/task/${data.data.id}`);
-        }
-      } else {
-        throw new Error(data.error?.message || 'タスクの生成に失敗しました');
+      if (!response.ok || !data.ok || !data.data?.id) {
+        throw new Error(
+          getUserFacingSubmissionError(
+            response,
+            data,
+            'タスクの開始に失敗しました。条件を確認して、もう一度お試しください。'
+          )
+        );
       }
-    } catch (error) {
-      console.error('Task generation error:', error);
-      alert(error instanceof Error ? error.message : 'エラーが発生しました');
+
+      if (level === 'beginner' || level === 'intermediate') {
+        router.push(`/task/${data.data.id}/prep`);
+      } else {
+        router.push(`/task/${data.data.id}`);
+      }
+    } catch (caught) {
+      console.error('Task generation error:', caught);
+      setError(caught instanceof Error ? caught.message : 'タスクの開始に失敗しました。');
     } finally {
       setLoading(false);
     }
   };
 
+  const selectedGenre = taskType === 'Task 1' ? task1Genre : task2Genre;
+  const selectedGenreLabel = getSelectedGenreLabel(taskType, selectedGenre);
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6">タスクを選択</h1>
+      <div className="container mx-auto max-w-5xl px-4 py-8">
+        <section className="mb-10 space-y-4">
+          <h1 className={pageTitle}>タスクを選ぶ</h1>
+          <p className={cn(bodyText, 'max-w-3xl')}>
+            Task の種類、レベル、出題タイプを選んで Writing を開始します。Task 2 は Practice と Exam Mode の両方へつながります。
+          </p>
+        </section>
 
-        {/* タスクタイプ選択 */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-4">タスクタイプ</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <button
-              onClick={() => {
-                setTaskType('Task 1');
-                setTask1Genre(null);
-              }}
-              className={`p-6 rounded-lg border-2 transition-all text-left ${
-                taskType === 'Task 1'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-              }`}
-            >
-              <div className="font-semibold text-lg mb-2">Task 1</div>
-              <div className="text-sm text-gray-600">グラフ・図表・地図の説明</div>
-            </button>
-            <button
-              onClick={() => {
-                setTaskType('Task 2');
-                setTask2Genre(null);
-              }}
-              className={`p-6 rounded-lg border-2 transition-all text-left ${
-                taskType === 'Task 2'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-              }`}
-            >
-              <div className="font-semibold text-lg mb-2">Task 2</div>
-              <div className="text-sm text-gray-600">エッセイライティング</div>
-            </button>
+        <section className="mb-8">
+          <h2 className={sectionTitle}>Task タイプ</h2>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {[
+              {
+                value: 'Task 1' as const,
+                title: 'Task 1',
+                description: 'グラフ・表・地図・プロセス図などを説明するタスクです。',
+              },
+              {
+                value: 'Task 2' as const,
+                title: 'Task 2',
+                description: '意見・比較・原因と解決策などを論理的に書くタスクです。',
+              },
+            ].map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => {
+                  setTaskType(item.value);
+                  setError(null);
+                  if (item.value === 'Task 1') setTask1Genre(null);
+                  if (item.value === 'Task 2') setTask2Genre(null);
+                }}
+                className={cn(
+                  cardBase,
+                  'p-6 text-left transition-all',
+                  taskType === item.value
+                    ? 'border-primary ring-2 ring-primary/20'
+                    : 'hover:border-primary/40 hover:shadow-md'
+                )}
+              >
+                <div className="text-lg font-semibold text-text">{item.title}</div>
+                <p className={cn(helperText, 'mt-2')}>{item.description}</p>
+              </button>
+            ))}
           </div>
-        </div>
+        </section>
 
-        {/* レベル選択 */}
-        {taskType && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">レベル</h2>
-            <div className="flex gap-4">
-              {levels.map((l) => (
+        {taskType ? (
+          <section className="mb-8">
+            <h2 className={sectionTitle}>レベル</h2>
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {levels.map((item) => (
                 <button
-                  key={l.value}
-                  onClick={() => setLevel(l.value)}
-                  className={`px-6 py-2 rounded-md border-2 transition-all ${
-                    level === l.value
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  key={item.value}
+                  type="button"
+                  onClick={() => setLevel(item.value)}
+                  className={cn(
+                    cardBase,
+                    'p-5 text-left transition-all',
+                    level === item.value
+                      ? 'border-primary ring-2 ring-primary/20'
+                      : 'hover:border-primary/40 hover:shadow-md'
+                  )}
                 >
-                  {l.label}
+                  <div className="font-semibold text-text">{item.label}</div>
+                  <p className={cn(helperText, 'mt-2')}>{item.description}</p>
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          </section>
+        ) : null}
 
-        {/* Task1 ジャンル選択 */}
-        {taskType === 'Task 1' && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">形式を選択</h2>
-            <div className="grid md:grid-cols-2 gap-4">
+        {taskType === 'Task 1' ? (
+          <section className="mb-8">
+            <h2 className={sectionTitle}>出題タイプ</h2>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
               {task1Genres.map((genre) => (
                 <button
                   key={genre.value}
+                  type="button"
                   onClick={() => setTask1Genre(genre.value)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                  className={cn(
+                    cardBase,
+                    'p-5 text-left transition-all',
                     task1Genre === genre.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                  }`}
+                      ? 'border-primary ring-2 ring-primary/20'
+                      : 'hover:border-primary/40 hover:shadow-md'
+                  )}
                 >
-                  <div className="font-semibold mb-1">{genre.label}</div>
-                  <div className="text-sm text-gray-600">{genre.description}</div>
+                  <div className="font-semibold text-text">{genre.label}</div>
+                  <p className={cn(helperText, 'mt-2')}>{genre.description}</p>
                 </button>
               ))}
               <button
+                type="button"
                 onClick={() => setTask1Genre('random')}
-                className={`p-4 rounded-lg border-2 transition-all text-left ${
+                className={cn(
+                  cardBase,
+                  'p-5 text-left transition-all',
                   task1Genre === 'random'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                }`}
+                    ? 'border-primary ring-2 ring-primary/20'
+                    : 'hover:border-primary/40 hover:shadow-md'
+                )}
               >
-                <div className="font-semibold mb-1">🎲 ランダム</div>
-                <div className="text-sm text-gray-600">ランダムな形式を選択</div>
+                <div className="font-semibold text-text">ランダム</div>
+                <p className={cn(helperText, 'mt-2')}>Task 1 の形式をランダムで出題します。</p>
               </button>
             </div>
-          </div>
-        )}
+          </section>
+        ) : null}
 
-        {/* Task2 ジャンル選択 */}
-        {taskType === 'Task 2' && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">エッセータイプを選択</h2>
-            <div className="space-y-3">
+        {taskType === 'Task 2' ? (
+          <section className="mb-8">
+            <h2 className={sectionTitle}>出題タイプ</h2>
+            <div className="mt-4 space-y-3">
               {task2Genres.map((genre) => (
                 <button
                   key={genre.value}
+                  type="button"
                   onClick={() => setTask2Genre(genre.value)}
-                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                  className={cn(
+                    cardBase,
+                    'w-full p-5 text-left transition-all',
                     task2Genre === genre.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                  }`}
+                      ? 'border-primary ring-2 ring-primary/20'
+                      : 'hover:border-primary/40 hover:shadow-md'
+                  )}
                 >
-                  <div className="font-semibold mb-1">{genre.label}</div>
-                  <div className="text-sm text-gray-600">{genre.description}</div>
+                  <div className="font-semibold text-text">{genre.label}</div>
+                  <p className={cn(helperText, 'mt-2')}>{genre.description}</p>
                 </button>
               ))}
               <button
+                type="button"
                 onClick={() => setTask2Genre('random')}
-                className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                className={cn(
+                  cardBase,
+                  'w-full p-5 text-left transition-all',
                   task2Genre === 'random'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                }`}
+                    ? 'border-primary ring-2 ring-primary/20'
+                    : 'hover:border-primary/40 hover:shadow-md'
+                )}
               >
-                <div className="font-semibold mb-1">🎲 ランダム</div>
-                <div className="text-sm text-gray-600">ランダムなエッセータイプを選択</div>
+                <div className="font-semibold text-text">ランダム</div>
+                <p className={cn(helperText, 'mt-2')}>Task 2 の出題タイプをランダムで選びます。</p>
               </button>
             </div>
-          </div>
-        )}
+          </section>
+        ) : null}
 
-        {/* 開始ボタン */}
-        {taskType && (taskType === 'Task 1' ? task1Genre : task2Genre) && (
-          <div className="flex justify-end">
-            <button
-              onClick={handleStart}
-              disabled={loading}
-              className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-semibold"
-            >
-              {loading ? '生成中...' : 'タスクを開始'}
-            </button>
-          </div>
-        )}
+        {taskType && selectedGenre ? (
+          <section className={cn(cardBase, 'space-y-4 p-6')}>
+            <div className="space-y-2">
+              <h2 className={sectionTitle}>開始する</h2>
+              <p className={helperText}>
+                {taskType} / {level === 'beginner' ? '初級' : level === 'intermediate' ? '中級' : '上級'} /{' '}
+                {selectedGenreLabel}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleStart}
+                disabled={loading}
+                className={cn(buttonPrimary, 'inline-flex', loading && 'cursor-not-allowed opacity-50')}
+              >
+                {loading ? 'タスクを準備中...' : 'この条件で始める'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTaskType(null);
+                  setTask1Genre(null);
+                  setTask2Genre(null);
+                  setError(null);
+                }}
+                className={cn(buttonSecondary, 'inline-flex')}
+              >
+                選び直す
+              </button>
+            </div>
+            {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
+          </section>
+        ) : null}
       </div>
     </Layout>
   );
@@ -276,15 +359,8 @@ function TaskSelectContent() {
 
 export default function TaskSelectPage() {
   return (
-    <Suspense fallback={
-      <Layout>
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="text-center">読み込み中...</div>
-        </div>
-      </Layout>
-    }>
+    <Suspense fallback={<div className="p-8 text-center text-text-muted">読み込み中...</div>}>
       <TaskSelectContent />
     </Suspense>
   );
 }
-

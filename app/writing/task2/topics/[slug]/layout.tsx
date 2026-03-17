@@ -1,74 +1,28 @@
-﻿import type { Metadata } from 'next';
-
-const task2Topics = [
-  { slug: 'education', title: 'Education' },
-  { slug: 'technology', title: 'Technology' },
-  { slug: 'environment', title: 'Environment' },
-  { slug: 'health', title: 'Health' },
-  { slug: 'work-career', title: 'Work & Career' },
-  { slug: 'government-society', title: 'Government & Society' },
-  { slug: 'media-advertising', title: 'Media & Advertising' },
-  { slug: 'crime-punishment', title: 'Crime & Punishment' },
-  { slug: 'culture-traditions', title: 'Culture & Traditions' },
-  { slug: 'transport-urban', title: 'Transport & Urban Life' },
-  { slug: 'work-life-balance', title: 'Work-life Balance' },
-  { slug: 'climate-change', title: 'Climate Change' },
-  { slug: 'globalisation', title: 'Globalisation' },
-  { slug: 'youth-age', title: 'Youth & Age' },
-  { slug: 'family-children', title: 'Family & Children' },
-  { slug: 'food-diet', title: 'Food & Diet' },
-  { slug: 'sports', title: 'Sports' },
-  { slug: 'arts', title: 'Arts' },
-  { slug: 'tourism', title: 'Tourism' },
-  { slug: 'housing', title: 'Housing' },
-  { slug: 'equality-rights', title: 'Equality & Rights' },
-  { slug: 'immigration', title: 'Immigration' },
-  { slug: 'fashion', title: 'Fashion' },
-  { slug: 'money-finance', title: 'Money & Finance' },
-  { slug: 'space-exploration', title: 'Space Exploration' },
-  { slug: 'animals-wildlife', title: 'Animals & Wildlife' },
-  { slug: 'languages', title: 'Languages' },
-  { slug: 'social-media', title: 'Social Media' },
-  { slug: 'data-privacy', title: 'Data Privacy' },
-  { slug: 'automation-jobs', title: 'Automation & Jobs' },
-  { slug: 'renewable-energy', title: 'Renewable Energy' },
-  { slug: 'waste-recycling', title: 'Waste & Recycling' },
-  { slug: 'aging-population', title: 'Aging Population' },
-  { slug: 'urbanisation', title: 'Urbanisation' },
-  { slug: 'rural-life', title: 'Rural Life' },
-  { slug: 'international-aid', title: 'International Aid' },
-  { slug: 'consumerism', title: 'Consumerism' },
-  { slug: 'advertising-ethics', title: 'Advertising Ethics' },
-  { slug: 'censorship', title: 'Censorship' },
-  { slug: 'scientific-research', title: 'Scientific Research' },
-  { slug: 'museums', title: 'Museums' },
-  { slug: 'music', title: 'Music' },
-  { slug: 'films-cinema', title: 'Films & Cinema' },
-  { slug: 'books-reading', title: 'Books & Reading' },
-  { slug: 'gap-year', title: 'Gap Year' },
-  { slug: 'online-learning', title: 'Online Learning' },
-  { slug: 'nuclear-energy', title: 'Nuclear Energy' },
-  { slug: 'water-shortage', title: 'Water Shortage' },
-  { slug: 'deforestation', title: 'Deforestation' },
-  { slug: 'vegetarianism', title: 'Vegetarianism' },
-] as const;
+import type { Metadata } from 'next';
+import { getWritingTask2Topic } from '@/lib/content/writingTopics';
 
 type Props = { params: { slug: string }; children: React.ReactNode };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = params;
-  const topic = task2Topics.find((t) => t.slug === slug);
+  const topic = getWritingTask2Topic(params.slug);
+
   if (!topic) {
-    return { title: 'トピックが見つかりません' };
+    return { title: '\u30c8\u30d4\u30c3\u30af\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093' };
   }
-  const title = `IELTS Writing Task 2 トピック: ${topic.title} | 例題・構成・AI フィードバック`;
-  const description = `IELTS Writing Task 2 の「${topic.title}」で、例題、構成テンプレート、AI フィードバックを使った Practice / Exam Mode に進めます。`;
-  const canonical = `/writing/task2/topics/${slug}`;
+
+  const title = `IELTS Writing Task 2 \u30c8\u30d4\u30c3\u30af | ${topic.titleJa}\uff08${topic.titleEn}\uff09`;
+  const description = `IELTS Writing Task 2 \u306e\u300c${topic.titleJa}\uff08${topic.titleEn}\uff09\u300d\u3067\u3001\u4f8b\u984c\u3001\u69cb\u6210\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u3001Practice / Exam Mode \u3078\u306e\u5c0e\u7dda\u3092\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002`;
+  const canonical = `/writing/task2/topics/${params.slug}`;
+
   return {
     title,
     description,
     alternates: { canonical },
-    openGraph: { title, description, url: canonical },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+    },
   };
 }
 
