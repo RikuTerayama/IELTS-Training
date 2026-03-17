@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Centralized nav config for public vs app shell.
  * Public: marketing/SEO pages. App: authenticated learner dashboard and flows.
  */

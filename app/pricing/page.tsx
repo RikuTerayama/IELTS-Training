@@ -1,9 +1,23 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
-import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
+import {
+  bodyText,
+  buttonPrimary,
+  buttonSecondary,
+  cardBase,
+  cn,
+  helperText,
+  pageTitle,
+  sectionTitle,
+  subsectionTitle,
+  surfaceSoftBadge,
+  surfaceSoftBody,
+  surfaceSoftCard,
+  surfaceSoftTitle,
+} from '@/lib/ui/theme';
 import type { ApiResponse } from '@/lib/api/response';
 
 type UsageTodayData = {
@@ -24,37 +38,37 @@ const SAVINGS_PERCENT = 17;
 
 const PRICING_FAQ: { question: string; answer: string; link?: { href: string; label: string } }[] = [
   {
-    question: 'Pro はいつ有効になりますか？',
+    question: 'Pro はいつでも解約できますか？',
     answer:
-      'お支払い完了後、すぐに Pro が有効になります。反映されない場合はページを再読み込みするか、1分ほどお待ちください。',
-    link: { href: '/billing/manage', label: '請求管理' },
+      'はい。支払い設定ページからいつでも Pro を停止できます。停止後は次回更新日までは Pro の機能を使えます。',
+    link: { href: '/billing/manage', label: '支払い設定' },
   },
   {
-    question: 'サブスクリプションの管理・解約はどうすればよいですか？',
-    answer: '請求管理ページで支払い方法の変更・解約・プラン変更ができます。',
-    link: { href: '/billing/manage', label: '請求管理' },
+    question: '支払い間隔の変更はできますか？',
+    answer: '支払い設定ページから、月額プランと年額プランの切り替えができます。',
+    link: { href: '/billing/manage', label: '支払い設定' },
   },
   {
-    question: 'Pro に含まれるものは？',
+    question: 'Pro に含まれる機能は？',
     answer:
-      'Writing / Speaking AI の無制限（または上限引き上げ）、待ち時間の短縮、フィードバック履歴の全件閲覧、優先演算（今後対応予定）です。',
+      'Writing / Speaking AI の回数制限解除、より多い練習量、フィードバック履歴の継続確認、進捗の見返しが含まれます。',
     link: { href: '/home', label: 'ホームへ' },
   },
   {
-    question: '無料枠は毎日リセットされますか？',
-    answer: 'はい。無料の1日あたりの上限（Writing AI・Speaking AI など）は毎日 0:00 JST にリセットされます。',
+    question: '無料プランの回数はいつリセットされますか？',
+    answer: '無料プランの 1 日あたりの Writing AI / Speaking AI 回数は、毎日 0:00 JST にリセットされます。',
   },
   {
-    question: '月額と年額を切り替えられますか？',
+    question: '月額と年額はどう選べばよいですか？',
     answer:
-      'はい。請求管理からプラン変更できます。Stripe の顧客ポータルでアップグレードや支払い周期の変更が可能です。',
-    link: { href: '/billing/manage', label: '請求管理' },
+      'まずは支払い設定や料金ページで利用頻度を確認してください。継続して使うなら年額の方がコストを抑えやすい設計です。',
+    link: { href: '/billing/manage', label: '支払い設定' },
   },
   {
-    question: '請求で問題が起きた場合は？',
+    question: '支払いで問題が起きた場合は？',
     answer:
-      '請求管理で請求書の確認や支払い情報の更新ができます。請求書払いなど手動承認をご希望の場合は Request Pro をご利用ください。',
-    link: { href: '/pro/request', label: 'Request Pro' },
+      '支払い設定から請求状況を確認できます。解決しない場合は、必要事項を添えて Pro リクエストから連絡してください。',
+    link: { href: '/pro/request', label: 'Pro リクエスト' },
   },
 ];
 
@@ -71,6 +85,7 @@ function FaqJsonLd() {
       },
     })),
   };
+
   return (
     <script
       type="application/ld+json"
@@ -106,6 +121,7 @@ export default function PricingPage() {
   const handleUpgrade = async () => {
     setLoading(true);
     setError(null);
+
     try {
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
@@ -113,140 +129,203 @@ export default function PricingPage() {
         body: JSON.stringify({ interval }),
       });
       const data = (await res.json()) as ApiResponse<CheckoutResponse>;
+
       if (res.status === 401) {
         setUnauthorized(true);
-        setError('Please log in to upgrade.');
+        setError('アップグレードにはログインが必要です。');
         return;
       }
+
       if (data.ok && data.data?.url) {
         window.location.href = data.data.url;
         return;
       }
-      setError(data.error?.message || 'Failed to start checkout.');
+
+      setError(data.error?.message || 'チェックアウトの開始に失敗しました。');
     } catch {
-      setError('Network error. Please try again.');
+      setError('通信に失敗しました。時間をおいてもう一度お試しください。');
     } finally {
       setLoading(false);
     }
   };
 
+  const planCards: Array<{
+    key: 'monthly' | 'annual';
+    title: string;
+    subtitle: string;
+    detail: string;
+    badge?: string;
+    price: PriceDisplay;
+    highlighted?: boolean;
+  }> = [
+    {
+      key: 'monthly',
+      title: 'Pro 月額',
+      subtitle: '毎月支払い',
+      detail: 'まずは短い期間で試したい人向けです。',
+      price: null,
+    },
+    {
+      key: 'annual',
+      title: 'Pro 年額',
+      subtitle: '年額支払い',
+      detail: '継続して使う前提なら、年額の方が管理しやすい設計です。',
+      badge: `約 ${SAVINGS_PERCENT}% お得`,
+      price: null,
+      highlighted: true,
+    },
+  ];
+
   return (
     <Layout variant="public">
       <FaqJsonLd />
-      <div className="container mx-auto px-4 py-12 max-w-3xl">
-        <h1 className="mb-2 text-2xl font-bold text-text">料金</h1>
-        <p className="mb-8 text-text-muted">プランを選んでください。</p>
+      <div className="container mx-auto max-w-5xl px-4 py-12 md:py-16">
+        <section className="mx-auto max-w-3xl text-center">
+          <span className={surfaceSoftBadge}>Meridian Pro</span>
+          <h1 className={cn(pageTitle, 'mt-4')}>料金</h1>
+          <p className={cn(bodyText, 'mx-auto mt-4 max-w-2xl text-balance')}>
+            無料プランで始めて、必要になったら Pro に切り替えられます。毎日の AI 利用枠、支払い設定、
+            使える機能の違いをここでまとめて確認できます。
+          </p>
+        </section>
 
         {!usageLoading && isPro && (
-          <div className={cn(
-            'mb-6 p-6 rounded-2xl border',
-            'border-green-200 bg-green-50/80 dark:border-green-700 dark:bg-green-900/30',
-            'shadow-sm'
-          )}>
+          <section className={cn(surfaceSoftCard, 'mt-10 p-6 md:p-7')}>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-900 dark:border-green-600 dark:bg-green-800/50 dark:text-green-100">
-                Pro 有効
-              </span>
+              <span className={surfaceSoftBadge}>Pro 利用中</span>
             </div>
-            <p className="mt-2 font-semibold text-green-900 dark:text-green-100">現在 Pro プランをご利用中です。</p>
-            <p className="mt-1 text-sm text-green-800 dark:text-green-200">サブスクリプションの管理またはホームへ戻る。</p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link href="/billing/manage" className={cn(buttonPrimary, 'inline-flex !bg-green-600 hover:!bg-green-700')}>
-                請求管理
+            <h2 className={cn(subsectionTitle, surfaceSoftTitle, 'mt-3')}>現在 Pro プランを利用中です</h2>
+            <p className={cn(surfaceSoftBody, 'mt-2 text-helper')}>
+              支払い設定の確認、請求情報の更新、プランの見直しは支払い設定ページから行えます。
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/billing/manage" className={cn(buttonPrimary, 'inline-flex')}>
+                支払い設定を開く
               </Link>
               <Link href="/home" className={cn(buttonSecondary, 'inline-flex')}>
-                ホームへ
+                ホームへ戻る
               </Link>
             </div>
-          </div>
+          </section>
         )}
 
-        <div className="mb-8 flex flex-wrap items-center gap-4">
-          <span className="text-sm font-medium text-text">Billing:</span>
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="radio"
-              name="interval"
-              checked={interval === 'monthly'}
-              onChange={() => setInterval('monthly')}
-              className="h-4 w-4 border-border text-indigo-600 focus:ring-indigo-500"
-            />
-            <span className="text-sm text-text">Monthly</span>
-          </label>
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="radio"
-              name="interval"
-              checked={interval === 'annual'}
-              onChange={() => setInterval('annual')}
-              className="h-4 w-4 border-border text-indigo-600 focus:ring-indigo-500"
-            />
-            <span className="text-sm text-text">Annual</span>
-          </label>
-        </div>
+        <section className="mt-12">
+          <div className="mb-5 flex flex-wrap items-center gap-4">
+            <h2 className={sectionTitle}>支払い間隔</h2>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-text-muted">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="interval"
+                  checked={interval === 'monthly'}
+                  onChange={() => setInterval('monthly')}
+                  className="h-4 w-4 border-border text-indigo-600 focus:ring-indigo-500"
+                />
+                <span>月額</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="interval"
+                  checked={interval === 'annual'}
+                  onChange={() => setInterval('annual')}
+                  className="h-4 w-4 border-border text-indigo-600 focus:ring-indigo-500"
+                />
+                <span>年額</span>
+              </label>
+            </div>
+          </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className={cn('p-6 rounded-2xl', cardBase, interval === 'monthly' && 'ring-2 ring-indigo-500 ring-offset-2')}>
-            <h2 className="text-lg font-bold text-text">Pro Monthly</h2>
-            <p className="mt-1 text-sm text-text-muted">Billed monthly</p>
-            <p className="mt-4 text-2xl font-bold text-text">—</p>
-            <p className="text-xs text-text-muted">Price set in Stripe</p>
+          <div className="grid gap-6 md:grid-cols-2">
+            {planCards.map((plan) => {
+              const active = interval === plan.key;
+              const isSoftSurface = plan.highlighted;
+
+              return (
+                <article
+                  key={plan.key}
+                  className={cn(
+                    isSoftSurface ? surfaceSoftCard : cardBase,
+                    'relative h-full p-6 md:p-7',
+                    active && 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-bg',
+                  )}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    {plan.highlighted ? <span className={surfaceSoftBadge}>{plan.badge}</span> : null}
+                    {active ? (
+                      <span className={cn(surfaceSoftBadge, !plan.highlighted && 'border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:text-indigo-200')}>
+                        選択中
+                      </span>
+                    ) : null}
+                  </div>
+                  <h3 className={cn(subsectionTitle, plan.highlighted ? surfaceSoftTitle : 'text-text', 'mt-4')}>
+                    {plan.title}
+                  </h3>
+                  <p className={cn(helperText, plan.highlighted ? surfaceSoftBody : 'text-text-muted', 'mt-1')}>
+                    {plan.subtitle}
+                  </p>
+                  <p className={cn('mt-4 text-3xl font-bold', plan.highlighted ? surfaceSoftTitle : 'text-text')}>
+                    価格は Stripe で表示
+                  </p>
+                  <p className={cn(helperText, plan.highlighted ? surfaceSoftBody : 'text-text-muted', 'mt-2')}>
+                    {plan.detail}
+                  </p>
+                  <ul className={cn('mt-6 space-y-2 text-sm', plan.highlighted ? surfaceSoftBody : 'text-text-muted')}>
+                    <li>Writing / Speaking AI の利用枠を広げて継続学習しやすくします。</li>
+                    <li>フィードバック履歴と進捗の見返しを安定して使えます。</li>
+                    <li>Writing / Speaking を毎日続ける人ほど Pro の価値が出やすい設計です。</li>
+                  </ul>
+                </article>
+              );
+            })}
           </div>
-          <div className={cn('p-6 rounded-2xl', cardBase, interval === 'annual' && 'ring-2 ring-indigo-500 ring-offset-2')}>
-            <h2 className="text-lg font-bold text-text">Pro Annual</h2>
-            <p className="mt-1 text-sm text-text-muted">Billed annually (save ~{SAVINGS_PERCENT}%)</p>
-            <p className="mt-4 text-2xl font-bold text-text">—</p>
-            <p className="text-xs text-text-muted">Price set in Stripe</p>
-          </div>
-        </div>
+        </section>
 
         {unauthorized && (
-          <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
-            <p className="text-sm text-amber-800 dark:text-amber-200">アップグレードにはログインが必要です。</p>
-            <Link href="/login" className={cn(buttonPrimary, 'mt-3 inline-flex')}>
+          <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-700 dark:bg-amber-900/30">
+            <p className="text-sm text-amber-900 dark:text-amber-200">
+              アップグレードにはログインが必要です。ログイン後に料金ページへ戻れます。
+            </p>
+            <Link href="/login?next=%2Fpricing" className={cn(buttonPrimary, 'mt-4 inline-flex')}>
               ログイン
             </Link>
-          </div>
+          </section>
         )}
 
         {!unauthorized && (
-          <div className="mt-8 flex flex-wrap gap-4">
+          <section className="mt-8 flex flex-wrap gap-4">
             <button
               type="button"
               onClick={handleUpgrade}
               disabled={loading || isPro}
-              className={cn(buttonPrimary, (loading || isPro) && 'opacity-50 cursor-not-allowed')}
+              className={cn(buttonPrimary, 'inline-flex', (loading || isPro) && 'cursor-not-allowed opacity-50')}
             >
-              {loading ? 'リダイレクト中...' : isPro ? 'Pro ご利用中' : 'Pro にアップグレード'}
+              {loading ? 'チェックアウトを準備中...' : isPro ? 'Pro 利用中' : 'Pro にアップグレード'}
             </button>
             <Link href="/billing/manage" className={cn(buttonSecondary, 'inline-flex')}>
-              請求管理
+              支払い設定
             </Link>
-          </div>
+          </section>
         )}
 
-        {error && (
-          <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
+        {error ? <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p> : null}
 
         <section className="mt-16 border-t border-border pt-12" aria-labelledby="faq-heading">
-          <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
-            よくある質問
-          </h2>
-          <ul className="space-y-6">
-            {PRICING_FAQ.map((item, i) => (
-              <li key={i} className={cn('rounded-lg border border-border bg-surface p-4', cardBase)}>
-                <h3 className="font-semibold text-text">{item.question}</h3>
-                <p className="mt-2 text-sm text-text-muted leading-relaxed">
+          <h2 id="faq-heading" className={sectionTitle}>よくある質問</h2>
+          <ul className="mt-6 space-y-6">
+            {PRICING_FAQ.map((item) => (
+              <li key={item.question} className={cn(cardBase, 'rounded-2xl p-5')}>
+                <h3 className={subsectionTitle}>{item.question}</h3>
+                <p className={cn(helperText, 'mt-2')}>
                   {item.answer}
-                  {item.link && (
+                  {item.link ? (
                     <>
                       {' '}
-                      <Link href={item.link.href} className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                      <Link href={item.link.href} className="text-indigo-600 hover:underline dark:text-indigo-300">
                         {item.link.label}
                       </Link>
                     </>
-                  )}
+                  ) : null}
                 </p>
               </li>
             ))}

@@ -9,6 +9,10 @@
     --bg-secondary: 249 250 251;
     --surface: 255 255 255;
     --surface-2: 249 250 251;
+    --surface-soft: 238 242 255;
+    --surface-soft-foreground: 30 41 59;
+    --surface-soft-muted: 71 85 105;
+    --surface-soft-border: 199 210 254;
     
     --text: 17 24 39;
     --text-muted: 107 114 128;
@@ -69,6 +73,10 @@
     --bg-secondary: 30 41 59;
     --surface: 30 41 59;
     --surface-2: 51 65 85;
+    --surface-soft: 224 231 255;
+    --surface-soft-foreground: 15 23 42;
+    --surface-soft-muted: 51 65 85;
+    --surface-soft-border: 129 140 248;
     
     --text: 248 250 252;
     --text-muted: 203 213 225;

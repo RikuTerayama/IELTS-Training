@@ -1,29 +1,28 @@
-﻿import type { Metadata } from 'next';
-
-const speakingTopics = [
-  { slug: 'work-study', title: 'Work & Study', apiTopic: 'work_study' },
-  { slug: 'hometown', title: 'Hometown', apiTopic: 'hometown' },
-  { slug: 'free-time', title: 'Free Time', apiTopic: 'free_time' },
-  { slug: 'travel', title: 'Travel', apiTopic: 'travel' },
-  { slug: 'technology', title: 'Technology', apiTopic: 'technology' },
-] as const;
+import type { Metadata } from 'next';
+import { getSpeakingTopicBySlug } from '@/lib/content/speakingTopics';
 
 type Props = { params: { slug: string }; children: React.ReactNode };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = params;
-  const topic = speakingTopics.find((t) => t.slug === slug);
+  const topic = getSpeakingTopicBySlug(params.slug);
+
   if (!topic) {
-    return { title: 'トピックが見つかりません' };
+    return { title: '\u30c8\u30d4\u30c3\u30af\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093' };
   }
-  const title = `IELTS Speakingトピック: ${topic.title} | Part 1-3 の質問例と練習`;
-  const description = `IELTS Speaking の「${topic.title}」トピックで、Part 1-3 の質問例、Cue Card、AI フィードバックの使い方を確認できます。`;
-  const canonical = `/speaking/topics/${slug}`;
+
+  const title = `IELTS Speaking \u30c8\u30d4\u30c3\u30af | ${topic.titleJa}\uff08${topic.titleEn}\uff09`;
+  const description = `IELTS Speaking \u306e\u300c${topic.titleJa}\uff08${topic.titleEn}\uff09\u300d\u3067\u3001Part 1-3 \u306e\u8cea\u554f\u4f8b\u3001Cue Card\u3001AI \u9762\u63a5\u3078\u306e\u5c0e\u7dda\u3092\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002`;
+  const canonical = `/speaking/topics/${params.slug}`;
+
   return {
     title,
     description,
     alternates: { canonical },
-    openGraph: { title, description, url: canonical },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+    },
   };
 }
 

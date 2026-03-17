@@ -1,10 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
-import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary, textareaBase } from '@/lib/ui/theme';
+import {
+  bodyText,
+  buttonPrimary,
+  buttonSecondary,
+  cardBase,
+  cardTitle,
+  cn,
+  helperText,
+  pageTitle,
+  sectionTitle,
+  textareaBase,
+} from '@/lib/ui/theme';
 import type { ApiResponse } from '@/lib/api/response';
+import {
+  getUserFacingSubmissionError,
+  isUnauthorizedApiResponse,
+  redirectToLoginWithNext,
+} from '@/lib/api/clientError';
+import { SPEAKING_TOPICS } from '@/lib/content/speakingTopics';
 
 type Phase =
   | 'idle'
@@ -16,24 +33,21 @@ type Phase =
   | 'done'
   | 'error';
 
-const TOPICS = [
-  { value: 'work_study', label: 'Work & Study' },
-  { value: 'hometown', label: 'Hometown' },
-  { value: 'free_time', label: 'Free Time' },
-  { value: 'travel', label: 'Travel' },
-  { value: 'technology', label: 'Technology' },
-] as const;
+const TOPICS = SPEAKING_TOPICS.map((topic) => ({
+  value: topic.apiTopic,
+  label: `${topic.titleJa}\uff08${topic.titleEn}\uff09`,
+}));
 
 const LEVELS = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
+  { value: 'beginner', label: '\u521d\u7d1a' },
+  { value: 'intermediate', label: '\u4e2d\u7d1a' },
+  { value: 'advanced', label: '\u4e0a\u7d1a' },
 ] as const;
 
 const PARTS = [
-  { value: 'part1', label: 'Part 1 — Personal Questions', help: 'Short answers about familiar topics.' },
-  { value: 'part2', label: 'Part 2 — Cue Card', help: '1–2 minute long turn based on a cue card.' },
-  { value: 'part3', label: 'Part 3 — Discussion', help: 'Abstract discussion with deeper reasoning.' },
+  { value: 'part1', label: 'Part 1', help: '\u8eab\u8fd1\u306a\u8cea\u554f\u306b\u77ed\u304f\u7b54\u3048\u308b\u30d1\u30fc\u30c8\u3067\u3059\u3002' },
+  { value: 'part2', label: 'Part 2 / Cue Card', help: '1\u301c2 \u5206\u3067\u8a71\u3059\u30d1\u30fc\u30c8\u3067\u3059\u3002' },
+  { value: 'part3', label: 'Part 3', help: '\u62bd\u8c61\u5ea6\u306e\u9ad8\u3044\u8b70\u8ad6\u3078\u5e83\u3052\u308b\u30d1\u30fc\u30c8\u3067\u3059\u3002' },
 ] as const;
 
 const LEVEL_TO_API: Record<string, string> = {
@@ -42,7 +56,24 @@ const LEVEL_TO_API: Record<string, string> = {
   advanced: 'C1',
 };
 
-/** prompt 行から表示用の質問テキストを組み立てる */
+const MIN_ANSWER_LENGTH = 30;
+
+const EVALUATION_LABELS: Record<string, string> = {
+  fluency_band: '流暢さ',
+  lexical_band: '語彙',
+  grammar_band: '文法',
+  pronunciation_band: '発音',
+};
+
+type UsageTodayData = {
+  is_pro: boolean;
+  writing_limit: number;
+  speaking_limit: number;
+  writing_remaining: number;
+  speaking_remaining: number;
+  reset_at: string;
+};
+
 function buildPromptText(promptRow: Record<string, unknown>): string {
   const followup = promptRow?.followup_question as string | undefined;
   const question = promptRow?.question as string | undefined;
@@ -50,20 +81,14 @@ function buildPromptText(promptRow: Record<string, unknown>): string {
   if (followup && String(followup).trim()) return String(followup).trim();
   if (question && String(question).trim()) return String(question).trim();
   if (jpIntent && String(jpIntent).trim()) return `(Intent) ${String(jpIntent).trim()}`;
-  return '(No question text)';
+  return '\u8cea\u554f\u6587\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002';
 }
 
-/** evaluations API に渡す prompt 文字列（評価品質のため情報を強化） */
-function buildEvaluationPromptText(
-  promptRow: Record<string, unknown>,
-  selectedPart: string
-): string {
+function buildEvaluationPromptText(promptRow: Record<string, unknown>, selectedPart: string): string {
   const topic = promptRow?.topic ?? 'unknown';
   const jpIntent = promptRow?.jp_intent ?? '';
   const targetPoints = promptRow?.target_points;
-  const targetStr = targetPoints
-    ? JSON.stringify(targetPoints, null, 0)
-    : '';
+  const targetStr = targetPoints ? JSON.stringify(targetPoints, null, 0) : '';
   const expectedStyle = promptRow?.expected_style ?? '';
 
   const baseLines = [
@@ -75,9 +100,13 @@ function buildEvaluationPromptText(
   ];
 
   const cueCard = promptRow?.cue_card as { topic?: string; points?: string[] } | undefined;
-  if (selectedPart === 'part2' && cueCard && (cueCard.topic || (Array.isArray(cueCard.points) && cueCard.points.length > 0))) {
+  if (
+    selectedPart === 'part2' &&
+    cueCard &&
+    (cueCard.topic || (Array.isArray(cueCard.points) && cueCard.points.length > 0))
+  ) {
     const points = Array.isArray(cueCard.points)
-      ? cueCard.points.map((p) => `- ${p}`).join('\n')
+      ? cueCard.points.map((point) => `- ${point}`).join('\n')
       : '';
     return [
       ...baseLines.slice(0, 2),
@@ -87,24 +116,17 @@ function buildEvaluationPromptText(
     ].filter(Boolean).join('\n');
   }
 
-  const questionText = buildPromptText(promptRow);
   return [
     ...baseLines.slice(0, 2),
-    `Question: ${questionText}`,
+    `Question: ${buildPromptText(promptRow)}`,
     ...baseLines.slice(2),
   ].join('\n');
 }
 
-const MIN_ANSWER_LENGTH = 30;
-
-type UsageTodayData = {
-  is_pro: boolean;
-  writing_limit: number;
-  speaking_limit: number;
-  writing_remaining: number;
-  speaking_remaining: number;
-  reset_at: string;
-};
+function getCurrentPath(): string {
+  if (typeof window === 'undefined') return '/exam/speaking';
+  return `${window.location.pathname}${window.location.search}`;
+}
 
 export default function ExamSpeakingPage() {
   const [phase, setPhase] = useState<Phase>('idle');
@@ -113,7 +135,7 @@ export default function ExamSpeakingPage() {
 
   const [topic, setTopic] = useState<string>(TOPICS[0].value);
   const [level, setLevel] = useState<string>(LEVELS[0].value);
-  const [selectedPart, setSelectedPart] = useState<string>('part1');
+  const [selectedPart, setSelectedPart] = useState<string>(PARTS[0].value);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [promptRow, setPromptRow] = useState<Record<string, unknown> | null>(null);
@@ -136,6 +158,20 @@ export default function ExamSpeakingPage() {
     phase === 'saving_attempt' ||
     phase === 'evaluating';
 
+  const usageMessage = useMemo(() => {
+    if (!usageToday) return null;
+    if (usageToday.is_pro) {
+      return 'Pro \u5229\u7528\u4e2d\u3067\u3059\u3002Speaking AI \u3092\u7d99\u7d9a\u3057\u3066\u4f7f\u3048\u307e\u3059\u3002';
+    }
+    if (usageToday.speaking_remaining === 0) {
+      return '\u4eca\u65e5\u306e Speaking AI \u6b8b\u308a\u56de\u6570\u306f 0 \u3067\u3059\u3002\u7d9a\u3051\u3066\u4f7f\u3046\u5834\u5408\u306f\u6599\u91d1\u30da\u30fc\u30b8\u3092\u78ba\u8a8d\u3057\u3066\u304f\u3060\u3055\u3044\u3002';
+    }
+    if (usageToday.speaking_remaining === 1) {
+      return '\u4eca\u65e5\u306e Speaking AI \u6b8b\u308a\u56de\u6570\u306f 1 \u56de\u3067\u3059\u3002';
+    }
+    return `\u4eca\u65e5\u306e Speaking AI \u6b8b\u308a\u56de\u6570\u306f ${usageToday.speaking_remaining} \u56de\u3067\u3059\u3002`;
+  }, [usageToday]);
+
   const handleStartInterview = async () => {
     setErrorMessage(null);
     setPhase('creating_session');
@@ -152,13 +188,18 @@ export default function ExamSpeakingPage() {
         }),
       });
       const sessionData = (await sessionRes.json()) as ApiResponse<{ id: string }>;
-      if (sessionRes.status === 401) {
-        setErrorMessage('ログインが必要です');
-        setPhase('error');
+      if (isUnauthorizedApiResponse(sessionRes, sessionData)) {
+        redirectToLoginWithNext(getCurrentPath());
         return;
       }
       if (!sessionData.ok || !sessionData.data?.id) {
-        setErrorMessage(sessionData.error?.message ?? 'Failed to create session');
+        setErrorMessage(
+          getUserFacingSubmissionError(
+            sessionRes,
+            sessionData,
+            '\u9762\u63a5\u30bb\u30c3\u30b7\u30e7\u30f3\u306e\u958b\u59cb\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002'
+          )
+        );
         setPhase('error');
         return;
       }
@@ -178,21 +219,26 @@ export default function ExamSpeakingPage() {
         }),
       });
       const promptData = (await promptRes.json()) as ApiResponse<Record<string, unknown>>;
-      if (promptRes.status === 401) {
-        setErrorMessage('ログインが必要です');
-        setPhase('error');
+      if (isUnauthorizedApiResponse(promptRes, promptData)) {
+        redirectToLoginWithNext(getCurrentPath());
         return;
       }
       if (!promptData.ok || !promptData.data) {
-        setErrorMessage(promptData.error?.message ?? 'Failed to generate prompt');
+        setErrorMessage(
+          getUserFacingSubmissionError(
+            promptRes,
+            promptData,
+            '\u8cea\u554f\u306e\u751f\u6210\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002'
+          )
+        );
         setPhase('error');
         return;
       }
       setPromptRow(promptData.data);
       setAnswer('');
       setPhase('answering');
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : 'Network error');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '\u901a\u4fe1\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002');
       setPhase('error');
     }
   };
@@ -201,9 +247,10 @@ export default function ExamSpeakingPage() {
     if (!sessionId || !promptRow || !promptRow.id) return;
     const trimmed = answer.trim();
     if (trimmed.length < MIN_ANSWER_LENGTH) {
-      setErrorMessage(`Please enter at least ${MIN_ANSWER_LENGTH} characters.`);
+      setErrorMessage(`\u56de\u7b54\u306f ${MIN_ANSWER_LENGTH} \u6587\u5b57\u4ee5\u4e0a\u3067\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002`);
       return;
     }
+
     setErrorMessage(null);
     setPhase('saving_attempt');
 
@@ -218,45 +265,54 @@ export default function ExamSpeakingPage() {
         }),
       });
       const attemptData = (await attemptRes.json()) as ApiResponse<{ id: string }>;
-      if (attemptRes.status === 401) {
-        setErrorMessage('ログインが必要です');
-        setPhase('error');
+      if (isUnauthorizedApiResponse(attemptRes, attemptData)) {
+        redirectToLoginWithNext(getCurrentPath());
         return;
       }
       if (!attemptData.ok || !attemptData.data?.id) {
-        setErrorMessage(attemptData.error?.message ?? 'Failed to save attempt');
-        setPhase('error');
+        setErrorMessage(
+          getUserFacingSubmissionError(
+            attemptRes,
+            attemptData,
+            '\u56de\u7b54\u306e\u4fdd\u5b58\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002\u5185\u5bb9\u3092\u78ba\u8a8d\u3057\u3066\u3001\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002'
+          )
+        );
+        setPhase('answering');
         return;
       }
       setAttemptId(attemptData.data.id);
 
       setPhase('evaluating');
-      const promptText = buildEvaluationPromptText(promptRow, selectedPart);
       const evalRes = await fetch('/api/speaking/evaluations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           attempt_id: attemptData.data.id,
           user_response: trimmed,
-          prompt: promptText,
+          prompt: buildEvaluationPromptText(promptRow, selectedPart),
           metrics: { word_count: trimmed.split(/\s+/).length },
         }),
       });
       const evalData = (await evalRes.json()) as ApiResponse<Record<string, unknown>>;
-      if (evalRes.status === 401) {
-        setErrorMessage('ログインが必要です');
-        setPhase('error');
+      if (isUnauthorizedApiResponse(evalRes, evalData)) {
+        redirectToLoginWithNext(getCurrentPath());
         return;
       }
       if (!evalData.ok || !evalData.data) {
-        setErrorMessage(evalData.error?.message ?? 'Failed to get evaluation');
+        setErrorMessage(
+          getUserFacingSubmissionError(
+            evalRes,
+            evalData,
+            '\u8a55\u4fa1\u306e\u53d6\u5f97\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002\u6642\u9593\u3092\u304a\u3044\u3066\u3001\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002'
+          )
+        );
         setPhase('error');
         return;
       }
       setFeedbackRow(evalData.data);
       setPhase('done');
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : 'Network error');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '\u901a\u4fe1\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002');
       setPhase('error');
     }
   };
@@ -273,257 +329,207 @@ export default function ExamSpeakingPage() {
 
   const questionText = promptRow ? buildPromptText(promptRow) : '';
   const cueCard = promptRow?.cue_card as { topic?: string; points?: string[] } | undefined;
-  const showCueCard = selectedPart === 'part2' && cueCard && (cueCard.topic || (Array.isArray(cueCard.points) && cueCard.points.length > 0));
+  const showCueCard =
+    selectedPart === 'part2' &&
+    cueCard &&
+    (cueCard.topic || (Array.isArray(cueCard.points) && cueCard.points.length > 0));
 
   return (
     <Layout>
-      <div className="container mx-auto max-w-2xl px-4 py-8">
-        <header className="mb-8">
-          <h1 className={cn('text-2xl font-bold tracking-tight text-text', cardTitle)}>
-            Speaking AI Interviewer (Beta)
-          </h1>
-          <p className={cn('mt-1 text-text-muted', cardDesc)}>Part 1 / 2 / 3 (Text-only)</p>
+      <div className="container mx-auto max-w-3xl px-4 py-8">
+        <header className="mb-8 space-y-3">
+          <h1 className={pageTitle}>{'Speaking AI \u9762\u63a5'}</h1>
+          <p className={cn(bodyText, 'max-w-2xl')}>
+            {'Part 1 / 2 / 3 \u3092\u9078\u3073\u3001AI \u9762\u63a5\u5b98\u3068\u672c\u756a\u306b\u8fd1\u3044\u6d41\u308c\u3067\u7df4\u7fd2\u3057\u307e\u3059\u3002\u56de\u7b54\u5f8c\u306f\u8a55\u4fa1\u3092\u78ba\u8a8d\u3057\u3001\u305d\u306e\u307e\u307e\u6b21\u306e\u4e00\u554f\u3078\u9032\u3081\u307e\u3059\u3002'}
+          </p>
         </header>
 
-        {phase === 'error' && errorMessage && (
-          <div className={cn('mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900')}>
+        {phase === 'error' && errorMessage ? (
+          <div className={cn('mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900')}>
             <p className="font-medium">{errorMessage}</p>
-            {errorMessage === 'ログインが必要です' && (
-              <Link href="/login" className="mt-2 inline-block text-indigo-600 font-semibold hover:underline">
-                Go to Login
-              </Link>
-            )}
-            <button
-              type="button"
-              onClick={handleTryAnother}
-              className={cn('mt-3', buttonSecondary)}
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
-        {phase === 'idle' && (
-          <>
-            {usageToday && (
-              <p className={cn(
-                'mb-4 text-sm flex flex-wrap items-baseline gap-x-2',
-                usageToday.is_pro
-                  ? 'text-gray-500'
-                  : (usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0)
-                    ? 'text-red-700'
-                    : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1)
-                      ? 'text-amber-700'
-                      : 'text-gray-500'
-              )}>
-                <span className="font-medium text-inherit">本日の残り:</span>
-                {usageToday.is_pro ? (
-                  <span>無制限（Pro）</span>
-                ) : (
-                  <>
-                    <span>
-                      Writing: {usageToday.writing_remaining}/{usageToday.writing_limit} · Speaking: {usageToday.speaking_remaining}/{usageToday.speaking_limit}
-                    </span>
-                    {usageToday.writing_remaining === 0 || usageToday.speaking_remaining === 0 ? (
-                      <>
-                        <span>本日の無料枠を使い切りました。</span>
-                        <Link href="/#pricing" className="underline hover:no-underline">
-                          料金を見る
-                        </Link>
-                      </>
-                    ) : (usageToday.writing_remaining <= 1 || usageToday.speaking_remaining <= 1) ? (
-                      <span>本日あと1回です。</span>
-                    ) : (
-                      <span className="text-xs text-text-subtle">（0:00 JSTでリセット）</span>
-                    )}
-                  </>
-                )}
-              </p>
-            )}
-            <div className={cn('p-6', cardBase)}>
-            <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>Settings</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">Topic</label>
-                <select
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  className={cn('w-full', 'rounded-lg border border-border bg-surface text-text px-4 py-2')}
-                >
-                  {TOPICS.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">Part</label>
-                <select
-                  value={selectedPart}
-                  onChange={(e) => setSelectedPart(e.target.value)}
-                  className={cn('w-full', 'rounded-lg border border-border bg-surface text-text px-4 py-2')}
-                >
-                  {PARTS.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-text-muted">
-                  {PARTS.find((p) => p.value === selectedPart)?.help}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">Level (optional)</label>
-                <select
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value)}
-                  className={cn('w-full', 'rounded-lg border border-border bg-surface text-text px-4 py-2')}
-                >
-                  {LEVELS.map((l) => (
-                    <option key={l.value} value={l.value}>
-                      {l.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button
-                type="button"
-                onClick={handleStartInterview}
-                disabled={isLoading}
-                className={cn('w-full sm:w-auto', buttonPrimary)}
-              >
-                {isLoading ? 'Loading...' : 'Start Interview'}
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button type="button" onClick={handleTryAnother} className={buttonSecondary}>
+                {'\u3082\u3046\u4e00\u5ea6\u8a66\u3059'}
               </button>
+              <Link href="/home" className={cn(buttonSecondary, 'inline-flex items-center')}>
+                {'\u5b66\u7fd2\u30db\u30fc\u30e0\u3078\u623b\u308b'}
+              </Link>
             </div>
           </div>
+        ) : null}
+
+        {phase === 'idle' ? (
+          <>
+            {usageMessage ? (
+              <div className={cn('mb-6 rounded-xl border border-border bg-surface p-4')}>
+                <p className={helperText}>{usageMessage}</p>
+                {!usageToday?.is_pro && usageToday?.speaking_remaining === 0 ? (
+                  <div className="mt-3">
+                    <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
+                      {'\u6599\u91d1\u3092\u898b\u308b'}
+                    </Link>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            <div className={cn('p-6', cardBase)}>
+              <h2 className={cn(sectionTitle, 'mb-4')}>{'\u8a2d\u5b9a'}</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-text">{'\u30c8\u30d4\u30c3\u30af'}</label>
+                  <select value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-text">
+                    {TOPICS.map((item) => (
+                      <option key={item.value} value={item.value}>{item.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-text">{'Part'}</label>
+                  <select value={selectedPart} onChange={(e) => setSelectedPart(e.target.value)} className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-text">
+                    {PARTS.map((part) => (
+                      <option key={part.value} value={part.value}>{part.label}</option>
+                    ))}
+                  </select>
+                  <p className={cn(helperText, 'mt-1 text-xs')}>
+                    {PARTS.find((part) => part.value === selectedPart)?.help}
+                  </p>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-text">{'\u30ec\u30d9\u30eb'}</label>
+                  <select value={level} onChange={(e) => setLevel(e.target.value)} className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-text">
+                    {LEVELS.map((item) => (
+                      <option key={item.value} value={item.value}>{item.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <button type="button" onClick={handleStartInterview} disabled={isLoading} className={cn('w-full sm:w-auto', buttonPrimary)}>
+                  {isLoading ? '\u6e96\u5099\u4e2d...' : 'AI \u9762\u63a5\u3092\u59cb\u3081\u308b'}
+                </button>
+              </div>
+            </div>
           </>
-        )}
+        ) : null}
 
-        {(phase === 'creating_session' || phase === 'generating_prompt') && (
+        {(phase === 'creating_session' || phase === 'generating_prompt') ? (
           <div className={cn('p-6', cardBase)}>
-            <p className="text-text-muted">Preparing your question...</p>
+            <p className={bodyText}>{'\u8cea\u554f\u3092\u6e96\u5099\u3057\u3066\u3044\u307e\u3059...'}</p>
           </div>
-        )}
+        ) : null}
 
-        {(phase === 'answering' || phase === 'saving_attempt' || phase === 'evaluating') && (
+        {(phase === 'answering' || phase === 'saving_attempt' || phase === 'evaluating') ? (
           <div className="space-y-6">
             <div className={cn('p-6', cardBase)}>
               {showCueCard ? (
                 <>
-                  <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-2">Cue Card</h3>
-                  {cueCard?.topic && (
-                    <p className="text-lg font-semibold text-text mb-3">{cueCard.topic}</p>
-                  )}
-                  {Array.isArray(cueCard?.points) && cueCard.points.length > 0 && (
-                    <ul className="list-disc list-inside space-y-1 text-text leading-relaxed">
-                      {cueCard.points.map((p, i) => (
-                        <li key={i}>{p}</li>
+                  <h2 className={cn(sectionTitle, 'mb-2 text-subsection-title')}>Cue Card</h2>
+                  {cueCard?.topic ? <p className="mb-3 text-lg font-semibold text-text">{cueCard.topic}</p> : null}
+                  {Array.isArray(cueCard?.points) && cueCard.points.length > 0 ? (
+                    <ul className="list-inside list-disc space-y-1 text-text leading-relaxed">
+                      {cueCard.points.map((point, index) => (
+                        <li key={index}>{point}</li>
                       ))}
                     </ul>
-                  )}
+                  ) : null}
                 </>
               ) : (
                 <>
-                  <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-2">Question</h3>
-                  <p className="text-lg text-text leading-relaxed">{questionText}</p>
+                  <h2 className={cn(sectionTitle, 'mb-2 text-subsection-title')}>{'\u8cea\u554f'}</h2>
+                  <p className="text-lg leading-relaxed text-text">{questionText}</p>
                 </>
               )}
             </div>
+
             <div className={cn('p-6', cardBase)}>
-              <label className="block text-sm font-semibold text-text mb-2">Your answer</label>
+              <label className="mb-2 block text-sm font-semibold text-text">{'\u3042\u306a\u305f\u306e\u56de\u7b54'}</label>
               <textarea
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 disabled={phase !== 'answering'}
-                placeholder="Type your answer here (at least 30 characters)..."
+                placeholder={`\u56de\u7b54\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\uff08${MIN_ANSWER_LENGTH} \u6587\u5b57\u4ee5\u4e0a\uff09`}
                 className={cn(textareaBase, 'min-h-[120px]')}
                 rows={5}
               />
-              <p className="mt-2 text-xs text-text-muted">
-                {answer.trim().length} characters (min {MIN_ANSWER_LENGTH})
+              <p className={cn(helperText, 'mt-2 text-xs')}>
+                {answer.trim().length}
+                {' \u6587\u5b57 / \u6700\u4f4e '}
+                {MIN_ANSWER_LENGTH}
+                {' \u6587\u5b57'}
               </p>
-              <button
-                type="button"
-                onClick={handleSubmitAnswer}
-                disabled={isLoading || answer.trim().length < MIN_ANSWER_LENGTH}
-                className={cn('mt-4', buttonPrimary)}
-              >
-                {phase === 'saving_attempt' || phase === 'evaluating'
-                  ? 'Submitting...'
-                  : 'Submit Answer'}
+              <button type="button" onClick={handleSubmitAnswer} disabled={isLoading || answer.trim().length < MIN_ANSWER_LENGTH} className={cn('mt-4', buttonPrimary)}>
+                {phase === 'saving_attempt' || phase === 'evaluating' ? '\u9001\u4fe1\u4e2d...' : '\u56de\u7b54\u3092\u9001\u4fe1\u3059\u308b'}
               </button>
+              {errorMessage ? <p className="mt-3 text-sm text-amber-600">{errorMessage}</p> : null}
             </div>
-            {errorMessage && (
-              <p className="text-sm text-amber-600">{errorMessage}</p>
-            )}
           </div>
-        )}
+        ) : null}
 
-        {phase === 'done' && feedbackRow && (
+        {phase === 'done' && feedbackRow ? (
           <div className="space-y-6">
             <div className={cn('p-6', cardBase)}>
-              <h2 className={cn('mb-4 text-lg font-bold', cardTitle)}>Evaluation</h2>
-              {feedbackRow.overall_band != null && (
+              <h2 className={cn(sectionTitle, 'mb-4 text-subsection-title')}>{'\u8a55\u4fa1'}</h2>
+              {feedbackRow.overall_band != null ? (
                 <div className="mb-4">
-                  <span className="text-sm font-semibold text-text-muted">Overall Band: </span>
+                  <span className="text-sm font-semibold text-text-muted">{'\u7dcf\u5408 Band: '}</span>
                   <span className="text-xl font-bold text-text">{String(feedbackRow.overall_band)}</span>
                 </div>
-              )}
+              ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
-                {['fluency_band', 'lexical_band', 'grammar_band', 'pronunciation_band'].map((key) => {
-                  const val = feedbackRow[key];
-                  const label = key.replace('_band', '').replace(/^./, (c) => c.toUpperCase());
-                  if (val == null) return null;
+                {Object.entries(EVALUATION_LABELS).map(([key, label]) => {
+                  const value = feedbackRow[key];
+                  if (value == null) return null;
                   return (
                     <div key={key} className="rounded-lg border border-border bg-surface-2 p-3">
-                      <div className="text-xs font-semibold text-text-muted uppercase">{label}</div>
-                      <div className="font-semibold text-text">{String(val)}</div>
-                      {typeof feedbackRow.evidence === 'object' &&
-                        feedbackRow.evidence !== null &&
-                        (feedbackRow.evidence as Record<string, unknown>)[key.replace('_band', '')] != null && (
+                      <div className="text-xs font-semibold uppercase text-text-muted">{label}</div>
+                      <div className="font-semibold text-text">{String(value)}</div>
+                      {typeof feedbackRow.evidence === 'object' && feedbackRow.evidence !== null && (feedbackRow.evidence as Record<string, unknown>)[key.replace('_band', '')] != null ? (
                         <p className="mt-1 text-sm text-text-muted">
                           {String((feedbackRow.evidence as Record<string, unknown>)[key.replace('_band', '')])}
                         </p>
-                      )}
+                      ) : null}
                     </div>
                   );
                 })}
               </div>
-              {Array.isArray(feedbackRow.top_fixes) && feedbackRow.top_fixes.length > 0 && (
+              {Array.isArray(feedbackRow.top_fixes) && feedbackRow.top_fixes.length > 0 ? (
                 <div className="mt-4">
-                  <h3 className="text-sm font-semibold text-text mb-2">Top fixes</h3>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-text-muted">
+                  <h3 className={cardTitle}>{'\u512a\u5148\u3057\u3066\u76f4\u3057\u305f\u3044\u30dd\u30a4\u30f3\u30c8'}</h3>
+                  <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-text-muted">
                     {(feedbackRow.top_fixes as Array<{ issue?: string; suggestion?: string }>)
                       .slice(0, 3)
-                      .map((fix, i) => (
-                        <li key={i}>
-                          {fix.issue ?? fix.suggestion ?? JSON.stringify(fix)}
-                        </li>
+                      .map((fix, index) => (
+                        <li key={index}>{fix.issue ?? fix.suggestion ?? JSON.stringify(fix)}</li>
                       ))}
                   </ul>
                 </div>
-              )}
+              ) : null}
             </div>
             <div className="flex flex-wrap gap-3">
-              <button type="button" onClick={handleTryAnother} className={cn(buttonPrimary)}>
-                Try another question
+              <button type="button" onClick={handleTryAnother} className={buttonPrimary}>
+                {'\u5225\u306e\u8cea\u554f\u3067\u7d9a\u3051\u308b'}
               </button>
+              {attemptId ? (
+                <Link href={`/speaking/feedback/${attemptId}`} className={cn(buttonSecondary, 'inline-flex items-center')}>
+                  {'\u30d5\u30a3\u30fc\u30c9\u30d0\u30c3\u30af\u8a73\u7d30\u3092\u898b\u308b'}
+                </Link>
+              ) : null}
+              <Link href="/progress" className={cn(buttonSecondary, 'inline-flex items-center')}>
+                {'\u9032\u6357\u3092\u898b\u308b'}
+              </Link>
               <Link href="/home" className={cn(buttonSecondary, 'inline-flex items-center')}>
-                Back to Home
+                {'\u5b66\u7fd2\u30db\u30fc\u30e0\u3078\u623b\u308b'}
               </Link>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {phase === 'idle' && (
-          <p className="mt-6">
-            <Link href="/home" className="text-indigo-600 hover:underline">
-              ← Back to Home
+        {phase === 'idle' ? (
+          <p className={cn(helperText, 'mt-6')}>
+            <Link href="/home" className="font-medium text-primary hover:underline">
+              {'\u5b66\u7fd2\u30db\u30fc\u30e0\u306b\u623b\u308b'}
             </Link>
           </p>
-        )}
+        ) : null}
       </div>
     </Layout>
   );
