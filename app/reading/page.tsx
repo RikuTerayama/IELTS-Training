@@ -83,18 +83,20 @@ export default function ReadingPage() {
       <div className="container mx-auto max-w-4xl px-4 py-12">
         <section className="mb-16 text-center">
           <h1 className={cn(pageTitle, 'mb-4')}>IELTS Reading 対策</h1>
-          <p className={cn(bodyText, 'mx-auto max-w-2xl text-lg md:text-body-lg')}>
+          <p className={cn(bodyText, 'mx-auto max-w-3xl text-balance text-lg md:text-body-lg')}>
             Academic Reading で頻出の設問タイプ、言い換え、語彙を日本語ガイド付きで練習できます。
             短いセットから始めて、復習を回しながら精度を上げていく構成です。
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/vocab?skill=reading" className={cn(buttonPrimary, 'inline-flex')}>
-              Reading 練習を始める
-            </Link>
-            <Link href={buildLoginUrl('/home')} className={cn(buttonSecondary, 'inline-flex')}>
-              学習ホームにログイン
-            </Link>
-            <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link href="/vocab?skill=reading" className={cn(buttonPrimary, 'inline-flex')}>
+                Reading を始める
+              </Link>
+              <Link href={buildLoginUrl('/home')} className={cn(buttonSecondary, 'inline-flex')}>
+                学習ホームにログイン
+              </Link>
+            </div>
+            <Link href="/pricing" className="text-sm font-medium text-primary/80 hover:text-primary hover:underline">
               料金を見る
             </Link>
           </div>
@@ -114,7 +116,7 @@ export default function ReadingPage() {
             これらの設問タイプは
             {' '}
             <Link href="/vocab?skill=reading" className="font-medium text-primary hover:underline">
-              Reading 練習
+              Reading
             </Link>
             {' '}
             で順番に確認できます。短い反復で基礎を固める設計です。
@@ -168,7 +170,7 @@ export default function ReadingPage() {
                 'hover:border-primary/70 hover:bg-primary/20 transition-colors'
               )}
             >
-              Reading 練習
+              Reading
             </Link>
             {HUB_LINKS.map(({ href, label }) => (
               <Link
