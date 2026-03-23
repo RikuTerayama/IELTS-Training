@@ -1,7 +1,3 @@
-/**
- * Lexicon API クライアント
- */
-
 import {
   getUserFacingSubmissionError,
   isUnauthorizedApiResponse,
@@ -10,17 +6,18 @@ import {
 import type { ApiResponse } from './response';
 
 export interface LexiconSetsResponse {
-  sets: Record<string, {
-    items_total: number;
-    items_typing_enabled: number;
-    questions_click: number;
-    questions_typing: number;
-    due_click: number;
-    due_typing: number;
-  }>;
-  /** Reading の場合のみ: 全カテゴリの復習Due合計 */
+  sets: Record<
+    string,
+    {
+      items_total: number;
+      items_typing_enabled: number;
+      questions_click: number;
+      questions_typing: number;
+      due_click: number;
+      due_typing: number;
+    }
+  >;
   total_due?: number;
-  /** Reading の場合のみ: フィルタ用 topic / difficulty 一覧 */
   filters_meta?: { topics: string[]; difficulties: string[] };
 }
 
@@ -31,7 +28,14 @@ export interface LexiconQuestion {
   hint_first_char?: string;
   hint_length?: number;
   item_id?: string;
-  question_type?: 'paraphrase_drill' | 'matching_headings' | 'tfng' | 'summary_completion' | 'matching_information' | 'sentence_completion' | 'signal';
+  question_type?:
+    | 'paraphrase_drill'
+    | 'matching_headings'
+    | 'tfng'
+    | 'summary_completion'
+    | 'matching_information'
+    | 'sentence_completion'
+    | 'signal';
   strategy?: string;
   passage_excerpt?: string;
   meta?: Record<string, unknown>;
@@ -52,9 +56,6 @@ export interface LexiconSubmitResponse {
   correct_expression: string;
 }
 
-/**
- * Lexicon setsを取得
- */
 export async function fetchLexiconSets(
   skill: 'writing' | 'speaking' | 'reading' | 'listening',
   module: 'lexicon' | 'idiom' | 'vocab' = 'lexicon'
@@ -72,10 +73,6 @@ export interface LexiconQuestionsParams {
   weak_skill?: string;
 }
 
-/**
- * Lexicon questionsを取得
- * Reading の場合: review_only / new_only / topic / difficulty でフィルタ可能
- */
 export async function fetchLexiconQuestions(
   skill: 'writing' | 'speaking' | 'reading' | 'listening',
   category: string,
@@ -91,28 +88,31 @@ export async function fetchLexiconQuestions(
     limit: String(limit),
     module,
   });
+
   if ((skill === 'reading' || skill === 'listening') && params) {
     if (params.review_only) search.set('review_only', 'true');
     if (params.new_only) search.set('new_only', 'true');
     if (params.question_type) search.set('question_type', params.question_type);
+
     if (skill === 'reading') {
       if (params.topic) search.set('topic', params.topic);
       if (params.difficulty) search.set('difficulty', params.difficulty);
       if (params.weak_skill) search.set('weak_skill', params.weak_skill);
     }
   }
+
   const response = await fetch(`/api/lexicon/questions?${search.toString()}`);
   return response.json();
 }
 
-/**
- * Lexicon回答を送信
- */
 export async function submitLexiconAnswer(
   question_id: string,
   user_answer?: string,
   time_ms?: number
 ): Promise<ApiResponse<LexiconSubmitResponse>> {
+  const fallbackMessage =
+    '\u9001\u4fe1\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002\u3082\u3046\u4e00\u5ea6\u62bc\u3057\u3066\u304f\u3060\u3055\u3044\u3002';
+
   const response = await fetch('/api/lexicon/submit', {
     method: 'POST',
     headers: {
@@ -124,6 +124,7 @@ export async function submitLexiconAnswer(
       time_ms,
     }),
   });
+
   const body = (await response.json().catch(() => null)) as ApiResponse<LexiconSubmitResponse> | null;
 
   if (isUnauthorizedApiResponse(response, body)) {
@@ -132,21 +133,23 @@ export async function submitLexiconAnswer(
       ok: false,
       error: {
         code: 'UNAUTHORIZED',
-        message: 'ログインが必要です。再ログイン後に続きから再開してください。',
+        message:
+          '\u30ed\u30b0\u30a4\u30f3\u304c\u5fc5\u8981\u3067\u3059\u3002\u30ed\u30b0\u30a4\u30f3\u5f8c\u306b\u7d9a\u304d\u304b\u3089\u518d\u958b\u3057\u3066\u304f\u3060\u3055\u3044\u3002',
       },
     };
   }
 
   if (!response.ok || !body?.ok) {
+    const normalizedMessage =
+      response.status >= 500 || response.status === 408 || response.status === 429
+        ? fallbackMessage
+        : getUserFacingSubmissionError(response, body, fallbackMessage);
+
     return {
       ok: false,
       error: {
         code: body?.error?.code ?? 'REQUEST_FAILED',
-        message: getUserFacingSubmissionError(
-          response,
-          body,
-          '回答の送信に失敗しました。入力内容を確認して、もう一度お試しください。'
-        ),
+        message: normalizedMessage,
         details: body?.error?.details,
       },
     };
