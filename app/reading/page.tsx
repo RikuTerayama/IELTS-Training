@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
@@ -84,7 +84,7 @@ export default function ReadingPage() {
         <section className="mb-16 text-center">
           <h1 className={cn(pageTitle, 'mb-4')}>IELTS Reading 対策</h1>
           <p className={cn(bodyText, 'mx-auto max-w-3xl text-balance text-lg md:text-body-lg')}>
-            Academic Reading で頻出の設問タイプ、言い換え、語彙を日本語ガイド付きで練習できます。
+            Academic Reading で頻出の設問タイプ、言い換え、語彙を日本語ガイド付きで練習できます。<br className="hidden sm:inline" />
             短いセットから始めて、復習を回しながら精度を上げていく構成です。
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
@@ -96,7 +96,7 @@ export default function ReadingPage() {
                 学習ホームにログイン
               </Link>
             </div>
-            <Link href="/pricing" className="text-sm font-medium text-primary/80 hover:text-primary hover:underline">
+            <Link href="/pricing" className="text-sm text-text-muted hover:text-text hover:underline transition-colors">
               料金を見る
             </Link>
           </div>
