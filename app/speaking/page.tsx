@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
@@ -61,7 +61,7 @@ export default function SpeakingPage() {
               </Link>
               <Link
                 href="/pricing"
-                className="text-sm font-medium text-text-muted transition-colors hover:text-text hover:underline"
+                className={cn(buttonSecondary, 'inline-flex')}
               >
                 料金を見る
               </Link>

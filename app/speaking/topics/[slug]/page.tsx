@@ -135,7 +135,7 @@ export default async function SpeakingTopicPage({ params }: Props) {
             <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
               {'\u6599\u91d1\u3092\u898b\u308b'}
             </Link>
-            <Link href="/speaking" className="text-sm font-medium text-primary hover:underline">
+            <Link href="/speaking" className="text-sm font-medium text-text-muted hover:text-text hover:underline transition-colors">
               {'Speaking \u306b\u623b\u308b'}
             </Link>
           </div>
