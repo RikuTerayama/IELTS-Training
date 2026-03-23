@@ -11,8 +11,9 @@ import {
   CONTACT_EMAIL,
   CONTACT_MAILTO,
 } from '@/lib/constants/contact';
-import { BrandLink, BrandMark } from '@/components/branding/Brand';
+import { BrandMark } from '@/components/branding/Brand';
 import { PublicHeader } from '@/components/layout/PublicHeader';
+import { PublicFooter } from '@/components/layout/PublicFooter';
 import {
   bodyText,
   buttonPrimary,
@@ -138,8 +139,8 @@ const FEATURE_CARDS = [
     accent: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300',
   },
   {
-    title: 'Reading と単語の反復',
-    description: 'Reading と単語を短いセットで回しながら、意味を取る力と語彙の土台を整えます。',
+    title: 'Reading / Listening の土台づくり',
+    description: 'Reading と Listening につながる単語・表現を短いセットで回し、意味を取る力の土台を整えます。',
     icon: Icons.Book,
     accent: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300',
   },
@@ -252,7 +253,6 @@ export default function LandingPage() {
   const [showTermsOfService, setShowTermsOfService] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const supabase = useMemo(() => createClient(), []);
-  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -280,13 +280,12 @@ export default function LandingPage() {
           <div className="container mx-auto max-w-6xl">
             <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
               <FadeIn className="space-y-6">
-                <span className={surfaceSoftBadge}>Meridian</span>
                 <div className="space-y-4">
                   <h1 className="max-w-4xl text-balance text-display font-bold tracking-tight text-text">
-                    Reading / Writing / Speaking を、ひとつの学習ループで続ける
+                    次の一手までつながる IELTS 学習
                   </h1>
-                  <p className={cn(bodyText, 'max-w-3xl text-lg md:text-body-lg')}>
-                    Meridian は、インプット、アウトプット、フィードバック、見返しを一つの流れで回せる IELTS 学習アプリです。
+                  <p className={cn(bodyText, 'max-w-3xl text-balance text-lg md:text-body-lg')}>
+                    Meridian は、インプット、アウトプット、フィードバック、見返しをひとつの流れで回せる IELTS 学習アプリです。
                     まずは無料で始めて、必要になったら Pro に切り替えられます。
                   </p>
                 </div>
@@ -302,6 +301,10 @@ export default function LandingPage() {
                 <div className={cn(helperText, 'flex flex-wrap items-center gap-x-3 gap-y-2')}>
                   <Link href="/reading" className="font-medium text-primary hover:underline">
                     Reading
+                  </Link>
+                  <span>・</span>
+                  <Link href="/listening" className="font-medium text-primary hover:underline">
+                    Listening
                   </Link>
                   <span>・</span>
                   <Link href="/writing" className="font-medium text-primary hover:underline">
@@ -337,14 +340,14 @@ export default function LandingPage() {
                 <div className={cn(surfaceSoftCard, 'space-y-6 p-6 md:p-7')}>
                   <BrandMark size={72} priority className="items-center" textClassName="text-2xl" />
                   <div className="space-y-3">
-                    <h2 className={cn(subsectionTitle, surfaceSoftTitle)}>まず見られること</h2>
+                    <h2 className={cn(subsectionTitle, surfaceSoftTitle)}>おすすめの進め方</h2>
                     <p className={cn(surfaceSoftBody, 'text-helper')}>
-                      公開ハブで学習の全体像を確認し、ログイン後はホームからそのまま Reading / Writing / Speaking の実使用へ進めます。
+                      公開ハブで全体像を確認し、ログイン後はホームからそのまま次の 1 本へ進めます。
                     </p>
                   </div>
                   <ul className={cn(surfaceSoftBody, 'space-y-3 text-sm')}>
                     {[
-                      'Reading と単語の反復',
+                      'Reading / Listening の土台づくり',
                       'Writing Practice / Exam Mode',
                       'Speaking AI 面接',
                       '進捗とフィードバックの見返し',
@@ -368,7 +371,7 @@ export default function LandingPage() {
             <FadeIn className="mx-auto mb-16 max-w-3xl text-center">
               <h2 className={cn(sectionTitle, 'mb-4')}>Meridian でできること</h2>
               <p className={cn(bodyText, 'text-lg')}>
-                AI フィードバック、反復学習、進捗の見返しを一つの流れでつなげています。何を次にやるべきかが分かる構成です。
+                AI フィードバック、反復学習、進捗の見返しを一つの流れでつなげています。何を次にやるべきかが見え、学習を続けやすい構成です。
               </p>
             </FadeIn>
 
@@ -396,7 +399,7 @@ export default function LandingPage() {
             <FadeIn className="mx-auto mb-14 max-w-3xl text-center">
               <h2 className={cn(sectionTitle, 'mb-4')}>料金</h2>
               <p className={cn(bodyText, 'text-lg')}>
-                まずは無料で始めて、Writing / Speaking を継続して使いたくなったら Pro を選べます。
+                まずは無料で始めて、必要になったタイミングで Pro に切り替えられます。
               </p>
             </FadeIn>
 
@@ -422,11 +425,7 @@ export default function LandingPage() {
 
               <FadeIn delay={0.15}>
                 <article className={cn(surfaceSoftCard, 'h-full p-7')}>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={surfaceSoftBadge}>Meridian Pro</span>
-                    <span className={surfaceSoftBadge}>継続学習向け</span>
-                  </div>
-                  <h3 className={cn(subsectionTitle, surfaceSoftTitle, 'mt-4')}>Pro プラン</h3>
+                  <h3 className={cn(subsectionTitle, surfaceSoftTitle)}>Pro プラン</h3>
                   <p className={cn(surfaceSoftBody, 'mt-2 text-helper')}>
                     毎日の AI 学習を増やして続けたい人向けに、利用枠と見返し導線を広げたプランです。
                   </p>
@@ -452,7 +451,7 @@ export default function LandingPage() {
               <FadeIn>
                 <h2 className={cn(sectionTitle, 'mb-4')}>About Meridian</h2>
                 <p className={cn(bodyText, 'mb-6')}>
-                  Meridian は、Reading / Writing / Speaking を分断せず、続けやすい一つの学習ループとして設計した IELTS 学習アプリです。
+                  Meridian は、Reading / Listening / Writing / Speaking を分断せず、続けやすい一つの学習ループとして設計した IELTS 学習アプリです。
                 </p>
                 <div className={cn(cardBase, 'p-6')}>
                   <h3 className={cn(subsectionTitle, 'mb-3 text-card-title')}>ミッション</h3>
@@ -530,39 +529,11 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-surface py-12">
-        <div className="container mx-auto px-6">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div className="space-y-3 md:col-span-2">
-              <BrandLink href="/" size={34} textClassName="text-lg" />
-              <p className={helperText}>
-                Meridian は、Reading / Writing / Speaking を一つの学習ループで進める IELTS 学習アプリです。
-              </p>
-            </div>
-            <div>
-              <h2 className={cn(subsectionTitle, 'mb-3 text-card-title')}>リンク</h2>
-              <ul className="space-y-2 text-sm text-text-muted">
-                <li><Link href="/reading" className="hover:text-text">Reading</Link></li>
-                <li><Link href="/writing" className="hover:text-text">Writing</Link></li>
-                <li><Link href="/speaking" className="hover:text-text">Speaking</Link></li>
-                <li><Link href="/pricing" className="hover:text-text">料金</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h2 className={cn(subsectionTitle, 'mb-3 text-card-title')}>コンテンツ</h2>
-              <ul className="space-y-2 text-sm text-text-muted">
-                <li><a href={BLOG_OFFICIAL_URL} target="_blank" rel="noopener noreferrer" className="hover:text-text">公式ブログ</a></li>
-                <li><a href={BLOG_NOTE_URL} target="_blank" rel="noopener noreferrer" className="hover:text-text">Note</a></li>
-                <li><button type="button" onClick={() => setShowPrivacyPolicy(true)} className="hover:text-text">プライバシーポリシー</button></li>
-                <li><button type="button" onClick={() => setShowTermsOfService(true)} className="hover:text-text">利用規約</button></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 border-t border-border pt-6 text-sm text-text-muted">
-            &copy; {currentYear} Meridian. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <PublicFooter
+        contactHref="/#contact"
+        onOpenPrivacyPolicy={() => setShowPrivacyPolicy(true)}
+        onOpenTermsOfService={() => setShowTermsOfService(true)}
+      />
 
       {showPrivacyPolicy ? (
         <PolicyModal

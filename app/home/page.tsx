@@ -431,6 +431,15 @@ export default function HomePage() {
         ctaLabel: '単語を開く',
       },
       {
+        title: 'Listening',
+        eyebrow: 'インプット',
+        description:
+          'Listening の公開ハブで、現在使える入口と今後の公開予定を確認できます。今は単語・熟語・表現から土台を整える段階です。',
+        href: '/listening',
+        ctaLabel: 'Listening を見る',
+        badge: '準備中',
+      },
+      {
         title: '熟語',
         eyebrow: 'インプット',
         description: '熟語や言い換え表現を確認して、Reading / Listening の理解を底上げします。',
@@ -640,10 +649,10 @@ export default function HomePage() {
             <span className={badgeBase}>インプット</span>
             <h2 className={sectionTitle}>読みながら土台を整える</h2>
             <p className={cn(helperText, 'max-w-3xl md:text-body-base')}>
-              Reading / 単語 / 熟語 / 表現をまとめて確認できるレーンです。今日の復習がある日は、ここから入るのが安定します。
+              Reading / Listening / 単語 / 熟語 / 表現をまとめて確認できるレーンです。今日の復習がある日は、ここから入るのが安定します。
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {inputCards.map((card) => (
               <DashboardCard key={card.title} {...card} />
             ))}

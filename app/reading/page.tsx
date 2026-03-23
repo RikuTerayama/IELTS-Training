@@ -2,7 +2,18 @@
 
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
-import { cn, cardBase, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
+import {
+  bodyText,
+  buttonPrimary,
+  buttonSecondary,
+  cardBase,
+  cardTitle,
+  cn,
+  helperText,
+  pageTitle,
+  sectionTitle,
+  subsectionTitle,
+} from '@/lib/ui/theme';
 
 const QUESTION_TYPES = [
   {
@@ -56,6 +67,7 @@ const READING_FAQ = [
 ] as const;
 
 const HUB_LINKS = [
+  { href: '/listening', label: 'Listening' },
   { href: '/writing', label: 'Writing' },
   { href: '/speaking', label: 'Speaking' },
   { href: '/vocab', label: '単語' },
@@ -70,10 +82,8 @@ export default function ReadingPage() {
     <Layout variant="public">
       <div className="container mx-auto max-w-4xl px-4 py-12">
         <section className="mb-16 text-center">
-          <h1 className="mb-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-            IELTS Reading 対策
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg leading-8 text-text-muted">
+          <h1 className={cn(pageTitle, 'mb-4')}>IELTS Reading 対策</h1>
+          <p className={cn(bodyText, 'mx-auto max-w-2xl text-lg md:text-body-lg')}>
             Academic Reading で頻出の設問タイプ、言い換え、語彙を日本語ガイド付きで練習できます。
             短いセットから始めて、復習を回しながら精度を上げていく構成です。
           </p>
@@ -91,18 +101,16 @@ export default function ReadingPage() {
         </section>
 
         <section className="mb-16" aria-labelledby="practice-heading">
-          <h2 id="practice-heading" className="mb-6 text-xl font-bold text-text">
-            練習できること
-          </h2>
+          <h2 id="practice-heading" className={cn(sectionTitle, 'mb-6')}>練習できること</h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {QUESTION_TYPES.map((item) => (
               <div key={item.id} className={cn('rounded-2xl p-6', cardBase)}>
-                <h3 className="font-semibold text-text">{item.label}</h3>
-                <p className="mt-2 text-sm leading-6 text-text-muted">{item.desc}</p>
+                <h3 className={cardTitle}>{item.label}</h3>
+                <p className={cn(helperText, 'mt-2')}>{item.desc}</p>
               </div>
             ))}
           </div>
-          <p className="mt-4 text-sm leading-6 text-text-muted">
+          <p className={cn(helperText, 'mt-4')}>
             これらの設問タイプは
             {' '}
             <Link href="/vocab?skill=reading" className="font-medium text-primary hover:underline">
@@ -114,16 +122,14 @@ export default function ReadingPage() {
         </section>
 
         <section className="mb-16" aria-labelledby="how-heading">
-          <h2 id="how-heading" className="mb-6 text-xl font-bold text-text">
-            使い方
-          </h2>
+          <h2 id="how-heading" className={cn(sectionTitle, 'mb-6')}>使い方</h2>
           <ol className="grid gap-4 md:grid-cols-3">
             <li className={cn('list-none rounded-2xl p-6', cardBase)}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 1
               </span>
-              <h3 className="mt-3 font-semibold text-text">Reading を選ぶ</h3>
-              <p className="mt-2 text-sm leading-6 text-text-muted">
+              <h3 className={cn(subsectionTitle, 'mt-3 text-card-title')}>Reading を選ぶ</h3>
+              <p className={cn(helperText, 'mt-2')}>
                 <Link href="/vocab?skill=reading" className="text-primary hover:underline">
                   単語練習
                 </Link>
@@ -135,8 +141,8 @@ export default function ReadingPage() {
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 2
               </span>
-              <h3 className="mt-3 font-semibold text-text">復習を回す</h3>
-              <p className="mt-2 text-sm leading-6 text-text-muted">
+              <h3 className={cn(subsectionTitle, 'mt-3 text-card-title')}>復習を回す</h3>
+              <p className={cn(helperText, 'mt-2')}>
                 間違えた設問は SRS で再表示されます。短いセットでも続けるほど Reading の精度が上がります。
               </p>
             </li>
@@ -144,8 +150,8 @@ export default function ReadingPage() {
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
                 3
               </span>
-              <h3 className="mt-3 font-semibold text-text">アウトプットにつなげる</h3>
-              <p className="mt-2 text-sm leading-6 text-text-muted">
+              <h3 className={cn(subsectionTitle, 'mt-3 text-card-title')}>アウトプットにつなげる</h3>
+              <p className={cn(helperText, 'mt-2')}>
                 Reading で拾った言い換えや語彙は、そのまま Writing と Speaking の表現補強にもつながります。
               </p>
             </li>
@@ -153,9 +159,7 @@ export default function ReadingPage() {
         </section>
 
         <section className="mb-16" aria-labelledby="related-heading">
-          <h2 id="related-heading" className="mb-6 text-xl font-bold text-text">
-            関連リンク
-          </h2>
+          <h2 id="related-heading" className={cn(sectionTitle, 'mb-6')}>関連リンク</h2>
           <div className="flex flex-wrap gap-4">
             <Link
               href="/vocab?skill=reading"
@@ -182,14 +186,12 @@ export default function ReadingPage() {
         </section>
 
         <section className="border-t border-border pt-12" aria-labelledby="faq-heading">
-          <h2 id="faq-heading" className="mb-6 text-xl font-bold text-text">
-            よくある質問
-          </h2>
+          <h2 id="faq-heading" className={cn(sectionTitle, 'mb-6')}>よくある質問</h2>
           <ul className="space-y-4">
             {READING_FAQ.map((item) => (
               <li key={item.question} className={cn('rounded-lg bg-surface p-4', cardBase)}>
-                <h3 className="font-semibold text-text">{item.question}</h3>
-                <p className="mt-2 text-sm leading-7 text-text-muted">{item.answer}</p>
+                <h3 className={cardTitle}>{item.question}</h3>
+                <p className={cn(helperText, 'mt-2 text-sm leading-7')}>{item.answer}</p>
               </li>
             ))}
           </ul>

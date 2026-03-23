@@ -122,6 +122,15 @@ export default function SpeakingPage() {
           <h2 id="related-heading" className={cn(sectionTitle, 'mb-6')}>関連リンク</h2>
           <div className="flex flex-wrap gap-4">
             <Link
+              href="/listening"
+              className={cn(
+                'inline-flex items-center gap-2 rounded-xl border border-border bg-surface-2 px-5 py-3 font-medium text-text',
+                'hover:bg-surface hover:border-primary/50 transition-colors'
+              )}
+            >
+              Listening
+            </Link>
+            <Link
               href="/reading"
               className={cn(
                 'inline-flex items-center gap-2 rounded-xl border border-border bg-surface-2 px-5 py-3 font-medium text-text',
