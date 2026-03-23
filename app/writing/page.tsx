@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
@@ -58,10 +58,16 @@ export default function WritingPage() {
               </Link>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-              <Link href={buildLoginUrl('/home')} className="text-sm font-medium text-primary/80 transition-colors hover:text-primary hover:underline">
+              <Link
+                href={buildLoginUrl('/home')}
+                className="text-sm font-medium text-text-muted transition-colors hover:text-text hover:underline"
+              >
                 学習ホームにログイン
               </Link>
-              <Link href="/pricing" className="text-sm font-medium text-primary/80 transition-colors hover:text-primary hover:underline">
+              <Link
+                href="/pricing"
+                className="text-sm font-medium text-text-muted transition-colors hover:text-text hover:underline"
+              >
                 料金を見る
               </Link>
             </div>
