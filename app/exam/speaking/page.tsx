@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import {
@@ -18,6 +18,7 @@ import {
 import type { ApiResponse } from '@/lib/api/response';
 import {
   getUserFacingSubmissionError,
+  getUserFacingTranscriptionError,
   isUnauthorizedApiResponse,
   redirectToLoginWithNext,
 } from '@/lib/api/clientError';
@@ -32,6 +33,17 @@ type Phase =
   | 'evaluating'
   | 'done'
   | 'error';
+
+type VoiceInputState = 'idle' | 'recording' | 'transcribing';
+
+type SpeakingEvaluationPromptPayload = {
+  part: string;
+  question_text: string;
+  jp_intent: string;
+  model_answer?: string;
+  expected_style?: string;
+  time_limit?: number;
+};
 
 const TOPICS = SPEAKING_TOPICS.map((topic) => ({
   value: topic.apiTopic,
@@ -57,6 +69,15 @@ const LEVEL_TO_API: Record<string, string> = {
 };
 
 const MIN_ANSWER_LENGTH = 30;
+const AUDIO_TRANSCRIPTION_RETRY_MESSAGE =
+  '文字起こしに失敗しました。もう一度録音するか、テキストで回答してください。';
+const RECORDER_MIME_CANDIDATES = [
+  'audio/webm;codecs=opus',
+  'audio/webm',
+  'audio/mp4',
+  'audio/ogg;codecs=opus',
+  'audio/ogg',
+] as const;
 
 const EVALUATION_LABELS: Record<string, string> = {
   fluency_band: '流暢さ',
@@ -84,43 +105,56 @@ function buildPromptText(promptRow: Record<string, unknown>): string {
   return '\u8cea\u554f\u6587\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002';
 }
 
-function buildEvaluationPromptText(promptRow: Record<string, unknown>, selectedPart: string): string {
-  const topic = promptRow?.topic ?? 'unknown';
-  const jpIntent = promptRow?.jp_intent ?? '';
-  const targetPoints = promptRow?.target_points;
-  const targetStr = targetPoints ? JSON.stringify(targetPoints, null, 0) : '';
-  const expectedStyle = promptRow?.expected_style ?? '';
-
-  const baseLines = [
-    `Part: ${selectedPart}`,
-    `Topic: ${topic}`,
-    `Intent(JP): ${jpIntent}`,
-    `Target points: ${targetStr}`,
-    `Expected style: ${expectedStyle}`,
-  ];
-
+function buildEvaluationPromptPayload(
+  promptRow: Record<string, unknown>,
+  selectedPart: string
+): SpeakingEvaluationPromptPayload {
   const cueCard = promptRow?.cue_card as { topic?: string; points?: string[] } | undefined;
-  if (
+  const cueCardText =
     selectedPart === 'part2' &&
     cueCard &&
     (cueCard.topic || (Array.isArray(cueCard.points) && cueCard.points.length > 0))
-  ) {
-    const points = Array.isArray(cueCard.points)
-      ? cueCard.points.map((point) => `- ${point}`).join('\n')
-      : '';
-    return [
-      ...baseLines.slice(0, 2),
-      `Cue Card: ${cueCard.topic ?? ''}`,
-      points ? `Points:\n${points}` : '',
-      ...baseLines.slice(2),
-    ].filter(Boolean).join('\n');
-  }
+      ? [
+          cueCard.topic ?? '',
+          ...(Array.isArray(cueCard.points) ? cueCard.points.map((point) => `- ${point}`) : []),
+        ]
+          .filter(Boolean)
+          .join('\n')
+      : undefined;
 
-  return [
-    ...baseLines.slice(0, 2),
-    `Question: ${buildPromptText(promptRow)}`,
-    ...baseLines.slice(2),
-  ].join('\n');
+  return {
+    part: selectedPart,
+    question_text: cueCardText || buildPromptText(promptRow),
+    jp_intent:
+      typeof promptRow.jp_intent === 'string' && promptRow.jp_intent.trim()
+        ? promptRow.jp_intent.trim()
+        : buildPromptText(promptRow),
+    model_answer:
+      typeof promptRow.model_answer === 'string' && promptRow.model_answer.trim()
+        ? promptRow.model_answer.trim()
+        : undefined,
+    expected_style:
+      typeof promptRow.expected_style === 'string' && promptRow.expected_style.trim()
+        ? promptRow.expected_style.trim()
+        : undefined,
+    time_limit:
+      typeof promptRow.time_limit === 'number'
+        ? promptRow.time_limit
+        : undefined,
+  };
+}
+
+function getPreferredRecorderMimeType(): string | undefined {
+  if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined') return undefined;
+  return RECORDER_MIME_CANDIDATES.find((type) => MediaRecorder.isTypeSupported(type));
+}
+
+function getAudioFileExtension(mimeType: string): string {
+  const normalized = mimeType.split(';')[0].trim().toLowerCase();
+  if (normalized === 'audio/mp4') return 'm4a';
+  if (normalized === 'audio/ogg') return 'ogg';
+  if (normalized === 'audio/wav' || normalized === 'audio/x-wav' || normalized === 'audio/wave') return 'wav';
+  return 'webm';
 }
 
 function getCurrentPath(): string {
@@ -142,6 +176,31 @@ export default function ExamSpeakingPage() {
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [answer, setAnswer] = useState('');
   const [feedbackRow, setFeedbackRow] = useState<Record<string, unknown> | null>(null);
+  const [voiceInputState, setVoiceInputState] = useState<VoiceInputState>('idle');
+  const [voiceErrorMessage, setVoiceErrorMessage] = useState<string | null>(null);
+  const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
+  const [lastTranscript, setLastTranscript] = useState<string>('');
+  const [canRecordAudio, setCanRecordAudio] = useState(false);
+  const [answerInputSource, setAnswerInputSource] = useState<'text' | 'voice'>('text');
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordedChunksRef = useRef<BlobPart[]>([]);
+
+  useEffect(() => {
+    const supported =
+      typeof window !== 'undefined' &&
+      typeof navigator !== 'undefined' &&
+      !!navigator.mediaDevices?.getUserMedia &&
+      typeof MediaRecorder !== 'undefined';
+    setCanRecordAudio(supported);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      mediaRecorderRef.current?.stream?.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
 
   useEffect(() => {
     fetch('/api/usage/today')
@@ -174,6 +233,10 @@ export default function ExamSpeakingPage() {
 
   const handleStartInterview = async () => {
     setErrorMessage(null);
+    setVoiceErrorMessage(null);
+    setVoiceNotice(null);
+    setLastTranscript('');
+    setAnswerInputSource('text');
     setPhase('creating_session');
 
     try {
@@ -243,6 +306,122 @@ export default function ExamSpeakingPage() {
     }
   };
 
+  const transcribeAudioBlob = async (audioBlob: Blob, mimeType: string) => {
+    setVoiceInputState('transcribing');
+    setVoiceErrorMessage(null);
+    setVoiceNotice(null);
+
+    try {
+      const formData = new FormData();
+      formData.append(
+        'audio',
+        new File([audioBlob], `speaking-answer.${getAudioFileExtension(mimeType)}`, {
+          type: mimeType,
+        })
+      );
+
+      const transcriptionRes = await fetch('/api/speaking/transcriptions', {
+        method: 'POST',
+        body: formData,
+      });
+      const transcriptionData =
+        (await transcriptionRes.json()) as ApiResponse<{ transcript: string }>;
+
+      if (isUnauthorizedApiResponse(transcriptionRes, transcriptionData)) {
+        redirectToLoginWithNext(getCurrentPath());
+        return;
+      }
+
+      if (!transcriptionData.ok || !transcriptionData.data?.transcript) {
+        setVoiceErrorMessage(
+          getUserFacingTranscriptionError(
+            transcriptionRes,
+            transcriptionData,
+            AUDIO_TRANSCRIPTION_RETRY_MESSAGE
+          )
+        );
+        setVoiceInputState('idle');
+        return;
+      }
+
+      const transcript = transcriptionData.data.transcript.trim();
+      setLastTranscript(transcript);
+      setAnswer((prev) => (prev.trim() ? `${prev.trim()}\n${transcript}` : transcript));
+      setAnswerInputSource('voice');
+      setVoiceNotice('文字起こしを反映しました。必要なら編集してから送信してください。');
+      setVoiceInputState('idle');
+    } catch {
+      setVoiceErrorMessage(AUDIO_TRANSCRIPTION_RETRY_MESSAGE);
+      setVoiceInputState('idle');
+    }
+  };
+
+  const handleStartRecording = async () => {
+    if (!canRecordAudio || voiceInputState === 'recording' || voiceInputState === 'transcribing') {
+      return;
+    }
+
+    setVoiceErrorMessage(null);
+    setVoiceNotice(null);
+    setLastTranscript('');
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = getPreferredRecorderMimeType();
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+
+      recordedChunksRef.current = [];
+      mediaRecorderRef.current = recorder;
+      mediaStreamRef.current = stream;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const finalMimeType = recorder.mimeType || mimeType || 'audio/webm';
+        const audioBlob = new Blob(recordedChunksRef.current, { type: finalMimeType });
+        mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+        mediaRecorderRef.current = null;
+        recordedChunksRef.current = [];
+
+        if (audioBlob.size === 0) {
+          setVoiceInputState('idle');
+          setVoiceErrorMessage('録音データを取得できませんでした。もう一度録音してください。');
+          return;
+        }
+
+        void transcribeAudioBlob(audioBlob, finalMimeType);
+      };
+
+      recorder.onerror = () => {
+        setVoiceInputState('idle');
+        setVoiceErrorMessage('録音に失敗しました。もう一度お試しください。');
+        mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+        mediaRecorderRef.current = null;
+      };
+
+      recorder.start();
+      setVoiceInputState('recording');
+    } catch {
+      setVoiceErrorMessage(
+        'マイクを利用できませんでした。許可を確認するか、テキスト入力で続けてください。'
+      );
+      setVoiceInputState('idle');
+    }
+  };
+
+  const handleStopRecording = () => {
+    if (voiceInputState !== 'recording') return;
+    mediaRecorderRef.current?.stop();
+  };
+
   const handleSubmitAnswer = async () => {
     if (!sessionId || !promptRow || !promptRow.id) return;
     const trimmed = answer.trim();
@@ -289,8 +468,11 @@ export default function ExamSpeakingPage() {
         body: JSON.stringify({
           attempt_id: attemptData.data.id,
           user_response: trimmed,
-          prompt: buildEvaluationPromptText(promptRow, selectedPart),
-          metrics: { word_count: trimmed.split(/\s+/).length },
+          prompt: buildEvaluationPromptPayload(promptRow, selectedPart),
+          metrics: {
+            word_count: trimmed.split(/\s+/).length,
+            has_audio_transcript: answerInputSource === 'voice',
+          },
         }),
       });
       const evalData = (await evalRes.json()) as ApiResponse<Record<string, unknown>>;
@@ -318,8 +500,15 @@ export default function ExamSpeakingPage() {
   };
 
   const handleTryAnother = () => {
+    mediaRecorderRef.current?.stream?.getTracks().forEach((track) => track.stop());
+    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
     setPhase('idle');
     setErrorMessage(null);
+    setVoiceErrorMessage(null);
+    setVoiceNotice(null);
+    setLastTranscript('');
+    setVoiceInputState('idle');
+    setAnswerInputSource('text');
     setSessionId(null);
     setPromptRow(null);
     setAttemptId(null);
@@ -442,6 +631,41 @@ export default function ExamSpeakingPage() {
 
             <div className={cn('p-6', cardBase)}>
               <label className="mb-2 block text-sm font-semibold text-text">{'\u3042\u306a\u305f\u306e\u56de\u7b54'}</label>
+              <div className="mb-4 space-y-3 rounded-xl border border-border bg-surface-2 p-4">
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleStartRecording}
+                    disabled={!canRecordAudio || voiceInputState !== 'idle' || phase !== 'answering'}
+                    className={buttonSecondary}
+                  >
+                    {voiceInputState === 'recording' ? '\u9332\u97f3\u4e2d...' : '\u9332\u97f3\u3092\u59cb\u3081\u308b'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleStopRecording}
+                    disabled={voiceInputState !== 'recording'}
+                    className={buttonSecondary}
+                  >
+                    {'\u9332\u97f3\u3092\u505c\u6b62'}
+                  </button>
+                </div>
+                <p className={helperText}>
+                  {canRecordAudio
+                    ? voiceInputState === 'transcribing'
+                      ? '\u6587\u5b57\u8d77\u3053\u3057\u4e2d\u3067\u3059...'
+                      : '\u9332\u97f3\u2192\u6587\u5b57\u8d77\u3053\u3057\u3067 textarea \u306b\u53cd\u6620\u3057\u307e\u3059\u3002\u53cd\u6620\u5f8c\u306f\u7de8\u96c6\u3057\u3066\u304b\u3089\u9001\u4fe1\u3067\u304d\u307e\u3059\u3002'
+                    : '\u3053\u306e\u30d6\u30e9\u30a6\u30b6\u3067\u306f\u97f3\u58f0\u5165\u529b\u304c\u4f7f\u3048\u307e\u305b\u3093\u3002\u30c6\u30ad\u30b9\u30c8\u56de\u7b54\u3067\u7d9a\u3051\u3066\u304f\u3060\u3055\u3044\u3002'}
+                </p>
+                {voiceNotice ? <p className="text-sm text-primary">{voiceNotice}</p> : null}
+                {voiceErrorMessage ? <p className="text-sm text-amber-600">{voiceErrorMessage}</p> : null}
+                {lastTranscript ? (
+                  <p className={cn(helperText, 'text-xs')}>
+                    {'\u6700\u65b0\u306e\u6587\u5b57\u8d77\u3053\u3057: '}
+                    {lastTranscript}
+                  </p>
+                ) : null}
+              </div>
               <textarea
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
@@ -456,7 +680,7 @@ export default function ExamSpeakingPage() {
                 {MIN_ANSWER_LENGTH}
                 {' \u6587\u5b57'}
               </p>
-              <button type="button" onClick={handleSubmitAnswer} disabled={isLoading || answer.trim().length < MIN_ANSWER_LENGTH} className={cn('mt-4', buttonPrimary)}>
+              <button type="button" onClick={handleSubmitAnswer} disabled={isLoading || voiceInputState === 'transcribing' || answer.trim().length < MIN_ANSWER_LENGTH} className={cn('mt-4', buttonPrimary)}>
                 {phase === 'saving_attempt' || phase === 'evaluating' ? '\u9001\u4fe1\u4e2d...' : '\u56de\u7b54\u3092\u9001\u4fe1\u3059\u308b'}
               </button>
               {errorMessage ? <p className="mt-3 text-sm text-amber-600">{errorMessage}</p> : null}
@@ -501,6 +725,41 @@ export default function ExamSpeakingPage() {
                         <li key={index}>{fix.issue ?? fix.suggestion ?? JSON.stringify(fix)}</li>
                       ))}
                   </ul>
+                </div>
+              ) : null}
+              {typeof promptRow?.model_answer === 'string' && promptRow.model_answer.trim() ? (
+                <div className="mt-4">
+                  <h3 className={cardTitle}>{'\u6a21\u7bc4\u89e3\u7b54'}</h3>
+                  <p className={cn(bodyText, 'mt-2 whitespace-pre-wrap')}>
+                    {promptRow.model_answer.trim()}
+                  </p>
+                </div>
+              ) : null}
+              {typeof feedbackRow.rewrite === 'string' && feedbackRow.rewrite.trim() ? (
+                <div className="mt-4">
+                  <h3 className={cardTitle}>{'\u3042\u306a\u305f\u306e\u56de\u7b54\u306e\u6539\u5584\u7248'}</h3>
+                  <p className={cn(bodyText, 'mt-2 whitespace-pre-wrap')}>
+                    {feedbackRow.rewrite.trim()}
+                  </p>
+                </div>
+              ) : null}
+              {Array.isArray(feedbackRow.micro_drills) && feedbackRow.micro_drills.length > 0 ? (
+                <div className="mt-4">
+                  <h3 className={cardTitle}>{'\u6b21\u56de\u305d\u306e\u307e\u307e\u4f7f\u3048\u308b\u30d5\u30ec\u30fc\u30ba'}</h3>
+                  <div className="mt-2 space-y-3">
+                    {(feedbackRow.micro_drills as Array<{ jp_intent?: string; model_answer?: string }>)
+                      .slice(0, 2)
+                      .map((drill, index) => (
+                        <div key={index} className="rounded-lg border border-border bg-surface-2 p-3">
+                          {drill.jp_intent ? (
+                            <p className={cn(helperText, 'mb-1')}>{drill.jp_intent}</p>
+                          ) : null}
+                          {drill.model_answer ? (
+                            <p className={cn(bodyText, 'whitespace-pre-wrap')}>{drill.model_answer}</p>
+                          ) : null}
+                        </div>
+                      ))}
+                  </div>
                 </div>
               ) : null}
             </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Layout } from '@/components/layout/Layout';
-import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
+import { bodyText, buttonPrimary, buttonSecondary, cardBase, cardTitle, cn, helperText, pageTitle, sectionTitle } from '@/lib/ui/theme';
 import type { ApiResponse } from '@/lib/api/response';
 
 type DetailData = {
@@ -21,6 +21,8 @@ type DetailData = {
     part: string | null;
     topic: string | null;
     cue_card: { topic?: string; points?: string[] } | null;
+    model_answer?: string | null;
+    paraphrases?: string[] | null;
     [key: string]: unknown;
   } | null;
   session: { topic: string | null; part: string | null; [key: string]: unknown } | null;
@@ -44,6 +46,13 @@ type DetailData = {
 
 type Status = 'loading' | 'error' | 'ready';
 
+const CRITERION_LABELS: Record<string, string> = {
+  fluency: '流暢さとつながり',
+  lexical: '語彙',
+  grammar: '文法',
+  pronunciation: '発音',
+};
+
 export default function SpeakingFeedbackPage() {
   const params = useParams();
   const attemptId = params.attemptId as string;
@@ -53,38 +62,40 @@ export default function SpeakingFeedbackPage() {
 
   useEffect(() => {
     if (!attemptId) {
-      setErrorMessage('Invalid attempt ID');
+      setErrorMessage('無効な attempt ID です。');
       setStatus('error');
       return;
     }
+
     setStatus('loading');
     setErrorMessage(null);
+
     fetch(`/api/speaking/attempts/${attemptId}/detail`)
       .then((res) => {
         if (res.status === 401) {
-          setErrorMessage('ログインが必要です');
+          setErrorMessage('ログインが必要です。');
           setStatus('error');
           return null;
         }
         if (res.status === 404) {
-          setErrorMessage('Not found');
+          setErrorMessage('結果が見つかりませんでした。');
           setStatus('error');
           return null;
         }
         return res.json();
       })
       .then((body: ApiResponse<DetailData> | null) => {
-        if (body == null) return;
+        if (!body) return;
         if (body.ok && body.data) {
           setData(body.data);
           setStatus('ready');
-        } else {
-          setErrorMessage(body.error?.message ?? 'Failed to load');
-          setStatus('error');
+          return;
         }
+        setErrorMessage(body.error?.message ?? 'フィードバックの取得に失敗しました。');
+        setStatus('error');
       })
       .catch(() => {
-        setErrorMessage('Network error');
+        setErrorMessage('通信に失敗しました。');
         setStatus('error');
       });
   }, [attemptId]);
@@ -94,163 +105,178 @@ export default function SpeakingFeedbackPage() {
   const showCueCard =
     data?.prompt?.part === 'part2' &&
     data?.prompt?.cue_card &&
-    (data.prompt.cue_card.topic || (Array.isArray(data.prompt.cue_card.points) && data.prompt.cue_card.points.length > 0));
+    (data.prompt.cue_card.topic ||
+      (Array.isArray(data.prompt.cue_card.points) && data.prompt.cue_card.points.length > 0));
   const cueCard = data?.prompt?.cue_card;
 
   return (
     <Layout>
-      <div className="container mx-auto max-w-2xl px-4 py-8">
-        <h1 className={cn('text-2xl font-bold tracking-tight text-text', cardTitle)}>
-          Speaking Feedback
-        </h1>
+      <div className="container mx-auto max-w-3xl px-4 py-8">
+        <h1 className={pageTitle}>Speaking フィードバック</h1>
 
-        {status === 'loading' && (
-          <p className="mt-4 text-text-muted">読み込み中...</p>
-        )}
+        {status === 'loading' ? <p className={cn(helperText, 'mt-4')}>読み込み中...</p> : null}
 
-        {status === 'error' && (
+        {status === 'error' ? (
           <div className="mt-6 space-y-4">
-            <p className="text-amber-600 font-medium">{errorMessage}</p>
-            {errorMessage === 'ログインが必要です' && (
-              <Link href="/login" className="inline-block text-indigo-600 font-semibold hover:underline">
-                Go to Login
-              </Link>
-            )}
-            <div className="flex gap-3">
-              <Link href="/progress" className={cn(buttonSecondary, 'inline-flex')}>
-                Back to Progress
+            <p className="font-medium text-amber-600">{errorMessage}</p>
+            <div className="flex flex-wrap gap-3">
+              {errorMessage === 'ログインが必要です。' ? (
+                <Link href="/login" className={cn(buttonPrimary, 'inline-flex items-center')}>
+                  ログインへ進む
+                </Link>
+              ) : null}
+              <Link href="/progress" className={cn(buttonSecondary, 'inline-flex items-center')}>
+                進捗へ戻る
               </Link>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {status === 'ready' && data && (
+        {status === 'ready' && data ? (
           <div className="mt-6 space-y-6">
-            <p className="text-sm text-text-muted">
-              {new Date(data.attempt.created_at).toLocaleString('ja-JP', { dateStyle: 'medium', timeStyle: 'short' })}
-              {' · '}
-              Topic: {topic} · Part: {part}
-              {' · '}
+            <p className={helperText}>
+              {new Date(data.attempt.created_at).toLocaleString('ja-JP', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
+              {' ・ '}
+              Topic: {topic}
+              {' ・ '}
+              Part: {part}
+              {' ・ '}
               {data.attempt.word_count ?? 0} words
-              {data.feedback?.overall_band != null && (
-                <> · Band {data.feedback.overall_band}</>
-              )}
+              {data.feedback?.overall_band != null ? <> ・ Band {data.feedback.overall_band}</> : null}
             </p>
 
-            {/* Section 1: Question */}
-            <div className={cn('p-6', cardBase)}>
-              <h2 className={cn('mb-3 text-lg font-semibold', cardTitle)}>Question</h2>
+            <section className={cn('p-6', cardBase)}>
+              <h2 className={cn(sectionTitle, 'mb-3 text-subsection-title')}>質問</h2>
               {showCueCard && cueCard ? (
                 <>
-                  {cueCard.topic && (
-                    <p className="text-lg font-semibold text-text mb-2">{cueCard.topic}</p>
-                  )}
-                  {Array.isArray(cueCard.points) && cueCard.points.length > 0 && (
-                    <ul className="list-disc list-inside space-y-1 text-text">
-                      {cueCard.points.map((p, i) => (
-                        <li key={i}>{p}</li>
+                  {cueCard.topic ? <p className="mb-3 text-lg font-semibold text-text">{cueCard.topic}</p> : null}
+                  {Array.isArray(cueCard.points) && cueCard.points.length > 0 ? (
+                    <ul className="list-inside list-disc space-y-1 text-text">
+                      {cueCard.points.map((point, index) => (
+                        <li key={index}>{point}</li>
                       ))}
                     </ul>
-                  )}
+                  ) : null}
                 </>
               ) : (
-                <p className="text-text leading-relaxed whitespace-pre-wrap">{data.derived.question_text || '—'}</p>
+                <p className={cn(bodyText, 'whitespace-pre-wrap')}>{data.derived.question_text || '-'}</p>
               )}
-            </div>
+            </section>
 
-            {/* Section 2: Your Answer */}
-            <div className={cn('p-6', cardBase)}>
-              <h2 className={cn('mb-3 text-lg font-semibold', cardTitle)}>Your Answer</h2>
-              <p className="text-text leading-relaxed whitespace-pre-wrap">{data.attempt.user_response || '—'}</p>
-            </div>
+            <section className={cn('p-6', cardBase)}>
+              <h2 className={cn(sectionTitle, 'mb-3 text-subsection-title')}>あなたの回答</h2>
+              <p className={cn(bodyText, 'whitespace-pre-wrap')}>{data.attempt.user_response || '-'}</p>
+            </section>
 
-            {/* Section 3: Evaluation */}
-            {data.feedback && (() => {
-              const feedback = data.feedback;
-              const criterionLabels: Record<string, string> = {
-                fluency: 'Fluency and Coherence',
-                lexical: 'Lexical Resource',
-                grammar: 'Grammatical Range and Accuracy',
-                pronunciation: 'Pronunciation',
-              };
-              return (
-              <div className={cn('p-6', cardBase)}>
-                <h2 className={cn('mb-4 text-lg font-semibold', cardTitle)}>評価</h2>
-                {feedback.overall_band != null && (
+            {data.feedback ? (
+              <section className={cn('p-6', cardBase)}>
+                <h2 className={cn(sectionTitle, 'mb-4 text-subsection-title')}>評価</h2>
+                {data.feedback.overall_band != null ? (
                   <div className="mb-4">
                     <span className="text-sm font-semibold text-text-muted">総合 Band: </span>
-                    <span className="text-xl font-bold text-text">{feedback.overall_band}</span>
+                    <span className="text-xl font-bold text-text">{data.feedback.overall_band}</span>
                   </div>
-                )}
-                <div className="grid gap-3 sm:grid-cols-2 mb-4">
+                ) : null}
+                <div className="grid gap-3 sm:grid-cols-2">
                   {(['fluency_band', 'lexical_band', 'grammar_band', 'pronunciation_band'] as const).map((key) => {
-                    const val = feedback[key];
-                    if (val == null) return null;
-                    const name = key.replace('_band', '');
-                    const label = criterionLabels[name] ?? name;
-                    const isPronunciation = key === 'pronunciation_band';
+                    const value = data.feedback?.[key];
+                    if (value == null) return null;
+                    const evidenceKey = key.replace('_band', '');
                     return (
                       <div key={key} className="rounded-lg border border-border bg-surface-2 p-3">
-                        <div className="text-xs font-semibold text-text-muted uppercase">{label}</div>
-                        {isPronunciation && (
-                          <p className="text-xs text-amber-700 mt-0.5">（音声未実装のため参考値です）</p>
-                        )}
-                        <div className="font-semibold text-text">{val}</div>
-                        {typeof feedback.evidence === 'object' &&
-                          feedback.evidence !== null &&
-                          (feedback.evidence as Record<string, unknown>)[name] != null && (
+                        <div className="text-xs font-semibold uppercase text-text-muted">
+                          {CRITERION_LABELS[evidenceKey] ?? evidenceKey}
+                        </div>
+                        <div className="font-semibold text-text">{value}</div>
+                        {typeof data.feedback?.evidence === 'object' &&
+                        data.feedback.evidence !== null &&
+                        (data.feedback.evidence as Record<string, unknown>)[evidenceKey] != null ? (
                           <p className="mt-1 text-sm text-text-muted">
-                            {String((feedback.evidence as Record<string, unknown>)[name])}
+                            {String((data.feedback.evidence as Record<string, unknown>)[evidenceKey])}
                           </p>
-                        )}
+                        ) : null}
                       </div>
                     );
                   })}
                 </div>
-                {Array.isArray(feedback.top_fixes) && feedback.top_fixes.length > 0 && (
-                  <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-text mb-2">改善ポイント</h3>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-text-muted">
-                      {(feedback.top_fixes as Array<{ issue?: string; suggestion?: string }>)
+
+                {Array.isArray(data.feedback.top_fixes) && data.feedback.top_fixes.length > 0 ? (
+                  <div className="mt-4">
+                    <h3 className={cardTitle}>優先して直したいポイント</h3>
+                    <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-text-muted">
+                      {(data.feedback.top_fixes as Array<{ issue?: string; suggestion?: string }>)
                         .slice(0, 3)
-                        .map((fix, i) => (
-                          <li key={i}>{fix.issue ?? fix.suggestion ?? '-'}</li>
+                        .map((fix, index) => (
+                          <li key={index}>{fix.issue ?? fix.suggestion ?? '-'}</li>
                         ))}
                     </ul>
                   </div>
-                )}
-                {Array.isArray(feedback.weakness_tags) && feedback.weakness_tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {(feedback.weakness_tags as string[]).map((tag, i) => (
+                ) : null}
+
+                {Array.isArray(data.feedback.weakness_tags) && data.feedback.weakness_tags.length > 0 ? (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {(data.feedback.weakness_tags as string[]).map((tag, index) => (
                       <span
-                        key={i}
+                        key={index}
                         className="inline-flex rounded-full border border-border bg-surface-2 px-2 py-0.5 text-xs font-medium text-text"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
-                )}
-              </div>
-              );
-            })()}
-
-            {!data.feedback && (
-              <div className={cn('p-6', cardBase)}>
-                <p className="text-text-muted">評価はまだありません</p>
-              </div>
+                ) : null}
+              </section>
+            ) : (
+              <section className={cn('p-6', cardBase)}>
+                <p className={helperText}>評価はまだありません。</p>
+              </section>
             )}
+
+            {typeof data.prompt?.model_answer === 'string' && data.prompt.model_answer.trim() ? (
+              <section className={cn('p-6', cardBase)}>
+                <h2 className={cn(sectionTitle, 'mb-3 text-subsection-title')}>模範解答</h2>
+                <p className={cn(bodyText, 'whitespace-pre-wrap')}>{data.prompt.model_answer.trim()}</p>
+              </section>
+            ) : null}
+
+            {typeof data.feedback?.rewrite === 'string' && data.feedback.rewrite.trim() ? (
+              <section className={cn('p-6', cardBase)}>
+                <h2 className={cn(sectionTitle, 'mb-3 text-subsection-title')}>あなたの回答の改善版</h2>
+                <p className={cn(bodyText, 'whitespace-pre-wrap')}>{data.feedback.rewrite.trim()}</p>
+              </section>
+            ) : null}
+
+            {Array.isArray(data.feedback?.micro_drills) && data.feedback.micro_drills.length > 0 ? (
+              <section className={cn('p-6', cardBase)}>
+                <h2 className={cn(sectionTitle, 'mb-3 text-subsection-title')}>次回そのまま使えるフレーズ</h2>
+                <div className="space-y-3">
+                  {(data.feedback.micro_drills as Array<{ jp_intent?: string; model_answer?: string }>)
+                    .slice(0, 2)
+                    .map((drill, index) => (
+                      <div key={index} className="rounded-lg border border-border bg-surface-2 p-3">
+                        {drill.jp_intent ? <p className={cn(helperText, 'mb-1')}>{drill.jp_intent}</p> : null}
+                        {drill.model_answer ? (
+                          <p className={cn(bodyText, 'whitespace-pre-wrap')}>{drill.model_answer}</p>
+                        ) : null}
+                      </div>
+                    ))}
+                </div>
+              </section>
+            ) : null}
 
             <div className="flex flex-wrap gap-3">
               <Link href="/progress" className={cn(buttonSecondary, 'inline-flex items-center')}>
-                履歴に戻る
+                進捗へ戻る
               </Link>
               <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex items-center')}>
                 もう一度面接する
               </Link>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </Layout>
   );

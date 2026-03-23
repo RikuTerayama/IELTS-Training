@@ -1,10 +1,12 @@
 /**
- * 瞬間英作文用評価プロンプト（採点用）
+ * Speaking evaluation prompt
  */
 
 export function buildSpeakingEvaluationPrompt(
   userResponse: string,
   prompt: {
+    part?: string;
+    question_text?: string;
     jp_intent: string;
     model_answer?: string;
     expected_style?: string;
@@ -15,6 +17,7 @@ export function buildSpeakingEvaluationPrompt(
     wpm?: number;
     filler_count?: number;
     long_pause_count?: number;
+    has_audio_transcript?: boolean;
   }
 ): string {
   return `You are an IELTS Speaking examiner. Evaluate the following response and provide detailed feedback.
@@ -22,6 +25,9 @@ export function buildSpeakingEvaluationPrompt(
 User's Response:
 ${userResponse}
 
+${prompt.part ? `Speaking Part: ${prompt.part}` : ''}
+${prompt.question_text ? `Question / Cue Card:
+${prompt.question_text}` : ''}
 Prompt (Japanese Intent):
 ${prompt.jp_intent}
 
@@ -35,6 +41,7 @@ Response Metrics:
 ${metrics.wpm !== undefined ? `- Words per minute: ${metrics.wpm.toFixed(1)}` : ''}
 ${metrics.filler_count !== undefined ? `- Filler words (um, like, etc.): ${metrics.filler_count}` : ''}
 ${metrics.long_pause_count !== undefined ? `- Long pauses: ${metrics.long_pause_count}` : ''}
+${metrics.has_audio_transcript ? '- Response source: transcript generated from a recorded spoken answer' : '- Response source: typed text answer'}
 
 Evaluate the response according to IELTS Speaking criteria (0-9 scale, decimal allowed):
 
@@ -55,10 +62,9 @@ Evaluate the response according to IELTS Speaking criteria (0-9 scale, decimal a
    - Error frequency
 
 4. **Pronunciation (PR)**
-   - Clarity and intelligibility (based on transcription accuracy)
-   - Stress and intonation patterns (if detectable from text)
-   - Phonetic accuracy (if detectable from text)
-   - Note: Since this is text-based, focus on what can be inferred from the text
+   - If the response source is typed text, keep pronunciation comments cautious and non-committal
+   - If the response source is a voice transcript, you may comment on spoken delivery in broad terms only
+   - Do not claim detailed acoustic or phonetic analysis unless it is clearly supported
 
 Output JSON format:
 {
@@ -67,31 +73,31 @@ Output JSON format:
     "fluency": 6.5,
     "lexical": 6.0,
     "grammar": 6.0,
-    "pronunciation": 6.5,
-    "overall": 6.25
+    "pronunciation": 6.0,
+    "overall": 6.0
   },
   "evidence": {
-    "fluency": "Brief comment on fluency (one sentence, e.g., 'Good flow but frequent fillers')",
-    "lexical": "Brief comment on vocabulary (one sentence, e.g., 'Adequate range but some inappropriate word choices')",
-    "grammar": "Brief comment on grammar (one sentence, e.g., 'Mostly accurate but lacks complex structures')",
-    "pronunciation": "Brief comment on pronunciation (one sentence, based on text analysis if possible)"
+    "fluency": "Brief comment on fluency",
+    "lexical": "Brief comment on vocabulary",
+    "grammar": "Brief comment on grammar",
+    "pronunciation": "Brief comment on pronunciation"
   },
   "top_fixes": [
     {
       "priority": 1,
-      "dimension": "fluency" | "lexical" | "grammar" | "pronunciation",
-      "issue": "Specific issue description (e.g., 'Too many filler words (um, like)')",
-      "suggestion": "How to improve (e.g., 'Practice pausing naturally instead of using fillers')"
+      "dimension": "fluency",
+      "issue": "Specific issue description",
+      "suggestion": "How to improve"
     },
     {
       "priority": 2,
-      "dimension": "fluency" | "lexical" | "grammar" | "pronunciation",
+      "dimension": "lexical",
       "issue": "Specific issue description",
       "suggestion": "How to improve"
     },
     {
       "priority": 3,
-      "dimension": "fluency" | "lexical" | "grammar" | "pronunciation",
+      "dimension": "grammar",
       "issue": "Specific issue description",
       "suggestion": "How to improve"
     }
@@ -111,12 +117,13 @@ Output JSON format:
 }
 
 Requirements:
-1. Provide honest, constructive feedback (not too harsh, not too lenient)
-2. Focus on actionable improvements (what can the user do to improve?)
-3. Rewrite should be natural and improve the original while maintaining similar length
-4. Micro drills should target the main weaknesses identified in top_fixes
-5. Use decimal bands (e.g., 6.5) for precision
-6. Overall band should be the average of the 4 criteria, rounded to 0.25 increments
-7. Weakness tags should reflect the main areas needing improvement (1-3 tags, max 4)`;
+1. Provide honest, constructive feedback.
+2. Focus on actionable improvements.
+3. Rewrite should be natural and improve the original while maintaining similar length.
+4. Micro drills should target the main weaknesses identified in top_fixes.
+5. Use decimal bands (e.g. 6.5) when helpful.
+6. Overall band should roughly align with the four criteria.
+7. Weakness tags should reflect the main areas needing improvement (1-4 tags).
+8. Model answer should be a natural spoken response, not an essay.
+9. Rewrite should stay close to the user's original idea so the learner can see what changed.`;
 }
-
