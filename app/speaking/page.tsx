@@ -48,16 +48,24 @@ export default function SpeakingPage() {
             AI interviewer と Part 1-3 の構成で Speaking を練習できます。Cue Card と band-style feedback を使って、
             本番に近い流れで感覚を整えるページです。
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <div className="mt-8 flex flex-col items-center gap-3">
             <Link href="/exam/speaking" className={cn(buttonPrimary, 'inline-flex')}>
               AI 面接を始める
             </Link>
-            <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
-              料金を見る
-            </Link>
-            <Link href={buildLoginUrl('/home')} className="text-sm font-medium text-primary hover:underline">
-              学習ホームにログイン
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              <Link
+                href={buildLoginUrl('/home')}
+                className="text-sm font-medium text-text-muted transition-colors hover:text-text hover:underline"
+              >
+                学習ホームにログイン
+              </Link>
+              <Link
+                href="/pricing"
+                className="text-sm font-medium text-text-muted transition-colors hover:text-text hover:underline"
+              >
+                料金を見る
+              </Link>
+            </div>
           </div>
         </section>
 
