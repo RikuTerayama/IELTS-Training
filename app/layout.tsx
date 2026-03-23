@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'Meridian',
-  description: 'Meridian | IELTS Reading / Writing / Speaking を一つの学習ループで進める学習アプリ',
+  description: 'Meridian | IELTS Reading / Listening / Writing / Speaking を一つの学習ループで進める学習アプリ',
   icons: {
     icon: '/branding/meridian.png',
     shortcut: '/branding/meridian.png',

@@ -5,6 +5,7 @@
 
 export const PUBLIC_NAV = [
   { href: '/reading', label: 'Reading' },
+  { href: '/listening', label: 'Listening' },
   { href: '/writing', label: 'Writing' },
   { href: '/speaking', label: 'Speaking' },
   { href: '/vocab', label: '単語' },

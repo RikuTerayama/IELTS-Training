@@ -1,171 +1,45 @@
 ﻿'use client';
 
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BrandLink } from '@/components/branding/Brand';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { APP_NAV } from '@/lib/config/nav';
+import { SiteHeader } from './SiteHeader';
 
 export function Header() {
   const [user, setUser] = useState<any>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-  }, []);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/login');
-    setMenuOpen(false);
   };
 
   return (
-    <header className="border-b border-border bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <BrandLink
-              href="/home"
-              size={38}
-              textClassName="text-lg text-primary"
-              linkClassName="transition-opacity duration-200 hover:opacity-90"
-            />
-            <nav className="hidden md:flex gap-3 lg:gap-4">
-              {APP_NAV.map(({ href, label, external }) =>
-                external ? (
-                  <Link
-                    key={href}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-text-muted hover:text-text transition-colors duration-200"
-                  >
-                    {label}
-                  </Link>
-                ) : (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="text-text-muted hover:text-text transition-colors duration-200"
-                  >
-                    {label}
-                  </Link>
-                )
-              )}
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
-            <div className="hidden md:flex items-center gap-4">
-              {user ? (
-                <>
-                  <span className="hidden xl:block text-sm text-text-muted">{user.email}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="rounded bg-surface-2 border border-border px-3 py-1 text-sm text-text hover:bg-surface transition-colors duration-200"
-                  >
-                    ログアウト
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground hover:bg-primary-hover transition-colors duration-200"
-                >
-                  ログイン
-                </Link>
-              )}
-            </div>
-            <div className="md:hidden flex items-center gap-2">
-              <ThemeToggle />
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2 text-text-muted hover:text-text focus:outline-none transition-colors duration-200"
-                aria-label={menuOpen ? 'ナビゲーションメニューを閉じる' : 'ナビゲーションメニューを開く'}
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  {menuOpen ? (
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        {menuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4">
-            <div className="flex flex-col gap-3">
-              {APP_NAV.map(({ href, label, external }) =>
-                external ? (
-                  <Link
-                    key={href}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-text-muted hover:text-text py-2 transition-colors duration-200"
-                  >
-                    {label}
-                  </Link>
-                ) : (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setMenuOpen(false)}
-                    className="text-text-muted hover:text-text py-2 transition-colors duration-200"
-                  >
-                    {label}
-                  </Link>
-                )
-              )}
-              {user ? (
-                <div className="pt-2 border-t border-border mt-2">
-                  <div className="text-sm text-text-muted py-2">{user.email}</div>
-                  <button
-                    onClick={handleLogout}
-                    className="rounded bg-surface-2 border border-border px-3 py-2 text-sm text-text hover:bg-surface w-full text-left transition-all duration-200"
-                  >
-                    ログアウト
-                  </button>
-                </div>
-              ) : (
-                <div className="pt-2 border-t border-border mt-2">
-                  <Link
-                    href="/login"
-                    onClick={() => setMenuOpen(false)}
-                    className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary-hover block text-center transition-colors duration-200"
-                  >
-                    ログイン
-                  </Link>
-                </div>
-              )}
-            </div>
-          </nav>
-        )}
-      </div>
-    </header>
+    <SiteHeader
+      mode="app"
+      brandHref="/home"
+      navItems={APP_NAV}
+      userEmail={user?.email ?? null}
+      onLogout={handleLogout}
+    />
   );
 }
+
