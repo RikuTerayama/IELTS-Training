@@ -203,7 +203,7 @@ function DashboardCard({
   external,
 }: HubCard) {
   return (
-    <article className={cn(cardBase, 'flex h-full flex-col gap-4 p-5')}>
+    <article className={cn(cardBase, 'group flex h-full flex-col gap-4 p-5')}>
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           {eyebrow ? <span className={badgeBase}>{eyebrow}</span> : null}
@@ -222,9 +222,15 @@ function DashboardCard({
         <Link
           href={href}
           {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-          className={cn(buttonSecondary, 'inline-flex items-center justify-center')}
+          className={cn(
+            buttonSecondary,
+            'inline-flex items-center justify-center gap-2 self-start font-semibold group-hover:border-border-strong'
+          )}
         >
           {ctaLabel}
+          <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
+            {'>'}
+          </span>
         </Link>
       </div>
     </article>
@@ -339,7 +345,7 @@ export default function HomePage() {
         title: 'まずは Reading から始める',
         description:
           'ログイン直後は Reading の復習から始めると、Writing や Speaking にもつながる学習リズムを作りやすくなります。',
-        href: '/training/vocab?skill=reading',
+        href: '/vocab/reading',
         label: 'Reading を始める',
         secondaryHref: '/task/select?task_type=Task%202',
         secondaryLabel: 'Writing を開く',
@@ -419,7 +425,7 @@ export default function HomePage() {
           readingDueCount > 0
             ? `今日の復習が ${readingDueCount} 件あります。まずは Reading から始めると、その後の定着も安定します。`
             : 'Academic Reading の問題タイプ別に入り、Reading の土台を整えられます。',
-        href: '/training/vocab?skill=reading',
+        href: '/vocab/reading',
         ctaLabel: readingDueCount > 0 ? 'Reading 復習を始める' : 'Reading を始める',
         badge: readingDueCount > 0 ? `復習 ${readingDueCount}` : undefined,
       },
@@ -427,7 +433,7 @@ export default function HomePage() {
         title: '単語',
         eyebrow: 'インプット',
         description: 'Reading・Listening と連動する単語復習をまとめて進められます。',
-        href: '/training/vocab',
+        href: '/vocab',
         ctaLabel: '単語を開く',
       },
       {
@@ -435,9 +441,8 @@ export default function HomePage() {
         eyebrow: 'インプット',
         description:
           'Listening の公開ハブで、現在使える入口と今後の公開予定を確認できます。今は単語・熟語・表現から土台を整える段階です。',
-        href: '/listening',
+        href: '/vocab/listening',
         ctaLabel: 'Listening を見る',
-        badge: '準備中',
       },
       {
         title: '熟語',
@@ -605,8 +610,15 @@ export default function HomePage() {
                       Reading を始める
                     </Link>
                   )}
-                  <Link href="/progress" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200">
+                  <Link
+                    href="/progress"
+                    className={cn(
+                      buttonSecondary,
+                      'inline-flex items-center justify-center gap-2 self-start px-3 py-2 text-sm font-semibold'
+                    )}
+                  >
                     進捗を見る
+                    <span aria-hidden="true">{'>'}</span>
                   </Link>
                 </div>
               </div>
@@ -648,7 +660,7 @@ export default function HomePage() {
           <div className="space-y-2">
             <span className={badgeBase}>インプット</span>
             <h2 className={sectionTitle}>読みながら土台を整える</h2>
-            <p className={cn(helperText, 'max-w-3xl md:text-body-base')}>
+            <p className={cn(helperText, 'max-w-4xl text-balance md:text-body-base')}>
               Reading / Listening / 単語 / 熟語 / 表現をまとめて確認できるレーンです。今日の復習がある日は、ここから入るのが安定します。
             </p>
           </div>
@@ -663,7 +675,7 @@ export default function HomePage() {
           <div className="space-y-2">
             <span className={badgeBase}>アウトプット</span>
             <h2 className={sectionTitle}>書いて話して仕上げる</h2>
-            <p className={cn(helperText, 'max-w-3xl md:text-body-base')}>
+            <p className={cn(helperText, 'max-w-4xl text-balance md:text-body-base')}>
               Writing と Speaking の Practice / Exam / フィードバックをまとめたレーンです。次の 1 本をここから選べます。
             </p>
           </div>
