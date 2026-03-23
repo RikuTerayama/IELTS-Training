@@ -330,12 +330,13 @@ function VocabPageContent() {
     },
     [applySubmitResult, selectedMode]
   );
+  const clickLimitSeconds = selectedSkill === 'reading' ? 30 : 20;
   const handleClickAnswer = async (choice: string) => {
     if (!quizState || !selectedMode) return;
     const { questions, currentIndex } = quizState;
     if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
     const currentQuestion = questions[currentIndex];
-    const timeMs = clickTimer !== null ? (10 - clickTimer) * 1000 : 0;
+    const timeMs = clickTimer !== null ? (clickLimitSeconds - clickTimer) * 1000 : 0;
     stopClickTimer();
     await submitAnswer(currentQuestion.question_id, choice, timeMs);
   };
@@ -415,7 +416,7 @@ function VocabPageContent() {
     }
 
     if (step === 'quiz' && selectedMode === 'click' && quizState && !quizState.showResult) {
-      const limitSeconds = selectedSkill === 'reading' ? 30 : 10;
+      const limitSeconds = clickLimitSeconds;
       const timeMs = limitSeconds * 1000;
       let timer = limitSeconds;
       setClickTimer(timer);
@@ -446,7 +447,7 @@ function VocabPageContent() {
       // タイマーをクリア
       setClickTimer(null);
     }
-  }, [step, selectedMode, selectedSkill, quizState?.currentIndex, quizState?.showResult, submitAnswer]);
+  }, [clickLimitSeconds, step, selectedMode, selectedSkill, quizState?.currentIndex, quizState?.showResult, submitAnswer]);
 
   // Reading: passage_group からセット番号・総セット数を算出
   const getReadingSetInfo = (questions: LexiconQuestion[], index: number): { setIndex: number; setTotal: number; setSize: number } | null => {
@@ -742,7 +743,7 @@ function VocabPageContent() {
                   >
                     <div className={cn('font-semibold mb-1', cardTitle)}>Click（選択式）</div>
                     <div className={cn('text-xs', cardDesc)}>
-                      {sets[selectedCategory].questions_click}問 / {selectedSkill === 'reading' ? '30' : '10'}秒制限
+                      {sets[selectedCategory].questions_click}問 / {selectedSkill === 'reading' ? '30' : '20'}秒制限
                     </div>
                     {sets[selectedCategory].due_click > 0 && (
                       <div className={cn('text-xs mt-1', 'text-primary')}>
