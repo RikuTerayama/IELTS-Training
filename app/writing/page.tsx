@@ -48,19 +48,23 @@ export default function WritingPage() {
             Task 2 の練習、Practice / Exam Mode、AI フィードバックをまとめて使える Writing 対策ページです。
             構成の確認から提出後の見直しまで、1ページで流れをつかめます。
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/task/select?task_type=Task%202&mode=exam" className={cn(buttonPrimary, 'inline-flex')}>
-              Exam Mode を始める
-            </Link>
-            <Link href="/task/select?task_type=Task%202" className={cn(buttonSecondary, 'inline-flex')}>
-              Practice を始める
-            </Link>
-            <Link href={buildLoginUrl('/home')} className="text-sm font-medium text-primary hover:underline">
-              学習ホームにログイン
-            </Link>
-            <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
-              料金を見る
-            </Link>
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link href="/task/select?task_type=Task%202&mode=exam" className={cn(buttonPrimary, 'inline-flex')}>
+                Exam Mode を始める
+              </Link>
+              <Link href="/task/select?task_type=Task%202" className={cn(buttonSecondary, 'inline-flex')}>
+                Practice を始める
+              </Link>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              <Link href={buildLoginUrl('/home')} className="text-sm font-medium text-primary/80 transition-colors hover:text-primary hover:underline">
+                学習ホームにログイン
+              </Link>
+              <Link href="/pricing" className="text-sm font-medium text-primary/80 transition-colors hover:text-primary hover:underline">
+                料金を見る
+              </Link>
+            </div>
           </div>
         </section>
 
