@@ -291,7 +291,15 @@ function IdiomPageContent() {
 
     const nextIndex = quizState.currentIndex + 1;
     if (nextIndex >= quizState.questions.length) {
-      // 全問終了
+      setQuizState({
+        ...quizState,
+        currentIndex: nextIndex,
+        showResult: false,
+        currentAnswer: undefined,
+      });
+      if (selectedMode === 'click') {
+        setClickTimer(null);
+      }
       return;
     }
 
@@ -321,7 +329,13 @@ function IdiomPageContent() {
       setTimerInterval(null);
     }
 
-    if (step === 'quiz' && selectedMode === 'click' && quizState && !quizState.showResult) {
+    if (
+      step === 'quiz' &&
+      selectedMode === 'click' &&
+      quizState &&
+      !quizState.showResult &&
+      quizState.currentIndex < quizState.questions.length
+    ) {
       const limitSeconds = CLICK_LIMIT_SECONDS;
       let timer = limitSeconds;
       setClickTimer(timer);
@@ -614,16 +628,18 @@ function IdiomPageContent() {
               </div>
             )}
             {/* 進捗表示 */}
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className={cn('text-sm', cardDesc)}>
-                問題 {quizState.currentIndex + 1} / {quizState.questions.length}
-              </div>
-              {selectedMode === 'click' && clickTimer !== null && (
-                <div className={cn('text-lg font-semibold', clickTimer <= 3 ? 'text-danger' : 'text-text')}>
-                  残り: {clickTimer}秒
+            {quizState.currentIndex < quizState.questions.length && (
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className={cn('text-sm', cardDesc)}>
+                  問題 {quizState.currentIndex + 1} / {quizState.questions.length}
                 </div>
-              )}
-            </div>
+                {selectedMode === 'click' && clickTimer !== null && (
+                  <div className={cn('text-lg font-semibold', clickTimer <= 3 ? 'text-danger' : 'text-text')}>
+                    残り: {clickTimer}秒
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 全問終了時のサマリー */}
             {quizState.currentIndex >= quizState.questions.length ? (
