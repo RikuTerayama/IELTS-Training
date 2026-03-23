@@ -126,13 +126,47 @@ export async function GET(): Promise<Response> {
     const sessionIds = Array.from(new Set(attempts.map((a) => a.session_id).filter((id): id is string => !!id)));
     const attemptIds = attempts.map((a) => a.id);
 
-    const [promptsResult, sessionsResult, feedbacksResult] = await Promise.all([
-      promptIds.length
-        ? supabase
-            .from('speaking_prompts')
-            .select('id, topic, part, followup_question, question, jp_intent')
-            .in('id', promptIds)
-        : Promise.resolve({ data: [] as PromptRow[], error: null }),
+    let promptsResult:
+      | { data: PromptRow[]; error: null }
+      | { data: PromptRow[] | null; error: { message?: string } | null };
+
+    if (promptIds.length) {
+      const promptCols = 'id, topic, part, followup_question, question, jp_intent';
+      const promptColsNoQuestion = 'id, topic, part, followup_question, jp_intent';
+      const promptQuery = await supabase
+        .from('speaking_prompts')
+        .select(promptCols)
+        .in('id', promptIds);
+
+      if (!promptQuery.error) {
+        promptsResult = promptQuery as typeof promptsResult;
+      } else if (/question/i.test(promptQuery.error.message || '')) {
+        const fallbackPromptQuery = await supabase
+          .from('speaking_prompts')
+          .select(promptColsNoQuestion)
+          .in('id', promptIds);
+
+        if (fallbackPromptQuery.error) {
+          throw fallbackPromptQuery.error;
+        }
+
+        promptsResult = {
+          data: ((fallbackPromptQuery.data || []) as Array<Omit<PromptRow, 'question'>>).map(
+            (prompt) => ({
+              ...prompt,
+              question: null,
+            })
+          ),
+          error: null,
+        };
+      } else {
+        throw promptQuery.error;
+      }
+    } else {
+      promptsResult = { data: [] as PromptRow[], error: null };
+    }
+
+    const [sessionsResult, feedbacksResult] = await Promise.all([
       sessionIds.length
         ? supabase.from('speaking_sessions').select('id, topic, part').in('id', sessionIds)
         : Promise.resolve({ data: [] as SessionRow[], error: null }),
@@ -185,8 +219,9 @@ export async function GET(): Promise<Response> {
 
     return Response.json(successResponse(history));
   } catch (error) {
+    console.error('[speaking-history] Unexpected error:', error);
     return Response.json(
-      errorResponse('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unknown error'),
+      errorResponse('INTERNAL_ERROR', 'スピーキング面接履歴の取得に失敗しました。時間をおいて再度お試しください。'),
       { status: 500 }
     );
   }

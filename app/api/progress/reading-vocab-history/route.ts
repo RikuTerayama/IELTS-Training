@@ -43,6 +43,14 @@ export type ReadingVocabHistoryResponse = {
   due_count: number;
 };
 
+type ReadingLogRow = {
+  id: string;
+  question_id: string | null;
+  is_correct: boolean;
+  user_answer: string | null;
+  created_at: string;
+};
+
 const QUESTION_TYPE_LABELS: Record<string, string> = {
   paraphrase_drill: 'Paraphrase Drill',
   matching_headings: 'Matching Headings',
@@ -60,6 +68,14 @@ const READING_SKILL_LABELS: Record<string, string> = {
   inference: 'Inference',
   not_given_confusion: 'Not Given',
 };
+
+function chunkArray<T>(items: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += chunkSize) {
+    chunks.push(items.slice(index, index + chunkSize));
+  }
+  return chunks;
+}
 
 export async function GET(): Promise<Response> {
   try {
@@ -98,23 +114,25 @@ export async function GET(): Promise<Response> {
     const questionById = new Map(readingQuestions.map((q) => [q.id, q]));
 
     // 2. Get logs where question_id in reading questions, user_id = user
-    const { data: logs, error: logsError } = await supabase
-      .from('lexicon_logs')
-      .select('id, question_id, is_correct, user_answer, created_at')
-      .eq('user_id', user.id)
-      .in('question_id', questionIds)
-      .order('created_at', { ascending: false })
-      .limit(50);
+    const logChunks = await Promise.all(
+      chunkArray(questionIds, 100).map(async (chunk) => {
+        const { data, error } = await supabase
+          .from('lexicon_logs')
+          .select('id, question_id, is_correct, user_answer, created_at')
+          .eq('user_id', user.id)
+          .in('question_id', chunk);
 
-    if (logsError) {
-      console.error('[reading-vocab-history] logs error:', logsError);
-      return Response.json(
-        errorResponse('DATABASE_ERROR', logsError.message),
-        { status: 500 }
-      );
-    }
+        if (error) {
+          throw error;
+        }
 
-    const logList = logs || [];
+        return (data || []) as ReadingLogRow[];
+      })
+    );
+
+    const logList = logChunks
+      .flat()
+      .sort((left, right) => right.created_at.localeCompare(left.created_at));
 
     // 3. Build history (latest 10)
     const history: ReadingVocabHistoryItem[] = logList.slice(0, 10).map((log) => {
@@ -194,7 +212,7 @@ export async function GET(): Promise<Response> {
     return Response.json(
       errorResponse(
         'INTERNAL_ERROR',
-        error instanceof Error ? error.message : 'Unknown error'
+        'Reading History の取得に失敗しました。時間をおいて再度お試しください。'
       ),
       { status: 500 }
     );
