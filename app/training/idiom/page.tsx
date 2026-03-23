@@ -16,6 +16,8 @@ import { LISTENING_IDIOM_CATEGORY_LABELS } from '@/data/idiom/listening';
 import { READING_IDIOM_CATEGORY_LABELS } from '@/data/idiom/reading';
 import { cn, cardBase, cardTitle, cardDesc, buttonPrimary, buttonSecondary } from '@/lib/ui/theme';
 
+const CLICK_LIMIT_SECONDS = 20;
+
 type Skill = 'reading' | 'listening' | 'speaking' | 'writing';
 type Mode = 'click' | 'typing';
 
@@ -208,7 +210,7 @@ function IdiomPageContent() {
     if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
 
     const currentQuestion = questions[currentIndex];
-    const timeMs = clickTimer !== null ? (10 - clickTimer) * 1000 : 0;
+    const timeMs = clickTimer !== null ? (CLICK_LIMIT_SECONDS - clickTimer) * 1000 : 0;
 
     // タイマー停止
     if (timerInterval) {
@@ -320,7 +322,8 @@ function IdiomPageContent() {
     }
 
     if (step === 'quiz' && selectedMode === 'click' && quizState && !quizState.showResult) {
-      let timer = 10;
+      const limitSeconds = CLICK_LIMIT_SECONDS;
+      let timer = limitSeconds;
       setClickTimer(timer);
 
       const interval = setInterval(() => {
@@ -333,7 +336,7 @@ function IdiomPageContent() {
           const { questions, currentIndex } = quizState;
           if (questions.length > 0 && currentIndex >= 0 && currentIndex < questions.length) {
             const currentQuestion = questions[currentIndex];
-            submitLexiconAnswer(currentQuestion.question_id, '', 10000).then((response) => {
+            submitLexiconAnswer(currentQuestion.question_id, '', limitSeconds * 1000).then((response) => {
             if (response.ok && response.data) {
               setQuizState((prev) => {
                 if (!prev) return null;
@@ -345,7 +348,7 @@ function IdiomPageContent() {
                       question_id: currentQuestion.question_id,
                       is_correct: false,
                       user_answer: '',
-                      time_ms: 10000,
+                      time_ms: limitSeconds * 1000,
                     },
                   ],
                   currentAnswer: response.data,
@@ -523,7 +526,7 @@ function IdiomPageContent() {
                   >
                     <div className={cn('font-semibold mb-1', cardTitle)}>Click（選択式）</div>
                     <div className={cn('text-xs', cardDesc)}>
-                      {sets[selectedCategory].questions_click}問 / 10秒制限
+                      {sets[selectedCategory].questions_click}問 / {CLICK_LIMIT_SECONDS}秒制限
                     </div>
                     {sets[selectedCategory].due_click > 0 && (
                       <div className={cn('text-xs mt-1', 'text-primary')}>

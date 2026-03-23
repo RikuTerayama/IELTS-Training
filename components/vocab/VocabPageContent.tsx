@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -30,6 +30,8 @@ interface QuizState {
   currentAnswer?: LexiconSubmitResponse;
   showResult: boolean;
 }
+
+const SUBMIT_RETRY_MESSAGE = '\u9001\u4fe1\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002\u3082\u3046\u4e00\u5ea6\u62bc\u3057\u3066\u304f\u3060\u3055\u3044\u3002';
 
 function ComingSoonSkillsView({ basePath }: { basePath: string }) {
   return (
@@ -76,6 +78,8 @@ function VocabPageContent() {
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submitInFlightRef = useRef(false);
+  const submitQuestionIdRef = useRef<string | null>(null);
 
   // URL ?skill=speaking|writing|reading|listening のとき fetch して category へ
   const validSkillQuery = urlSkill === 'speaking' || urlSkill === 'writing' || urlSkill === 'reading' || urlSkill === 'listening';
@@ -258,87 +262,93 @@ function VocabPageContent() {
   };
 
   // Click回答
-  const handleClickAnswer = async (choice: string) => {
-    if (!quizState || !selectedMode) return;
-    const { questions, currentIndex } = quizState;
-    if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
-
-    const currentQuestion = questions[currentIndex];
-    const timeMs = clickTimer !== null ? (10 - clickTimer) * 1000 : 0;
-
-    // タイマー停止
+  const stopClickTimer = useCallback(() => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
     setClickTimer(null);
-
-    setLoading(true);
-    try {
-      const response = await submitLexiconAnswer(currentQuestion.question_id, choice, timeMs);
-      if (response.ok && response.data) {
-        setQuizState({
-          ...quizState,
+  }, [timerInterval]);
+  const applySubmitResult = useCallback(
+    (questionId: string, userAnswer: string, timeMs: number, result: LexiconSubmitResponse) => {
+      setQuizState((prev) => {
+        if (!prev || prev.showResult) return prev;
+        const activeQuestion = prev.questions[prev.currentIndex];
+        if (!activeQuestion || activeQuestion.question_id !== questionId) {
+          return prev;
+        }
+        return {
+          ...prev,
           answers: [
-            ...quizState.answers,
+            ...prev.answers,
             {
-              question_id: currentQuestion.question_id,
-              is_correct: response.data.is_correct,
-              user_answer: choice,
+              question_id: questionId,
+              is_correct: result.is_correct,
+              user_answer: userAnswer,
               time_ms: timeMs,
             },
           ],
-          currentAnswer: response.data,
+          currentAnswer: result,
           showResult: true,
-        });
-      } else {
-        setError(response.error?.message || 'Failed to submit answer');
+        };
+      });
+    },
+    []
+  );
+  const submitAnswer = useCallback(
+    async (questionId: string, userAnswer: string, timeMs: number): Promise<boolean> => {
+      if (!questionId) {
+        setError(SUBMIT_RETRY_MESSAGE);
+        return false;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Typing回答
-  const handleTypingSubmit = async (answer: string) => {
-    if (!quizState || !selectedMode || !typingStartTime) return;
+      if (submitInFlightRef.current && submitQuestionIdRef.current === questionId) {
+        return false;
+      }
+      submitInFlightRef.current = true;
+      submitQuestionIdRef.current = questionId;
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await submitLexiconAnswer(questionId, userAnswer, timeMs);
+        if (response.ok && response.data) {
+          applySubmitResult(questionId, userAnswer, timeMs, response.data);
+          if (selectedMode === 'typing') {
+            setTypingStartTime(null);
+          }
+          return true;
+        }
+        setError(response.error?.message || SUBMIT_RETRY_MESSAGE);
+        return false;
+      } catch {
+        setError(SUBMIT_RETRY_MESSAGE);
+        return false;
+      } finally {
+        submitInFlightRef.current = false;
+        submitQuestionIdRef.current = null;
+        setLoading(false);
+      }
+    },
+    [applySubmitResult, selectedMode]
+  );
+  const clickLimitSeconds = selectedSkill === 'reading' ? 30 : 20;
+  const handleClickAnswer = async (choice: string) => {
+    if (!quizState || !selectedMode) return;
     const { questions, currentIndex } = quizState;
     if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return;
-
+    const currentQuestion = questions[currentIndex];
+    const timeMs = clickTimer !== null ? (clickLimitSeconds - clickTimer) * 1000 : 0;
+    stopClickTimer();
+    await submitAnswer(currentQuestion.question_id, choice, timeMs);
+  };
+  // Typing回答
+  const handleTypingSubmit = async (answer: string): Promise<boolean> => {
+    if (!quizState || !selectedMode || !typingStartTime) return false;
+    const { questions, currentIndex } = quizState;
+    if (questions.length === 0 || currentIndex < 0 || currentIndex >= questions.length) return false;
     const currentQuestion = questions[currentIndex];
     const timeMs = Date.now() - typingStartTime;
-
-    setLoading(true);
-    try {
-      const response = await submitLexiconAnswer(currentQuestion.question_id, answer, timeMs);
-      if (response.ok && response.data) {
-        setQuizState({
-          ...quizState,
-          answers: [
-            ...quizState.answers,
-            {
-              question_id: currentQuestion.question_id,
-              is_correct: response.data.is_correct,
-              user_answer: answer,
-              time_ms: timeMs,
-            },
-          ],
-          currentAnswer: response.data,
-          showResult: true,
-        });
-        setTypingStartTime(null);
-      } else {
-        setError(response.error?.message || 'Failed to submit answer');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
+    return submitAnswer(currentQuestion.question_id, answer, timeMs);
   };
-
   const advanceToNextQuestion = () => {
     if (!quizState) return;
     const nextIndex = quizState.currentIndex + 1;
@@ -406,7 +416,7 @@ function VocabPageContent() {
     }
 
     if (step === 'quiz' && selectedMode === 'click' && quizState && !quizState.showResult) {
-      const limitSeconds = selectedSkill === 'reading' ? 30 : 10;
+      const limitSeconds = clickLimitSeconds;
       const timeMs = limitSeconds * 1000;
       let timer = limitSeconds;
       setClickTimer(timer);
@@ -421,27 +431,7 @@ function VocabPageContent() {
           const { questions, currentIndex } = quizState;
           if (questions.length > 0 && currentIndex >= 0 && currentIndex < questions.length) {
             const currentQuestion = questions[currentIndex];
-            submitLexiconAnswer(currentQuestion.question_id, '', timeMs).then((response) => {
-              if (response.ok && response.data) {
-                setQuizState((prev) => {
-                  if (!prev) return null;
-                  return {
-                    ...prev,
-                    answers: [
-                      ...prev.answers,
-                      {
-                        question_id: currentQuestion.question_id,
-                        is_correct: false,
-                        user_answer: '',
-                        time_ms: timeMs,
-                      },
-                    ],
-                    currentAnswer: response.data,
-                    showResult: true,
-                  };
-                });
-              }
-            });
+            void submitAnswer(currentQuestion.question_id, '', timeMs);
           }
           setClickTimer(null);
         }
@@ -457,7 +447,7 @@ function VocabPageContent() {
       // タイマーをクリア
       setClickTimer(null);
     }
-  }, [step, selectedMode, selectedSkill, quizState?.currentIndex, quizState?.showResult]);
+  }, [clickLimitSeconds, step, selectedMode, selectedSkill, quizState?.currentIndex, quizState?.showResult, submitAnswer]);
 
   // Reading: passage_group からセット番号・総セット数を算出
   const getReadingSetInfo = (questions: LexiconQuestion[], index: number): { setIndex: number; setTotal: number; setSize: number } | null => {
@@ -753,7 +743,7 @@ function VocabPageContent() {
                   >
                     <div className={cn('font-semibold mb-1', cardTitle)}>Click（選択式）</div>
                     <div className={cn('text-xs', cardDesc)}>
-                      {sets[selectedCategory].questions_click}問 / {selectedSkill === 'reading' ? '30' : '10'}秒制限
+                      {sets[selectedCategory].questions_click}問 / {selectedSkill === 'reading' ? '30' : '20'}秒制限
                     </div>
                     {sets[selectedCategory].due_click > 0 && (
                       <div className={cn('text-xs mt-1', 'text-primary')}>
@@ -1132,14 +1122,17 @@ function TypingInput({
   loading,
 }: {
   question: LexiconQuestion;
-  onSubmit: (answer: string) => void;
+  onSubmit: (answer: string) => Promise<boolean>;
   loading: boolean;
 }) {
   const [answer, setAnswer] = useState('');
 
-  const handleSubmit = () => {
-    if (answer.trim()) {
-      onSubmit(answer.trim());
+  const handleSubmit = async () => {
+    if (!answer.trim() || loading) return;
+
+    const normalizedAnswer = answer.trim();
+    const submitted = await onSubmit(normalizedAnswer);
+    if (submitted) {
       setAnswer('');
     }
   };
@@ -1158,7 +1151,7 @@ function TypingInput({
           onChange={(e) => setAnswer(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !loading) {
-              handleSubmit();
+              void handleSubmit();
             }
           }}
           disabled={loading}
@@ -1172,7 +1165,9 @@ function TypingInput({
           autoFocus
         />
         <button
-          onClick={handleSubmit}
+          onClick={() => {
+            void handleSubmit();
+          }}
           disabled={loading || !answer.trim()}
           className={cn('px-4 py-2', buttonPrimary, (loading || !answer.trim()) && 'opacity-50 cursor-not-allowed')}
         >
