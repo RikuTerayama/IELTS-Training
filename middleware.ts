@@ -43,13 +43,6 @@ export async function middleware(request: NextRequest) {
     user = getUserResult;
   }
 
-  // Canonical public entry: /vocab. Legacy /training/vocab 竊・/vocab (308), preserve query
-  if (request.nextUrl.pathname === '/training/vocab') {
-    const to = new URL('/vocab', request.url);
-    request.nextUrl.searchParams.forEach((v, k) => to.searchParams.set(k, v));
-    return NextResponse.redirect(to, 308);
-  }
-
   // W2-FR-2: /training/writing/task2 縺ｯ蟒・ｭ｢縲・08 縺ｧ /task/select?task_type=Task%202 縺ｸ
   if (request.nextUrl.pathname === '/training/writing/task2') {
     return NextResponse.redirect(new URL('/task/select?task_type=Task%202', request.url), 308);
@@ -59,7 +52,6 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const pathProtected =
     pathname.startsWith('/home') ||
-    pathname.startsWith('/vocab') ||
     pathname.startsWith('/training') ||
     pathname.startsWith('/task') ||
     pathname.startsWith('/feedback') ||

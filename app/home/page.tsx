@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -315,7 +315,7 @@ export default function HomePage() {
       title: 'Reading',
       detail: buildReadingDetail(item),
       occurredAt: item.created_at,
-      href: '/vocab?skill=reading',
+      href: '/training/vocab?skill=reading',
       ctaLabel: 'Reading 復習へ',
     }));
 
@@ -339,7 +339,7 @@ export default function HomePage() {
         title: 'まずは Reading から始める',
         description:
           'ログイン直後は Reading の復習から始めると、Writing や Speaking にもつながる学習リズムを作りやすくなります。',
-        href: '/vocab?skill=reading',
+        href: '/training/vocab?skill=reading',
         label: 'Reading を始める',
         secondaryHref: '/task/select?task_type=Task%202',
         secondaryLabel: 'Writing を開く',
@@ -352,9 +352,9 @@ export default function HomePage() {
         title: '今日はインプット中心で整える',
         description:
           '今日の AI 利用枠を使い切っているので、Reading と単語の復習を進めるのが安全です。アウトプットは明日また再開できます。',
-        href: '/vocab?skill=reading',
+        href: '/training/vocab?skill=reading',
         label: 'Reading 復習へ',
-        secondaryHref: '/vocab',
+        secondaryHref: '/training/vocab',
         secondaryLabel: '単語を開く',
       };
     }
@@ -365,7 +365,7 @@ export default function HomePage() {
         title: `Reading の復習が ${readingDueCount} 件あります`,
         description:
           '忘れかけている項目を先に整えると、その後の Writing / Speaking の定着も安定します。短いセッションでも進めやすい導線です。',
-        href: '/vocab?skill=reading',
+        href: '/training/vocab?skill=reading',
         label: 'Reading 復習を始める',
         secondaryHref: '/progress',
         secondaryLabel: '進捗を見る',
@@ -419,7 +419,7 @@ export default function HomePage() {
           readingDueCount > 0
             ? `今日の復習が ${readingDueCount} 件あります。まずは Reading から始めると、その後の定着も安定します。`
             : 'Academic Reading の問題タイプ別に入り、Reading の土台を整えられます。',
-        href: '/vocab?skill=reading',
+        href: '/training/vocab?skill=reading',
         ctaLabel: readingDueCount > 0 ? 'Reading 復習を始める' : 'Reading を始める',
         badge: readingDueCount > 0 ? `復習 ${readingDueCount}` : undefined,
       },
@@ -427,7 +427,7 @@ export default function HomePage() {
         title: '単語',
         eyebrow: 'インプット',
         description: 'Reading・Listening と連動する単語復習をまとめて進められます。',
-        href: '/vocab',
+        href: '/training/vocab',
         ctaLabel: '単語を開く',
       },
       {
@@ -601,7 +601,7 @@ export default function HomePage() {
                       {resumeActivity.ctaLabel}
                     </Link>
                   ) : (
-                    <Link href="/vocab?skill=reading" className={cn(buttonSecondary, 'inline-flex items-center justify-center')}>
+                    <Link href="/training/vocab?skill=reading" className={cn(buttonSecondary, 'inline-flex items-center justify-center')}>
                       Reading を始める
                     </Link>
                   )}
@@ -727,7 +727,7 @@ export default function HomePage() {
                   まずはインプットかアウトプットを 1 セット進めると、ここに履歴が表示されます。最初の学習を始めましょう。
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <Link href="/vocab?skill=reading" className={cn(buttonPrimary, 'inline-flex items-center justify-center')}>
+                  <Link href="/training/vocab?skill=reading" className={cn(buttonPrimary, 'inline-flex items-center justify-center')}>
                     Reading を始める
                   </Link>
                   <Link href="/task/select?task_type=Task%202" className={cn(buttonSecondary, 'inline-flex items-center justify-center')}>
