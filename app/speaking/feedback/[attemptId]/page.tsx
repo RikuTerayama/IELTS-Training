@@ -140,11 +140,11 @@ export default function SpeakingFeedbackPage() {
                 timeStyle: 'short',
               })}
               {' ・ '}
-              Topic: {topic}
+              トピック: {topic}
               {' ・ '}
               Part: {part}
               {' ・ '}
-              {data.attempt.word_count ?? 0} words
+              {data.attempt.word_count ?? 0} 語
               {data.feedback?.overall_band != null ? <> ・ Band {data.feedback.overall_band}</> : null}
             </p>
 
@@ -238,6 +238,9 @@ export default function SpeakingFeedbackPage() {
             {typeof data.prompt?.model_answer === 'string' && data.prompt.model_answer.trim() ? (
               <section className={cn('p-6', cardBase)}>
                 <h2 className={cn(sectionTitle, 'mb-3 text-subsection-title')}>模範解答</h2>
+                <p className={cn(helperText, 'mb-2')}>
+                  論点の流れやつなぎ表現の参考として見返してください。
+                </p>
                 <p className={cn(bodyText, 'whitespace-pre-wrap')}>{data.prompt.model_answer.trim()}</p>
               </section>
             ) : null}
@@ -245,6 +248,9 @@ export default function SpeakingFeedbackPage() {
             {typeof data.feedback?.rewrite === 'string' && data.feedback.rewrite.trim() ? (
               <section className={cn('p-6', cardBase)}>
                 <h2 className={cn(sectionTitle, 'mb-3 text-subsection-title')}>あなたの回答の改善版</h2>
+                <p className={cn(helperText, 'mb-2')}>
+                  元の内容を活かしつつ、より自然に伝わる形へ整えた例です。
+                </p>
                 <p className={cn(bodyText, 'whitespace-pre-wrap')}>{data.feedback.rewrite.trim()}</p>
               </section>
             ) : null}

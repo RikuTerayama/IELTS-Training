@@ -78,6 +78,11 @@ const RECORDER_MIME_CANDIDATES = [
   'audio/ogg;codecs=opus',
   'audio/ogg',
 ] as const;
+const VOICE_STATUS_LABELS: Record<VoiceInputState, string> = {
+  idle: '録音待ち',
+  recording: '録音中',
+  transcribing: '文字起こし中',
+};
 
 const EVALUATION_LABELS: Record<string, string> = {
   fluency_band: '流暢さ',
@@ -632,12 +637,21 @@ export default function ExamSpeakingPage() {
             <div className={cn('p-6', cardBase)}>
               <label className="mb-2 block text-sm font-semibold text-text">{'\u3042\u306a\u305f\u306e\u56de\u7b54'}</label>
               <div className="mb-4 space-y-3 rounded-xl border border-border bg-surface-2 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-text">音声入力（任意）</p>
+                    <p className={helperText}>状態: {VOICE_STATUS_LABELS[voiceInputState]}</p>
+                  </div>
+                  <span className="inline-flex rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-text-muted">
+                    {voiceInputState === 'transcribing' ? '回答欄に反映中' : 'テキスト入力はいつでも利用可能'}
+                  </span>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
                     onClick={handleStartRecording}
                     disabled={!canRecordAudio || voiceInputState !== 'idle' || phase !== 'answering'}
-                    className={buttonSecondary}
+                    className={cn('w-full sm:w-auto', buttonSecondary)}
                   >
                     {voiceInputState === 'recording' ? '\u9332\u97f3\u4e2d...' : '\u9332\u97f3\u3092\u59cb\u3081\u308b'}
                   </button>
@@ -645,25 +659,38 @@ export default function ExamSpeakingPage() {
                     type="button"
                     onClick={handleStopRecording}
                     disabled={voiceInputState !== 'recording'}
-                    className={buttonSecondary}
+                    className={cn('w-full sm:w-auto', buttonSecondary)}
                   >
-                    {'\u9332\u97f3\u3092\u505c\u6b62'}
+                    {'\u9332\u97f3\u3092\u505c\u6b62\u3057\u3066\u6587\u5b57\u8d77\u3053\u3057'}
                   </button>
                 </div>
                 <p className={helperText}>
                   {canRecordAudio
                     ? voiceInputState === 'transcribing'
-                      ? '\u6587\u5b57\u8d77\u3053\u3057\u4e2d\u3067\u3059...'
-                      : '\u9332\u97f3\u2192\u6587\u5b57\u8d77\u3053\u3057\u3067 textarea \u306b\u53cd\u6620\u3057\u307e\u3059\u3002\u53cd\u6620\u5f8c\u306f\u7de8\u96c6\u3057\u3066\u304b\u3089\u9001\u4fe1\u3067\u304d\u307e\u3059\u3002'
+                      ? '\u6587\u5b57\u8d77\u3053\u3057\u4e2d\u3067\u3059\u3002\u5b8c\u4e86\u3059\u308b\u3068\u56de\u7b54\u6b04\u306b\u53cd\u6620\u3055\u308c\u307e\u3059\u3002'
+                      : '\u9332\u97f3\u3057\u305f\u97f3\u58f0\u3092\u6587\u5b57\u8d77\u3053\u3057\u3057\u3001\u56de\u7b54\u6b04\u306b\u5165\u308c\u307e\u3059\u3002\u53cd\u6620\u5f8c\u306f\u81ea\u7531\u306b\u7de8\u96c6\u3057\u3066\u304b\u3089\u9001\u4fe1\u3067\u304d\u307e\u3059\u3002'
                     : '\u3053\u306e\u30d6\u30e9\u30a6\u30b6\u3067\u306f\u97f3\u58f0\u5165\u529b\u304c\u4f7f\u3048\u307e\u305b\u3093\u3002\u30c6\u30ad\u30b9\u30c8\u56de\u7b54\u3067\u7d9a\u3051\u3066\u304f\u3060\u3055\u3044\u3002'}
                 </p>
-                {voiceNotice ? <p className="text-sm text-primary">{voiceNotice}</p> : null}
-                {voiceErrorMessage ? <p className="text-sm text-amber-600">{voiceErrorMessage}</p> : null}
+                {voiceNotice ? (
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-primary">
+                    {voiceNotice}
+                  </div>
+                ) : null}
+                {voiceErrorMessage ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
+                    <p>{voiceErrorMessage}</p>
+                    <p className="mt-1 text-xs text-amber-700/90">
+                      音声入力がうまくいかなくても、そのままテキスト入力で続けられます。
+                    </p>
+                  </div>
+                ) : null}
                 {lastTranscript ? (
-                  <p className={cn(helperText, 'text-xs')}>
-                    {'\u6700\u65b0\u306e\u6587\u5b57\u8d77\u3053\u3057: '}
-                    {lastTranscript}
-                  </p>
+                  <div className="rounded-lg border border-border bg-surface p-3">
+                    <p className={cn(helperText, 'mb-1 text-xs')}>
+                      {'\u6700\u65b0\u306e\u6587\u5b57\u8d77\u3053\u3057'}
+                    </p>
+                    <p className="text-sm leading-relaxed text-text">{lastTranscript}</p>
+                  </div>
                 ) : null}
               </div>
               <textarea
@@ -730,6 +757,9 @@ export default function ExamSpeakingPage() {
               {typeof promptRow?.model_answer === 'string' && promptRow.model_answer.trim() ? (
                 <div className="mt-4">
                   <h3 className={cardTitle}>{'\u6a21\u7bc4\u89e3\u7b54'}</h3>
+                  <p className={cn(helperText, 'mt-1')}>
+                    論点の流れやつなぎ表現の参考として見返してください。
+                  </p>
                   <p className={cn(bodyText, 'mt-2 whitespace-pre-wrap')}>
                     {promptRow.model_answer.trim()}
                   </p>
@@ -738,6 +768,9 @@ export default function ExamSpeakingPage() {
               {typeof feedbackRow.rewrite === 'string' && feedbackRow.rewrite.trim() ? (
                 <div className="mt-4">
                   <h3 className={cardTitle}>{'\u3042\u306a\u305f\u306e\u56de\u7b54\u306e\u6539\u5584\u7248'}</h3>
+                  <p className={cn(helperText, 'mt-1')}>
+                    元の内容を活かしつつ、より自然に伝わる形へ整えた例です。
+                  </p>
                   <p className={cn(bodyText, 'mt-2 whitespace-pre-wrap')}>
                     {feedbackRow.rewrite.trim()}
                   </p>
