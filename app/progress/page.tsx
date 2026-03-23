@@ -456,7 +456,7 @@ export default function ProgressPage() {
             )}
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
-                href="/vocab?skill=reading"
+                href="/training/vocab?skill=reading"
                 className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
               >
                 {readingHistory?.due_count != null && readingHistory.due_count > 0
@@ -595,7 +595,7 @@ export default function ProgressPage() {
                   単語練習で Listening を練習すると、ここに履歴と正答率が表示されます
                 </p>
                 <Link
-                  href="/vocab?skill=listening"
+                  href="/training/vocab?skill=listening"
                   className="mt-4 inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
                 >
                   Listening Vocab を始める
@@ -656,7 +656,7 @@ export default function ProgressPage() {
                 )}
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Link
-                    href="/vocab?skill=listening"
+                    href="/training/vocab?skill=listening"
                     className="inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2"
                   >
                     {listeningVocabHistory?.due_count != null && listeningVocabHistory.due_count > 0

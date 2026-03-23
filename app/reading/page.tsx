@@ -89,7 +89,7 @@ export default function ReadingPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link href="/vocab?skill=reading" className={cn(buttonPrimary, 'inline-flex')}>
+              <Link href="/vocab/reading" className={cn(buttonPrimary, 'inline-flex')}>
                 Reading を始める
               </Link>
               <Link href={buildLoginUrl('/home')} className={cn(buttonSecondary, 'inline-flex')}>
@@ -115,7 +115,7 @@ export default function ReadingPage() {
           <p className={cn(helperText, 'mt-4')}>
             これらの設問タイプは
             {' '}
-            <Link href="/vocab?skill=reading" className="font-medium text-primary hover:underline">
+            <Link href="/vocab/reading" className="font-medium text-primary hover:underline">
               Reading
             </Link>
             {' '}
@@ -132,7 +132,7 @@ export default function ReadingPage() {
               </span>
               <h3 className={cn(subsectionTitle, 'mt-3 text-card-title')}>Reading を選ぶ</h3>
               <p className={cn(helperText, 'mt-2')}>
-                <Link href="/vocab?skill=reading" className="text-primary hover:underline">
+                <Link href="/vocab/reading" className="text-primary hover:underline">
                   単語練習
                 </Link>
                 {' '}
@@ -164,7 +164,7 @@ export default function ReadingPage() {
           <h2 id="related-heading" className={cn(sectionTitle, 'mb-6')}>関連リンク</h2>
           <div className="flex flex-wrap gap-4">
             <Link
-              href="/vocab?skill=reading"
+              href="/vocab/reading"
               className={cn(
                 'inline-flex items-center gap-2 rounded-xl border-2 border-primary/50 bg-primary/10 px-5 py-3 font-medium text-primary',
                 'hover:border-primary/70 hover:bg-primary/20 transition-colors'

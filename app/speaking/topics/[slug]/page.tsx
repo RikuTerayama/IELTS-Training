@@ -40,6 +40,26 @@ const SAMPLE_QUESTIONS = {
     part2: 'Describe a piece of technology you use every day. You should say what it is, how you use it, and why it is useful.',
     part3: 'Will technology replace some jobs in the future?',
   },
+  people: {
+    part1: 'Do you enjoy meeting new people?',
+    part2: 'Describe a person who has influenced you. You should say who the person is, how you know them, and why they influenced you.',
+    part3: 'Why do some people become role models in society?',
+  },
+  'daily-routine': {
+    part1: 'What is your daily routine like?',
+    part2: 'Describe a part of your daily routine that you enjoy. You should say what you do, when you do it, and why it is important to you.',
+    part3: 'How have daily routines changed because of technology?',
+  },
+  memories: {
+    part1: 'Do you often think about the past?',
+    part2: 'Describe a memory that makes you smile. You should say what happened, when it happened, and why you still remember it.',
+    part3: 'Why are some memories easier to remember than others?',
+  },
+  'future-plans': {
+    part1: 'Do you often think about the future?',
+    part2: 'Describe a goal you would like to achieve in the future. You should say what it is, why it matters to you, and how you plan to achieve it.',
+    part3: 'How do young people today plan for their future?',
+  },
 } as const;
 
 const QUICK_TIPS = [
@@ -115,7 +135,7 @@ export default async function SpeakingTopicPage({ params }: Props) {
             <Link href="/pricing" className={cn(buttonSecondary, 'inline-flex')}>
               {'\u6599\u91d1\u3092\u898b\u308b'}
             </Link>
-            <Link href="/speaking" className="text-sm font-medium text-primary hover:underline">
+            <Link href="/speaking" className="text-sm font-medium text-text-muted hover:text-text hover:underline transition-colors">
               {'Speaking \u306b\u623b\u308b'}
             </Link>
           </div>
